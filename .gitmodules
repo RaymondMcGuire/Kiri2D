@@ -1,0 +1,3 @@
+[submodule "KiriExtlib"]
+	path = KiriExtlib
+	url = git@github.com:RaymondMcGuire/KiriExtlib.git

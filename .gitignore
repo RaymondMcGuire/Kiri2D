@@ -1,0 +1,7 @@
+build
+.vscode
+/cmake/checkCUDA/compile/*
+!/cmake/checkCUDA/compile/.gitkeep
+/export/screenshots/*.png
+/export/screenshots/*.jpg
+/**/*.pyc
