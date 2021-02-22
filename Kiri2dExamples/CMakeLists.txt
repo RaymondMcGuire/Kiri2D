@@ -11,6 +11,9 @@ link_directories(${EXTLIBS_LIB})
 configure_file(${CMAKE_SOURCE_DIR}/configuration/root_directory.h.in  ${CMAKE_BINARY_DIR}/configuration/root_directory.h)
 set(CONFIGURATION_INCLUDE ${CMAKE_BINARY_DIR}/configuration)
 
+# Kiri2D Library
+set(KIRI2D_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/Kiri2d/include)
+
 # Extra Static Library
 # set(EXTLIBS_LINK_LIBS XXXXX)
 
@@ -36,10 +39,11 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PROJECT_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC
     include
     ${CONFIGURATION_INCLUDE}
+    ${KIRI2D_LIB_INLCUDE}
     ${EXTLIBS_INCLUDE}
 )
 
-target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451)
+target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 kiri2d)
 
 
 # WorkSpace

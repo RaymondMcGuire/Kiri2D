@@ -51,12 +51,12 @@ namespace KIRI2D
             mCameraData.CameraDistance = 1.f;
         }
 
-        inline constexpr float ViewScale()
+        inline const float ViewScale()
         {
             return mCameraData.CameraDistance / mCameraData.ViewDistance;
         }
 
-        inline constexpr Vector2F Project(Vector2F pixel)
+        inline const Vector2F Project(Vector2F pixel)
         {
             auto relPosition = mRotateMatrix * (pixel - mCameraData.LookAt) * this->ViewScale();
 

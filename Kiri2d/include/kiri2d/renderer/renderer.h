@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:26:52
- * @LastEditTime: 2021-02-22 18:34:57
+ * @LastEditTime: 2021-02-23 01:08:14
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\renderer\renderer.h
@@ -21,22 +21,22 @@ namespace KIRI2D
     public:
         KiriRenderer2D()
         {
-            KiriRenderer2D(700, 700);
+            KiriRenderer2D(std::make_shared<KiriScene2D>(700, 700));
         }
 
         KiriRenderer2D(
-            Int windowWidth,
-            Int windowHeight)
-            : mWindowWidth(windowWidth),
-              mWindowHeight(windowHeight)
+            KiriScene2DPtr scene)
+            : mScene(std::move(scene))
         {
-            mScene = std::make_shared<KiriScene2D>(mWindowWidth, mWindowHeight);
+            mWindowWidth = mScene->GetWindowWidth();
+            mWindowHeight = mScene->GetWindowHeight();
             mCanvas = cv::Mat::zeros(mWindowHeight, mWindowWidth, CV_8UC3);
             this->ClearCanvas();
         }
 
         void ClearCanvas();
         void DrawCanvas();
+        inline auto GetCanvas() { return mCanvas; }
 
         ~KiriRenderer2D() noexcept {}
 

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 14:40:10
- * @LastEditTime: 2021-02-22 18:20:01
+ * @LastEditTime: 2021-02-23 00:30:29
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\sdf\sdf2d.h
@@ -24,8 +24,8 @@ namespace KIRI2D
 
         // Constructor
         SDF2DInfo(
-            float closestDistance;
-            Int lineSegStartIdx;
+            float closestDistance,
+            Int lineSegStartIdx,
             Int lineSegEndIdx)
             : ClosestDistance(closestDistance),
               LineSegStartIdx(lineSegStartIdx),
@@ -51,7 +51,9 @@ namespace KIRI2D
 
         ~KiriSDF2D() noexcept {}
 
-        void Append(Vector2F p, Vector2F v = Vector2F::setZero());
+        const Vec_Vec2F GetPoints()const { return mPoints; }
+
+        void Append(Vector2F p, Vector2F v = Vector2F(0.f));
         const Int FindRegion(Vector2F p);
         const SDF2DInfo CalcClosestDistance(Vector2F p);
 

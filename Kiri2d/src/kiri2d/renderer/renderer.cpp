@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-02-22 18:39:23
+ * @LastEditTime: 2021-02-23 00:35:19
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\renderer\renderer.cpp
@@ -29,8 +29,17 @@ namespace KIRI2D
         auto sdfObjects = mScene->GetSDFObjects();
         for (size_t i = 0; i < sdfObjects.size(); i++)
         {
-            auto obj = sdfObjects[i];
-            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 2.0 * sc->camera.Scale());
+            auto points = sdfObjects[i].GetPoints();
+            for (int j = 0, k = points.size() - 1, l = points.size(); j < l; k = j++)
+            {
+                Vector2F start_relate_position = mScene->GetCamera()->Project(points[k]);
+                auto sx = (Int)start_relate_position.x;
+                auto sy = mWindowHeight - (Int)start_relate_position.y;
+                Vector2F end_relate_position = mScene->GetCamera()->Project(points[j]);
+                auto ex = (Int)end_relate_position.x;
+                auto ey = mWindowHeight - (Int)end_relate_position.y;
+                cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 2.0 * mScene->GetCamera()->ViewScale());
+            }
         }
     }
 }

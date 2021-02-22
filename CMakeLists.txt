@@ -56,4 +56,5 @@ endif()
 
 
 # Sub Projects
+add_subdirectory(Kiri2d)
 add_subdirectory(Kiri2dExamples)

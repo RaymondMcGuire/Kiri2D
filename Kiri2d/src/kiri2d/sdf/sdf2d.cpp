@@ -14,11 +14,11 @@ namespace KIRI2D
 {
     void KiriSDF2D::ReCalcBBox(Vector2F p)
     {
-        mAABBMin[0] = std::min(p[0], mAABBMin[0]);
-        mAABBMin[1] = std::min(p[1], mAABBMin[1]);
+        mBBoxMin[0] = std::min(p[0], mBBoxMin[0]);
+        mBBoxMin[1] = std::min(p[1], mBBoxMin[1]);
 
-        mAABBMax[0] = std::max(p[0], mAABBMax[0]);
-        mAABBMax[1] = std::max(p[1], mAABBMax[1]);
+        mBBoxMax[0] = std::max(p[0], mBBoxMax[0]);
+        mBBoxMax[1] = std::max(p[1], mBBoxMax[1]);
     }
 
     void KiriSDF2D::Append(Vector2F p, Vector2F v)

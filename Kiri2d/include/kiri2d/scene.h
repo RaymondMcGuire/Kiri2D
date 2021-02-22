@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 14:13:45
- * @LastEditTime: 2021-02-22 18:37:47
+ * @LastEditTime: 2021-02-23 00:54:24
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\scene.h
@@ -45,7 +45,10 @@ namespace KIRI2D
         }
 
         void AddObject(KiriSDF2D object);
-        inline constexpr auto GetSDFObjects() constexpr { return mSDFObjects; }
+        inline const auto GetSDFObjects() { return mSDFObjects; }
+        inline const auto GetCamera() { return mCamera; }
+        inline const auto GetWindowWidth() { return mWindowWidth; }
+        inline const auto GetWindowHeight() { return mWindowHeight; }
 
         ~KiriScene2D() noexcept {}
 
