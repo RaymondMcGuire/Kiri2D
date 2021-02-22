@@ -1,3 +1,6 @@
 [submodule "KiriExtlib"]
 	path = KiriExtlib
 	url = git@github.com:RaymondMcGuire/KiriExtlib.git
+[submodule "KiriMath"]
+	path = KiriMath
+	url = git@github.com:RaymondMcGuire/KiriMath.git
