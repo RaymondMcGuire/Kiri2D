@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 14:13:45
- * @LastEditTime: 2021-03-24 02:20:57
+ * @LastEditTime: 2021-03-26 04:23:01
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\scene.h
@@ -41,6 +41,18 @@ namespace KIRI2D
               end(_end) {}
     };
 
+    struct KiriRect2
+    {
+        Vector2F lowest;
+        Vector2F highest;
+
+        KiriRect2(
+            Vector2F _lowest,
+            Vector2F _highest)
+            : lowest(_lowest),
+              highest(_highest) {}
+    };
+
     class KiriScene2D
     {
     public:
@@ -50,8 +62,8 @@ namespace KIRI2D
         }
 
         KiriScene2D(
-            Int windowWidth,
-            Int windowHeight)
+            size_t windowWidth,
+            size_t windowHeight)
             : mWindowWidth(windowWidth),
               mWindowHeight(windowHeight)
         {
@@ -90,8 +102,8 @@ namespace KIRI2D
 
         KiriCamera2DPtr mCamera;
 
-        Int mWindowWidth;
-        Int mWindowHeight;
+        size_t mWindowWidth;
+        size_t mWindowHeight;
     };
     typedef SharedPtr<KiriScene2D> KiriScene2DPtr;
 }

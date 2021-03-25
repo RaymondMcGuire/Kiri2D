@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-03-24 02:09:16
+ * @LastEditTime: 2021-03-26 03:41:54
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\renderer\renderer.cpp
@@ -36,7 +36,7 @@ namespace KIRI2D
                 continue;
             auto col = particles[i].col * 255.f;
 
-            cv::circle(mCanvas, cv::Point(cx, cy), 5, cv::Scalar(col.z, col.y, col.x, -1), -1);
+            cv::circle(mCanvas, cv::Point(cx, cy), 3, cv::Scalar(col.z, col.y, col.x, -1), -1);
         }
 
         auto lines = mScene->GetLines();
@@ -48,7 +48,7 @@ namespace KIRI2D
             Vector2F end_relate_position = mScene->GetCamera()->Project(lines[i].end);
             int ex = end_relate_position[0];
             int ey = mWindowHeight - end_relate_position[1];
-            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(205, 252, 107), 3.0 * mScene->GetCamera()->ViewScale());
+            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 3.0 * mScene->GetCamera()->ViewScale());
         }
 
         auto sdfObjects = mScene->GetSDFObjects();
@@ -58,11 +58,11 @@ namespace KIRI2D
             for (int j = 0, k = points.size() - 1, l = points.size(); j < l; k = j++)
             {
                 Vector2F start_relate_position = mScene->GetCamera()->Project(points[k]);
-                auto sx = (Int)start_relate_position.x;
-                auto sy = mWindowHeight - (Int)start_relate_position.y;
+                auto sx = (size_t)start_relate_position.x;
+                auto sy = mWindowHeight - (size_t)start_relate_position.y;
                 Vector2F end_relate_position = mScene->GetCamera()->Project(points[j]);
-                auto ex = (Int)end_relate_position.x;
-                auto ey = mWindowHeight - (Int)end_relate_position.y;
+                auto ex = (size_t)end_relate_position.x;
+                auto ey = mWindowHeight - (size_t)end_relate_position.y;
                 cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 2.0 * mScene->GetCamera()->ViewScale());
             }
         }
