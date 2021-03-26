@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-03-26 05:35:03
+ * @LastEditTime: 2021-03-26 16:55:58
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -37,11 +37,15 @@ struct mapweight
     string name;
     float value;
     size_t child_num;
+    KiriRect2 rect;
 
     mapweight() : name("NoName"), value(0.f), child_num(0) {}
 
     mapweight(string n, float v, size_t cn)
         : name(n), value(v), child_num(cn) {}
+
+    mapweight(string n, float v, size_t cn, KiriRect2 r)
+        : name(n), value(v), child_num(cn), rect(r) {}
 };
 
 void tree_map_layout(tree<mapweight> &map, tree<mapweight>::iterator &node)
@@ -65,26 +69,72 @@ void tree_map_layout(tree<mapweight> &map, tree<mapweight>::iterator &node)
         ++sibs;
     }
 
-    tree<mapweight>::iterator right = map.wrap(map.next_sibling(sibs), map.end(node), mapweight("O", partB, child_num - num));
-    tree<mapweight>::iterator left = map.wrap(map.begin(node), map.next_sibling(sibs), mapweight("O", partA, num));
+    KiriRect2 cur_rect_left, cur_rect_right;
+    if ((*node).rect.size.x >= (*node).rect.size.y)
+    {
+        cur_rect_left.original.x = (*node).rect.original.x;
+        cur_rect_left.original.y = (*node).rect.original.y;
 
-    if (num > 1)
-        tree_map_layout(map, left);
+        cur_rect_left.size.x = partA / (*node).value * (*node).rect.size.x;
+        cur_rect_left.size.y = (*node).rect.size.y;
+
+        cur_rect_right.original.x = (*node).rect.original.x + partA / (*node).value * (*node).rect.size.x;
+        cur_rect_right.original.y = (*node).rect.original.y;
+
+        cur_rect_right.size.x = partB / (*node).value * (*node).rect.size.x;
+        cur_rect_right.size.y = (*node).rect.size.y;
+    }
+    else
+    {
+        cur_rect_left.original.x = (*node).rect.original.x;
+        cur_rect_left.original.y = (*node).rect.original.y + partB / (*node).value * (*node).rect.size.y;
+
+        cur_rect_left.size.x = (*node).rect.size.x;
+        cur_rect_left.size.y = partA / (*node).value * (*node).rect.size.y;
+
+        cur_rect_right.original.x = (*node).rect.original.x;
+        cur_rect_right.original.y = (*node).rect.original.y;
+
+        cur_rect_right.size.x = (*node).rect.size.x;
+        cur_rect_right.size.y = partB / (*node).value * (*node).rect.size.y;
+    }
 
     if ((*node).child_num - num > 1)
+    {
+        tree<mapweight>::iterator right = map.wrap(map.next_sibling(sibs), map.end(node), mapweight("O", partB, child_num - num, cur_rect_right));
         tree_map_layout(map, right);
+    }
+    else
+    {
+        (*map.next_sibling(sibs)).rect = cur_rect_right;
+    }
+
+    if (num > 1)
+    {
+        tree<mapweight>::iterator left = map.wrap(map.begin(node), map.next_sibling(sibs), mapweight("O", partA, num, cur_rect_left));
+        tree_map_layout(map, left);
+    }
+    else
+    {
+        (*sibs).rect = cur_rect_left;
+    }
 
     return;
 }
 
 int main()
 {
+    float height = 400.f;
+    float width = 600.f;
+    Vector2F offset = (width, height) / 100.f;
 
     tree<mapweight> treemap;
     tree<mapweight>::iterator top_tree, data_tree;
 
     top_tree = treemap.begin();
-    data_tree = treemap.insert(top_tree, mapweight("O", 35, 10));
+
+    KiriRect2 top_rect(offset, Vector2F(width, height) - 2.f * offset);
+    data_tree = treemap.insert(top_tree, mapweight("O", 35, 10, top_rect));
 
     treemap.append_child(data_tree, mapweight("A", 4, 0));
     treemap.append_child(data_tree, mapweight("B", 3, 0));
@@ -99,25 +149,11 @@ int main()
 
     tree_map_layout(treemap, data_tree);
 
-    float height = 400.f;
-    float width = 600.f;
-    float view_width = 5.f;
-    float offset = 0.1f;
-    float aspect = height / width;
-    Vector2F camera_scale = Vector2F(view_width, aspect * view_width);
-
-    bool vertical_segment = true;
-
     vector<KiriRect2> rects;
 
     tree<mapweight>::iterator sibss = treemap.begin(data_tree);
     tree<mapweight>::iterator sibee = treemap.end(data_tree);
 
-    size_t depth, last_depth = 0;
-    KiriRect2 rect(Vector2F(0.f), Vector2F(0.f));
-    KiriRect2 lrect(Vector2F(0.f), Vector2F(0.f));
-    float maxSize = 35.f;
-    float cur_val, last_val = 0.f;
     while (sibss != sibee)
     {
         for (int k = 0; k < treemap.depth(sibss) - 1; ++k)
@@ -125,38 +161,11 @@ int main()
 
         cout << "depth=" << treemap.depth(sibss) << ";" << (*sibss).name << ":" << (*sibss).value << "," << (*sibss).child_num << endl;
 
-        depth = treemap.depth(sibss);
-        rect.lowest.x = 0.f;
-        rect.lowest.y = 0.f;
-
-        rect.highest.x = (*sibss).value / maxSize;
-        rect.highest.y = 1.f;
-
-        cur_val = (*sibss).value;
-        if (depth == last_depth + 1 && (*sibss).name != "O")
-        {
-            rect.lowest.x = lrect.lowest.x;
-            rect.lowest.y = depth % 2 == 0 ? lrect.lowest.y + (last_val - cur_val) / last_val : lrect.lowest.y;
-
-            rect.highest.x = depth % 2 == 1 ? lrect.highest.x + cur_val / last_val : lrect.highest.x;
-            rect.highest.y = lrect.highest.y;
-        }
-        else if (depth != last_depth + 1 && (*sibss).name == "O")
-        {
-            rect.lowest.x = lrect.highest.x;
-            rect.lowest.y = lrect.lowest.y;
-
-            rect.highest.x = lrect.highest.x + cur_val / last_val : lrect.highest.x;
-            rect.highest.y = lrect.highest.y;
-        }
-
         if ((*sibss).name != "O")
         {
-            rects.emplace_back(KiriRect2(rect.lowest, rect.highest));
+            //cout << (*sibss).rect.size.x << "," << (*sibss).rect.size.y << endl;
+            rects.emplace_back((*sibss).rect);
         }
-
-        lrect = rect;
-        last_depth = depth;
 
         ++sibss;
     }
@@ -252,6 +261,8 @@ int main()
     //     ppoints.emplace_back(KiriPoint2(ptest[i] * width + offset, Vector3F(1.f, 0.f, 0.f)));
     // }
     // scene->AddParticles(ppoints);
+
+    scene->AddRects(rects);
 
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
