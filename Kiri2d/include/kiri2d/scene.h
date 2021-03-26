@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 14:13:45
- * @LastEditTime: 2021-03-26 04:23:01
+ * @LastEditTime: 2021-03-26 15:20:23
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\scene.h
@@ -43,14 +43,17 @@ namespace KIRI2D
 
     struct KiriRect2
     {
-        Vector2F lowest;
-        Vector2F highest;
+        Vector2F original;
+        Vector2F size;
+
+        KiriRect2()
+            : original(Vector2F(0.f)), size(Vector2F(0.f)) {}
 
         KiriRect2(
-            Vector2F _lowest,
-            Vector2F _highest)
-            : lowest(_lowest),
-              highest(_highest) {}
+            Vector2F _original,
+            Vector2F _size)
+            : original(_original),
+              size(_size) {}
     };
 
     class KiriScene2D
@@ -65,13 +68,13 @@ namespace KIRI2D
             size_t windowWidth,
             size_t windowHeight)
             : mWindowWidth(windowWidth),
-              mWindowHeight(windowHeight)
+              mWindowHeight(windowHeight),
+              mViewWidth(windowWidth)
         {
-            float viewWidth = 5.f;
-            float viewHeight = mWindowHeight * viewWidth / mWindowWidth;
-            auto lookAt = Vector2F(viewWidth / 2.f, viewHeight / 2.f);
-            auto windowCellSize = Vector2F(viewWidth / mWindowWidth, viewHeight / mWindowHeight);
-            auto windowCenter = Vector2F(viewWidth / (2.f * windowCellSize.x), viewHeight / (2.f * windowCellSize.y));
+            float viewHeight = mWindowHeight * mViewWidth / mWindowWidth;
+            auto lookAt = Vector2F(mViewWidth / 2.f, viewHeight / 2.f);
+            auto windowCellSize = Vector2F(mViewWidth / mWindowWidth, viewHeight / mWindowHeight);
+            auto windowCenter = Vector2F(mViewWidth / (2.f * windowCellSize.x), viewHeight / (2.f * windowCellSize.y));
             mCamera = std::make_shared<KiriCamera2D>(
                 Camera2DProperty(
                     lookAt,
@@ -84,10 +87,13 @@ namespace KIRI2D
         void AddLines(std::vector<KiriLine2> lines);
         void AddParticle(KiriPoint2 particle);
         void AddParticles(std::vector<KiriPoint2> particles);
+        void AddRect(KiriRect2 rect);
+        void AddRects(std::vector<KiriRect2> rects);
 
         inline const auto GetSDFObjects() { return mSDFObjects; }
         inline const auto GetPoints() { return mPoints; }
         inline const auto GetLines() { return mLines; }
+        inline const auto GetRects() { return mRects; }
 
         inline const auto GetCamera() { return mCamera; }
         inline const auto GetWindowWidth() { return mWindowWidth; }
@@ -99,9 +105,11 @@ namespace KIRI2D
         std::vector<KiriSDF2D> mSDFObjects;
         std::vector<KiriPoint2> mPoints;
         std::vector<KiriLine2> mLines;
+        std::vector<KiriRect2> mRects;
 
         KiriCamera2DPtr mCamera;
 
+        size_t mViewWidth;
         size_t mWindowWidth;
         size_t mWindowHeight;
     };

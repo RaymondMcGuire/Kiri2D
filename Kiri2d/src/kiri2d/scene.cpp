@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:24:22
- * @LastEditTime: 2021-03-24 02:20:33
+ * @LastEditTime: 2021-03-26 14:59:33
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\scene.cpp
@@ -39,6 +39,19 @@ namespace KIRI2D
         for (size_t i = 0; i < lines.size(); i++)
         {
             mLines.emplace_back(lines[i]);
+        }
+    }
+
+    void KiriScene2D::AddRect(KiriRect2 rect)
+    {
+        mRects.emplace_back(rect);
+    }
+
+    void KiriScene2D::AddRects(std::vector<KiriRect2> rects)
+    {
+        for (size_t i = 0; i < rects.size(); i++)
+        {
+            mRects.emplace_back(rects[i]);
         }
     }
 }
