@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-03-26 15:21:14
+ * @LastEditTime: 2021-03-29 03:33:31
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\renderer\renderer.cpp
@@ -39,6 +39,18 @@ namespace KIRI2D
             cv::circle(mCanvas, cv::Point(cx, cy), 3, cv::Scalar(col.z, col.y, col.x, -1), -1);
         }
 
+        auto circles = mScene->GetCircles();
+        for (int i = 0; i < circles.size(); i++)
+        {
+            auto relate_position = mScene->GetCamera()->Project(circles[i].pos);
+            int cx = relate_position[0];
+            int cy = mWindowHeight - relate_position[1];
+            if (cx < 0 || cx >= mWindowWidth || cy < 0 || cy >= mWindowHeight)
+                continue;
+            auto col = circles[i].col * 255.f;
+            cv::circle(mCanvas, cv::Point(cx, cy), circles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), -1);
+        }
+
         auto lines = mScene->GetLines();
         for (int i = 0; i < lines.size(); i++)
         {
@@ -48,7 +60,7 @@ namespace KIRI2D
             Vector2F end_relate_position = mScene->GetCamera()->Project(lines[i].end);
             int ex = end_relate_position[0];
             int ey = mWindowHeight - end_relate_position[1];
-            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 3.0 * mScene->GetCamera()->ViewScale());
+            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 3.f * mScene->GetCamera()->ViewScale());
         }
 
         auto rects = mScene->GetRects();
@@ -59,7 +71,7 @@ namespace KIRI2D
             int oy = mWindowHeight - original[1];
 
             cv::Rect rect(ox, oy, rects[i].size.x, rects[i].size.y);
-            cv::rectangle(mCanvas, rect, cv::Scalar(253, 185, 134), 3.0 * mScene->GetCamera()->ViewScale());
+            cv::rectangle(mCanvas, rect, cv::Scalar(253, 185, 134), 2.f * mScene->GetCamera()->ViewScale());
         }
 
         auto sdfObjects = mScene->GetSDFObjects();
@@ -74,7 +86,7 @@ namespace KIRI2D
                 Vector2F end_relate_position = mScene->GetCamera()->Project(points[j]);
                 auto ex = (size_t)end_relate_position.x;
                 auto ey = mWindowHeight - (size_t)end_relate_position.y;
-                cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 2.0 * mScene->GetCamera()->ViewScale());
+                cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 2.f * mScene->GetCamera()->ViewScale());
             }
         }
     }

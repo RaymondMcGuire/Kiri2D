@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 14:13:45
- * @LastEditTime: 2021-03-27 01:50:04
+ * @LastEditTime: 2021-03-29 03:26:45
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\scene.h
@@ -52,11 +52,14 @@ namespace KIRI2D
         void AddParticles(std::vector<KiriPoint2> particles);
         void AddRect(KiriRect2 rect);
         void AddRects(std::vector<KiriRect2> rects);
+        void AddCircle(KiriCircle2 circle);
+        void AddCircles(std::vector<KiriCircle2> circles);
 
         inline const auto GetSDFObjects() { return mSDFObjects; }
         inline const auto GetPoints() { return mPoints; }
         inline const auto GetLines() { return mLines; }
         inline const auto GetRects() { return mRects; }
+        inline const auto GetCircles() { return mCircles; }
 
         inline const auto GetCamera() { return mCamera; }
         inline const auto GetWindowWidth() { return mWindowWidth; }
@@ -69,6 +72,7 @@ namespace KIRI2D
         std::vector<KiriPoint2> mPoints;
         std::vector<KiriLine2> mLines;
         std::vector<KiriRect2> mRects;
+        std::vector<KiriCircle2> mCircles;
 
         KiriCamera2DPtr mCamera;
 

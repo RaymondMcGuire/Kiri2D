@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-03-27 01:50:20
+ * @LastEditTime: 2021-03-29 03:24:37
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\shape_struct.h
@@ -26,6 +26,21 @@ namespace KIRI2D
             Vector3F _col)
             : pos(_pos),
               col(_col) {}
+    };
+
+    struct KiriCircle2
+    {
+        Vector2F pos;
+        Vector3F col;
+        float radius;
+
+        KiriCircle2(
+            Vector2F _pos,
+            Vector3F _col,
+            float _radius)
+            : pos(_pos),
+              col(_col),
+              radius(_radius) {}
     };
 
     struct KiriLine2

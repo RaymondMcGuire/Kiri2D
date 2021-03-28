@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:24:22
- * @LastEditTime: 2021-03-26 14:59:33
+ * @LastEditTime: 2021-03-29 03:26:53
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\scene.cpp
@@ -26,6 +26,19 @@ namespace KIRI2D
         for (size_t i = 0; i < particles.size(); i++)
         {
             mPoints.emplace_back(particles[i]);
+        }
+    }
+
+    void KiriScene2D::AddCircle(KiriCircle2 circle)
+    {
+        mCircles.emplace_back(circle);
+    }
+
+    void KiriScene2D::AddCircles(std::vector<KiriCircle2> circles)
+    {
+        for (size_t i = 0; i < circles.size(); i++)
+        {
+            mCircles.emplace_back(circles[i]);
         }
     }
 
