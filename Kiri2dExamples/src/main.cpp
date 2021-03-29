@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-03-29 03:32:35
+ * @LastEditTime: 2021-03-29 13:06:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -34,6 +34,21 @@ int main()
 {
     float height = 1080.f;
     float width = 1920.f;
+
+    // boundary
+    KiriSDFPoly2D boundary;
+    std::vector<KiriPoint2> ppoints;
+    std::vector<Vector2F> ptest;
+    size_t testn;
+    //load_xy_file(ptest, testn, "D:/project/Kiri/export/xy/test.xy");
+    load_xy_file(ptest, testn, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+
+    for (size_t i = 0; i < ptest.size(); i++)
+    {
+        auto point = KiriPoint2(ptest[i] * 800.f + Vector2F(500.f, 100.f), Vector3F(1.f, 0.f, 0.f));
+        ppoints.emplace_back(point);
+        boundary.Append(point.pos, Vector2F(0.f));
+    }
 
     float aspect = height / width;
     float offset = height / 30.f;
@@ -72,7 +87,7 @@ int main()
 
     TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
     treemap2d->AddTreeNodes(nodes);
-
+    treemap2d->ConstructTreemapLayout();
     // treemap2d->AddTreeNode(TreemapNode("A", 4, 0));
     // treemap2d->AddTreeNode(TreemapNode("B", 3, 0));
     // treemap2d->AddTreeNode(TreemapNode("C", 1, 0));
@@ -84,111 +99,36 @@ int main()
     // treemap2d->AddTreeNode(TreemapNode("I", 3, 0));
     // treemap2d->AddTreeNode(TreemapNode("J", 2, 0));
 
-    treemap2d->ConstructTreemapLayout();
-
     auto allrects = treemap2d->GetTreemapLayoutRect();
     for (size_t i = 0; i < allrects.size(); i++)
     {
         auto rect = allrects[i];
-        auto p = rect.original + rect.size / 2.f;
-        float rad = std::min(rect.size.x, rect.size.y) / 2.f;
+        float minw = std::min(rect.size.x, rect.size.y);
+        float maxw = std::max(rect.size.x, rect.size.y);
+        size_t np = static_cast<size_t>(std::roundf(maxw / minw));
+        for (size_t j = 0; j < np; j++)
+        {
+            float rad = minw / 2.f;
+            Vector2F p;
+            if (rect.size.x >= rect.size.y)
+                p = rect.original + Vector2F(rad + j * minw, rad);
+            else
+                p = rect.original + Vector2F(rad, rad + j * minw);
 
-        circles.emplace_back(KiriCircle2(p, Vector3F(1.f, 0.f, 0.f), rad));
+            if (boundary.FindRegion(p) < 0.f)
+                circles.emplace_back(KiriCircle2(p, Vector3F(1.f, 0.f, 0.f), rad));
+        }
     }
 
     auto scene = std::make_shared<KiriScene2D>((size_t)width, (size_t)height);
 
-    // std::vector<KiriPoint2> ppoints;
-    // std::vector<Vector2F> ptest;
-    // size_t testn;
-    // //load_xy_file(ptest, testn, "D:/project/Kiri/export/xy/test.xy");
-    // load_xy_file(ptest, testn, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    //scene->AddParticles(ppoints);
+    //scene->AddObject(boundary);
 
-    // KiriSDFPoly2D boundary;
-    // boundary.Append(Vector2F(0.3f, 0.3f));
-    // boundary.Append(Vector2F(0.3f, 4.7f));
-    // boundary.Append(Vector2F(4.7f, 4.7f));
-    // boundary.Append(Vector2F(4.7f, 0.3f));
+    // scene->AddLines(edges);
+    // scene->AddParticles(points);
 
-    // std::vector<KiriLine2> edges;
-
-    // edges.emplace_back(KiriLine2(Vector2F(0.511491, 0.151576) * width + offset, Vector2F(0.328024, 0.265777) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.328024, 0.265777) * width + offset, Vector2F(0.000000, 0.052614) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.000000, 0.052614) * width + offset, Vector2F(0.000000, 0.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.000000, 0.000000) * width + offset, Vector2F(0.546750, 0.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.546750, 0.000000) * width + offset, Vector2F(0.511491, 0.151576) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(1.000000, 0.418452) * width + offset, Vector2F(0.702465, 0.452691) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.702465, 0.452691) * width + offset, Vector2F(0.511491, 0.151576) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.511491, 0.151576) * width + offset, Vector2F(0.546750, 0.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.546750, 0.000000) * width + offset, Vector2F(1.000000, 0.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(1.000000, 0.000000) * width + offset, Vector2F(1.000000, 0.418452) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.328024, 0.265777) * width + offset, Vector2F(0.282745, 0.401936) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.282745, 0.401936) * width + offset, Vector2F(0.000000, 0.426054) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.000000, 0.426054) * width + offset, Vector2F(0.000000, 0.052614) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.000000, 0.052614) * width + offset, Vector2F(0.328024, 0.265777) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.702465, 0.452691) * width + offset, Vector2F(0.620256, 0.549363) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.620256, 0.549363) * width + offset, Vector2F(0.340386, 0.513157) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.340386, 0.513157) * width + offset, Vector2F(0.282745, 0.401936) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.282745, 0.401936) * width + offset, Vector2F(0.328024, 0.265777) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.328024, 0.265777) * width + offset, Vector2F(0.511491, 0.151576) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.511491, 0.151576) * width + offset, Vector2F(0.702465, 0.452691) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.340386, 0.513157) * width + offset, Vector2F(0.253343, 0.688532) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.253343, 0.688532) * width + offset, Vector2F(0.000000, 0.661637) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.000000, 0.661637) * width + offset, Vector2F(0.000000, 0.426054) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.000000, 0.426054) * width + offset, Vector2F(0.282745, 0.401936) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.282745, 0.401936) * width + offset, Vector2F(0.340386, 0.513157) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.613220, 0.679874) * width + offset, Vector2F(0.478311, 0.804271) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.478311, 0.804271) * width + offset, Vector2F(0.282452, 0.741229) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.282452, 0.741229) * width + offset, Vector2F(0.253343, 0.688532) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.253343, 0.688532) * width + offset, Vector2F(0.340386, 0.513157) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.340386, 0.513157) * width + offset, Vector2F(0.620256, 0.549363) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.620256, 0.549363) * width + offset, Vector2F(0.613220, 0.679874) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.929682, 1.000000) * width + offset, Vector2F(0.613220, 0.679874) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.613220, 0.679874) * width + offset, Vector2F(0.620256, 0.549363) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.620256, 0.549363) * width + offset, Vector2F(0.702465, 0.452691) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.702465, 0.452691) * width + offset, Vector2F(1.000000, 0.418452) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(1.000000, 0.418452) * width + offset, Vector2F(1.000000, 1.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(1.000000, 1.000000) * width + offset, Vector2F(0.929682, 1.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.282451, 0.741229) * width + offset, Vector2F(0.198055, 1.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.198055, 1.000000) * width + offset, Vector2F(0.000000, 1.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.000000, 1.000000) * width + offset, Vector2F(0.000000, 0.661637) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.000000, 0.661637) * width + offset, Vector2F(0.253343, 0.688532) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.253343, 0.688532) * width + offset, Vector2F(0.282452, 0.741229) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.489985, 1.000000) * width + offset, Vector2F(0.478311, 0.804271) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.478311, 0.804271) * width + offset, Vector2F(0.613220, 0.679874) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.613220, 0.679874) * width + offset, Vector2F(0.929682, 1.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.929682, 1.000000) * width + offset, Vector2F(0.489985, 1.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.478311, 0.804271) * width + offset, Vector2F(0.489985, 1.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.489985, 1.000000) * width + offset, Vector2F(0.198055, 1.000000) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.198055, 1.000000) * width + offset, Vector2F(0.282451, 0.741229) * width + offset));
-    // edges.emplace_back(KiriLine2(Vector2F(0.282452, 0.741229) * width + offset, Vector2F(0.478311, 0.804271) * width + offset));
-
-    // std::vector<KiriPoint2> points;
-    // points.emplace_back(KiriPoint2(Vector2F(0.149758, 0.286679) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.749196, 0.204762) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.458271, 0.389274) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.350847, 0.886708) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.614671, 0.870973) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.141437, 0.818411) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.274716, 0.094388) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.804290, 0.683524) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.422865, 0.662960) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // points.emplace_back(KiriPoint2(Vector2F(0.171200, 0.538052) * width + offset, Vector3F(1.f, 0.f, 0.f)));
-
-    //auto scene = std::make_shared<KiriScene2D>(700, 700);
-
-    // // scene->AddLines(edges);
-    // // scene->AddParticles(points);
-
-    // for (size_t i = 0; i < ptest.size(); i++)
-    // {
-    //     if (ptest[i].x < 0.f || ptest[i].y < 0.f)
-    //         continue;
-    //     ppoints.emplace_back(KiriPoint2(ptest[i] * width + offset, Vector3F(1.f, 0.f, 0.f)));
-    // }
-    // scene->AddParticles(ppoints);
-
-    scene->AddRects(treemap2d->GetTreemapLayoutRect());
+    //scene->AddRects(treemap2d->GetTreemapLayoutRect());
     scene->AddCircles(circles);
 
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
