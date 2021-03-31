@@ -41,7 +41,8 @@ int main()
     std::vector<Vector2F> ptest;
     size_t testn;
     //load_xy_file(ptest, testn, "D:/project/Kiri/export/xy/test.xy");
-    load_xy_file(ptest, testn, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file(ptest, testn, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file(ptest, testn, "D:/project/Kiri2D/scripts/alphashape/test.xy");
 
     for (size_t i = 0; i < ptest.size(); i++)
     {
