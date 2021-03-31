@@ -104,6 +104,11 @@ namespace KIRI2D
             ++sibs;
         }
 
+        if (partB < 0.f || partA < 0.f || partB > (*node).value || partA > (*node).value)
+        {
+            printf("node value=%.3f, partA=%.3f,partB=%.3f,num=%zd,child num=%zd,sibs value=%.3f \n", (*node).value, partA, partB, num, childNum, (*sibs).value);
+        }
+
         KiriRect2 leftRect, rightRect;
         GetSplitRect((*node).rect, leftRect, rightRect, partA, partB, (*node).value);
 
