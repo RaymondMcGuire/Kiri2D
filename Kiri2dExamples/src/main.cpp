@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-03-29 13:06:59
+ * @LastEditTime: 2021-04-05 15:31:55
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -30,7 +30,7 @@ void load_xy_file(std::vector<Vector2F> &points, size_t &num, const char *filePa
     file.close();
 }
 
-int main()
+int main_treemap()
 {
     float height = 1080.f;
     float width = 1920.f;
@@ -89,16 +89,6 @@ int main()
     TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
     treemap2d->AddTreeNodes(nodes);
     treemap2d->ConstructTreemapLayout();
-    // treemap2d->AddTreeNode(TreemapNode("A", 4, 0));
-    // treemap2d->AddTreeNode(TreemapNode("B", 3, 0));
-    // treemap2d->AddTreeNode(TreemapNode("C", 1, 0));
-    // treemap2d->AddTreeNode(TreemapNode("D", 10, 0));
-    // treemap2d->AddTreeNode(TreemapNode("E", 2, 0));
-    // treemap2d->AddTreeNode(TreemapNode("F", 3, 0));
-    // treemap2d->AddTreeNode(TreemapNode("G", 6, 0));
-    // treemap2d->AddTreeNode(TreemapNode("H", 1, 0));
-    // treemap2d->AddTreeNode(TreemapNode("I", 3, 0));
-    // treemap2d->AddTreeNode(TreemapNode("J", 2, 0));
 
     auto allrects = treemap2d->GetTreemapLayoutRect();
     for (size_t i = 0; i < allrects.size(); i++)
