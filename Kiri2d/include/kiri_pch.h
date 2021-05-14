@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2020-10-19 01:37:05
- * @LastEditTime: 2021-02-22 15:28:44
+ * @LastEditTime: 2021-05-14 15:23:28
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
@@ -112,6 +112,21 @@ template <class Type>
 using SharedPtr = std::shared_ptr<Type>;
 template <class Type>
 using UniquePtr = std::unique_ptr<Type>;
+
+////////////////////////////////////////////////////////////////////////////////
+template <class Type, class UType>
+using IsSame = std::is_same<Type, UType>;
+
+template <class Type>
+using IsSame_Float = std::is_same<Type, float>;
+template <class Type>
+using IsSame_Double = std::is_same<Type, double>;
+template <class Type>
+using IsSame_Int = std::is_same<Type, int>;
+template <class Type>
+using IsSame_SizeT = std::is_same<Type, size_t>;
+template <class Type>
+using IsSame_Bool = std::is_same<Type, bool>;
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
