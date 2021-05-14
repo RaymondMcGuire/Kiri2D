@@ -1,136 +1,44 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-04-05 15:31:55
+ * @LastEditTime: 2021-05-14 15:53:01
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
  */
 
-#include <kiri2d/renderer/renderer.h>
-#include <kiri2d/sdf/sdf_poly_2d.h>
-#include <kiri2d/treemap/treemap_layout.h>
-
-#include <random>
-#include <list>
+#include <kiri2d/linked_list/doubly_linked_list.h>
 
 using namespace KIRI2D;
 
-void load_xy_file(std::vector<Vector2F> &points, size_t &num, const char *filePath)
+int main()
 {
-    std::ifstream file(filePath);
-    file >> num;
-    for (int i = 0; i < num; ++i)
-    {
-        Vector2F xy;
-        file >> xy.x >> xy.y;
-        points.emplace_back(xy);
-    }
+    KIRI::KiriLog::Init();
 
-    file.close();
-}
+    auto v = KiriDoublyLinkedList<int>();
+    v.Push(15);
+    v.Push(17);
+    v.Push(12);
+    v.Push(14);
+    v.Push(21);
 
-int main_treemap()
-{
-    float height = 1080.f;
-    float width = 1920.f;
+    v.Print();
+    v.PrintReverse();
 
-    // boundary
-    KiriSDFPoly2D boundary;
-    std::vector<KiriPoint2> ppoints;
-    std::vector<Vector2F> ptest;
-    size_t testn;
-    //load_xy_file(ptest, testn, "D:/project/Kiri/export/xy/test.xy");
-    //load_xy_file(ptest, testn, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
-    load_xy_file(ptest, testn, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    v.Remove([](int x)
+             { return x % 2 == 1; });
 
-    for (size_t i = 0; i < ptest.size(); i++)
-    {
-        auto point = KiriPoint2(ptest[i] * 800.f + Vector2F(500.f, 100.f), Vector3F(1.f, 0.f, 0.f));
-        ppoints.emplace_back(point);
-        boundary.Append(point.pos, Vector2F(0.f));
-    }
+    v.Print();
 
-    float aspect = height / width;
-    float offset = height / 30.f;
-    Vector2F offsetVec2 = Vector2F(offset, offset);
+    // auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    String tempNodeName = "O";
-    KiriRect2 topRect(offsetVec2, Vector2F(width, height) - offsetVec2 * 2.f);
-
-    std::vector<float> radiusRange;
-    radiusRange.push_back(0.2f / 2.f);
-    radiusRange.push_back(0.2f);
-    radiusRange.push_back(0.2f * 1.5f);
-
-    std::vector<float> radiusRangeProb;
-    radiusRangeProb.push_back(0.8f);
-    radiusRangeProb.push_back(0.2f);
-
-    std::random_device engine;
-    std::mt19937 gen(engine());
-    std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
-
-    std::vector<TreemapNode> nodes;
-    std::vector<KiriCircle2> circles;
-
-    size_t totalNum = 10000;
-    float totalValue = 0.f;
-    for (size_t i = 0; i < totalNum; i++)
-    {
-        float radius = pcdis(gen);
-        totalValue += radius;
-        nodes.emplace_back(TreemapNode("A", radius, 0));
-    }
-
-    //TreemapNode topNode(tempNodeName, 35, 10, topRect);
-    TreemapNode topNode(tempNodeName, totalValue, totalNum, topRect);
-
-    TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
-    treemap2d->AddTreeNodes(nodes);
-    treemap2d->ConstructTreemapLayout();
-
-    auto allrects = treemap2d->GetTreemapLayoutRect();
-    for (size_t i = 0; i < allrects.size(); i++)
-    {
-        auto rect = allrects[i];
-        float minw = std::min(rect.size.x, rect.size.y);
-        float maxw = std::max(rect.size.x, rect.size.y);
-        size_t np = static_cast<size_t>(std::roundf(maxw / minw));
-        for (size_t j = 0; j < np; j++)
-        {
-            float rad = minw / 2.f;
-            Vector2F p;
-            if (rect.size.x >= rect.size.y)
-                p = rect.original + Vector2F(rad + j * minw, rad);
-            else
-                p = rect.original + Vector2F(rad, rad + j * minw);
-
-            if (boundary.FindRegion(p) < 0.f)
-                circles.emplace_back(KiriCircle2(p, Vector3F(1.f, 0.f, 0.f), rad));
-        }
-    }
-
-    auto scene = std::make_shared<KiriScene2D>((size_t)width, (size_t)height);
-
-    //scene->AddParticles(ppoints);
-    //scene->AddObject(boundary);
-
-    // scene->AddLines(edges);
-    // scene->AddParticles(points);
-
-    //scene->AddRects(treemap2d->GetTreemapLayoutRect());
-    scene->AddCircles(circles);
-
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
-
-    while (1)
-    {
-        renderer->DrawCanvas();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
-        cv::waitKey(5);
-        renderer->ClearCanvas();
-    }
+    // while (1)
+    // {
+    //     renderer->DrawCanvas();
+    //     cv::imshow("KIRI2D", renderer->GetCanvas());
+    //     cv::waitKey(5);
+    //     renderer->ClearCanvas();
+    // }
 
     return 0;
 }
