@@ -46,6 +46,7 @@ typedef SSIZE_T ssize_t;
 #ifdef KIRI_WINDOWS
 #include <cassert>
 #define KIRI_ASSERT(x) assert(x)
+#define KIRI_STATIC_ASSERT(x, info) static_assert(x, info)
 #endif
 #else
 #define KIRI_ASSERT(x)
