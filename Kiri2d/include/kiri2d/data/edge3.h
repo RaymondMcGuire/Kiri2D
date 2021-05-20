@@ -41,6 +41,9 @@ namespace KIRI2D
         const SharedPtr<KiriEdge3> &GetPrevEdge() const { return mPrev; }
         const SharedPtr<KiriEdge3> &GetTwinEdge() const { return mTwin; }
 
+        KiriVertex3 GetOriginVertex() const { return mOrigin; }
+        KiriVertex3 GetDestVertex() const { return mDest; }
+
         const bool IsEqual(KiriVertex3 a, KiriVertex3 b)
         {
             //KIRI_LOG_DEBUG("edge equal ={0}", ((mOrigin.IsEqual(a) && mDest.IsEqual(b)) || (mOrigin.IsEqual(b) && mDest.IsEqual(a))));

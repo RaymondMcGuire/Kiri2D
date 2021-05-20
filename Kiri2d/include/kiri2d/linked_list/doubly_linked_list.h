@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-14 16:00:34
+ * @LastEditTime: 2021-05-19 03:17:09
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\linked_list\doubly_linked_list.h
@@ -38,6 +38,7 @@ namespace KIRI2D
 
         void Push(const T x)
         {
+            mCounter++;
             if (first == NULL)
             {
                 first = SharedPtr<Node>(new Node(x));
@@ -54,6 +55,7 @@ namespace KIRI2D
 
         void Push2Tail(const T x)
         {
+            mCounter++;
             if (first == NULL)
             {
                 first = SharedPtr<Node>(new Node(x));
@@ -65,6 +67,17 @@ namespace KIRI2D
                 last->next = new_node;
                 new_node->prev = last;
                 last = new_node;
+            }
+        }
+
+        void RemoveAll()
+        {
+            while (first != NULL)
+            {
+                auto next = first->next;
+                if (next)
+                    next->prev = NULL;
+                first = next;
             }
         }
 
@@ -103,6 +116,8 @@ namespace KIRI2D
             }
         }
 
+        constexpr UInt Size() { return mCounter; }
+
         void Print()
         {
             static_assert(
@@ -137,7 +152,7 @@ namespace KIRI2D
             KIRI_LOG_DEBUG("doubly linked list reverse= [ {0}]", printStr);
         }
 
-    private:
+    protected:
         struct Node
         {
             T value;
@@ -157,6 +172,9 @@ namespace KIRI2D
         };
         SharedPtr<Node> first;
         SharedPtr<Node> last;
+
+    private:
+        UInt mCounter = 0;
     };
 }
 #endif

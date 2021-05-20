@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-05-18 01:20:38
+ * @LastEditTime: 2021-05-18 22:54:51
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_hull3.cpp
@@ -31,9 +31,70 @@ namespace KIRI2D
         }
     }
 
+    void KiriConvexHull3::PrintConflictGraphInfo()
+    {
+        KIRI_LOG_DEBUG("----------CONFLICT GRAPH INFO----------");
+
+        for (size_t i = 0; i < mFConflict.size(); i++)
+            mFConflict[i].PrintFaceConflictList();
+
+        for (size_t i = 0; i < mVConflict.size(); i++)
+            mVConflict[i].PrintVertexConflictList();
+
+        KIRI_LOG_DEBUG("---------------------------------------");
+    }
+
     void KiriConvexHull3::ComputeConvexHull()
     {
         BuildTetrahedron();
+
+        while (mProcessedCount < mVertices.size())
+        {
+            auto p_r = mVertices[mProcessedCount];
+
+            // vertex in convex hull
+            if (mVConflict[p_r.GetIdx()].Size() == 0)
+            {
+                ++mProcessedCount;
+                continue;
+            }
+
+            // outside
+            mVisFacets.clear();
+            mVConflict[p_r.GetIdx()].BuildVisibleList(mVisFacets);
+
+            // find horizon edges
+            for (size_t i = 0; i < mVisFacets.size(); i++)
+            {
+                auto vf = mVisFacets[i];
+                for (size_t j = 0; j < 3; j++)
+                {
+                    auto vfe = vf.GetEdgesByIdx(j);
+                    if (vfe->GetTwinEdge() != NULL)
+                    {
+                        // twin edge
+                        auto te = vfe->GetTwinEdge();
+                        // twin edge face
+                        auto tef = mCurFacets[te->GetId() / 3];
+                        if (!tef.GetVisible())
+                            mHorizonEdges.emplace_back(te);
+                    }
+                }
+            }
+
+            // create new facets
+            for (size_t i = 0; i < mHorizonEdges.size(); i++)
+            {
+                KIRI_LOG_DEBUG("start={0},{1},{2}/ end={3},{4},{5}",
+                               mHorizonEdges[i]->GetOriginVertex().GetValue().x, mHorizonEdges[i]->GetOriginVertex().GetValue().y, mHorizonEdges[i]->GetOriginVertex().GetValue().z,
+                               mHorizonEdges[i]->GetDestVertex().GetValue().x, mHorizonEdges[i]->GetDestVertex().GetValue().y, mHorizonEdges[i]->GetDestVertex().GetValue().z);
+                // auto newf = KiriFace3(p_r, mHorizonEdges[i]->GetOriginVertex(), mHorizonEdges[i]->GetDestVertex(), mHorizonEdges[i]->GetTwinEdge()->GetNextEdge()->GetDestVertex());
+                // AddFacet(newf);
+                // mCreatedFacets.emplace_back(newf);
+            }
+
+            ++mProcessedCount;
+        }
     }
 
     void KiriConvexHull3::AddVertex(Vector3F v3)
@@ -41,12 +102,20 @@ namespace KIRI2D
         auto vert = KiriVertex3(v3);
         vert.SetIdx(mVertices.size());
         mVertices.emplace_back(vert);
+        mVConflict.emplace_back(KiriVertexConflictLists());
     }
 
     void KiriConvexHull3::AddFacet(KiriFace3 &f3)
     {
         f3.SetIdx(mCurFacets.size());
         mCurFacets.emplace_back(f3);
+        mFConflict.emplace_back(KiriFaceConflictLists());
+    }
+
+    void KiriConvexHull3::BuildConflictGraph(KiriFace3 f, KiriVertex3 v)
+    {
+        mFConflict[f.GetIdx()].Push(v);
+        mVConflict[v.GetIdx()].Push(f);
     }
 
     void KiriConvexHull3::BuildTetrahedron()
@@ -133,6 +202,7 @@ namespace KIRI2D
         AddFacet(f1);
         AddFacet(f2);
         AddFacet(f3);
+        mProcessedCount = 4;
 
         // connect facets
         f0.LinkFace(f1, v0, v2);
@@ -143,5 +213,21 @@ namespace KIRI2D
         f2.LinkFace(f3, v3, v1);
 
         // build conflict graph
+        for (size_t i = mProcessedCount; i < mVertices.size(); i++)
+        {
+            auto p_t = mVertices[i];
+
+            if (f0.CheckConflict(p_t.GetValue()))
+                BuildConflictGraph(f0, p_t);
+
+            if (f1.CheckConflict(p_t.GetValue()))
+                BuildConflictGraph(f1, p_t);
+
+            if (f2.CheckConflict(p_t.GetValue()))
+                BuildConflictGraph(f2, p_t);
+
+            if (f3.CheckConflict(p_t.GetValue()))
+                BuildConflictGraph(f3, p_t);
+        }
     }
 }

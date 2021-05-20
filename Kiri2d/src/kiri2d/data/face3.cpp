@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-05-18 01:25:00
+ * @LastEditTime: 2021-05-18 21:38:53
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\data\face3.cpp
@@ -42,9 +42,9 @@ namespace KIRI2D
 
     void KiriFace3::CreateEdges()
     {
-        mEdges[0] = std::make_shared<KiriEdge3>(mIdx * 3 + 1, mVertices[0], mVertices[1]);
-        mEdges[1] = std::make_shared<KiriEdge3>(mIdx * 3 + 2, mVertices[1], mVertices[2]);
-        mEdges[2] = std::make_shared<KiriEdge3>(mIdx * 3 + 3, mVertices[2], mVertices[0]);
+        mEdges[0] = std::make_shared<KiriEdge3>(mIdx * 3, mVertices[0], mVertices[1]);
+        mEdges[1] = std::make_shared<KiriEdge3>(mIdx * 3 + 1, mVertices[1], mVertices[2]);
+        mEdges[2] = std::make_shared<KiriEdge3>(mIdx * 3 + 2, mVertices[2], mVertices[0]);
 
         mEdges[0]->SetNextEdge(mEdges[1]);
         mEdges[1]->SetNextEdge(mEdges[2]);

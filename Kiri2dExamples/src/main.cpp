@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-05-18 01:09:56
+ * @LastEditTime: 2021-05-19 03:36:05
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -31,6 +31,38 @@ int main()
 
     v.Print();
 
+    v.RemoveAll();
+    v.Print();
+
+    Vector<int> intList;
+    intList.emplace_back(3);
+    intList.emplace_back(5);
+    intList.emplace_back(6);
+    intList.emplace_back(1);
+    intList.emplace_back(4);
+    intList.emplace_back(6);
+    intList.emplace_back(9);
+
+    String printStr = "[ ";
+    for (size_t i = 0; i < intList.size(); i++)
+    {
+        printStr += std::to_string(intList[i]) + " ";
+    }
+    printStr += "]";
+    KIRI_LOG_DEBUG("int list = {0}", printStr);
+
+    auto lastElem = intList.back();
+    intList.pop_back();
+    intList[3] = lastElem;
+
+    printStr = "[ ";
+    for (size_t i = 0; i < intList.size(); i++)
+    {
+        printStr += std::to_string(intList[i]) + " ";
+    }
+    printStr += "]";
+    KIRI_LOG_DEBUG("int list = {0}", printStr);
+
     // // face
     // auto v1 = KiriVertex3(Vector3F(0.f));
     // auto v2 = KiriVertex3(Vector3F(10.f, 0.f, 0.f));
@@ -57,6 +89,7 @@ int main()
 
     ch3->PrintVertexInfo();
     ch3->PrintCurFacetsInfo();
+    ch3->PrintConflictGraphInfo();
     // auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     // while (1)
