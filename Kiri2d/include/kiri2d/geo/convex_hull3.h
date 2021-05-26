@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-05-25 15:11:38
+ * @LastEditTime: 2021-05-26 17:25:31
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\geo\convex_hull3.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\convex_hull3.h
  */
 
 #ifndef _KIRI_CONVEX_HULL3_H_
@@ -43,6 +43,8 @@ namespace KIRI
         const bool IsHorizonEdge(const KiriEdge3Ptr &edge);
 
         void ComputeConvexHull();
+
+        void Reset();
 
         void PrintVertexInfo();
         void PrintCurFacetsInfo();

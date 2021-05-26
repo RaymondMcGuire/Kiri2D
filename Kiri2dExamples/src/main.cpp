@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-05-26 12:43:07
+ * @LastEditTime: 2021-05-26 18:05:44
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -10,6 +10,8 @@
 #include <kiri2d/geo/convex_hull3.h>
 #include <kiri2d/voronoi/power_diagram.h>
 #include <kiri2d/renderer/renderer.h>
+#include <kiri2d/sdf/sdf_poly_2d.h>
+
 #include <random>
 using namespace KIRI;
 using namespace KIRI2D;
@@ -28,10 +30,25 @@ int main()
     float height = 1000.f;
     auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
 
-    boundaryPoly->AddPolygonVertex2(Vector2F(0, 0));
-    boundaryPoly->AddPolygonVertex2(Vector2F(width, 0));
-    boundaryPoly->AddPolygonVertex2(Vector2F(width, height));
-    boundaryPoly->AddPolygonVertex2(Vector2F(0, height));
+    //!TODO  polygon intersection has bug
+    KiriSDFPoly2D boundary;
+    auto bp1 = Vector2F(0, 0);
+    auto bp2 = Vector2F(width, 0);
+    auto bp3 = Vector2F(width, height);
+    auto bp3_1 = Vector2F(width / 2.f, height);
+    auto bp4 = Vector2F(0.f, height);
+
+    boundary.Append(bp1);
+    boundary.Append(bp2);
+    boundary.Append(bp3);
+    boundary.Append(bp4);
+
+    boundaryPoly->AddPolygonVertex2(bp1);
+    boundaryPoly->AddPolygonVertex2(bp2);
+    boundaryPoly->AddPolygonVertex2(bp3);
+    boundaryPoly->AddPolygonVertex2(bp4);
+    // boundaryPoly->AddPolygonVertex2(Vector2F(width, height));
+    //boundaryPoly->AddPolygonVertex2(Vector2F(0, height));
 
     auto pd = std::make_shared<KiriPowerDiagram>();
     std::random_device seedGen;
@@ -40,12 +57,15 @@ int main()
     for (size_t i = 0; i < 100; i++)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
-        //pd->AddVoroSite(sitePos2);
-        pd->AddPowerSite(sitePos2, dist(rndEngine) * width * 100.f);
+        if (boundary.FindRegion(sitePos2) < 0.f)
+            pd->AddVoroSite(sitePos2);
+        //pd->AddPowerSite(sitePos2, dist(rndEngine) * width * 100.f);
     }
 
     pd->SetBoundaryPolygon2(boundaryPoly);
-    pd->ComputeDiagram();
+    //pd->ComputeDiagram();
+    // pd->SetRelaxIterNumber(100);
+    pd->LloydRelaxation();
 
     Vector<KiriPoint2> points;
     Vector<KiriLine2> lines;

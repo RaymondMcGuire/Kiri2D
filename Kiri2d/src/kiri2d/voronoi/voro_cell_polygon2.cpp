@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-05-26 11:54:10
+ * @LastEditTime: 2021-05-26 17:54:42
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -10,6 +10,31 @@
 #include <kiri2d/voronoi/voro_cell_polygon2.h>
 namespace KIRI
 {
+    float KiriVoroCellPolygon2::GetPolygonArea()
+    {
+        auto area = 0.f;
+        if (!mPolygonVertices2.empty())
+            for (size_t i = 0; i < GetLength(); i++)
+                area += mPolygonVertices2[i].cross(mPolygonVertices2[(i + 1) % GetLength()]);
+
+        return std::abs(area * 0.5f);
+    }
+
+    Vector2F KiriVoroCellPolygon2::GetPolygonCentroid()
+    {
+        auto centroid = Vector2F(0.f);
+        auto length = GetLength();
+        if (!mPolygonVertices2.empty())
+        {
+            for (size_t i = 0; i < length; i++)
+                centroid += (mPolygonVertices2[i] + mPolygonVertices2[(i + 1) % length]) * (mPolygonVertices2[i].cross(mPolygonVertices2[(i + 1) % length]));
+
+            centroid /= 6.f * GetPolygonArea();
+        }
+
+        return centroid;
+    }
+
     void KiriVoroCellPolygon2::UpdateBBox()
     {
         for (size_t i = 0; i < mPolygonVertices2.size(); i++)

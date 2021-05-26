@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-25 23:44:54
+ * @LastEditTime: 2021-05-26 17:55:41
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\voronoi\voro_cell_polygon2.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
  */
 
 #ifndef _KIRI_VORO_CELL_POLYGON2_H_
@@ -36,6 +36,31 @@ namespace KIRI
         void Print();
         void UpdateBBox();
         void ComputeVoroSitesList();
+
+        UInt GetLength() const { return mPolygonVertices2.size(); }
+
+        void Reset()
+        {
+            mBBox2.reset();
+            mVoroSitesList->RemoveAll();
+            mPolygonVertices2.clear();
+        }
+
+        /*** 
+         * @description: Nürnberg, R. (2013). Calculating the volume and centroid of a polyhedron in 3d. 
+         * @url:http://paulbourke.net/geometry/polygonmesh/centroid.pdf
+         * @param {*}
+         * @return {*}
+         */
+        float GetPolygonArea();
+
+        /*** 
+         * @description: Nürnberg, R. (2013). Calculating the volume and centroid of a polyhedron in 3d. 
+         * @url:http://paulbourke.net/geometry/polygonmesh/centroid.pdf
+         * @param {*}
+         * @return {*}
+         */
+        Vector2F GetPolygonCentroid();
 
     private:
         BoundingBox2F mBBox2;

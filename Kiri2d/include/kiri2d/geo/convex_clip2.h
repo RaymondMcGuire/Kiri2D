@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-05-25 18:33:02
+ * @LastEditTime: 2021-05-26 17:45:40
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\geo\convex_clip2.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\convex_clip2.h
  */
 
 #ifndef _KIRI_CONVEX_CLIP2_H_
@@ -47,6 +47,8 @@ namespace KIRI
         }
 
         ~KiriConvexClip2() {}
+
+        void Reset() { mIntersectionList->RemoveAll(); }
 
         const KiriVector2ListPtr &GetIntersectionList() const { return mIntersectionList; }
 

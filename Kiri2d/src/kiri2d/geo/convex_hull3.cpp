@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-05-25 15:11:31
+ * @LastEditTime: 2021-05-26 17:27:46
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\src\kiri2d\geo\convex_hull3.cpp
+ * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_hull3.cpp
  */
 
 #include <kiri2d/geo/convex_hull3.h>
@@ -57,6 +57,18 @@ namespace KIRI
                 return true;
         }
         return false;
+    }
+
+    void KiriConvexHull3::Reset()
+    {
+        mProcessedCount = 0;
+        mVertices.clear();
+        mHorizonEdges.clear();
+        mCurFacets.clear();
+        mVisFacets.clear();
+        mCreatedFacets.clear();
+        mFConflict.clear();
+        mVConflict.clear();
     }
 
     void KiriConvexHull3::FindHorizonEdgeList(const KiriEdge3Ptr &edge)

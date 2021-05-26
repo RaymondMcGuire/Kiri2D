@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-25 23:34:55
+ * @LastEditTime: 2021-05-26 17:56:10
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\voronoi\voro_site.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
  */
 
 #ifndef _KIRI_VORO_SITE_H_
@@ -35,7 +35,16 @@ namespace KIRI
 
         virtual ~KiriVoroSite() noexcept {}
 
+        constexpr float GetWeight() const { return mWeight; }
         const KiriVoroCellPolygon2Ptr &GetCellPolygon() const { return mVoroCellPolygon2; }
+
+        void ResetValue(const Vector3F &val)
+        {
+            SetValue(Vector3F(val.x, val.y, ProjectZ(val.x, val.y, val.z)));
+            mNeighborSites.clear();
+            mLastNeighborSites.clear();
+            mVoroCellPolygon2->Reset();
+        }
 
         void SetCellPolygon(const KiriVoroCellPolygon2Ptr &polygon)
         {

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-26 12:33:12
+ * @LastEditTime: 2021-05-26 17:44:18
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
@@ -29,6 +29,7 @@ namespace KIRI
 
         ~KiriPowerDiagram() noexcept {}
 
+        void SetRelaxIterNumber(UInt relaxNum) { mRelaxIterNumber = relaxNum; }
         const Vector<KiriVoroSitePtr> &GetVoroSites() const { return mVoroSites; }
         const Vector<KiriVoroSitePtr> &GetBoundaryVoroSites() const { return mBoundaryVoroSites; }
 
@@ -39,10 +40,15 @@ namespace KIRI
 
         void PermutateVoroSites();
         void ComputeDiagram();
+        void LloydRelaxation();
 
         void PrintVoroSites();
 
+        void Reset();
+
     private:
+        UInt mRelaxIterNumber = 10;
+
         Vector<bool> mVisitedVoroSites;
         Vector<KiriVoroSitePtr> mVoroSites;
         Vector<KiriVoroSitePtr> mBoundaryVoroSites;
