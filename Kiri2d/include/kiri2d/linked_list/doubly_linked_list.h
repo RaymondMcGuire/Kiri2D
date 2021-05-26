@@ -1,20 +1,20 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-19 03:17:09
+ * @LastEditTime: 2021-05-24 10:42:14
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\linked_list\doubly_linked_list.h
+ * @FilePath: \Kiri\KiriCore\include\kiri2d\linked_list\doubly_linked_list.h
  */
 
-#ifndef _KIRI2D_DOUBLY_LINKED_LIST_H_
-#define _KIRI2D_DOUBLY_LINKED_LIST_H_
+#ifndef _KIRI_DOUBLY_LINKED_LIST_H_
+#define _KIRI_DOUBLY_LINKED_LIST_H_
 
 #pragma once
 
 #include <kiri_pch.h>
 
-namespace KIRI2D
+namespace KIRI
 {
     template <typename T>
     class KiriDoublyLinkedList
@@ -22,12 +22,12 @@ namespace KIRI2D
     public:
         KiriDoublyLinkedList()
         {
-            first = last = NULL;
+            mFirst = mLast = NULL;
         }
 
-        ~KiriDoublyLinkedList()
+        virtual ~KiriDoublyLinkedList()
         {
-            auto x = first;
+            auto x = mFirst;
             while (x)
             {
                 auto next = x->next;
@@ -39,46 +39,47 @@ namespace KIRI2D
         void Push(const T x)
         {
             mCounter++;
-            if (first == NULL)
+            if (mFirst == NULL)
             {
-                first = SharedPtr<Node>(new Node(x));
-                last = first;
+                mFirst = SharedPtr<Node>(new Node(x));
+                mLast = mFirst;
             }
             else
             {
                 auto new_node = SharedPtr<Node>(new Node(x));
-                first->prev = new_node;
-                new_node->next = first;
-                first = new_node;
+                mFirst->prev = new_node;
+                new_node->next = mFirst;
+                mFirst = new_node;
             }
         }
 
         void Push2Tail(const T x)
         {
             mCounter++;
-            if (first == NULL)
+            if (mFirst == NULL)
             {
-                first = SharedPtr<Node>(new Node(x));
-                last = first;
+                mFirst = SharedPtr<Node>(new Node(x));
+                mLast = mFirst;
             }
             else
             {
                 auto new_node = SharedPtr<Node>(new Node(x));
-                last->next = new_node;
-                new_node->prev = last;
-                last = new_node;
+                mLast->next = new_node;
+                new_node->prev = mLast;
+                mLast = new_node;
             }
         }
 
         void RemoveAll()
         {
-            while (first != NULL)
+            while (mFirst != NULL)
             {
-                auto next = first->next;
+                auto next = mFirst->next;
                 if (next)
                     next->prev = NULL;
-                first = next;
+                mFirst = next;
             }
+            mCounter = 0;
         }
 
         /*** 
@@ -88,19 +89,20 @@ namespace KIRI2D
          */
         void Remove(std::function<bool(T)> predicate)
         {
-            while (predicate(first->value))
+            while (mFirst != NULL && predicate(mFirst->value))
             {
-                auto next = first->next;
+                mCounter--;
+                auto next = mFirst->next;
                 if (next)
                     next->prev = NULL;
-                first = next;
+                mFirst = next;
             }
-
-            auto x = first;
+            auto x = mFirst;
             while (x)
             {
                 if (predicate(x->value))
                 {
+                    mCounter--;
                     auto prev = x->prev;
                     auto next = x->next;
                     prev->next = next;
@@ -108,28 +110,28 @@ namespace KIRI2D
                     if (next)
                         next->prev = prev;
 
-                    if (x == last)
-                        last = prev;
+                    if (x == mLast)
+                        mLast = prev;
                 }
 
                 x = x->next;
             }
         }
 
-        constexpr UInt Size() { return mCounter; }
+        constexpr UInt Size() const { return mCounter; }
 
         void Print()
         {
-            static_assert(
-                IsSame_Int<T>::value ||
-                    IsSame_SizeT<T>::value ||
-                    IsSame_Float<T>::value ||
-                    IsSame_Double<T>::value ||
-                    IsSame_Bool<T>::value,
-                "data type is not correct");
+            // static_assert(
+            //     IsSame_Int<T>::value ||
+            //         IsSame_SizeT<T>::value ||
+            //         IsSame_Float<T>::value ||
+            //         IsSame_Double<T>::value ||
+            //         IsSame_Bool<T>::value,
+            //     "data type is not correct");
 
             String printStr = "";
-            for (auto x = first; x; x = x->next)
+            for (auto x = mFirst; x; x = x->next)
                 printStr += std::to_string(x->value) + " ";
 
             KIRI_LOG_DEBUG("doubly linked list = [ {0}]", printStr);
@@ -137,16 +139,16 @@ namespace KIRI2D
 
         void PrintReverse()
         {
-            static_assert(
-                IsSame_Int<T>::value ||
-                    IsSame_SizeT<T>::value ||
-                    IsSame_Float<T>::value ||
-                    IsSame_Double<T>::value ||
-                    IsSame_Bool<T>::value,
-                "data type is not correct");
+            // static_assert(
+            //     IsSame_Int<T>::value ||
+            //         IsSame_SizeT<T>::value ||
+            //         IsSame_Float<T>::value ||
+            //         IsSame_Double<T>::value ||
+            //         IsSame_Bool<T>::value,
+            //     "data type is not correct");
 
             String printStr = "";
-            for (auto x = last; x; x = x->prev)
+            for (auto x = mLast; x; x = x->prev)
                 printStr += std::to_string(x->value) + " ";
 
             KIRI_LOG_DEBUG("doubly linked list reverse= [ {0}]", printStr);
@@ -170,10 +172,8 @@ namespace KIRI2D
                 //KIRI_LOG_DEBUG("destruct node value: {0}", this->value);
             }
         };
-        SharedPtr<Node> first;
-        SharedPtr<Node> last;
-
-    private:
+        SharedPtr<Node> mFirst;
+        SharedPtr<Node> mLast;
         UInt mCounter = 0;
     };
 }

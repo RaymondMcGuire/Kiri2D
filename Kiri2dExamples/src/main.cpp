@@ -1,104 +1,90 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-05-19 03:36:05
+ * @LastEditTime: 2021-05-26 12:02:20
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
  */
 
-#include <kiri2d/linked_list/doubly_linked_list.h>
 #include <kiri2d/geo/convex_hull3.h>
-
+#include <kiri2d/voronoi/power_diagram.h>
+#include <kiri2d/renderer/renderer.h>
+#include <random>
+using namespace KIRI;
 using namespace KIRI2D;
 
 int main()
 {
     KIRI::KiriLog::Init();
 
-    auto v = KiriDoublyLinkedList<int>();
-    v.Push(15);
-    v.Push(17);
-    v.Push(12);
-    v.Push(14);
-    v.Push(21);
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
 
-    v.Print();
-    v.PrintReverse();
+    // voronoi
+    auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
+    float width = 1000.f;
+    float height = 1000.f;
+    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
 
-    v.Remove([](int x)
-             { return x % 2 == 1; });
+    boundaryPoly->AddPolygonVertex2(Vector2F(0, 0));
+    boundaryPoly->AddPolygonVertex2(Vector2F(width, 0));
+    boundaryPoly->AddPolygonVertex2(Vector2F(width, height));
+    boundaryPoly->AddPolygonVertex2(Vector2F(0, height));
 
-    v.Print();
-
-    v.RemoveAll();
-    v.Print();
-
-    Vector<int> intList;
-    intList.emplace_back(3);
-    intList.emplace_back(5);
-    intList.emplace_back(6);
-    intList.emplace_back(1);
-    intList.emplace_back(4);
-    intList.emplace_back(6);
-    intList.emplace_back(9);
-
-    String printStr = "[ ";
-    for (size_t i = 0; i < intList.size(); i++)
+    auto pd = std::make_shared<KiriPowerDiagram>();
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<> dist(0.f, 1.f);
+    for (size_t i = 0; i < 100; i++)
     {
-        printStr += std::to_string(intList[i]) + " ";
+        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        pd->AddVoroSite(sitePos2);
     }
-    printStr += "]";
-    KIRI_LOG_DEBUG("int list = {0}", printStr);
 
-    auto lastElem = intList.back();
-    intList.pop_back();
-    intList[3] = lastElem;
+    pd->SetBoundaryPolygon2(boundaryPoly);
+    pd->ComputeDiagram();
 
-    printStr = "[ ";
-    for (size_t i = 0; i < intList.size(); i++)
+    Vector<KiriPoint2> points;
+    Vector<KiriLine2> lines;
+
+    auto sites = pd->GetVoroSites();
+    for (size_t i = 0; i < sites.size(); i++)
     {
-        printStr += std::to_string(intList[i]) + " ";
+        //sites[i]->Print();
+        points.emplace_back(KiriPoint2(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) + offsetVec2, Vector3F(1.f, 0.f, 0.f)));
+        auto poly = sites[i]->GetCellPolygon();
+        if (poly != NULL)
+        {
+            poly->ComputeVoroSitesList();
+            auto list = poly->GetVoroSitesList();
+            // list->PrintVertexList();
+
+            auto node = list->GetHead();
+            do
+            {
+                auto start = Vector2F(node->value) + offsetVec2;
+                node = node->next;
+                auto end = Vector2F(node->value) + offsetVec2;
+                lines.emplace_back(KiriLine2(start, end));
+            } while (node != list->GetHead());
+        }
     }
-    printStr += "]";
-    KIRI_LOG_DEBUG("int list = {0}", printStr);
 
-    // // face
-    // auto v1 = KiriVertex3(Vector3F(0.f));
-    // auto v2 = KiriVertex3(Vector3F(10.f, 0.f, 0.f));
-    // auto v3 = KiriVertex3(Vector3F(5.f, 5.f, 0.f));
-    // auto f = std::make_shared<KiriFace3>(v1, v2, v3);
-    // f->PrintFaceInfo();
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
 
-    // auto e1 = f->GetEdgesByIdx(0);
-    // e1->PrintEdgeInfo();
-    // e1->GetNextEdge()->PrintEdgeInfo();
-    // e1->GetPrevEdge()->PrintEdgeInfo();
+    scene->AddLines(lines);
+    scene->AddParticles(points);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    // convex hull 3d
-    auto ch3 = std::make_shared<KiriConvexHull3>();
-    ch3->AddVertex(Vector3F(1.f));
-    ch3->AddVertex(Vector3F(2.f));
-    ch3->AddVertex(Vector3F(3.f));
-    ch3->AddVertex(Vector3F(1.f, 2.f, 3.f));
-    ch3->AddVertex(Vector3F(3.f, 2.f, 5.f));
-
-    ch3->PrintVertexInfo();
-
-    ch3->ComputeConvexHull();
-
-    ch3->PrintVertexInfo();
-    ch3->PrintCurFacetsInfo();
-    ch3->PrintConflictGraphInfo();
-    // auto renderer = std::make_shared<KiriRenderer2D>(scene);
-
-    // while (1)
-    // {
-    //     renderer->DrawCanvas();
-    //     cv::imshow("KIRI2D", renderer->GetCanvas());
-    //     cv::waitKey(5);
-    //     renderer->ClearCanvas();
-    // }
+    while (1)
+    {
+        renderer->DrawCanvas();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+    }
 
     return 0;
 }

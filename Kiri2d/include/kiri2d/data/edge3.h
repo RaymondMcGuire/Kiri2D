@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-05-18 01:23:05
+ * @LastEditTime: 2021-05-20 23:29:33
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\edge3.h
+ * @FilePath: \Kiri\KiriCore\include\kiri2d\data\edge3.h
  */
 
 #ifndef _KIRI_EDGE3_H_
@@ -14,12 +14,12 @@
 
 #include <kiri2d/data/vertex3.h>
 
-namespace KIRI2D
+namespace KIRI
 {
     class KiriEdge3
     {
     public:
-        explicit KiriEdge3::KiriEdge3(UInt id, KiriVertex3 ori, KiriVertex3 dst)
+        explicit KiriEdge3::KiriEdge3(UInt id, const KiriVertex3Ptr &ori, const KiriVertex3Ptr &dst)
         {
             mNext = NULL;
             mPrev = NULL;
@@ -33,6 +33,8 @@ namespace KIRI2D
         ~KiriEdge3() noexcept {}
 
         constexpr UInt GetId() const { return mId; }
+        void SetId(UInt id) { mId = id; }
+
         void SetNextEdge(const SharedPtr<KiriEdge3> &nxt) { mNext = nxt; }
         void SetPrevEdge(const SharedPtr<KiriEdge3> &pre) { mPrev = pre; }
         void SetTwinEdge(const SharedPtr<KiriEdge3> &twn) { mTwin = twn; }
@@ -41,13 +43,17 @@ namespace KIRI2D
         const SharedPtr<KiriEdge3> &GetPrevEdge() const { return mPrev; }
         const SharedPtr<KiriEdge3> &GetTwinEdge() const { return mTwin; }
 
-        KiriVertex3 GetOriginVertex() const { return mOrigin; }
-        KiriVertex3 GetDestVertex() const { return mDest; }
+        const KiriVertex3Ptr &GetOriginVertex() const { return mOrigin; }
+        const KiriVertex3Ptr &GetDestVertex() const { return mDest; }
 
-        const bool IsEqual(KiriVertex3 a, KiriVertex3 b)
+        const bool IsEqual(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b) const
         {
-            //KIRI_LOG_DEBUG("edge equal ={0}", ((mOrigin.IsEqual(a) && mDest.IsEqual(b)) || (mOrigin.IsEqual(b) && mDest.IsEqual(a))));
-            return ((mOrigin.IsEqual(a) && mDest.IsEqual(b)) || (mOrigin.IsEqual(b) && mDest.IsEqual(a)));
+            return ((mOrigin->IsEqual(a) && mDest->IsEqual(b)) || (mOrigin->IsEqual(b) && mDest->IsEqual(a)));
+        }
+
+        const bool IsEqual(const SharedPtr<KiriEdge3> &edge) const
+        {
+            return ((mOrigin->IsEqual(edge->GetOriginVertex()) && mDest->IsEqual(edge->GetDestVertex())) || (mOrigin->IsEqual(edge->GetDestVertex()) && mDest->IsEqual(edge->GetOriginVertex())));
         }
 
         void PrintEdgeInfo()
@@ -55,8 +61,8 @@ namespace KIRI2D
             KIRI_LOG_DEBUG("----------EDGE INFO----------");
             KIRI_LOG_DEBUG("edge info: id={0}, origin=({1},{2},{3}), dest=({4},{5},{6})",
                            mId,
-                           mOrigin.GetValue().x, mOrigin.GetValue().y, mOrigin.GetValue().z,
-                           mDest.GetValue().x, mDest.GetValue().y, mDest.GetValue().z);
+                           mOrigin->GetValue().x, mOrigin->GetValue().y, mOrigin->GetValue().z,
+                           mDest->GetValue().x, mDest->GetValue().y, mDest->GetValue().z);
 
             KIRI_LOG_DEBUG("prev edge id={0}, next edge id={1}, twin edge id={2},",
                            (mPrev != NULL) ? mPrev->GetId() : -1,
@@ -65,9 +71,17 @@ namespace KIRI2D
             KIRI_LOG_DEBUG("------------------------------");
         }
 
+        void CleanEdge()
+        {
+            mPrev = NULL;
+            mNext = NULL;
+            mTwin = NULL;
+            mId = -1;
+        }
+
     private:
         UInt mId;
-        KiriVertex3 mOrigin, mDest;
+        KiriVertex3Ptr mOrigin, mDest;
         SharedPtr<KiriEdge3> mNext;
         SharedPtr<KiriEdge3> mPrev;
         SharedPtr<KiriEdge3> mTwin;

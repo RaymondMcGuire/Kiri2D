@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2020-10-19 01:37:05
- * @LastEditTime: 2021-05-14 15:23:28
+ * @LastEditTime: 2021-05-26 11:24:42
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
@@ -179,6 +179,7 @@ using Array3F = kiri_math::Array3<float>;
 
 using ConstantVectorField3F = kiri_math::ConstantVectorField3F;
 using BccLatticePointGenerator = kiri_math::BccLatticePointGenerator;
+using BoundingBox2F = kiri_math::BoundingBox2F;
 using BoundingBox3F = kiri_math::BoundingBox3F;
 using PointNeighborSearcher3Ptr = kiri_math::PointNeighborSearcher3Ptr;
 using VectorField3FPtr = kiri_math::VectorField3FPtr;
