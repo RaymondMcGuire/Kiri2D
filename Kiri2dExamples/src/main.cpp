@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-05-26 12:02:20
+ * @LastEditTime: 2021-05-26 12:43:07
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -40,7 +40,8 @@ int main()
     for (size_t i = 0; i < 100; i++)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
-        pd->AddVoroSite(sitePos2);
+        //pd->AddVoroSite(sitePos2);
+        pd->AddPowerSite(sitePos2, dist(rndEngine) * width * 100.f);
     }
 
     pd->SetBoundaryPolygon2(boundaryPoly);

@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-25 23:54:52
+ * @LastEditTime: 2021-05-26 12:33:12
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\voronoi\power_diagram.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
  */
 
 #ifndef _KIRI_POWER_DIAGRAM_H_
@@ -33,6 +33,7 @@ namespace KIRI
         const Vector<KiriVoroSitePtr> &GetBoundaryVoroSites() const { return mBoundaryVoroSites; }
 
         void AddVoroSite(const Vector2F &pos) { mVoroSites.emplace_back(std::make_shared<KiriVoroSite>(pos.x, pos.y)); }
+        void AddPowerSite(const Vector2F &pos, float weight) { mVoroSites.emplace_back(std::make_shared<KiriVoroSite>(pos.x, pos.y, weight)); }
 
         void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
 
