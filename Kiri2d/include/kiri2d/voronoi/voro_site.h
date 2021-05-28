@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-26 17:56:10
+ * @LastEditTime: 2021-05-28 15:34:09
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
@@ -31,12 +31,36 @@ namespace KIRI
             : KiriVertex3(Vector3F(x, y, ProjectZ(x, y, weight)))
         {
             mWeight = weight;
+            mPercentage = MEpsilon<float>();
+        }
+
+        explicit KiriVoroSite::KiriVoroSite(float x, float y, float weight, float percent)
+            : KiriVertex3(Vector3F(x, y, ProjectZ(x, y, weight)))
+        {
+            mWeight = weight;
+            mPercentage = percent;
         }
 
         virtual ~KiriVoroSite() noexcept {}
 
+        void SetWeight(float weight)
+        {
+            auto v = GetValue();
+            SetValue(Vector3F(v.x, v.y, ProjectZ(v.x, v.y, weight)));
+        }
+        void SetPercentage(float percent) { mPercentage = std::clamp(percent, 0.f, 1.f); }
         constexpr float GetWeight() const { return mWeight; }
+        constexpr float GetPercentage() const { return mPercentage; }
         const KiriVoroCellPolygon2Ptr &GetCellPolygon() const { return mVoroCellPolygon2; }
+
+        const Vector<SharedPtr<KiriVoroSite>> &GetNeighborSites() const { return mNeighborSites; }
+
+        float GetDistance2(const SharedPtr<KiriVoroSite> &site)
+        {
+            auto dx = GetValue().x - site->GetValue().x;
+            auto dy = GetValue().y - site->GetValue().y;
+            return std::sqrt(dx * dx + dy * dy);
+        }
 
         void ResetValue(const Vector3F &val)
         {
@@ -63,7 +87,7 @@ namespace KIRI
     private:
         float ProjectZ(float x, float y, float weight) { return (x * x + y * y - weight); }
 
-        float mWeight;
+        float mWeight, mPercentage;
         bool mBoundarySite = false;
 
         Vector<SharedPtr<KiriVoroSite>> mNeighborSites;

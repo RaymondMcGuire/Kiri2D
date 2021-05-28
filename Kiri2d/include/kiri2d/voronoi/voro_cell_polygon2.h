@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-26 17:55:41
+ * @LastEditTime: 2021-05-28 10:58:04
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
@@ -45,6 +45,11 @@ namespace KIRI
             mVoroSitesList->RemoveAll();
             mPolygonVertices2.clear();
         }
+
+        bool CheckBBox();
+        bool Contains(const Vector2F &v);
+
+        Vector2F GetRndInnerPoint();
 
         /*** 
          * @description: Nürnberg, R. (2013). Calculating the volume and centroid of a polyhedron in 3d. 
