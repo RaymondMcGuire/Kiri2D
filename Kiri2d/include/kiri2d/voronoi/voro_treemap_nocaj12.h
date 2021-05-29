@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-05-29 22:47:48
+ * @LastEditTime: 2021-05-30 00:42:32
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_nocaj12.h
@@ -41,10 +41,14 @@ namespace KIRI
         constexpr UInt GetMaxIterationNum() const { return mMaxIterationNum; }
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
 
+        void Init();
+
         void Reset();
-        void ComputeBoundaryPolygonArea();
 
     private:
+        void ComputeBoundaryPolygonArea();
+        void ReComputePercentage();
+
         float GetGlobalAvgDistance();
         float GetGlobalAreaError();
         float GetMaxAreaError();

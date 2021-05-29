@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-05-29 22:48:57
+ * @LastEditTime: 2021-05-30 03:07:04
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -14,6 +14,11 @@
 #include <random>
 using namespace KIRI;
 using namespace KIRI2D;
+
+Vector2F Transform2Original(const Vector2F &v, float h)
+{
+    return Vector2F(v.x, h - v.y);
+}
 
 void LloydRelaxationExample()
 {
@@ -141,26 +146,68 @@ void NOCAJ12Example()
     std::random_device seedGen;
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
-    for (size_t i = 0; i < 100; i++)
-    {
+    // for (size_t i = 0; i < 10; i++)
+    // {
 
-        auto site = std::make_shared<KiriVoroSite>(dist(rndEngine) * width, dist(rndEngine) * height);
+    //     auto site = std::make_shared<KiriVoroSite>(dist(rndEngine) * width, dist(rndEngine) * height);
 
-        site->SetPercentage(dist(rndEngine));
+    //     site->SetPercentage(0.1f);
 
-        if (boundary.FindRegion(Vector2F(site->GetValue().x, site->GetValue().y)) < 0.f)
-            nocaj12->AddSite(site);
-    }
+    //     if (boundary.FindRegion(Vector2F(site->GetValue().x, site->GetValue().y)) < 0.f)
+    //         nocaj12->AddSite(site);
+    // }
+
+    auto site1 = std::make_shared<KiriVoroSite>(735.9843368178131f, 746.0502348102431f);
+    auto site2 = std::make_shared<KiriVoroSite>(700.7618335887928f, 742.7548583270794f);
+    auto site3 = std::make_shared<KiriVoroSite>(865.7503835269017f, 650.8863993736297f);
+    auto site4 = std::make_shared<KiriVoroSite>(988.3142114679076f, 503.5056023696504f);
+    auto site5 = std::make_shared<KiriVoroSite>(70.48833820876466f, 174.6032797364101f);
+    auto site6 = std::make_shared<KiriVoroSite>(430.61358713253514f, 886.1273087800068f);
+    auto site7 = std::make_shared<KiriVoroSite>(889.1002614918041f, 961.4905218647881f);
+    auto site8 = std::make_shared<KiriVoroSite>(670.0090069662888f, 825.7412824081849f);
+    auto site9 = std::make_shared<KiriVoroSite>(1.9773698692181485f, 855.517620485873f);
+    auto site10 = std::make_shared<KiriVoroSite>(236.06943947644965f, 423.0900322355453f);
+
+    site1->SetPercentage(0.4);
+    site2->SetPercentage(0.4);
+    site3->SetPercentage(0.1);
+    site4->SetPercentage(0.1);
+    site5->SetPercentage(0.1);
+    site6->SetPercentage(0.1);
+    site7->SetPercentage(0.1);
+    site8->SetPercentage(0.1);
+    site9->SetPercentage(0.1);
+    site10->SetPercentage(0.1);
+
+    nocaj12->AddSite(site1);
+    nocaj12->AddSite(site2);
+    nocaj12->AddSite(site3);
+    nocaj12->AddSite(site4);
+    nocaj12->AddSite(site5);
+    nocaj12->AddSite(site6);
+    nocaj12->AddSite(site7);
+    nocaj12->AddSite(site8);
+    nocaj12->AddSite(site9);
+    nocaj12->AddSite(site10);
+
+    // auto site = nocaj12->GetSites();
+    // site[0]->SetPercentage(0.4f);
+    // site[1]->SetPercentage(0.4f);
 
     nocaj12->SetBoundaryPolygon2(boundaryPoly);
-    nocaj12->Reset();
-    nocaj12->ComputeBoundaryPolygonArea();
+    nocaj12->Init();
+
+    // debug
+    // auto site1 = nocaj12->GetSites();
+    // for (size_t i = 0; i < site1.size(); i++)
+    //     site1[i]->PrintSite();
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     while (1)
     {
+
         nocaj12->ComputeIterate();
 
         Vector<KiriPoint2> points;
@@ -170,7 +217,8 @@ void NOCAJ12Example()
         for (size_t i = 0; i < sites.size(); i++)
         {
             //sites[i]->Print();
-            points.emplace_back(KiriPoint2(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) + offsetVec2, Vector3F(1.f, 0.f, 0.f)));
+            auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
+            points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
             auto poly = sites[i]->GetCellPolygon();
             if (poly != NULL)
             {
@@ -181,9 +229,11 @@ void NOCAJ12Example()
                 auto node = list->GetHead();
                 do
                 {
-                    auto start = Vector2F(node->value) + offsetVec2;
+                    auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+
                     node = node->next;
-                    auto end = Vector2F(node->value) + offsetVec2;
+                    auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+
                     lines.emplace_back(KiriLine2(start, end));
                 } while (node != list->GetHead());
             }

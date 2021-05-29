@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-05-29 22:47:04
+ * @LastEditTime: 2021-05-30 03:05:51
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_treemap_nocaj12.cpp
@@ -10,6 +10,15 @@
 #include <kiri2d/voronoi/voro_treemap_nocaj12.h>
 namespace KIRI
 {
+
+    void KiriVoroTreemapNocaj12::Init()
+    {
+        Reset();
+        ComputeBoundaryPolygonArea();
+        ReComputePercentage();
+        mPowerDiagram->ComputeDiagram();
+    }
+
     void KiriVoroTreemapNocaj12::Reset()
     {
         mCompleteArea = 0.f;
@@ -19,6 +28,22 @@ namespace KIRI
 
         mErrorThreshold = 0.3f;
         mMaxIterationNum = 35;
+    }
+
+    void KiriVoroTreemapNocaj12::ReComputePercentage()
+    {
+        auto voroSite = mPowerDiagram->GetVoroSites();
+        if (!voroSite.empty())
+        {
+            auto sum = 0.f;
+            for (size_t i = 0; i < voroSite.size(); i++)
+                sum += voroSite[i]->GetPercentage();
+
+            for (size_t i = 0; i < voroSite.size(); i++)
+                voroSite[i]->SetPercentage(voroSite[i]->GetPercentage() / sum);
+        }
+        else
+            KIRI_LOG_ERROR("ReComputePercentage::No voro site!!");
     }
 
     void KiriVoroTreemapNocaj12::ComputeBoundaryPolygonArea()
@@ -77,16 +102,17 @@ namespace KIRI
             auto targetArea = mCompleteArea * voroSite[i]->GetPercentage();
 
             auto increase = 2.f;
-            if (currentArea == 0.f)
+            if (currentArea != 0.f)
                 increase = targetArea / currentArea;
 
             auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
             auto step = 1.f * gAvg * errorTransform;
             auto weight = voroSite[i]->GetWeight();
 
-            if (increase < (1.f - MEpsilon<float>()))
+            auto epsilon = 0.01f;
+            if (increase < (1.f - epsilon))
                 weight -= step;
-            else if (increase > (1.f + MEpsilon<float>()))
+            else if (increase > (1.f + epsilon))
                 weight += step;
 
             voroSite[i]->SetWeight(weight);
@@ -141,12 +167,15 @@ namespace KIRI
 
         for (size_t i = 0; i < voroSite.size(); i++)
         {
+            //KIRI_LOG_DEBUG("voro site pos={0},{1}", voroSite[i]->GetValue().x, voroSite[i]->GetValue().y);
             // KIRI_LOG_ERROR("GetGlobalAvgDistance:: voro n num={0}", voroSite[i]->GetNeighborSites().size());
             if (!voroSite[i]->GetNeighborSites().empty())
             {
                 for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
                 {
-                    sum += voroSite[i]->GetDistance2(voroSite[i]->GetNeighborSites()[j]);
+                    auto distance = voroSite[i]->GetDistance2(voroSite[i]->GetNeighborSites()[j]);
+                    // KIRI_LOG_DEBUG("distance = {0}", distance);
+                    sum += distance;
                     num++;
                 }
             }
@@ -175,18 +204,15 @@ namespace KIRI
     {
         Iterate();
 
-        mCurGlobalAreaError = GetGlobalAreaError();
-        mCurMaxAreaError = GetMaxAreaError();
+        // mCurGlobalAreaError = GetGlobalAreaError();
+        // mCurMaxAreaError = GetMaxAreaError();
 
-        KIRI_LOG_INFO("Iteration:{0}, Local max area error={1}, Global area error={2}", mCurIteration, mCurMaxAreaError, mCurGlobalAreaError);
+        // KIRI_LOG_INFO("Iteration:{0}, Local max area error={1}, Global area error={2}", mCurIteration, mCurMaxAreaError, mCurGlobalAreaError);
     }
 
     void KiriVoroTreemapNocaj12::Compute()
     {
-        Reset();
-        ComputeBoundaryPolygonArea();
-
-        mPowerDiagram->ComputeDiagram();
+        Init();
 
         while (mCurIteration < mMaxIterationNum)
         {

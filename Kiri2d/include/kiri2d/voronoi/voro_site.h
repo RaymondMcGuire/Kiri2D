@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-29 22:07:52
+ * @LastEditTime: 2021-05-30 03:04:09
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
@@ -68,7 +68,7 @@ namespace KIRI
             SetValue(Vector3F(val.x, val.y, ProjectZ(val.x, val.y, mWeight)));
             //mNeighborSites.clear();
             //mLastNeighborSites.clear();
-            mVoroCellPolygon2->Reset();
+            //mVoroCellPolygon2->Reset();
         }
 
         void ResetValue(const Vector3F &val)
@@ -93,6 +93,12 @@ namespace KIRI
         void SetLastNeighborSites(const Vector<SharedPtr<KiriVoroSite>> &lastNeighbor) { mLastNeighborSites = lastNeighbor; }
 
         const bool IsBoundarySite() const { return mBoundarySite; }
+
+        void PrintSite()
+        {
+            KIRI_LOG_DEBUG("site idx={0}", GetIdx());
+            KIRI_LOG_DEBUG("site weight={0}, percentage={1}", mWeight, mPercentage);
+        }
 
     private:
         float ProjectZ(float x, float y, float weight) { return (x * x + y * y - weight); }
