@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-05-28 17:01:57
+ * @LastEditTime: 2021-05-29 22:47:48
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_nocaj12.h
@@ -29,25 +29,28 @@ namespace KIRI
         ~KiriVoroTreemapNocaj12() noexcept {}
 
         void Compute();
+        void ComputeIterate();
 
+        void AddSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
+        void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
         void SetMaxIterationNum(UInt num) { mMaxIterationNum = num; }
         void SetErrorThreshold(float error) { mErrorThreshold = error; }
+
+        const Vector<KiriVoroSitePtr> &GetSites() const { return mPowerDiagram->GetVoroSites(); }
 
         constexpr UInt GetMaxIterationNum() const { return mMaxIterationNum; }
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
 
-    private:
         void Reset();
+        void ComputeBoundaryPolygonArea();
 
+    private:
         float GetGlobalAvgDistance();
         float GetGlobalAreaError();
         float GetMaxAreaError();
 
-        void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
-
         void Iterate();
 
-        void ComputeBoundaryPolygonArea();
         void CorrectWeights();
         void AdaptPositionsWeights();
         void AdaptWeights();

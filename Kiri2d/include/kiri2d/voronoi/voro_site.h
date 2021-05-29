@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-28 15:34:09
+ * @LastEditTime: 2021-05-29 22:07:52
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
@@ -46,9 +46,10 @@ namespace KIRI
         void SetWeight(float weight)
         {
             auto v = GetValue();
+            mWeight = weight;
             SetValue(Vector3F(v.x, v.y, ProjectZ(v.x, v.y, weight)));
         }
-        void SetPercentage(float percent) { mPercentage = std::clamp(percent, 0.f, 1.f); }
+        void SetPercentage(float percent) { mPercentage = percent; }
         constexpr float GetWeight() const { return mWeight; }
         constexpr float GetPercentage() const { return mPercentage; }
         const KiriVoroCellPolygon2Ptr &GetCellPolygon() const { return mVoroCellPolygon2; }
@@ -62,11 +63,20 @@ namespace KIRI
             return std::sqrt(dx * dx + dy * dy);
         }
 
+        void ResetValue(const Vector2F &val)
+        {
+            SetValue(Vector3F(val.x, val.y, ProjectZ(val.x, val.y, mWeight)));
+            //mNeighborSites.clear();
+            //mLastNeighborSites.clear();
+            mVoroCellPolygon2->Reset();
+        }
+
         void ResetValue(const Vector3F &val)
         {
+            mWeight = val.z;
             SetValue(Vector3F(val.x, val.y, ProjectZ(val.x, val.y, val.z)));
-            mNeighborSites.clear();
-            mLastNeighborSites.clear();
+            //mNeighborSites.clear();
+            // mLastNeighborSites.clear();
             mVoroCellPolygon2->Reset();
         }
 

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-05-28 16:59:09
+ * @LastEditTime: 2021-05-29 22:47:04
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_treemap_nocaj12.cpp
@@ -18,7 +18,7 @@ namespace KIRI
         mCurIteration = 0;
 
         mErrorThreshold = 0.3f;
-        mMaxIterationNum = 800;
+        mMaxIterationNum = 35;
     }
 
     void KiriVoroTreemapNocaj12::ComputeBoundaryPolygonArea()
@@ -58,7 +58,9 @@ namespace KIRI
 
     void KiriVoroTreemapNocaj12::AdaptPositionsWeights()
     {
+
         auto outside = mPowerDiagram->Move2Centroid();
+
         if (outside)
             CorrectWeights();
     }
@@ -136,8 +138,10 @@ namespace KIRI
         float sum = 0.f;
         UInt num = 0;
         auto voroSite = mPowerDiagram->GetVoroSites();
+
         for (size_t i = 0; i < voroSite.size(); i++)
         {
+            // KIRI_LOG_ERROR("GetGlobalAvgDistance:: voro n num={0}", voroSite[i]->GetNeighborSites().size());
             if (!voroSite[i]->GetNeighborSites().empty())
             {
                 for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
@@ -159,11 +163,22 @@ namespace KIRI
 
     void KiriVoroTreemapNocaj12::Iterate()
     {
+
         AdaptPositionsWeights();
 
         AdaptWeights();
 
         mPowerDiagram->ComputeDiagram();
+    }
+
+    void KiriVoroTreemapNocaj12::ComputeIterate()
+    {
+        Iterate();
+
+        mCurGlobalAreaError = GetGlobalAreaError();
+        mCurMaxAreaError = GetMaxAreaError();
+
+        KIRI_LOG_INFO("Iteration:{0}, Local max area error={1}, Global area error={2}", mCurIteration, mCurMaxAreaError, mCurGlobalAreaError);
     }
 
     void KiriVoroTreemapNocaj12::Compute()

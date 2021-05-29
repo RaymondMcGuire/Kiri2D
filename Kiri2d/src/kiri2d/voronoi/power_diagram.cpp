@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-05-28 12:47:17
+ * @LastEditTime: 2021-05-29 22:39:08
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -98,34 +98,26 @@ namespace KIRI
         mFacetsAroundVertex.clear();
     }
 
-    // TODO need optimize
     bool KiriPowerDiagram::Move2Centroid()
     {
         bool outside = false;
-        Vector<Vector2F> centroids;
         // move sites to centroid
         for (size_t j = 0; j < mVoroSites.size(); j++)
         {
             auto poly = mVoroSites[j]->GetCellPolygon();
-
             if (poly != NULL)
             {
                 auto cen = poly->GetPolygonCentroid();
                 if (mBoundaryPolygon2->Contains(cen))
-                    centroids.emplace_back(Vector2F(cen));
+                    mVoroSites[j]->ResetValue(cen);
                 else
                 {
                     outside = true;
                     KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!!");
-                    centroids.emplace_back(mBoundaryPolygon2->GetRndInnerPoint());
+                    mVoroSites[j]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
                 }
             }
         }
-
-        mVoroSites.clear();
-
-        for (size_t k = 0; k < centroids.size(); k++)
-            AddVoroSite(centroids[k]);
 
         return outside;
     }
@@ -141,6 +133,13 @@ namespace KIRI
 
             ComputeDiagram();
         }
+    }
+
+    void KiriPowerDiagram::LloydIterate()
+    {
+        Move2Centroid();
+
+        ComputeDiagram();
     }
 
     void KiriPowerDiagram::ComputeDiagram()
