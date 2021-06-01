@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:56:27
- * @LastEditTime: 2021-03-27 03:04:43
+ * @LastEditTime: 2021-06-01 22:07:19
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\treemap\treemap_layout.cpp
@@ -9,7 +9,7 @@
 
 #include <kiri2d/treemap/treemap_layout.h>
 
-namespace KIRI2D
+namespace KIRI
 {
     void TreemapLayout::ConstructTreemapLayout()
     {
@@ -24,9 +24,30 @@ namespace KIRI2D
     void TreemapLayout::AddTreeNodes(const std::vector<TreemapNode> &nodes)
     {
         for (size_t i = 0; i < nodes.size(); i++)
-        {
             mTreemap.append_child(mDataTree, nodes[i]);
+    }
+
+    const KiriVoroTreeMapDataPtr &TreemapLayout::Convert2VoroTreeData()
+    {
+        mVoroTreeMapData->Clear();
+
+        tree<TreemapNode>::iterator sibe = mTreemap.begin(mDataTree);
+        tree<TreemapNode>::iterator end = mTreemap.end(mDataTree);
+
+        while (sibe != end)
+        {
+            VoroTreeMapNode node;
+            node.depth = mTreemap.depth(sibe);
+            node.id = (*sibe).id;
+            node.pid = (*sibe).pid;
+            node.weight = (*sibe).value;
+            node.child_num = (*sibe).child_num;
+            mVoroTreeMapData->AddNode(node);
+
+            ++sibe;
         }
+
+        return mVoroTreeMapData;
     }
 
     void TreemapLayout::PrintTreemapLayout()
@@ -39,8 +60,8 @@ namespace KIRI2D
             for (int k = 0; k < mTreemap.depth(sibe) - 1; ++k)
                 std::cout << " ";
 
-            KIRI_LOG_INFO("Depth={0},Name={1}:Value={2},ChildNum={3}",
-                          mTreemap.depth(sibe), (*sibe).name, (*sibe).value, (*sibe).child_num);
+            KIRI_LOG_INFO("Depth={0},Name={1}:Value={2},ChildNum={3},Id={4}, Parent Id={5}",
+                          mTreemap.depth(sibe), (*sibe).name, (*sibe).value, (*sibe).child_num, (*sibe).id, (*sibe).pid);
 
             ++sibe;
         }
@@ -105,9 +126,7 @@ namespace KIRI2D
         }
 
         if (partB < 0.f || partA < 0.f || partB > (*node).value || partA > (*node).value)
-        {
             printf("node value=%.3f, partA=%.3f,partB=%.3f,num=%zd,child num=%zd,sibs value=%.3f \n", (*node).value, partA, partB, num, childNum, (*sibs).value);
-        }
 
         KiriRect2 leftRect, rightRect;
         GetSplitRect((*node).rect, leftRect, rightRect, partA, partB, (*node).value);
@@ -115,20 +134,28 @@ namespace KIRI2D
         // right parts
         if ((*node).child_num - num > 1)
         {
-            tree<TreemapNode>::iterator right = map.wrap(map.next_sibling(sibs), map.end(node), TreemapNode(mTempNodeName, partB, childNum - num, rightRect));
+            tree<TreemapNode>::iterator right = map.wrap(map.next_sibling(sibs), map.end(node), TreemapNode(mTempNodeName, mCnt++, (*node).id, partB, childNum - num, rightRect));
             TreemapRecur(map, right);
         }
         else
+        {
             (*map.next_sibling(sibs)).rect = rightRect;
+            (*map.next_sibling(sibs)).id = mCnt++;
+            (*map.next_sibling(sibs)).pid = (*node).id;
+        }
 
         // left parts
         if (num > 1)
         {
-            tree<TreemapNode>::iterator left = map.wrap(map.begin(node), map.next_sibling(sibs), TreemapNode(mTempNodeName, partA, num, leftRect));
+            tree<TreemapNode>::iterator left = map.wrap(map.begin(node), map.next_sibling(sibs), TreemapNode(mTempNodeName, mCnt++, (*node).id, partA, num, leftRect));
             TreemapRecur(map, left);
         }
         else
+        {
             (*sibs).rect = leftRect;
+            (*sibs).id = mCnt++;
+            (*sibs).pid = (*node).id;
+        }
 
         return;
     }

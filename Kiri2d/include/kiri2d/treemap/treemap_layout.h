@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:42:49
- * @LastEditTime: 2021-03-27 02:56:12
+ * @LastEditTime: 2021-06-01 20:11:05
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\treemap\treemap_layout.h
@@ -14,24 +14,29 @@
 
 #include <treehh/tree.hh>
 #include <kiri2d/data/shape_struct.h>
+#include <kiri2d/voronoi/voro_treemap_data.h>
 
-namespace KIRI2D
+using namespace KIRI2D;
+
+namespace KIRI
 {
 
     struct TreemapNode
     {
         String name;
+        UInt id;
+        UInt pid;
         float value;
         size_t child_num;
         KiriRect2 rect;
 
-        TreemapNode() : name("TreemapNode"), value(0.f), child_num(0) {}
+        TreemapNode() : name("TreemapNode"), id(-1), pid(-1), value(0.f), child_num(0) {}
 
-        TreemapNode(String _name, float _value, size_t _child_num)
-            : name(name), value(_value), child_num(_child_num) {}
+        TreemapNode(String _name, UInt _id, UInt _pid, float _value, size_t _child_num)
+            : name(name), id(_id), pid(_pid), value(_value), child_num(_child_num) {}
 
-        TreemapNode(String _name, float _value, size_t _child_num, KiriRect2 _rect)
-            : name(_name), value(_value), child_num(_child_num), rect(_rect) {}
+        TreemapNode(String _name, UInt _id, UInt _pid, float _value, size_t _child_num, KiriRect2 _rect)
+            : name(_name), id(_id), pid(_pid), value(_value), child_num(_child_num), rect(_rect) {}
     };
 
     class TreemapLayout
@@ -44,9 +49,12 @@ namespace KIRI2D
         {
             mTopTree = mTreemap.begin();
             mDataTree = mTreemap.insert(mTopTree, topNode);
+            mVoroTreeMapData = std::make_shared<KiriVoroTreeMapData>();
         }
 
         ~TreemapLayout() noexcept {}
+
+        const KiriVoroTreeMapDataPtr &Convert2VoroTreeData();
 
         void ConstructTreemapLayout();
 
@@ -58,10 +66,12 @@ namespace KIRI2D
 
     private:
         String mTempNodeName;
+        UInt mCnt = 1;
         tree<TreemapNode> mTreemap;
         tree<TreemapNode>::iterator mTopTree, mDataTree;
+        KiriVoroTreeMapDataPtr mVoroTreeMapData;
         void TreemapRecur(tree<TreemapNode> &map, tree<TreemapNode>::iterator &node);
-        void GetSplitRect(KiriRect2 parentRect, KiriRect2& left, KiriRect2& right, const float valueA, const float valueB, const float total);
+        void GetSplitRect(KiriRect2 parentRect, KiriRect2 &left, KiriRect2 &right, const float valueA, const float valueB, const float total);
     };
 
     typedef SharedPtr<TreemapLayout> TreemapLayoutPtr;

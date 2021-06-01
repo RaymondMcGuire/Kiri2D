@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-05-30 03:05:51
+ * @LastEditTime: 2021-06-01 21:39:04
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_treemap_nocaj12.cpp
@@ -206,7 +206,6 @@ namespace KIRI
 
         // mCurGlobalAreaError = GetGlobalAreaError();
         // mCurMaxAreaError = GetMaxAreaError();
-
         // KIRI_LOG_INFO("Iteration:{0}, Local max area error={1}, Global area error={2}", mCurIteration, mCurMaxAreaError, mCurGlobalAreaError);
     }
 

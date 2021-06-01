@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-28 10:58:04
+ * @LastEditTime: 2021-06-02 01:43:55
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
@@ -34,6 +34,8 @@ namespace KIRI
         void AddPolygonVertex2(const Vector2F &v2) { mPolygonVertices2.emplace_back(Vector2F(v2)); }
 
         void Print();
+        void PrintPolyVertices();
+        void PrintVoroSitesList();
         void UpdateBBox();
         void ComputeVoroSitesList();
 

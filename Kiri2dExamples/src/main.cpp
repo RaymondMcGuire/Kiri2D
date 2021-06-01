@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-05-30 03:07:04
+ * @LastEditTime: 2021-06-02 00:15:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -10,6 +10,7 @@
 #include <kiri2d/voronoi/voro_treemap_nocaj12.h>
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>
+#include <kiri2d/treemap/treemap_layout.h>
 
 #include <random>
 using namespace KIRI;
@@ -18,6 +19,168 @@ using namespace KIRI2D;
 Vector2F Transform2Original(const Vector2F &v, float h)
 {
     return Vector2F(v.x, h - v.y);
+}
+
+void GenRndTreemap()
+{
+    float height = 1080.f;
+    float width = 1920.f;
+
+    float aspect = height / width;
+    float offset = height / 30.f;
+    Vector2F offsetVec2 = Vector2F(offset, offset);
+
+    String tempNodeName = "O";
+    KiriRect2 topRect(offsetVec2, Vector2F(width, height) - offsetVec2 * 2.f);
+
+    std::vector<float> radiusRange;
+    radiusRange.push_back(0.2f / 2.f);
+    radiusRange.push_back(0.2f);
+    radiusRange.push_back(0.2f * 1.5f);
+
+    std::vector<float> radiusRangeProb;
+    radiusRangeProb.push_back(0.8f);
+    radiusRangeProb.push_back(0.2f);
+
+    std::random_device engine;
+    std::mt19937 gen(engine());
+    std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
+
+    std::vector<TreemapNode> nodes;
+    std::vector<KiriCircle2> circles;
+
+    size_t totalNum = 10;
+    float totalValue = 0.f;
+    for (size_t i = 0; i < totalNum; i++)
+    {
+        float radius = pcdis(gen);
+        totalValue += radius;
+        nodes.emplace_back(TreemapNode("A", -1, -1, radius, 0));
+    }
+
+    //TreemapNode topNode(tempNodeName, 35, 10, topRect);
+    TreemapNode topNode(tempNodeName, 0, -1, totalValue, totalNum, topRect);
+
+    TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
+    treemap2d->AddTreeNodes(nodes);
+    treemap2d->ConstructTreemapLayout();
+    treemap2d->PrintTreemapLayout();
+
+    auto voroTreeNodes = treemap2d->Convert2VoroTreeData();
+    for (size_t i = 0; i < voroTreeNodes->GetTotalNodeNum(); i++)
+    {
+        KIRI_LOG_DEBUG("current node id={0}", i);
+        auto array = voroTreeNodes->GetChildNodesById(i);
+        for (size_t j = 0; j < array.size(); j++)
+            KIRI_LOG_DEBUG("child: id={0}, pid={1}, weight={2}, depth={3}", array[j].id, array[j].pid, array[j].weight, array[j].depth);
+    }
+}
+
+void VoronoiExample()
+{
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    // voronoi
+    auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
+    float width = 1000.f;
+    float height = 1000.f;
+    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+
+    //!TODO  polygon intersection has bug
+    KiriSDFPoly2D boundary;
+    auto bp1 = Vector2F(0, 0);
+    auto bp2 = Vector2F(width / 2, height);
+    auto bp3 = Vector2F(width, 0);
+    //auto bp4 = Vector2F(width, 0);
+
+    boundary.Append(bp1);
+    boundary.Append(bp2);
+    boundary.Append(bp3);
+    //boundary.Append(bp4);
+
+    boundaryPoly->AddPolygonVertex2(bp1);
+    boundaryPoly->AddPolygonVertex2(bp2);
+    boundaryPoly->AddPolygonVertex2(bp3);
+    //boundaryPoly->AddPolygonVertex2(bp4);
+
+    auto pd = std::make_shared<KiriPowerDiagram>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
+
+    // auto cnt = 0;
+    // while (cnt <= 10)
+    // {
+    //     auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+    //     if (boundary.FindRegion(sitePos2) < 0.f)
+    //     {
+    //         pd->AddVoroSite(sitePos2);
+    //         cnt++;
+    //         KIRI_LOG_DEBUG("pd->AddVoroSite(Vector2F({0},{1}));", sitePos2.x, sitePos2.y);
+    //     }
+    // }
+
+    pd->AddVoroSite(Vector2F(292.59906, 337.5617));
+    pd->AddVoroSite(Vector2F(210.2593, 309.7437));
+    pd->AddVoroSite(Vector2F(346.58127, 479.68475));
+    pd->AddVoroSite(Vector2F(823.7116, 189.96306));
+    pd->AddVoroSite(Vector2F(150.06136, 277.91763));
+    pd->AddVoroSite(Vector2F(524.4252, 103.00255));
+    pd->AddVoroSite(Vector2F(607.1892, 43.33178));
+    pd->AddVoroSite(Vector2F(532.539, 879.05725));
+    pd->AddVoroSite(Vector2F(182.51099, 295.60687));
+    pd->AddVoroSite(Vector2F(244.83142, 184.72595));
+    pd->AddVoroSite(Vector2F(337.2065, 353.0117));
+
+    pd->SetBoundaryPolygon2(boundaryPoly);
+    pd->ComputeDiagram();
+    //pd->SetRelaxIterNumber(100);
+    //pd->LloydRelaxation();
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    while (1)
+    {
+        Vector<KiriPoint2> points;
+        Vector<KiriLine2> lines;
+
+        auto sites = pd->GetVoroSites();
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            //sites[i]->Print();
+            auto pos = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
+            points.emplace_back(KiriPoint2(pos, Vector3F(1.f, 0.f, 0.f)));
+            auto poly = sites[i]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                poly->ComputeVoroSitesList();
+                auto list = poly->GetVoroSitesList();
+                // list->PrintVertexList();
+
+                auto node = list->GetHead();
+                do
+                {
+                    auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                    node = node->next;
+                    auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                    lines.emplace_back(KiriLine2(start, end));
+                } while (node != list->GetHead());
+            }
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
 }
 
 void LloydRelaxationExample()
@@ -250,11 +413,161 @@ void NOCAJ12Example()
     }
 }
 
+void NOCAJ12Example1()
+{
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    // voronoi
+    auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
+    float width = 1000.f;
+    float height = 1000.f;
+    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+
+    //!TODO  polygon intersection has bug
+    KiriSDFPoly2D boundary;
+    auto bp1 = Vector2F(0, 0);
+    auto bp2 = Vector2F(width, 0);
+    auto bp3 = Vector2F(width, height);
+    auto bp3_1 = Vector2F(width / 2.f, height);
+    auto bp4 = Vector2F(0.f, height);
+
+    boundary.Append(bp1);
+    boundary.Append(bp2);
+    boundary.Append(bp3);
+    boundary.Append(bp4);
+
+    boundaryPoly->AddPolygonVertex2(bp1);
+    boundaryPoly->AddPolygonVertex2(bp2);
+    boundaryPoly->AddPolygonVertex2(bp3);
+    boundaryPoly->AddPolygonVertex2(bp4);
+
+    auto nocaj12 = std::make_shared<KiriVoroTreemapNocaj12>();
+
+    // generate voronoi treemap
+    float aspect = height / width;
+    float offset = height / 30.f;
+
+    String tempNodeName = "O";
+    KiriRect2 topRect(offsetVec2, Vector2F(width, height) - offsetVec2 * 2.f);
+
+    std::vector<float> radiusRange;
+    radiusRange.push_back(0.2f / 2.f);
+    radiusRange.push_back(0.2f);
+    radiusRange.push_back(0.2f * 1.5f);
+
+    std::vector<float> radiusRangeProb;
+    radiusRangeProb.push_back(0.8f);
+    radiusRangeProb.push_back(0.2f);
+
+    std::random_device engine;
+    std::mt19937 gen(engine());
+    std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
+
+    std::default_random_engine rndEngine(engine());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
+
+    std::vector<TreemapNode> nodes;
+    std::vector<KiriCircle2> circles;
+
+    size_t totalNum = 10;
+    float totalValue = 0.f;
+    for (size_t i = 0; i < totalNum; i++)
+    {
+        float radius = pcdis(gen);
+        totalValue += radius;
+        nodes.emplace_back(TreemapNode("A", -1, -1, radius, 0));
+    }
+
+    TreemapNode topNode(tempNodeName, 0, -1, totalValue, totalNum, topRect);
+
+    TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
+    treemap2d->AddTreeNodes(nodes);
+    treemap2d->ConstructTreemapLayout();
+    treemap2d->PrintTreemapLayout();
+
+    auto depthid = 0;
+    auto voroTreeNodes = treemap2d->Convert2VoroTreeData();
+    auto depth0nodes = voroTreeNodes->GetLeafChildNodes();
+    auto child0weight = voroTreeNodes->GetLeafChildTotalWeight();
+
+    for (size_t i = 0; i < depth0nodes.size(); i++)
+    {
+        auto site = std::make_shared<KiriVoroSite>(dist(rndEngine) * width, dist(rndEngine) * height);
+        site->SetPercentage(depth0nodes[i].weight / child0weight);
+        nocaj12->AddSite(site);
+    }
+
+    // auto site = nocaj12->GetSites();
+    // site[0]->SetPercentage(0.4f);
+    // site[1]->SetPercentage(0.4f);
+
+    nocaj12->SetBoundaryPolygon2(boundaryPoly);
+    nocaj12->Init();
+
+    // debug
+    // auto site1 = nocaj12->GetSites();
+    // for (size_t i = 0; i < site1.size(); i++)
+    //     site1[i]->PrintSite();
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    while (1)
+    {
+
+        nocaj12->ComputeIterate();
+
+        Vector<KiriPoint2> points;
+        Vector<KiriLine2> lines;
+
+        auto sites = nocaj12->GetSites();
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            //sites[i]->Print();
+            auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
+            points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
+            auto poly = sites[i]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                poly->ComputeVoroSitesList();
+                auto list = poly->GetVoroSitesList();
+                // list->PrintVertexList();
+
+                auto node = list->GetHead();
+                do
+                {
+                    auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+
+                    node = node->next;
+                    auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+
+                    lines.emplace_back(KiriLine2(start, end));
+                } while (node != list->GetHead());
+            }
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
 int main()
 {
     KIRI::KiriLog::Init();
+    VoronoiExample();
     //LloydRelaxationExample();
-    NOCAJ12Example();
+    //NOCAJ12Example();
+
+    //GenRndTreemap();
+    //NOCAJ12Example1();
 
     // // scene renderer config
     // float windowheight = 1080.f;

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-05-28 11:32:39
+ * @LastEditTime: 2021-06-02 01:46:08
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -106,6 +106,25 @@ namespace KIRI
         mVoroSitesList->RemoveAll();
         for (size_t i = 0; i < mPolygonVertices2.size(); i++)
             mVoroSitesList->Push(Vector2F(mPolygonVertices2[mPolygonVertices2.size() - 1 - i]));
+    }
+
+    void KiriVoroCellPolygon2::PrintPolyVertices()
+    {
+        KIRI_LOG_DEBUG("----------Voronoi Cell Polygon Vertices INFO----------");
+
+        for (size_t i = 0; i < mPolygonVertices2.size(); i++)
+            KIRI_LOG_DEBUG("vertex2=({0},{1})", mPolygonVertices2[i].x, mPolygonVertices2[i].y);
+
+        KIRI_LOG_DEBUG("------------------------------");
+    }
+
+    void KiriVoroCellPolygon2::PrintVoroSitesList()
+    {
+        KIRI_LOG_DEBUG("----------Voronoi Sites List INFO----------");
+
+        mVoroSitesList->PrintVertexList();
+
+        KIRI_LOG_DEBUG("------------------------------");
     }
 
     void KiriVoroCellPolygon2::Print()

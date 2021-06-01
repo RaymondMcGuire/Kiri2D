@@ -14,6 +14,7 @@
 #include <random>
 #include <list>
 
+using namespace KIRI;
 using namespace KIRI2D;
 
 void load_xy_file(std::vector<Vector2F> &points, size_t &num, const char *filePath)
@@ -80,11 +81,11 @@ int main_treemap()
     {
         float radius = pcdis(gen);
         totalValue += radius;
-        nodes.emplace_back(TreemapNode("A", radius, 0));
+        nodes.emplace_back(TreemapNode("A",-1,-1, radius, 0));
     }
 
     //TreemapNode topNode(tempNodeName, 35, 10, topRect);
-    TreemapNode topNode(tempNodeName, totalValue, totalNum, topRect);
+    TreemapNode topNode(tempNodeName,0,-1, totalValue, totalNum, topRect);
 
     TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
     treemap2d->AddTreeNodes(nodes);

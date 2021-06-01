@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-05-29 22:39:08
+ * @LastEditTime: 2021-06-02 02:12:53
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -167,7 +167,7 @@ namespace KIRI
             ComputeVoroCells();
         }
 
-        KIRI_LOG_INFO("Compute Power Diagram Finished!!");
+        //KIRI_LOG_INFO("Compute Power Diagram Finished!!");
     }
 
     KiriVoroCellPolygon2Ptr KiriPowerDiagram::VoroCellPolygonClip(const KiriVoroCellPolygon2Ptr &vcp1, const KiriVoroCellPolygon2Ptr &vcp2)
@@ -179,10 +179,26 @@ namespace KIRI
         }
 
         if (vcp1->GetBBox().contains(vcp2->GetBBox()))
+        {
+            KIRI_LOG_DEBUG("Contains");
             return vcp2;
+        }
+
+        //vcp2->PrintPolyVertices();
 
         vcp1->ComputeVoroSitesList();
         vcp2->ComputeVoroSitesList();
+
+        //vcp2->PrintPolyVertices();
+        //vcp2->PrintVoroSitesList();
+
+        // auto rmpo = vcp2->GetPolygonVertices();
+        // KIRI_LOG_DEBUG("---------------");
+        // for (size_t i = 0; i < rmpo.size(); i++)
+        // {
+        //     KIRI_LOG_DEBUG("({0},{1})", rmpo[i].x, rmpo[i].y);
+        // }
+
         mConvexClip->ComputeConvexPolygonIntersection(vcp1->GetVoroSitesList(), vcp2->GetVoroSitesList());
 
         auto intersection = mConvexClip->GetIntersectionList();
@@ -232,6 +248,7 @@ namespace KIRI
 
     void KiriPowerDiagram::ComputeVoroCells()
     {
+
         for (size_t i = 0; i < mConvexHull->GetNumOfFacets(); i++)
         {
             auto facet = mConvexHull->GetFacets()[i];
@@ -256,6 +273,9 @@ namespace KIRI
                         auto lastX = Huge<float>(), lastY = Huge<float>();
                         auto dx = 1.f, dy = 1.f;
 
+                        //edge->PrintEdgeInfo();
+                        //KIRI_LOG_DEBUG("{0}", mFacetsAroundVertex.size());
+
                         for (size_t j = 0; j < mFacetsAroundVertex.size(); j++)
                         {
                             auto f = mFacetsAroundVertex[j];
@@ -277,12 +297,15 @@ namespace KIRI
                             }
                             if (dx > MEpsilon<float>() || dy > MEpsilon<float>())
                             {
+                                //KIRI_LOG_DEBUG("dual={0},{1}", dual.x, dual.y);
                                 cellPoly->AddPolygonVertex2(dual);
                                 lastX = dual.x;
                                 lastY = dual.y;
                             }
                         }
+
                         cellPoly->UpdateBBox();
+                        //cellPoly->PrintPolyVertices();
                         // cellPoly->ComputeVoroSitesList();
 
                         if (!site->IsBoundarySite())

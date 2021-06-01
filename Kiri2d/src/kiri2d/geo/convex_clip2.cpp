@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-05-25 23:16:20
+ * @LastEditTime: 2021-06-02 01:48:18
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\src\kiri2d\geo\convex_clip2.cpp
+ * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_clip2.cpp
  */
 
 #include <kiri2d/geo/convex_clip2.h>
@@ -225,6 +225,8 @@ namespace KIRI
         auto q = std::make_shared<KiriVector2List>();
         a->Clone(p);
         b->Clone(q);
+
+        //q->PrintVertexList();
 
         //KIRI_LOG_DEBUG("ComputeConvexPolygonIntersection: a size={0},b size={1},p size={2},q size={3}", a->Size(), b->Size(), p->Size(), q->Size());
 

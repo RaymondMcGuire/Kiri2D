@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-05-26 17:27:46
+ * @LastEditTime: 2021-06-02 01:23:12
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_hull3.cpp
@@ -360,9 +360,7 @@ namespace KIRI
 
         // reset indices
         for (size_t i = 0; i < mVertices.size(); i++)
-        {
             mVertices[i]->SetIdx(i);
-        }
 
         // find 4 linear indepent vertex
         bool linear_dependent = true;
