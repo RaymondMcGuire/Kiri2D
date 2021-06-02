@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-02 00:15:59
+ * @LastEditTime: 2021-06-02 12:58:19
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -19,6 +19,20 @@ using namespace KIRI2D;
 Vector2F Transform2Original(const Vector2F &v, float h)
 {
     return Vector2F(v.x, h - v.y);
+}
+
+void load_xy_file1(std::vector<Vector2F> &points, size_t &num, const char *filePath)
+{
+    std::ifstream file(filePath);
+    file >> num;
+    for (int i = 0; i < num; ++i)
+    {
+        Vector2F xy;
+        file >> xy.x >> xy.y;
+        points.emplace_back(xy);
+    }
+
+    file.close();
 }
 
 void GenRndTreemap()
@@ -88,22 +102,19 @@ void VoronoiExample()
     float height = 1000.f;
     auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
 
-    //!TODO  polygon intersection has bug
+    // boundary polygon
     KiriSDFPoly2D boundary;
     auto bp1 = Vector2F(0, 0);
     auto bp2 = Vector2F(width / 2, height);
     auto bp3 = Vector2F(width, 0);
-    //auto bp4 = Vector2F(width, 0);
 
     boundary.Append(bp1);
     boundary.Append(bp2);
     boundary.Append(bp3);
-    //boundary.Append(bp4);
 
     boundaryPoly->AddPolygonVertex2(bp1);
     boundaryPoly->AddPolygonVertex2(bp2);
     boundaryPoly->AddPolygonVertex2(bp3);
-    //boundaryPoly->AddPolygonVertex2(bp4);
 
     auto pd = std::make_shared<KiriPowerDiagram>();
 
@@ -111,29 +122,112 @@ void VoronoiExample()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-    // auto cnt = 0;
-    // while (cnt <= 10)
-    // {
-    //     auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
-    //     if (boundary.FindRegion(sitePos2) < 0.f)
-    //     {
-    //         pd->AddVoroSite(sitePos2);
-    //         cnt++;
-    //         KIRI_LOG_DEBUG("pd->AddVoroSite(Vector2F({0},{1}));", sitePos2.x, sitePos2.y);
-    //     }
-    // }
+    auto cnt = 0, maxcnt = 10;
+    while (cnt < maxcnt)
+    {
+        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        if (boundary.FindRegion(sitePos2) < 0.f)
+        {
+            pd->AddVoroSite(sitePos2);
+            cnt++;
+            KIRI_LOG_DEBUG("pd->AddVoroSite(Vector2F({0},{1}));", sitePos2.x, sitePos2.y);
+        }
+    }
 
-    pd->AddVoroSite(Vector2F(292.59906, 337.5617));
-    pd->AddVoroSite(Vector2F(210.2593, 309.7437));
-    pd->AddVoroSite(Vector2F(346.58127, 479.68475));
-    pd->AddVoroSite(Vector2F(823.7116, 189.96306));
-    pd->AddVoroSite(Vector2F(150.06136, 277.91763));
-    pd->AddVoroSite(Vector2F(524.4252, 103.00255));
-    pd->AddVoroSite(Vector2F(607.1892, 43.33178));
-    pd->AddVoroSite(Vector2F(532.539, 879.05725));
-    pd->AddVoroSite(Vector2F(182.51099, 295.60687));
-    pd->AddVoroSite(Vector2F(244.83142, 184.72595));
-    pd->AddVoroSite(Vector2F(337.2065, 353.0117));
+    pd->SetBoundaryPolygon2(boundaryPoly);
+    pd->ComputeDiagram();
+    //pd->SetRelaxIterNumber(100);
+    //pd->LloydRelaxation();
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    while (1)
+    {
+        Vector<KiriPoint2> points;
+        Vector<KiriLine2> lines;
+
+        auto sites = pd->GetVoroSites();
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            //sites[i]->Print();
+            auto pos = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
+            points.emplace_back(KiriPoint2(pos, Vector3F(1.f, 0.f, 0.f)));
+            auto poly = sites[i]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                poly->ComputeVoroSitesList();
+                auto list = poly->GetVoroSitesList();
+                // list->PrintVertexList();
+
+                auto node = list->GetHead();
+                do
+                {
+                    auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                    node = node->next;
+                    auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                    lines.emplace_back(KiriLine2(start, end));
+                } while (node != list->GetHead());
+            }
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
+void VoronoiExample2()
+{
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    // voronoi
+    auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
+    float width = 1000.f;
+    float height = 1000.f;
+
+    // boundary polygon
+    KiriSDFPoly2D boundary;
+
+    auto PI = 3.141592653f;
+    auto numPoints = 8;
+    auto radius = 500.f;
+    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+
+    for (auto j = 0; j < numPoints; j++)
+    {
+        auto angle = 2.0 * PI * (j * 1.f / numPoints);
+        auto rotate = 2.0 * PI / numPoints / 2;
+        auto y = std::sin(angle + rotate) * radius;
+        auto x = std::cos(angle + rotate) * radius;
+        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+
+        boundary.Append(pos);
+        boundaryPoly->AddPolygonVertex2(pos);
+    }
+    auto pd = std::make_shared<KiriPowerDiagram>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
+
+    auto cnt = 0, maxcnt = 10;
+    while (cnt < maxcnt)
+    {
+        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        if (boundary.FindRegion(sitePos2) < 0.f)
+        {
+            pd->AddVoroSite(sitePos2);
+            cnt++;
+        }
+    }
 
     pd->SetBoundaryPolygon2(boundaryPoly);
     pd->ComputeDiagram();
@@ -195,23 +289,38 @@ void LloydRelaxationExample()
     float height = 1000.f;
     auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
 
-    //!TODO  polygon intersection has bug
     KiriSDFPoly2D boundary;
-    auto bp1 = Vector2F(0, 0);
-    auto bp2 = Vector2F(width, 0);
-    auto bp3 = Vector2F(width, height);
-    auto bp3_1 = Vector2F(width / 2.f, height);
-    auto bp4 = Vector2F(0.f, height);
 
-    boundary.Append(bp1);
-    boundary.Append(bp2);
-    boundary.Append(bp3);
-    boundary.Append(bp4);
+    auto PI = 3.141592653f;
+    auto numPoints = 8;
+    auto radius = 500.f;
 
-    boundaryPoly->AddPolygonVertex2(bp1);
-    boundaryPoly->AddPolygonVertex2(bp2);
-    boundaryPoly->AddPolygonVertex2(bp3);
-    boundaryPoly->AddPolygonVertex2(bp4);
+    for (auto j = 0; j < numPoints; j++)
+    {
+        auto angle = 2.0 * PI * (j * 1.f / numPoints);
+        auto rotate = 2.0 * PI / numPoints / 2;
+        auto y = std::sin(angle + rotate) * radius;
+        auto x = std::cos(angle + rotate) * radius;
+        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+
+        boundary.Append(pos);
+        boundaryPoly->AddPolygonVertex2(pos);
+    }
+    // auto bp1 = Vector2F(0, 0);
+    // auto bp2 = Vector2F(width, 0);
+    // auto bp3 = Vector2F(width, height);
+    // auto bp3_1 = Vector2F(width / 2.f, height);
+    // auto bp4 = Vector2F(0.f, height);
+
+    // boundary.Append(bp1);
+    // boundary.Append(bp2);
+    // boundary.Append(bp3);
+    // boundary.Append(bp4);
+
+    // boundaryPoly->AddPolygonVertex2(bp1);
+    // boundaryPoly->AddPolygonVertex2(bp2);
+    // boundaryPoly->AddPolygonVertex2(bp3);
+    // boundaryPoly->AddPolygonVertex2(bp4);
 
     auto pd = std::make_shared<KiriPowerDiagram>();
 
@@ -562,8 +671,10 @@ void NOCAJ12Example1()
 int main()
 {
     KIRI::KiriLog::Init();
-    VoronoiExample();
-    //LloydRelaxationExample();
+    // VoronoiExample();
+    //VoronoiExample2();
+
+    LloydRelaxationExample();
     //NOCAJ12Example();
 
     //GenRndTreemap();
