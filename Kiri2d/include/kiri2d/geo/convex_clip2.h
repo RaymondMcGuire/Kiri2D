@@ -52,7 +52,7 @@ namespace KIRI
 
         const KiriVector2ListPtr &GetIntersectionList() const { return mIntersectionList; }
 
-        void ComputeConvexPolygonIntersection(const KiriVector2ListPtr &a, const KiriVector2ListPtr &b);
+        bool ComputeConvexPolygonIntersection(const KiriVector2ListPtr &a, const KiriVector2ListPtr &b);
 
     private:
         KiriVector2ListPtr mIntersectionList;

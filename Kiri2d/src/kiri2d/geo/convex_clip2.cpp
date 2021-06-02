@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-06-02 01:48:18
+ * @LastEditTime: 2021-06-02 23:41:21
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_clip2.cpp
@@ -219,7 +219,7 @@ namespace KIRI
         } while (((advP < p->Size()) || (advQ < q->Size())) && (advP < 2 * p->Size()) && (advQ < 2 * q->Size()));
     }
 
-    void KiriConvexClip2::ComputeConvexPolygonIntersection(const KiriVector2ListPtr &a, const KiriVector2ListPtr &b)
+    bool KiriConvexClip2::ComputeConvexPolygonIntersection(const KiriVector2ListPtr &a, const KiriVector2ListPtr &b)
     {
         auto p = std::make_shared<KiriVector2List>();
         auto q = std::make_shared<KiriVector2List>();
@@ -236,7 +236,7 @@ namespace KIRI
             if (!IsConvex(p))
             {
                 KIRI_LOG_ERROR("ComputeConvexPolygonIntersection: Polygons are not Convex");
-                return;
+                return false;
             }
         }
         if (!IsConvex(q))
@@ -245,11 +245,13 @@ namespace KIRI
             if (!IsConvex(q))
             {
                 KIRI_LOG_ERROR("ComputeConvexPolygonIntersection: Polygons are not Convex");
-                return;
+                return false;
             }
         }
 
         mIntersectionList->RemoveAll();
         ConvexIntersection(p, q);
+
+        return true;
     }
 }

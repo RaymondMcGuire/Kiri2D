@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-06-02 02:12:53
+ * @LastEditTime: 2021-06-02 23:55:38
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -32,6 +32,7 @@ namespace KIRI
         site3->SetAsBoundarySite();
         site4->SetAsBoundarySite();
 
+        mBoundaryVoroSites.clear();
         mBoundaryVoroSites.emplace_back(site1);
         mBoundaryVoroSites.emplace_back(site2);
         mBoundaryVoroSites.emplace_back(site3);
@@ -98,6 +99,30 @@ namespace KIRI
         mFacetsAroundVertex.clear();
     }
 
+    void KiriPowerDiagram::ReGenVoroSites()
+    {
+        KIRI_LOG_ERROR("ReGenVoroSites::Start, size={0}", mVoroSites.size());
+        if (mBoundaryPolygon2 == NULL)
+        {
+            KIRI_LOG_ERROR("ReGenVoroSites::Please set boundary polygon!!");
+            return;
+        }
+
+        if (!mVoroSites.empty())
+        {
+            for (size_t i = 0; i < mVoroSites.size(); i++)
+            {
+                auto pos = mVoroSites[i]->GetValue();
+                if (!mBoundaryPolygon2->Contains(Vector2F(pos.x, pos.y)))
+                    mVoroSites[i]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
+            }
+        }
+        else
+            KIRI_LOG_ERROR("ReGenVoroSites::No voro site!!");
+
+        ComputeDiagram();
+    }
+
     bool KiriPowerDiagram::Move2Centroid()
     {
         bool outside = false;
@@ -113,7 +138,7 @@ namespace KIRI
                 else
                 {
                     outside = true;
-                    KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!!");
+                    KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
                     mVoroSites[j]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
                 }
             }
@@ -199,7 +224,10 @@ namespace KIRI
         //     KIRI_LOG_DEBUG("({0},{1})", rmpo[i].x, rmpo[i].y);
         // }
 
-        mConvexClip->ComputeConvexPolygonIntersection(vcp1->GetVoroSitesList(), vcp2->GetVoroSitesList());
+        bool clipStatus = mConvexClip->ComputeConvexPolygonIntersection(vcp1->GetVoroSitesList(), vcp2->GetVoroSitesList());
+
+        if (!clipStatus)
+            return NULL;
 
         auto intersection = mConvexClip->GetIntersectionList();
 
@@ -319,7 +347,10 @@ namespace KIRI
 
                             //newPoly->Print();
 
-                            site->SetCellPolygon(newPoly);
+                            if (newPoly != NULL)
+                                site->SetCellPolygon(newPoly);
+                            // else
+                            //     ReGenVoroSites();
                         }
                     }
                 }

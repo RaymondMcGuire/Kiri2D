@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-29 22:38:45
+ * @LastEditTime: 2021-06-02 23:46:01
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
@@ -50,6 +50,8 @@ namespace KIRI
         void PrintVoroSites();
 
         void Reset();
+
+        void ReGenVoroSites();
 
     private:
         UInt mRelaxIterNumber = 10;

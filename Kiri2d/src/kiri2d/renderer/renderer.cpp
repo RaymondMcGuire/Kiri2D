@@ -1,16 +1,28 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-03-29 03:33:31
+ * @LastEditTime: 2021-06-03 00:13:52
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\renderer\renderer.cpp
  */
 
 #include <kiri2d/renderer/renderer.h>
-
+#include <root_directory.h>
 namespace KIRI2D
 {
+    String UInt2Str4Digit(UInt Input)
+    {
+        char output[5];
+        snprintf(output, 5, "%04d", Input);
+        return String(output);
+    };
+
+    void KiriRenderer2D::SaveImages2File()
+    {
+        cv::imwrite(String(EXPORT_PATH) + "images/" + UInt2Str4Digit(counter++) + ".png", mCanvas);
+    }
+
     void KiriRenderer2D::ClearCanvas()
     {
         for (int j = 0; j < mWindowHeight; j++)

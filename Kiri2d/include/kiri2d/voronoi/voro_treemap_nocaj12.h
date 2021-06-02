@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-05-30 00:42:32
+ * @LastEditTime: 2021-06-02 21:13:29
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_nocaj12.h
@@ -12,60 +12,68 @@
 
 #pragma once
 
-#include <kiri2d/voronoi/power_diagram.h>
+#include <kiri2d/voronoi/voro_treemap_node.h>
 
 namespace KIRI
 {
 
-    class KiriVoroTreemapNocaj12
+    class KiriVoroTreeMapNocaj12
     {
     public:
-        explicit KiriVoroTreemapNocaj12::KiriVoroTreemapNocaj12()
+        explicit KiriVoroTreeMapNocaj12()
         {
-            Reset();
-            mPowerDiagram = std::make_shared<KiriPowerDiagram>();
+            mRootCore = std::make_shared<KiriVoroTreeMapCore>();
+            mRootBoundary = std::make_shared<KiriVoroCellPolygon2>();
         }
 
-        ~KiriVoroTreemapNocaj12() noexcept {}
+        ~KiriVoroTreeMapNocaj12() noexcept {}
 
-        void Compute();
+        void SetRootBoundary2(const Vector<Vector2F> &boundary);
+
+        void GenExample(float width, float height);
+
         void ComputeIterate();
 
-        void AddSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
-        void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
-        void SetMaxIterationNum(UInt num) { mMaxIterationNum = num; }
-        void SetErrorThreshold(float error) { mErrorThreshold = error; }
+        const KiriVoroTreeMapCorePtr &GetRootCore() const { return mRootCore; }
+        const KiriVoroCellPolygon2Ptr &GetRootBoundary() const { return mRootBoundary; }
 
-        const Vector<KiriVoroSitePtr> &GetSites() const { return mPowerDiagram->GetVoroSites(); }
+        void MergeLeafNodeVoroSites(Vector<KiriVoroSitePtr> &sites, const Vector<KiriVoroTreeMapNodePtr> &child)
+        {
+            if (!child.empty())
+            {
+                for (size_t i = 0; i < child.size(); i++)
+                {
+                    auto csites = child[i]->GetChildSites();
+                    for (size_t j = 0; j < csites.size(); j++)
+                    {
+                        if (child[i]->GetChildNodes()[j]->IsNoChildNode())
+                            sites.emplace_back(csites[j]);
+                    }
+                    MergeLeafNodeVoroSites(sites, child[i]->GetChildNodes());
+                }
+            }
+        }
 
-        constexpr UInt GetMaxIterationNum() const { return mMaxIterationNum; }
-        constexpr float GetErrorThreshold() const { return mErrorThreshold; }
+        Vector<KiriVoroSitePtr> GetLeafNodeSites()
+        {
+            Vector<KiriVoroSitePtr> sites;
+            for (size_t i = 0; i < mRootCore->GetSites().size(); i++)
+                if (mNodes[i]->IsNoChildNode())
+                    sites.emplace_back(mRootCore->GetSites()[i]);
 
-        void Init();
-
-        void Reset();
+            MergeLeafNodeVoroSites(sites, mNodes);
+            return sites;
+        }
 
     private:
-        void ComputeBoundaryPolygonArea();
-        void ReComputePercentage();
+        UInt mMaxDepth = 0;
+        KiriVoroCellPolygon2Ptr mRootBoundary;
+        KiriVoroTreeMapCorePtr mRootCore;
+        Vector<KiriVoroTreeMapNodePtr> mNodes;
 
-        float GetGlobalAvgDistance();
-        float GetGlobalAreaError();
-        float GetMaxAreaError();
-
-        void Iterate();
-
-        void CorrectWeights();
-        void AdaptPositionsWeights();
-        void AdaptWeights();
-
-        KiriPowerDiagramPtr mPowerDiagram;
-
-        float mCompleteArea;
-        float mCurGlobalAreaError, mCurMaxAreaError, mErrorThreshold;
-        UInt mCurIteration, mMaxIterationNum;
+        void ComputeIterate(const Vector<KiriVoroTreeMapNodePtr> &child);
     };
 
-    typedef SharedPtr<KiriVoroTreemapNocaj12> KiriVoroTreemapNocaj12Ptr;
+    typedef SharedPtr<KiriVoroTreeMapNocaj12> KiriVoroTreeMapNocaj12Ptr;
 }
 #endif

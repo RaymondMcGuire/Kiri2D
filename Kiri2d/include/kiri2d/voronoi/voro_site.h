@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-30 03:04:09
+ * @LastEditTime: 2021-06-02 21:25:22
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
@@ -21,20 +21,23 @@ namespace KIRI
     class KiriVoroSite : public KiriVertex3
     {
     public:
-        explicit KiriVoroSite::KiriVoroSite()
+        explicit KiriVoroSite()
             : KiriVoroSite(0.f, 0.f, 0.f) {}
 
-        explicit KiriVoroSite::KiriVoroSite(float x, float y)
+        explicit KiriVoroSite(float x, float y)
             : KiriVoroSite(x, y, MEpsilon<float>()) {}
 
-        explicit KiriVoroSite::KiriVoroSite(float x, float y, float weight)
+        explicit KiriVoroSite(Vector2F pos, float percent)
+            : KiriVoroSite(pos.x, pos.y, MEpsilon<float>(), percent) {}
+
+        explicit KiriVoroSite(float x, float y, float weight)
             : KiriVertex3(Vector3F(x, y, ProjectZ(x, y, weight)))
         {
             mWeight = weight;
             mPercentage = MEpsilon<float>();
         }
 
-        explicit KiriVoroSite::KiriVoroSite(float x, float y, float weight, float percent)
+        explicit KiriVoroSite(float x, float y, float weight, float percent)
             : KiriVertex3(Vector3F(x, y, ProjectZ(x, y, weight)))
         {
             mWeight = weight;
@@ -77,7 +80,7 @@ namespace KIRI
             SetValue(Vector3F(val.x, val.y, ProjectZ(val.x, val.y, val.z)));
             //mNeighborSites.clear();
             // mLastNeighborSites.clear();
-            mVoroCellPolygon2->Reset();
+            // mVoroCellPolygon2->Reset();
         }
 
         void SetCellPolygon(const KiriVoroCellPolygon2Ptr &polygon)

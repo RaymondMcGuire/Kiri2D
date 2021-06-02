@@ -35,9 +35,9 @@ namespace KIRI
         constexpr UInt GetId() const { return mId; }
         void SetId(UInt id) { mId = id; }
 
-        void SetNextEdge(const SharedPtr<KiriEdge3> &nxt) { mNext = nxt; }
-        void SetPrevEdge(const SharedPtr<KiriEdge3> &pre) { mPrev = pre; }
-        void SetTwinEdge(const SharedPtr<KiriEdge3> &twn) { mTwin = twn; }
+        void SetNextEdge( SharedPtr<KiriEdge3> nxt) { mNext = nxt; }
+        void SetPrevEdge( SharedPtr<KiriEdge3> pre) { mPrev = pre; }
+        void SetTwinEdge( SharedPtr<KiriEdge3> twn) { mTwin = twn; }
 
         const SharedPtr<KiriEdge3> &GetNextEdge() const { return mNext; }
         const SharedPtr<KiriEdge3> &GetPrevEdge() const { return mPrev; }

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:26:52
- * @LastEditTime: 2021-02-23 01:08:14
+ * @LastEditTime: 2021-06-03 00:13:42
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\renderer\renderer.h
@@ -16,6 +16,9 @@
 
 namespace KIRI2D
 {
+
+ 
+
     class KiriRenderer2D
     {
     public:
@@ -36,13 +39,14 @@ namespace KIRI2D
 
         void ClearCanvas();
         void DrawCanvas();
+        void SaveImages2File();
         inline auto GetCanvas() { return mCanvas; }
 
         ~KiriRenderer2D() noexcept {}
 
     private:
         cv::Mat mCanvas;
-
+        UInt counter = 0;
         KiriScene2DPtr mScene;
         Int mWindowWidth, mWindowHeight;
     };

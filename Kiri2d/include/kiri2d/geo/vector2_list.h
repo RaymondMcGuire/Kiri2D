@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-25 09:54:20
+ * @LastEditTime: 2021-06-02 23:09:09
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\geo\vector2_list.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\vector2_list.h
  */
 
 #ifndef _KIRI_VECTOR2_LIST_H_
@@ -97,11 +97,12 @@ namespace KIRI
         //??
         bool CheckVertex2Identity(const Vector2F &v1)
         {
+            auto epsilon = 0.1f;
             auto v2 = mHead->prev->value;
             auto v3 = mHead->value;
-            if (std::abs(v1.x - v2.x) < MEpsilon<float>() && std::abs(v1.y - v2.y) < MEpsilon<float>())
+            if (std::abs(v1.x - v2.x) < epsilon && std::abs(v1.y - v2.y) < epsilon)
                 return true;
-            if (std::abs(v1.x - v3.x) < MEpsilon<float>() && std::abs(v1.y - v3.y) < MEpsilon<float>())
+            if (std::abs(v1.x - v3.x) < epsilon && std::abs(v1.y - v3.y) < epsilon)
                 return true;
             return false;
         }
