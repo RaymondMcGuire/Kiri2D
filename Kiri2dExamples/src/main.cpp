@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-03 00:14:48
+ * @LastEditTime: 2021-06-03 17:28:06
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -105,16 +105,19 @@ void VoronoiExample()
     // boundary polygon
     KiriSDFPoly2D boundary;
     auto bp1 = Vector2F(0, 0);
-    auto bp2 = Vector2F(width / 2, height);
-    auto bp3 = Vector2F(width, 0);
+    auto bp2 = Vector2F(width, 0);
+    auto bp3 = Vector2F(width, height);
+    auto bp4 = Vector2F(0, height);
 
     boundary.Append(bp1);
     boundary.Append(bp2);
     boundary.Append(bp3);
+    boundary.Append(bp4);
 
     boundaryPoly->AddPolygonVertex2(bp1);
     boundaryPoly->AddPolygonVertex2(bp2);
     boundaryPoly->AddPolygonVertex2(bp3);
+    boundaryPoly->AddPolygonVertex2(bp4);
 
     auto pd = std::make_shared<KiriPowerDiagram>();
 
@@ -122,22 +125,22 @@ void VoronoiExample()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-    auto cnt = 0, maxcnt = 10;
+    auto cnt = 0, maxcnt = 100;
     while (cnt < maxcnt)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
             pd->AddVoroSite(sitePos2);
+            //pd->AddPowerSite(sitePos2, dist(rndEngine) * 1000.f);
             cnt++;
-            KIRI_LOG_DEBUG("pd->AddVoroSite(Vector2F({0},{1}));", sitePos2.x, sitePos2.y);
         }
     }
 
     pd->SetBoundaryPolygon2(boundaryPoly);
     pd->ComputeDiagram();
-    //pd->SetRelaxIterNumber(100);
-    //pd->LloydRelaxation();
+    pd->SetRelaxIterNumber(100);
+    pd->LloydRelaxation();
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
@@ -175,6 +178,7 @@ void VoronoiExample()
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
+        renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
@@ -612,13 +616,14 @@ void NOCAJ12Example1()
 int main()
 {
     KIRI::KiriLog::Init();
-    // VoronoiExample();
+    //VoronoiExample();
     //VoronoiExample2();
 
     //LloydRelaxationExample();
-    NOCAJ12Example();
 
     //GenRndTreemap();
+
+    NOCAJ12Example();
     //NOCAJ12Example1();
 
     // // scene renderer config
