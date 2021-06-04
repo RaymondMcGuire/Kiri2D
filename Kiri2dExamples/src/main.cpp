@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-03 17:28:06
+ * @LastEditTime: 2021-06-04 13:51:49
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -139,8 +139,8 @@ void VoronoiExample()
 
     pd->SetBoundaryPolygon2(boundaryPoly);
     pd->ComputeDiagram();
-    pd->SetRelaxIterNumber(100);
-    pd->LloydRelaxation();
+    // pd->SetRelaxIterNumber(100);
+    // pd->LloydRelaxation();
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);

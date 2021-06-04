@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-03 17:38:28
+ * @LastEditTime: 2021-06-04 13:51:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_treemap_nocaj12.cpp
@@ -45,9 +45,9 @@ namespace KIRI
         for (size_t i = 0; i < mNodes.size(); i++)
         {
             //if (i != mNodes.size() / 2)
-            mNodes[i]->AddChildNodes();
+            //mNodes[i]->AddChildNodes();
 
-            mNodes[i]->InitCore();
+            //mNodes[i]->InitCore();
         }
     }
 
@@ -68,7 +68,7 @@ namespace KIRI
     {
         mRootCore->ComputeIterate();
 
-        ComputeIterate(mNodes);
+        //ComputeIterate(mNodes);
     }
 
 }

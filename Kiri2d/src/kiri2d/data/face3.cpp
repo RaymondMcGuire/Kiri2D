@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-05-25 21:21:38
+ * @LastEditTime: 2021-06-04 14:25:54
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\src\kiri2d\data\face3.cpp
+ * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\data\face3.cpp
  */
 
 #include <kiri2d/data/face3.h>

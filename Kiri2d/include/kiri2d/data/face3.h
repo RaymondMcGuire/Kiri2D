@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-05-25 14:32:57
+ * @LastEditTime: 2021-06-04 14:25:35
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\data\face3.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\face3.h
  */
 
 #ifndef _KIRI_FACE3_H_
@@ -19,9 +19,9 @@ namespace KIRI
     class KiriFace3
     {
     public:
-        explicit KiriFace3::KiriFace3() : KiriFace3(std::make_shared<KiriVertex3>(), std::make_shared<KiriVertex3>(), std::make_shared<KiriVertex3>()) {}
+        explicit KiriFace3() : KiriFace3(std::make_shared<KiriVertex3>(), std::make_shared<KiriVertex3>(), std::make_shared<KiriVertex3>()) {}
 
-        explicit KiriFace3::KiriFace3(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b, const KiriVertex3Ptr &c)
+        explicit KiriFace3(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b, const KiriVertex3Ptr &c)
         {
             mIdx = -1;
             mVisible = false;
@@ -33,7 +33,7 @@ namespace KIRI
             mNormal = (-((b->GetValue() - a->GetValue()).cross(c->GetValue() - b->GetValue()))).normalized();
         }
 
-        explicit KiriFace3::KiriFace3(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b, const KiriVertex3Ptr &c, const KiriVertex3Ptr &orient)
+        explicit KiriFace3(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b, const KiriVertex3Ptr &c, const KiriVertex3Ptr &orient)
             : KiriFace3(a, b, c)
         {
             OrientFace(orient);

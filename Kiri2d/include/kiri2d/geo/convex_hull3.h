@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-05-26 17:25:31
+ * @LastEditTime: 2021-06-04 14:05:48
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\convex_hull3.h
@@ -59,8 +59,8 @@ namespace KIRI
         Vector<KiriFace3Ptr> mVisFacets;
         Vector<KiriFace3Ptr> mCreatedFacets;
 
-        Vector<KiriFaceConflictLists> mFConflict;
-        Vector<KiriVertexConflictLists> mVConflict;
+        Vector<KiriFaceConflictListsPtr> mFConflict;
+        Vector<KiriVertexConflictListsPtr> mVConflict;
 
         void BuildTetrahedron();
         void BuildConflictGraph(KiriFace3Ptr &f, KiriVertex3Ptr &v);

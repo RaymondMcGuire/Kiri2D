@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-06-02 01:23:12
+ * @LastEditTime: 2021-06-04 15:21:55
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_hull3.cpp
@@ -37,10 +37,10 @@ namespace KIRI
         KIRI_LOG_DEBUG("----------CONFLICT GRAPH INFO----------");
 
         for (size_t i = 0; i < mFConflict.size(); i++)
-            mFConflict[i].PrintFaceConflictList();
+            mFConflict[i]->PrintFaceConflictList();
 
         for (size_t i = 0; i < mVConflict.size(); i++)
-            mVConflict[i].PrintVertexConflictList();
+            mVConflict[i]->PrintVertexConflictList();
 
         KIRI_LOG_DEBUG("---------------------------------------");
     }
@@ -67,6 +67,13 @@ namespace KIRI
         mCurFacets.clear();
         mVisFacets.clear();
         mCreatedFacets.clear();
+
+        for (size_t i = 0; i < mFConflict.size(); i++)
+            mFConflict[i]->RemoveAll();
+
+        for (size_t i = 0; i < mVConflict.size(); i++)
+            mVConflict[i]->RemoveAll();
+
         mFConflict.clear();
         mVConflict.clear();
     }
@@ -99,18 +106,11 @@ namespace KIRI
 
         while (mProcessedCount < mVertices.size())
         {
-
-            // for (size_t i = 0; i < mCurFacets.size(); i++)
-            // {
-            //     mCurFacets[i]->PrintFaceInfo();
-            // }
-
             auto p_r = mVertices[mProcessedCount];
 
             // vertex in convex hull
-            if (mVConflict[p_r->GetIdx()].Size() == 0)
+            if (mVConflict[p_r->GetIdx()]->Size() == 0)
             {
-                //KIRI_LOG_DEBUG("Current idx={0}, no conlict!", mProcessedCount);
                 ++mProcessedCount;
                 continue;
             }
@@ -120,13 +120,9 @@ namespace KIRI
             mHorizonEdges.clear();
 
             // outside
-            mVConflict[p_r->GetIdx()].BuildVisibleList(mVisFacets);
-            //KIRI_LOG_DEBUG("mVConflict p_r idx={0}, num of conflict ={1}!", mProcessedCount, mVConflict[mProcessedCount].Size());
-            // KIRI_LOG_DEBUG("mVConflict p_r idx={0}, num of conflict ={1}!", 5, mVConflict[5].Size());
+            mVConflict[p_r->GetIdx()]->BuildVisibleList(mVisFacets);
 
             // find horizon edges
-            //KIRI_LOG_DEBUG("mCurFacets size={0}!", mCurFacets.size());
-            //KIRI_LOG_DEBUG("--------------------------------------FIND HORIZON EDGES");
             bool find_horizon_edges = false;
             for (size_t i = 0; i < mVisFacets.size(); i++)
             {
@@ -151,12 +147,10 @@ namespace KIRI
                 }
             }
 
-            //KIRI_LOG_DEBUG("mHorizonEdges size={0}!", mHorizonEdges.size());
             // create new facets
-            KiriFace3Ptr first, last;
+            KiriFace3Ptr first = NULL, last = NULL;
             for (size_t i = 0; i < mHorizonEdges.size(); i++)
             {
-                //mHorizonEdges[i]->PrintEdgeInfo();
                 auto newf = std::make_shared<KiriFace3>(p_r, mHorizonEdges[i]->GetOriginVertex(), mHorizonEdges[i]->GetDestVertex(), mHorizonEdges[i]->GetTwinEdge()->GetNextEdge()->GetDestVertex());
                 AddFacet(newf);
                 mCreatedFacets.emplace_back(newf);
@@ -178,33 +172,24 @@ namespace KIRI
 
             // link the first and last facet
             if (first != NULL && last != NULL)
-            {
-                //KIRI_LOG_DEBUG("Link first 2 last");
                 last->LinkFace(first, p_r, mHorizonEdges[0]->GetOriginVertex());
-            }
 
-            //KIRI_LOG_DEBUG("mCreatedFacets size={0}!", mCreatedFacets.size());
             // remove conflict facet
             if (mCreatedFacets.size() != 0)
             {
                 for (size_t i = 0; i < mVisFacets.size(); i++)
                     RemoveConflictGraphByFace(mVisFacets[i]);
                 mCreatedFacets.clear();
-
-                // for (size_t tmp = mProcessedCount; tmp < mVertices.size(); tmp++)
-                // {
-                //     KIRI_LOG_DEBUG("After Remove mVConflict p_r idx={0}, num of conflict ={1}!", tmp, mVConflict[tmp].Size());
-                // }
             }
             ++mProcessedCount;
-            mVConflict[p_r->GetIdx()].ResetVisible();
+            mVConflict[p_r->GetIdx()]->ResetVisible();
         }
     }
     void KiriConvexHull3::AddVertex(const KiriVertex3Ptr &v3)
     {
         v3->SetIdx(mVertices.size());
         mVertices.emplace_back(v3);
-        mVConflict.emplace_back(KiriVertexConflictLists());
+        mVConflict.emplace_back(std::make_shared<KiriVertexConflictLists>());
     }
 
     void KiriConvexHull3::AddVertex(const Vector3F &v3)
@@ -212,7 +197,7 @@ namespace KIRI
         auto vert = std::make_shared<KiriVertex3>(v3);
         vert->SetIdx(mVertices.size());
         mVertices.emplace_back(vert);
-        mVConflict.emplace_back(KiriVertexConflictLists());
+        mVConflict.emplace_back(std::make_shared<KiriVertexConflictLists>());
     }
 
     void KiriConvexHull3::AddFacet(const KiriFace3Ptr &f3)
@@ -221,13 +206,13 @@ namespace KIRI
         f3->GenerateEdges();
 
         mCurFacets.emplace_back(f3);
-        mFConflict.emplace_back(KiriFaceConflictLists());
+        mFConflict.emplace_back(std::make_shared<KiriFaceConflictLists>());
     }
 
     void KiriConvexHull3::BuildConflictGraph(KiriFace3Ptr &f, KiriVertex3Ptr &v)
     {
-        mFConflict[f->GetIdx()].Push(v);
-        mVConflict[v->GetIdx()].Push(f);
+        mFConflict[f->GetIdx()]->Push(v);
+        mVConflict[v->GetIdx()]->Push(f);
     }
 
     void KiriConvexHull3::RemoveConflictGraphByFace(KiriFace3Ptr &f)
@@ -235,8 +220,8 @@ namespace KIRI
         auto idx = f->GetIdx();
 
         for (size_t i = 0; i < mVConflict.size(); i++)
-            mVConflict[i].Remove([=](KiriFace3Ptr x)
-                                 { return x->GetIdx() == idx; });
+            mVConflict[i]->Remove([=](KiriFace3Ptr x)
+                                  { return x->GetIdx() == idx; });
 
         //KIRI_LOG_DEBUG("RemoveConflictGraphByFace face idx={0}!", f->GetIdx());
 
@@ -245,7 +230,7 @@ namespace KIRI
         for (size_t i = 0; i < 3; i++)
             f->GetEdgesByIdx(i)->CleanEdge();
 
-        mFConflict[idx].RemoveAll();
+        mFConflict[idx]->RemoveAll();
         if (idx == mCurFacets.size() - 1)
         {
             mCurFacets.pop_back();

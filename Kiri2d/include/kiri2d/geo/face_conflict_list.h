@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-24 10:42:50
+ * @LastEditTime: 2021-06-04 15:05:22
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\geo\face_conflict_list.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\face_conflict_list.h
  */
 
 #ifndef _KIRI_FACE_CONFLICT_LISTS_H_
@@ -24,7 +24,7 @@ namespace KIRI
         KiriFaceConflictLists() : KiriDoublyLinkedList<KiriVertex3Ptr>(){};
         ~KiriFaceConflictLists(){};
 
-        void BuildVertexList(Vector<KiriVertex3Ptr> &vertexList)
+        void BuildVertexList(Vector<KiriVertex3Ptr> vertexList)
         {
             for (auto x = mFirst; x; x = x->next)
                 vertexList.emplace_back(x->value);
