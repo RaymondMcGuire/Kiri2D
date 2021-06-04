@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2020-10-19 01:37:05
- * @LastEditTime: 2021-05-26 11:24:42
+ * @LastEditTime: 2021-06-04 16:14:46
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
@@ -110,6 +110,8 @@ template <class Type>
 using Vec_Vec = Vector<Vector<Type>>;
 template <class Type>
 using SharedPtr = std::shared_ptr<Type>;
+template <class Type>
+using WeakPtr = std::weak_ptr<Type>;
 template <class Type>
 using UniquePtr = std::unique_ptr<Type>;
 

@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-05-20 23:29:33
+ * @LastEditTime: 2021-06-04 16:44:51
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\data\edge3.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\edge3.h
  */
 
 #ifndef _KIRI_EDGE3_H_
@@ -19,7 +19,7 @@ namespace KIRI
     class KiriEdge3
     {
     public:
-        explicit KiriEdge3::KiriEdge3(UInt id, const KiriVertex3Ptr &ori, const KiriVertex3Ptr &dst)
+        explicit KiriEdge3(UInt id, const KiriVertex3Ptr &ori, const KiriVertex3Ptr &dst)
         {
             mNext = NULL;
             mPrev = NULL;
@@ -35,9 +35,9 @@ namespace KIRI
         constexpr UInt GetId() const { return mId; }
         void SetId(UInt id) { mId = id; }
 
-        void SetNextEdge( SharedPtr<KiriEdge3> nxt) { mNext = nxt; }
-        void SetPrevEdge( SharedPtr<KiriEdge3> pre) { mPrev = pre; }
-        void SetTwinEdge( SharedPtr<KiriEdge3> twn) { mTwin = twn; }
+        void SetNextEdge(SharedPtr<KiriEdge3> nxt) { mNext = nxt; }
+        void SetPrevEdge(SharedPtr<KiriEdge3> pre) { mPrev = pre; }
+        void SetTwinEdge(SharedPtr<KiriEdge3> twn) { mTwin = twn; }
 
         const SharedPtr<KiriEdge3> &GetNextEdge() const { return mNext; }
         const SharedPtr<KiriEdge3> &GetPrevEdge() const { return mPrev; }

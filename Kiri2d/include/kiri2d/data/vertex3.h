@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-05-25 11:34:24
+ * @LastEditTime: 2021-06-04 16:37:36
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\data\vertex3.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\vertex3.h
  */
 
 #ifndef _KIRI_VERTEX3_H_
@@ -19,11 +19,11 @@ namespace KIRI
     class KiriVertex3
     {
     public:
-        explicit KiriVertex3::KiriVertex3() : KiriVertex3(Vector3F(0.f)) {}
+        explicit KiriVertex3() : KiriVertex3(Vector3F(0.f)) {}
 
-        explicit KiriVertex3::KiriVertex3(Vector3F v) : KiriVertex3(-1, v) {}
+        explicit KiriVertex3(Vector3F v) : KiriVertex3(-1, v) {}
 
-        explicit KiriVertex3::KiriVertex3(UInt idx, Vector3F v)
+        explicit KiriVertex3(UInt idx, Vector3F v)
         {
             mIdx = idx;
             mValue = v;
