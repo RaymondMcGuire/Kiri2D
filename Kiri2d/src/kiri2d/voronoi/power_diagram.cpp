@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-06-04 15:38:30
+ * @LastEditTime: 2021-06-07 18:31:40
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -67,9 +67,15 @@ namespace KIRI
         KiriVoroSitePtr site = std::dynamic_pointer_cast<KiriVoroSite>(edge->GetDestVertex());
 
         Vector<KiriVoroSitePtr> neighborSitesList;
+        auto edges = mConvexHull->GetEdges();
         do
         {
-            prevEdge = prevEdge->GetTwinEdge()->GetPrevEdge();
+            //prevEdge = prevEdge->GetTwinEdge()->GetPrevEdge();
+            if (prevEdge->GetTwinEdgeId() == -1)
+                break;
+
+            prevEdge = edges[edges[prevEdge->GetTwinEdgeId()]->GetPrevEdgeId()];
+
             KiriVoroSitePtr neighborSite = std::dynamic_pointer_cast<KiriVoroSite>(prevEdge->GetOriginVertex());
             // add neighbor sites
             if (!neighborSite->IsBoundarySite())
@@ -276,7 +282,7 @@ namespace KIRI
 
     void KiriPowerDiagram::ComputeVoroCells()
     {
-
+        auto edges = mConvexHull->GetEdges();
         for (size_t i = 0; i < mConvexHull->GetNumOfFacets(); i++)
         {
             auto facet = mConvexHull->GetFacets()[i];
@@ -284,7 +290,8 @@ namespace KIRI
             {
                 for (size_t e = 0; e < 3; e++)
                 {
-                    auto edge = facet->GetEdgesByIdx(e);
+                    //auto edge = facet->GetEdgesByIdx(e);
+                    auto edge = edges[facet->GetEdgeIdByIdx(e)];
 
                     auto dst = edge->GetDestVertex();
                     auto site = std::dynamic_pointer_cast<KiriVoroSite>(dst);

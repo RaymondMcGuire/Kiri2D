@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-06-04 14:25:54
+ * @LastEditTime: 2021-06-07 14:33:52
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\data\face3.cpp
@@ -43,72 +43,76 @@ namespace KIRI
 
     void KiriFace3::GenerateEdges()
     {
-        mEdges[0] = std::make_shared<KiriEdge3>(mIdx * 3, mVertices[0], mVertices[1]);
-        mEdges[1] = std::make_shared<KiriEdge3>(mIdx * 3 + 1, mVertices[1], mVertices[2]);
-        mEdges[2] = std::make_shared<KiriEdge3>(mIdx * 3 + 2, mVertices[2], mVertices[0]);
+        // mEdges[0] = std::make_shared<KiriEdge3>(mIdx * 3, mVertices[0], mVertices[1]);
+        // mEdges[1] = std::make_shared<KiriEdge3>(mIdx * 3 + 1, mVertices[1], mVertices[2]);
+        // mEdges[2] = std::make_shared<KiriEdge3>(mIdx * 3 + 2, mVertices[2], mVertices[0]);
 
-        mEdges[0]->SetNextEdge(mEdges[1]);
-        mEdges[1]->SetNextEdge(mEdges[2]);
-        mEdges[2]->SetNextEdge(mEdges[0]);
+        // mEdges[0]->SetNextEdge(mEdges[1]);
+        // mEdges[1]->SetNextEdge(mEdges[2]);
+        // mEdges[2]->SetNextEdge(mEdges[0]);
 
-        mEdges[0]->SetPrevEdge(mEdges[2]);
-        mEdges[1]->SetPrevEdge(mEdges[0]);
-        mEdges[2]->SetPrevEdge(mEdges[1]);
+        // mEdges[0]->SetPrevEdge(mEdges[2]);
+        // mEdges[1]->SetPrevEdge(mEdges[0]);
+        // mEdges[2]->SetPrevEdge(mEdges[1]);
+
+        mEdges[0] = mIdx * 3;
+        mEdges[1] = mIdx * 3 + 1;
+        mEdges[2] = mIdx * 3 + 2;
     }
 
-    const KiriEdge3Ptr &KiriFace3::GetEdge(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b)
-    {
-        for (size_t i = 0; i < 3; i++)
-        {
-            if (mEdges[i]->IsEqual(a, b))
-                return mEdges[i];
-        }
-        return NULL;
-    }
+    // const KiriEdge3Ptr &KiriFace3::GetEdge(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b)
+    // {
+    //     for (size_t i = 0; i < 3; i++)
+    //     {
+    //         if (mEdges[i]->IsEqual(a, b))
+    //             return mEdges[i];
+    //     }
+    //     return NULL;
+    // }
 
-    void KiriFace3::LinkEdge(const KiriEdge3Ptr &e)
-    {
-        auto cur_edge = this->GetEdge(e->GetOriginVertex(), e->GetDestVertex());
-        if (cur_edge == NULL)
-        {
-            KIRI_LOG_ERROR("LinkEdge ERROR: Current edge is not exist, cannot connect edges!");
-            return;
-        }
+    // void KiriFace3::LinkEdge(const KiriEdge3Ptr &e)
+    // {
+    //     auto cur_edge = this->GetEdge(e->GetOriginVertex(), e->GetDestVertex());
+    //     if (cur_edge == NULL)
+    //     {
+    //         KIRI_LOG_ERROR("LinkEdge ERROR: Current edge is not exist, cannot connect edges!");
+    //         return;
+    //     }
 
-        if (cur_edge->GetId() == e->GetId())
-            KIRI_LOG_ERROR("LinkEdge ERROR:edge idx={0}, face idx={1}", cur_edge->GetId(), mIdx);
+    //     if (cur_edge->GetId() == e->GetId())
+    //         KIRI_LOG_ERROR("LinkEdge ERROR:edge idx={0}, face idx={1}", cur_edge->GetId(), mIdx);
 
-        e->SetTwinEdge(cur_edge);
-        cur_edge->SetTwinEdge(e);
-    }
+    //     e->SetTwinEdge(cur_edge);
+    //     cur_edge->SetTwinEdge(e);
+    // }
 
-    void KiriFace3::LinkFace(const KiriFace3Ptr &f, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b)
-    {
-        auto twin = f->GetEdge(a, b);
-        if (twin == NULL)
-        {
-            KIRI_LOG_ERROR("LinkFace ERROR: Twin edge is not exist, cannot connect edges!");
-            return;
-        }
+    // void KiriFace3::LinkFace(const KiriFace3Ptr &f, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b)
+    // {
+    //     auto twin = f->GetEdge(a, b);
+    //     if (twin == NULL)
+    //     {
+    //         KIRI_LOG_ERROR("LinkFace ERROR: Twin edge is not exist, cannot connect edges!");
+    //         return;
+    //     }
 
-        auto cur_edge = this->GetEdge(a, b);
-        if (cur_edge != NULL)
-        {
-            twin->SetTwinEdge(cur_edge);
-            cur_edge->SetTwinEdge(twin);
-        }
-    }
+    //     auto cur_edge = this->GetEdge(a, b);
+    //     if (cur_edge != NULL)
+    //     {
+    //         twin->SetTwinEdge(cur_edge);
+    //         cur_edge->SetTwinEdge(twin);
+    //     }
+    // }
 
-    void KiriFace3::LinkFace(const KiriFace3Ptr &f)
-    {
-        for (size_t i = 0; i < 3; i++)
-        {
-            auto twin = f->GetEdge(mEdges[i]->GetOriginVertex(), mEdges[i]->GetDestVertex());
-            if (twin != NULL)
-            {
-                mEdges[i]->SetTwinEdge(twin);
-                twin->SetTwinEdge(mEdges[i]);
-            }
-        }
-    }
+    // void KiriFace3::LinkFace(const KiriFace3Ptr &f)
+    // {
+    //     for (size_t i = 0; i < 3; i++)
+    //     {
+    //         auto twin = f->GetEdge(mEdges[i]->GetOriginVertex(), mEdges[i]->GetDestVertex());
+    //         if (twin != NULL)
+    //         {
+    //             mEdges[i]->SetTwinEdge(twin);
+    //             twin->SetTwinEdge(mEdges[i]);
+    //         }
+    //     }
+    // }
 }

@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-06-04 14:05:48
+ * @LastEditTime: 2021-06-07 17:16:58
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\convex_hull3.h
+ * @FilePath: \Kiri\KiriCore\include\kiri2d\geo\convex_hull3.h
  */
 
 #ifndef _KIRI_CONVEX_HULL3_H_
@@ -32,9 +32,21 @@ namespace KIRI
         void AddVertex(const KiriVertex3Ptr &v3);
         void AddFacet(const KiriFace3Ptr &f3);
 
+        UInt GetFaceEdgeId(const KiriFace3Ptr &f, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
+        void LinkEdge(UInt eAId, UInt eBId);
+        void LinkEdge(const KiriEdge3Ptr &eA, const KiriEdge3Ptr &eB);
+        void LinkFace(const KiriFace3Ptr &fA, const KiriFace3Ptr &fB, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
+        void LinkFaceEdge(const KiriFace3Ptr &f, const KiriEdge3Ptr &e);
+
+        void ResetFace(const KiriFace3Ptr &f, UInt idx);
+        void CleanTwinEdge(const KiriEdge3Ptr &e);
+
         const Vector<KiriFace3Ptr> &GetFacets() const { return mCurFacets; }
+        const Vector<KiriEdge3Ptr> &GetEdges() const { return mEdges; }
         const Vector<KiriVertex3Ptr> &GetVertices() const { return mVertices; }
         const Vector<KiriEdge3Ptr> &GetHorizonEdges() const { return mHorizonEdges; }
+
+        const KiriEdge3Ptr &GetEdgeById(UInt id) const { return mEdges[id]; }
 
         const UInt GetNumOfVertices() const { return mVertices.size(); }
         const UInt GetNumOfFacets() const { return mCurFacets.size(); }
@@ -54,6 +66,7 @@ namespace KIRI
         UInt mProcessedCount = 0;
 
         Vector<KiriVertex3Ptr> mVertices;
+        Vector<KiriEdge3Ptr> mEdges;
         Vector<KiriEdge3Ptr> mHorizonEdges;
         Vector<KiriFace3Ptr> mCurFacets;
         Vector<KiriFace3Ptr> mVisFacets;

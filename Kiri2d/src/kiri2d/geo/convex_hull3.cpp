@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-06-04 15:21:55
+ * @LastEditTime: 2021-06-07 18:26:58
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_hull3.cpp
@@ -47,12 +47,13 @@ namespace KIRI
 
     const bool KiriConvexHull3::IsHorizonEdge(const KiriEdge3Ptr &edge)
     {
-        auto twin = edge->GetTwinEdge();
-        if (twin != NULL)
+        auto twinId = edge->GetTwinEdgeId();
+        if (twinId != -1)
         {
             // twin edge face
-            auto tef = mCurFacets[twin->GetId() / 3];
+            auto tef = mCurFacets[twinId / 3];
             auto ef = mCurFacets[edge->GetId() / 3];
+            // KIRI_LOG_DEBUG("twin edge face id={0}, vis={1}, ef id={2} !ef={3}", twinId, tef->GetVisible(), edge->GetId(), !ef->GetVisible());
             if (tef->GetVisible() && !ef->GetVisible())
                 return true;
         }
@@ -63,6 +64,7 @@ namespace KIRI
     {
         mProcessedCount = 0;
         mVertices.clear();
+        mEdges.clear();
         mHorizonEdges.clear();
         mCurFacets.clear();
         mVisFacets.clear();
@@ -86,17 +88,15 @@ namespace KIRI
                 return;
             else
             {
-                //edge->PrintEdgeInfo();
-                //KIRI_LOG_DEBUG("Current edge idx={0}, next edge idx={1}", edge->GetId(), edge->GetNextEdge()->GetId());
                 mHorizonEdges.emplace_back(edge);
-                FindHorizonEdgeList(edge->GetNextEdge());
+                FindHorizonEdgeList(mEdges[edge->GetNextEdgeId()]);
+                //FindHorizonEdgeList(edge->GetNextEdge());
             }
         }
-        else if (edge->GetTwinEdge() != NULL)
+        else if (edge->GetTwinEdgeId() != -1)
         {
-            //edge->PrintEdgeInfo();
-            //KIRI_LOG_DEBUG("Current edge idx={0}, twin={1}, twin next edge idx={2}", edge->GetId(), edge->GetTwinEdge()->GetId(), edge->GetTwinEdge()->GetNextEdge()->GetId());
-            FindHorizonEdgeList(edge->GetTwinEdge()->GetNextEdge());
+
+            FindHorizonEdgeList(mEdges[mEdges[edge->GetTwinEdgeId()]->GetNextEdgeId()]);
         }
     }
 
@@ -106,6 +106,7 @@ namespace KIRI
 
         while (mProcessedCount < mVertices.size())
         {
+            // KIRI_LOG_DEBUG("mProcessedCount={0}", mProcessedCount);
             auto p_r = mVertices[mProcessedCount];
 
             // vertex in convex hull
@@ -129,17 +130,28 @@ namespace KIRI
                 if (find_horizon_edges)
                     break;
 
-                // KIRI_LOG_DEBUG("mVisFacets idx={0}!", mVisFacets[i]->GetIdx());
                 auto vf = mVisFacets[i];
                 for (size_t j = 0; j < 3; j++)
                 {
-                    auto vfe = vf->GetEdgesByIdx(j);
-                    if (vfe->GetTwinEdge() != NULL)
+                    // auto vfe = vf->GetEdgesByIdx(j);
+                    // if (vfe->GetTwinEdge() != NULL)
+                    // {
+                    //     auto te = vfe->GetTwinEdge();
+                    //     if (IsHorizonEdge(te))
+                    //     {
+                    //         FindHorizonEdgeList(vfe);
+                    //         find_horizon_edges = true;
+                    //         break;
+                    //     }
+                    // }
+                    auto vfeId = vf->GetEdgeIdByIdx(j);
+                    if (mEdges[vfeId]->GetTwinEdgeId() != -1)
                     {
-                        auto te = vfe->GetTwinEdge();
+                        auto te = mEdges[mEdges[vfeId]->GetTwinEdgeId()];
+                        //KIRI_LOG_DEBUG("face id={0}, edge id={1}, twin edge id={2}", vf->GetIdx(), vfeId, mEdges[vfeId]->GetTwinEdgeId());
                         if (IsHorizonEdge(te))
                         {
-                            FindHorizonEdgeList(vfe);
+                            FindHorizonEdgeList(mEdges[vfeId]);
                             find_horizon_edges = true;
                             break;
                         }
@@ -147,22 +159,34 @@ namespace KIRI
                 }
             }
 
+            //KIRI_LOG_DEBUG("mHorizonEdges size={0}", mHorizonEdges.size());
             // create new facets
             KiriFace3Ptr first = NULL, last = NULL;
             for (size_t i = 0; i < mHorizonEdges.size(); i++)
             {
-                auto newf = std::make_shared<KiriFace3>(p_r, mHorizonEdges[i]->GetOriginVertex(), mHorizonEdges[i]->GetDestVertex(), mHorizonEdges[i]->GetTwinEdge()->GetNextEdge()->GetDestVertex());
+                //auto newf = std::make_shared<KiriFace3>(p_r, mHorizonEdges[i]->GetOriginVertex(), mHorizonEdges[i]->GetDestVertex(), mHorizonEdges[i]->GetTwinEdge()->GetNextEdge()->GetDestVertex());
+                auto newf =
+                    std::make_shared<KiriFace3>(
+                        p_r,
+                        mHorizonEdges[i]->GetOriginVertex(),
+                        mHorizonEdges[i]->GetDestVertex(),
+                        mEdges[mEdges[mHorizonEdges[i]->GetTwinEdgeId()]->GetNextEdgeId()]->GetDestVertex());
+
                 AddFacet(newf);
                 mCreatedFacets.emplace_back(newf);
 
                 // add new conflicts for new facet
-                BuildConflictGraphByHorizonEdge(mCurFacets[mHorizonEdges[i]->GetId() / 3], mCurFacets[mHorizonEdges[i]->GetTwinEdge()->GetId() / 3], newf);
+                //BuildConflictGraphByHorizonEdge(mCurFacets[mHorizonEdges[i]->GetId() / 3], mCurFacets[mHorizonEdges[i]->GetTwinEdge()->GetId() / 3], newf);
+                BuildConflictGraphByHorizonEdge(mCurFacets[mHorizonEdges[i]->GetId() / 3], mCurFacets[mHorizonEdges[i]->GetTwinEdgeId() / 3], newf);
+
                 // link new facet with horizon edge
-                newf->LinkEdge(mHorizonEdges[i]);
+                //newf->LinkEdge(mHorizonEdges[i]);
+                LinkFaceEdge(newf, mHorizonEdges[i]);
 
                 if (last != NULL)
                 {
-                    newf->LinkFace(last, p_r, mHorizonEdges[i]->GetOriginVertex());
+                    //newf->LinkFace(last, p_r, mHorizonEdges[i]->GetOriginVertex());
+                    LinkFace(newf, last, p_r, mHorizonEdges[i]->GetOriginVertex());
                 }
 
                 last = newf;
@@ -171,8 +195,10 @@ namespace KIRI
             }
 
             // link the first and last facet
+            // if (first != NULL && last != NULL)
+            //     last->LinkFace(first, p_r, mHorizonEdges[0]->GetOriginVertex());
             if (first != NULL && last != NULL)
-                last->LinkFace(first, p_r, mHorizonEdges[0]->GetOriginVertex());
+                LinkFace(last, first, p_r, mHorizonEdges[0]->GetOriginVertex());
 
             // remove conflict facet
             if (mCreatedFacets.size() != 0)
@@ -205,8 +231,183 @@ namespace KIRI
         f3->SetIdx(mCurFacets.size());
         f3->GenerateEdges();
 
+        // ------------------------------
+        // generate edges for f3
+        auto edgeA = std::make_shared<KiriEdge3>(f3->GetEdgeIdByIdx(0), f3->GetVertexByIdx(0), f3->GetVertexByIdx(1));
+        auto edgeB = std::make_shared<KiriEdge3>(f3->GetEdgeIdByIdx(1), f3->GetVertexByIdx(1), f3->GetVertexByIdx(2));
+        auto edgeC = std::make_shared<KiriEdge3>(f3->GetEdgeIdByIdx(2), f3->GetVertexByIdx(2), f3->GetVertexByIdx(0));
+
+        edgeA->SetNextEdgeId(f3->GetEdgeIdByIdx(1));
+        edgeB->SetNextEdgeId(f3->GetEdgeIdByIdx(2));
+        edgeC->SetNextEdgeId(f3->GetEdgeIdByIdx(0));
+
+        edgeA->SetPrevEdgeId(f3->GetEdgeIdByIdx(2));
+        edgeB->SetPrevEdgeId(f3->GetEdgeIdByIdx(0));
+        edgeC->SetPrevEdgeId(f3->GetEdgeIdByIdx(1));
+
+        mEdges.emplace_back(edgeA);
+        mEdges.emplace_back(edgeB);
+        mEdges.emplace_back(edgeC);
+        // KIRI_LOG_DEBUG("AddFacet: facet id={0}, edge id={1},{2},{3}", f3->GetIdx(), edgeA->GetId(), edgeB->GetId(), edgeC->GetId());
+        // ------------------------------
+
         mCurFacets.emplace_back(f3);
         mFConflict.emplace_back(std::make_shared<KiriFaceConflictLists>());
+    }
+
+    UInt KiriConvexHull3::GetFaceEdgeId(const KiriFace3Ptr &f, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b)
+    {
+        auto edgeId = -1;
+        for (size_t i = 0; i < f->GetEdgeCount(); i++)
+        {
+            auto eId = f->GetEdgeIdByIdx(i);
+            auto edge = GetEdgeById(eId);
+            //KIRI_LOG_DEBUG("edge idx ={0}, edge id={1}", eId, edge->GetId());
+            auto bSameEdge = edge->IsEqual(a, b);
+            if (bSameEdge)
+            {
+                edgeId = eId;
+                break;
+            }
+        }
+
+        if (edgeId == -1)
+        {
+            KIRI_LOG_ERROR("Debug error Link face!!");
+            for (size_t i = 0; i < f->GetEdgeCount(); i++)
+            {
+                auto eId = f->GetEdgeIdByIdx(i);
+                auto edge = GetEdgeById(eId);
+                edge->PrintEdgeInfo();
+            }
+            KIRI_LOG_ERROR("Edge Info");
+            a->Print();
+            b->Print();
+        }
+
+        return edgeId;
+    }
+
+    void KiriConvexHull3::CleanTwinEdge(const KiriEdge3Ptr &e)
+    {
+        auto twinId = e->GetTwinEdgeId();
+        if (twinId != -1)
+        {
+            if (mEdges[twinId]->GetTwinEdgeId() == e->GetId())
+                mEdges[twinId]->SetTwinEdgeId(-1);
+
+            mEdges[e->GetId()]->SetTwinEdgeId(-1);
+            //KIRI_LOG_DEBUG("array twin id={0}, cur twin id={0}", mEdges[e->GetId()]->GetTwinEdgeId(), e->GetTwinEdgeId());
+        }
+    }
+
+    void KiriConvexHull3::ResetFace(const KiriFace3Ptr &f, UInt idx)
+    {
+        // get original edge data
+        auto edgeA = mEdges[f->GetEdgeIdByIdx(0)];
+        auto edgeB = mEdges[f->GetEdgeIdByIdx(1)];
+        auto edgeC = mEdges[f->GetEdgeIdByIdx(2)];
+
+        // reset face idx info
+        f->SetIdx(idx);
+        f->GenerateEdges();
+
+        // reset edge id
+        edgeA->SetId(f->GetEdgeIdByIdx(0));
+        edgeB->SetId(f->GetEdgeIdByIdx(1));
+        edgeC->SetId(f->GetEdgeIdByIdx(2));
+
+        // relink edge
+        edgeA->SetNextEdgeId(f->GetEdgeIdByIdx(1));
+        edgeB->SetNextEdgeId(f->GetEdgeIdByIdx(2));
+        edgeC->SetNextEdgeId(f->GetEdgeIdByIdx(0));
+
+        edgeA->SetPrevEdgeId(f->GetEdgeIdByIdx(2));
+        edgeB->SetPrevEdgeId(f->GetEdgeIdByIdx(0));
+        edgeC->SetPrevEdgeId(f->GetEdgeIdByIdx(1));
+
+        // reset twin edge
+        if (edgeA->GetTwinEdgeId() != -1)
+            mEdges[edgeA->GetTwinEdgeId()]->SetTwinEdgeId(edgeA->GetId());
+
+        if (edgeB->GetTwinEdgeId() != -1)
+            mEdges[edgeB->GetTwinEdgeId()]->SetTwinEdgeId(edgeB->GetId());
+
+        if (edgeC->GetTwinEdgeId() != -1)
+            mEdges[edgeC->GetTwinEdgeId()]->SetTwinEdgeId(edgeC->GetId());
+
+        // reset edge array
+        mEdges[f->GetEdgeIdByIdx(0)] = edgeA;
+        mEdges[f->GetEdgeIdByIdx(1)] = edgeB;
+        mEdges[f->GetEdgeIdByIdx(2)] = edgeC;
+
+        // reset facet array
+        mCurFacets[idx] = f;
+    }
+
+    void KiriConvexHull3::LinkEdge(UInt eAId, UInt eBId)
+    {
+        mEdges[eAId]->SetTwinEdgeId(eBId);
+        mEdges[eBId]->SetTwinEdgeId(eAId);
+    }
+
+    void KiriConvexHull3::LinkEdge(const KiriEdge3Ptr &eA, const KiriEdge3Ptr &eB)
+    {
+        LinkEdge(eA->GetId(), eB->GetId());
+    }
+
+    void KiriConvexHull3::LinkFaceEdge(const KiriFace3Ptr &f, const KiriEdge3Ptr &e)
+    {
+        auto curEdgeId = GetFaceEdgeId(f, e->GetOriginVertex(), e->GetDestVertex());
+
+        if (curEdgeId == -1)
+        {
+            KIRI_LOG_ERROR("LinkFaceEdge ERROR: Current edge is not exist, cannot connect edges!");
+            return;
+        }
+
+        if (curEdgeId == e->GetId())
+        {
+            KIRI_LOG_ERROR("LinkFaceEdge ERROR: face idx={0}, face edge idx={1}, link edge idx={2}", f->GetIdx(), curEdgeId, e->GetId());
+            return;
+        }
+
+        LinkEdge(e, mEdges[curEdgeId]);
+    }
+
+    void KiriConvexHull3::LinkFace(const KiriFace3Ptr &fA, const KiriFace3Ptr &fB, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b)
+    {
+        auto twinEdgeId = GetFaceEdgeId(fB, a, b);
+
+        if (twinEdgeId == -1)
+        {
+            KIRI_LOG_ERROR("LinkFace ERROR: Twin edge is not exist, cannot connect edges!");
+            return;
+        }
+
+        auto curEdgeId = GetFaceEdgeId(fA, a, b);
+
+        if (curEdgeId != -1)
+        {
+            //KIRI_LOG_DEBUG("Link face, twin edge id={0}, cur edge id={1}", twinEdgeId, curEdgeId);
+            LinkEdge(twinEdgeId, curEdgeId);
+        }
+        else
+            KIRI_LOG_ERROR("LinkFace ERROR: Current edge is not exist, cannot connect edges!");
+
+        // auto twin = f->GetEdge(a, b);
+        // if (twin == NULL)
+        // {
+        //     KIRI_LOG_ERROR("LinkFace ERROR: Twin edge is not exist, cannot connect edges!");
+        //     return;
+        // }
+
+        // auto cur_edge = this->GetEdge(a, b);
+        // if (cur_edge != NULL)
+        // {
+        //     twin->SetTwinEdge(cur_edge);
+        //     cur_edge->SetTwinEdge(twin);
+        // }
     }
 
     void KiriConvexHull3::BuildConflictGraph(KiriFace3Ptr &f, KiriVertex3Ptr &v)
@@ -217,6 +418,13 @@ namespace KIRI
 
     void KiriConvexHull3::RemoveConflictGraphByFace(KiriFace3Ptr &f)
     {
+        // KIRI_LOG_DEBUG("Before Delete Face, face array size={0}, edge size={1}", mCurFacets.size(), mEdges.size());
+        // KIRI_LOG_DEBUG("+++++++++++++++++++++++++++++++++++++++++");
+        // for (size_t i = 0; i < mEdges.size(); i++)
+        // {
+        //     mEdges[i]->PrintEdgeInfo();
+        // }
+
         auto idx = f->GetIdx();
 
         for (size_t i = 0; i < mVConflict.size(); i++)
@@ -227,13 +435,23 @@ namespace KIRI
 
         // reset facet
         f->SetIdx(-1);
+        // for (size_t i = 0; i < 3; i++)
+        //     f->GetEdgesByIdx(i)->CleanEdge();
         for (size_t i = 0; i < 3; i++)
-            f->GetEdgesByIdx(i)->CleanEdge();
+        {
+            CleanTwinEdge(mEdges[f->GetEdgeIdByIdx(i)]);
+        }
+        // mEdges[f->GetEdgeIdByIdx(i)]->CleanEdge();
 
         mFConflict[idx]->RemoveAll();
         if (idx == mCurFacets.size() - 1)
         {
             mCurFacets.pop_back();
+            // clean edges
+            mEdges.pop_back();
+            mEdges.pop_back();
+            mEdges.pop_back();
+
             mFConflict.pop_back();
             return;
         }
@@ -246,17 +464,19 @@ namespace KIRI
         mFConflict[idx] = mFConflict.back();
         mFConflict.pop_back();
 
-        mCurFacets[idx] = mCurFacets.back();
+        // move back element -> idx
+        ResetFace(mCurFacets.back(), idx);
         mCurFacets.pop_back();
+        mEdges.pop_back();
+        mEdges.pop_back();
+        mEdges.pop_back();
 
-        // remake face info
-        mCurFacets[idx]->SetIdx(idx);
-        for (size_t i = 0; i < 3; i++)
-            mCurFacets[idx]->GetEdgesByIdx(i)->SetId(idx * 3 + i);
-
-        // for (size_t i = 0; i < mCurFacets.size(); i++)
+        // KIRI_LOG_DEBUG("After Delete Face, face array size={0}, edge size={1}", mCurFacets.size(), mEdges.size());
+        // KIRI_LOG_DEBUG("****************************************************");
+        // KIRI_LOG_DEBUG("Delete idx = {0}", idx);
+        // for (size_t i = 0; i < mEdges.size(); i++)
         // {
-        //     mCurFacets[i]->PrintFaceInfo();
+        //     mEdges[i]->PrintEdgeInfo();
         // }
     }
 
@@ -417,12 +637,18 @@ namespace KIRI
         mProcessedCount = 4;
 
         // connect facets
-        f0->LinkFace(f1, v0, v2);
-        f0->LinkFace(f2, v0, v1);
-        f0->LinkFace(f3, v1, v2);
-        f1->LinkFace(f2, v0, v3);
-        f1->LinkFace(f3, v2, v3);
-        f2->LinkFace(f3, v3, v1);
+        // f0->LinkFace(f1, v0, v2);
+        // f0->LinkFace(f2, v0, v1);
+        // f0->LinkFace(f3, v1, v2);
+        // f1->LinkFace(f2, v0, v3);
+        // f1->LinkFace(f3, v2, v3);
+        // f2->LinkFace(f3, v3, v1);
+        LinkFace(f0, f1, v0, v2);
+        LinkFace(f0, f2, v0, v1);
+        LinkFace(f0, f3, v1, v2);
+        LinkFace(f1, f2, v0, v3);
+        LinkFace(f1, f3, v2, v3);
+        LinkFace(f2, f3, v3, v1);
 
         // build conflict graph
         for (size_t i = mProcessedCount; i < mVertices.size(); i++)

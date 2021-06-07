@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-06-04 14:25:35
+ * @LastEditTime: 2021-06-07 14:44:23
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\face3.h
@@ -46,7 +46,8 @@ namespace KIRI
         inline constexpr Int GetEdgeCount() const { return 3; }
 
         inline const Vector3F &GetNormal() const { return mNormal; }
-        inline const KiriEdge3Ptr &GetEdgesByIdx(Int idx) const { return mEdges[idx]; }
+        //inline const KiriEdge3Ptr &GetEdgesByIdx(Int idx) const { return mEdges[idx]; }
+        inline UInt GetEdgeIdByIdx(Int idx) const { return mEdges[idx]; }
         inline const KiriVertex3Ptr &GetVertexByIdx(Int idx) const { return mVertices[idx]; }
 
         void SetIdx(UInt idx) { mIdx = idx; }
@@ -63,7 +64,7 @@ namespace KIRI
 
         inline constexpr bool IsVisibleFromBelow() const { return (mNormal.z < -MEpsilon<float>()); }
 
-        const KiriEdge3Ptr &GetEdge(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
+        //const KiriEdge3Ptr &GetEdge(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
 
         void PrintFaceInfo();
 
@@ -71,16 +72,17 @@ namespace KIRI
 
         void OrientFace(const KiriVertex3Ptr &orient);
 
-        void LinkEdge(const KiriEdge3Ptr &e);
-        void LinkFace(const SharedPtr<KiriFace3> &f);
-        void LinkFace(const SharedPtr<KiriFace3> &f, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
+        // void LinkEdge(const KiriEdge3Ptr &e);
+        // void LinkFace(const SharedPtr<KiriFace3> &f);
+        // void LinkFace(const SharedPtr<KiriFace3> &f, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
 
     private:
         UInt mIdx;
         bool mVisible;
         KiriVertex3Ptr mVertices[3];
         Vector3F mNormal;
-        KiriEdge3Ptr mEdges[3];
+        // KiriEdge3Ptr mEdges[3];
+        UInt mEdges[3];
 
         /*** 
          * @description: Check the relation between point v and face
