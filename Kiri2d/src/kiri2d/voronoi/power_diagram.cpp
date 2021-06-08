@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-06-07 18:31:40
+ * @LastEditTime: 2021-06-08 16:43:49
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -13,6 +13,40 @@
 
 namespace KIRI
 {
+    Vector3F KiriPowerDiagram::ComputeMaxInscribedCircle()
+    {
+        auto maxCirVec = Vector2F(0.f);
+        auto maxCirRad = Tiny<float>();
+        if (!mVoroSites.empty())
+        {
+            for (size_t i = 0; i < mVoroSites.size(); i++)
+            {
+                auto polyVertices = mVoroSites[i]->GetCellPolygon()->GetPolygonVertices();
+                for (size_t j = 0; j < polyVertices.size(); j++)
+                {
+                    if (mBoundaryPolygon2->Contains(polyVertices[j]))
+                    {
+                        auto minDis = mBoundaryPolygon2->ComputeMinDisInPoly(polyVertices[j]);
+                        if (minDis > maxCirRad)
+                        {
+                            maxCirRad = minDis;
+                            maxCirVec = polyVertices[j];
+                        }
+                    }
+                }
+            }
+        }
+        return Vector3F(maxCirVec.x, maxCirVec.y, maxCirRad);
+    }
+
+    float KiriPowerDiagram::ComputeMinPorosity()
+    {
+        auto maxCir = ComputeMaxInscribedCircle();
+        auto maxCirArea = maxCir.z * maxCir.z * KIRI_PI<float>();
+        auto boundaryArea = mBoundaryPolygon2->GetPolygonArea();
+        return (boundaryArea - maxCirArea) / boundaryArea;
+    }
+
     void KiriPowerDiagram::SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary)
     {
         mBoundaryPolygon2 = boundary;

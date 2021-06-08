@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2020-10-19 01:37:05
- * @LastEditTime: 2021-06-04 16:14:46
+ * @LastEditTime: 2021-06-08 16:43:14
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
@@ -158,6 +158,9 @@ using Matrix4x4F = kiri_math::Matrix4x4F;
 
 using Vec_Vec2F = Vector<Vector2F>;
 using Vec_Vec3F = Vector<Vector3F>;
+
+template <class T>
+constexpr auto KIRI_PI() { return kiri_math::pi<T>(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>

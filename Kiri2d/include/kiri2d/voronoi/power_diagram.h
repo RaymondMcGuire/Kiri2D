@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-07 18:17:02
+ * @LastEditTime: 2021-06-08 16:38:39
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
@@ -52,6 +52,15 @@ namespace KIRI
         void Reset();
 
         void ReGenVoroSites();
+
+        /*** 
+         * @description: 
+         * @param {*}
+         * @return {Vector3F} Vector2F center, float radius
+         */
+        Vector3F ComputeMaxInscribedCircle();
+
+        float ComputeMinPorosity();
 
     private:
         UInt mRelaxIterNumber = 10;

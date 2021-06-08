@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-02 01:43:55
+ * @LastEditTime: 2021-06-08 16:20:08
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
@@ -68,6 +68,8 @@ namespace KIRI
          * @return {*}
          */
         Vector2F GetPolygonCentroid();
+
+        float ComputeMinDisInPoly(const Vector2F &p);
 
     private:
         BoundingBox2F mBBox2;

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-04 13:51:49
+ * @LastEditTime: 2021-06-08 16:44:51
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -222,7 +222,7 @@ void VoronoiExample2()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-    auto cnt = 0, maxcnt = 10;
+    auto cnt = 0, maxcnt = 500;
     while (cnt < maxcnt)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
@@ -237,6 +237,13 @@ void VoronoiExample2()
     pd->ComputeDiagram();
     //pd->SetRelaxIterNumber(100);
     //pd->LloydRelaxation();
+
+    auto maxCir = pd->ComputeMaxInscribedCircle();
+    auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxCir.x, maxCir.y), height) + offsetVec2, Vector3F(0.f, 0.f, 1.f), maxCir.z);
+    KIRI_LOG_DEBUG("MaxInscribedCircle, center=({0},{1}), radius={2}", maxCir.x, maxCir.y, maxCir.z);
+
+    auto porosity = pd->ComputeMinPorosity();
+    KIRI_LOG_DEBUG("Minium porosity = {0}", porosity);
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
@@ -272,6 +279,7 @@ void VoronoiExample2()
 
         scene->AddLines(lines);
         scene->AddParticles(points);
+        scene->AddCircle(maxCir2);
 
         renderer->DrawCanvas();
         cv::imshow("KIRI2D", renderer->GetCanvas());
@@ -617,13 +625,13 @@ int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
-    //VoronoiExample2();
+    VoronoiExample2();
 
     //LloydRelaxationExample();
 
     //GenRndTreemap();
 
-    NOCAJ12Example();
+    //NOCAJ12Example();
     //NOCAJ12Example1();
 
     // // scene renderer config

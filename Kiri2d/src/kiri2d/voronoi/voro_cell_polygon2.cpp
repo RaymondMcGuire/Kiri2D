@@ -1,13 +1,14 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-02 01:46:08
+ * @LastEditTime: 2021-06-08 16:23:24
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
  */
 
 #include <kiri2d/voronoi/voro_cell_polygon2.h>
+#include <kiri2d/voronoi/voro_util.h>
 #include <random>
 
 namespace KIRI
@@ -93,6 +94,14 @@ namespace KIRI
         }
 
         return centroid;
+    }
+
+    float KiriVoroCellPolygon2::ComputeMinDisInPoly(const Vector2F &p)
+    {
+        auto minDis = Huge<float>();
+        for (size_t i = 0; i < mPolygonVertices2.size(); i++)
+            minDis = std::min(minDis, MinDis2LineSegment2(mPolygonVertices2[i], mPolygonVertices2[(i + 1) % mPolygonVertices2.size()], p));
+        return minDis;
     }
 
     void KiriVoroCellPolygon2::UpdateBBox()

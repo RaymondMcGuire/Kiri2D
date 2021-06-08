@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-06-03 00:13:52
+ * @LastEditTime: 2021-06-08 16:35:39
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\renderer\renderer.cpp
@@ -60,7 +60,7 @@ namespace KIRI2D
             if (cx < 0 || cx >= mWindowWidth || cy < 0 || cy >= mWindowHeight)
                 continue;
             auto col = circles[i].col * 255.f;
-            cv::circle(mCanvas, cv::Point(cx, cy), circles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), -1);
+            cv::circle(mCanvas, cv::Point(cx, cy), circles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), 5);
         }
 
         auto lines = mScene->GetLines();
