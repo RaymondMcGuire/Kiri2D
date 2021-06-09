@@ -43,6 +43,7 @@ namespace KIRI
         void PermutateVoroSites();
         void ComputeDiagram();
 
+        bool MoveVoroSites(Vector<Vector2F> movement);
         bool Move2Centroid();
         void LloydRelaxation();
         void LloydIterate();

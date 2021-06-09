@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-08 16:44:51
+ * @LastEditTime: 2021-06-09 17:46:01
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -11,6 +11,7 @@
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>
 #include <kiri2d/treemap/treemap_layout.h>
+#include <kiri2d/voronoi/voro_poropti_core.h>
 
 #include <random>
 using namespace KIRI;
@@ -349,8 +350,8 @@ void LloydRelaxationExample()
 
     pd->SetBoundaryPolygon2(boundaryPoly);
     pd->ComputeDiagram();
-    //pd->SetRelaxIterNumber(100);
-    //pd->LloydRelaxation();
+    pd->SetRelaxIterNumber(100);
+    pd->LloydRelaxation();
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
@@ -621,11 +622,104 @@ void NOCAJ12Example1()
     // }
 }
 
+void VoroTestExample()
+{
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    // voronoi
+    auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
+    float width = 1000.f;
+    float height = 1000.f;
+    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+
+    KiriSDFPoly2D boundary;
+
+    auto PI = 3.141592653f;
+    auto numPoints = 8;
+    auto radius = 500.f;
+
+    for (auto j = 0; j < numPoints; j++)
+    {
+        auto angle = 2.0 * PI * (j * 1.f / numPoints);
+        auto rotate = 2.0 * PI / numPoints / 2;
+        auto y = std::sin(angle + rotate) * radius;
+        auto x = std::cos(angle + rotate) * radius;
+        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+
+        boundary.Append(pos);
+        boundaryPoly->AddPolygonVertex2(pos);
+    }
+
+    auto voroPorOptiCore = std::make_shared<KiriVoroPoroOptiCore>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
+
+    auto cnt = 0, maxcnt = 100;
+    while (cnt < maxcnt)
+    {
+        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        if (boundary.FindRegion(sitePos2) < 0.f)
+        {
+            auto site = std::make_shared<KiriVoroSite>(sitePos2, dist(rndEngine));
+            voroPorOptiCore->AddSite(site);
+            cnt++;
+        }
+    }
+    voroPorOptiCore->SetBoundaryPolygon2(boundaryPoly);
+    voroPorOptiCore->Init();
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    while (1)
+    {
+        voroPorOptiCore->ComputeIterate();
+        Vector<KiriPoint2> points;
+        Vector<KiriLine2> lines;
+
+        auto sites = voroPorOptiCore->GetSites();
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            //sites[i]->Print();
+            points.emplace_back(KiriPoint2(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) + offsetVec2, Vector3F(1.f, 0.f, 0.f)));
+            auto poly = sites[i]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                poly->ComputeVoroSitesList();
+                auto list = poly->GetVoroSitesList();
+                // list->PrintVertexList();
+
+                auto node = list->GetHead();
+                do
+                {
+                    auto start = Vector2F(node->value) + offsetVec2;
+                    node = node->next;
+                    auto end = Vector2F(node->value) + offsetVec2;
+                    lines.emplace_back(KiriLine2(start, end));
+                } while (node != list->GetHead());
+            }
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
 int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
-    VoronoiExample2();
+    //VoronoiExample2();
 
     //LloydRelaxationExample();
 
@@ -633,6 +727,8 @@ int main()
 
     //NOCAJ12Example();
     //NOCAJ12Example1();
+
+    VoroTestExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-06-08 16:43:49
+ * @LastEditTime: 2021-06-09 17:26:31
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -181,6 +181,27 @@ namespace KIRI
                     KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
                     mVoroSites[j]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
                 }
+            }
+        }
+
+        return outside;
+    }
+
+    bool KiriPowerDiagram::MoveVoroSites(Vector<Vector2F> movement)
+    {
+        bool outside = false;
+        // move sites to centroid
+        for (size_t j = 0; j < mVoroSites.size(); j++)
+        {
+            auto curPos = Vector2F(mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y);
+            auto newPos = curPos + movement[j];
+
+            if (mBoundaryPolygon2->Contains(newPos))
+                mVoroSites[j]->ResetValue(newPos);
+            else
+            {
+                outside = true;
+                mVoroSites[j]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
             }
         }
 
