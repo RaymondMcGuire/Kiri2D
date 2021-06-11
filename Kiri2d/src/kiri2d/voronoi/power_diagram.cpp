@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-06-09 17:26:31
+ * @LastEditTime: 2021-06-11 02:17:01
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -54,7 +54,8 @@ namespace KIRI
         mBoundaryPolygon2->ComputeVoroSitesList();
         auto bbox = mBoundaryPolygon2->GetBBox();
 
-        //KIRI_LOG_DEBUG("bbox low={0},{1}, high={2},{3}, width={4}, height={5}", bbox.LowestPoint.x, bbox.LowestPoint.y, bbox.HighestPoint.x, bbox.HighestPoint.y, bbox.width(), bbox.height());
+        if (bbox.width() < 0.f || bbox.height() < 0.f)
+            KIRI_LOG_DEBUG("bbox low={0},{1}, high={2},{3}, width={4}, height={5}", bbox.LowestPoint.x, bbox.LowestPoint.y, bbox.HighestPoint.x, bbox.HighestPoint.y, bbox.width(), bbox.height());
 
         auto site1 = std::make_shared<KiriVoroSite>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y - bbox.height());
         auto site2 = std::make_shared<KiriVoroSite>(bbox.LowestPoint.x + 2.f * bbox.width(), bbox.LowestPoint.y - bbox.height());
@@ -141,7 +142,7 @@ namespace KIRI
 
     void KiriPowerDiagram::ReGenVoroSites()
     {
-        KIRI_LOG_ERROR("ReGenVoroSites::Start, size={0}", mVoroSites.size());
+        KIRI_LOG_INFO("ReGenVoroSites::Start, size={0}", mVoroSites.size());
         if (mBoundaryPolygon2 == NULL)
         {
             KIRI_LOG_ERROR("ReGenVoroSites::Please set boundary polygon!!");
@@ -155,6 +156,15 @@ namespace KIRI
                 auto pos = mVoroSites[i]->GetValue();
                 if (!mBoundaryPolygon2->Contains(Vector2F(pos.x, pos.y)))
                     mVoroSites[i]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
+                else
+                {
+                    std::random_device seedGen;
+                    std::default_random_engine rndEngine(seedGen());
+                    std::uniform_real_distribution<float> dist(0.f, 0.1f);
+                    mVoroSites[i]->ResetValue(Vector2F(pos.x, pos.y) + Vector2F(dist(rndEngine), dist(rndEngine)));
+
+                    // KIRI_LOG_INFO("ReGenVoroSites::pos={0},{1},{2}", pos.x, pos.y, pos.z);
+                }
             }
         }
         else
@@ -178,10 +188,12 @@ namespace KIRI
                 else
                 {
                     outside = true;
-                    KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
+                    //KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
                     mVoroSites[j]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
                 }
             }
+
+            //KIRI_LOG_DEBUG("voro site idx={0}, value=({1},{2},{3})", mVoroSites[j]->GetIdx(), mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y, mVoroSites[j]->GetValue().z);
         }
 
         return outside;
@@ -228,7 +240,7 @@ namespace KIRI
         ComputeDiagram();
     }
 
-    void KiriPowerDiagram::ComputeDiagram()
+    bool KiriPowerDiagram::ComputeDiagram()
     {
         if (!mVoroSites.empty())
         {
@@ -248,11 +260,15 @@ namespace KIRI
                 mVisitedVoroSites.emplace_back(false);
             }
 
-            mConvexHull->ComputeConvexHull();
+            if (!mConvexHull->ComputeConvexHull())
+                return false;
 
             ComputeVoroCells();
+
+            return true;
         }
 
+        return false;
         //KIRI_LOG_INFO("Compute Power Diagram Finished!!");
     }
 
@@ -260,13 +276,24 @@ namespace KIRI
     {
         if (!vcp1->GetBBox().overlaps(vcp2->GetBBox()))
         {
-            KIRI_LOG_ERROR("VoroCellPolygonClip: Bounding box no overlap!!");
+            // vcp1->Print();
+            // vcp2->Print();
+            // KIRI_LOG_ERROR("VoroCellPolygonClip: vcp1 low={0},{1}; high={2},{3};vcp2 low={4},{5}; high={6},{7}",
+            //                vcp1->GetBBox().LowestPoint.x,
+            //                vcp1->GetBBox().LowestPoint.y,
+            //                vcp1->GetBBox().HighestPoint.x,
+            //                vcp1->GetBBox().HighestPoint.y,
+            //                vcp2->GetBBox().LowestPoint.x,
+            //                vcp2->GetBBox().LowestPoint.y,
+            //                vcp2->GetBBox().HighestPoint.x,
+            //                vcp2->GetBBox().HighestPoint.y);
+            // KIRI_LOG_ERROR("VoroCellPolygonClip: Bounding box no overlap!!");
             return NULL;
         }
 
         if (vcp1->GetBBox().contains(vcp2->GetBBox()))
         {
-            KIRI_LOG_DEBUG("Contains");
+            //KIRI_LOG_DEBUG("Contains");
             return vcp2;
         }
 
@@ -364,7 +391,6 @@ namespace KIRI
                         auto dx = 1.f, dy = 1.f;
 
                         //edge->PrintEdgeInfo();
-                        //KIRI_LOG_DEBUG("{0}", mFacetsAroundVertex.size());
 
                         for (size_t j = 0; j < mFacetsAroundVertex.size(); j++)
                         {
@@ -394,25 +420,17 @@ namespace KIRI
                             }
                         }
 
-                        cellPoly->UpdateBBox();
-                        //cellPoly->PrintPolyVertices();
-                        // cellPoly->ComputeVoroSitesList();
-
                         if (!site->IsBoundarySite())
                         {
-                            // KIRI_LOG_DEBUG("------------NEW SITE COMPUTE---------------");
-                            // KIRI_LOG_DEBUG("site idx = {0}, ComputeVoroCells mFacetsAroundVertex={1}", site->GetIdx(), mFacetsAroundVertex.size());
-                            //site->Print();
-                            auto newPoly = VoroCellPolygonClip(mBoundaryPolygon2, cellPoly);
-                            // newPoly->UpdateBBox();
-                            // newPoly->ComputeVoroSitesList();
+                            cellPoly->UpdateBBox();
+                            cellPoly->ComputeVoroSitesList();
 
-                            //newPoly->Print();
-
-                            if (newPoly != NULL)
-                                site->SetCellPolygon(newPoly);
-                            // else
-                            //     ReGenVoroSites();
+                            if (cellPoly->GetLength() > 2)
+                            {
+                                auto newPoly = VoroCellPolygonClip(mBoundaryPolygon2, cellPoly);
+                                if (newPoly != NULL)
+                                    site->SetCellPolygon(newPoly);
+                            }
                         }
                     }
                 }

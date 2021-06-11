@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-08 16:38:39
+ * @LastEditTime: 2021-06-10 17:11:18
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
@@ -41,7 +41,7 @@ namespace KIRI
         const KiriVoroCellPolygon2Ptr &GetBoundaryPolygon2() const { return mBoundaryPolygon2; };
 
         void PermutateVoroSites();
-        void ComputeDiagram();
+        bool ComputeDiagram();
 
         bool MoveVoroSites(Vector<Vector2F> movement);
         bool Move2Centroid();

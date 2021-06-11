@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-09 17:46:01
+ * @LastEditTime: 2021-06-11 11:17:54
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -11,7 +11,7 @@
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>
 #include <kiri2d/treemap/treemap_layout.h>
-#include <kiri2d/voronoi/voro_poropti_core.h>
+#include <kiri2d/voronoi/voro_poropti.h>
 
 #include <random>
 using namespace KIRI;
@@ -20,6 +20,21 @@ using namespace KIRI2D;
 Vector2F Transform2Original(const Vector2F &v, float h)
 {
     return Vector2F(v.x, h - v.y);
+}
+
+void ExportPoroityData2CSVFile(const String fileName, const Vector<float> &error, const Vector<float> &poroity)
+{
+    std::fstream file;
+    file.open(fileName.c_str(), std::ios_base::out);
+    file << "iter,error"
+         << std::endl;
+    for (int i = 0; i < error.size(); i++)
+        file << i + 1 << "," << error[i] << std::endl;
+    file << "iter,poroity"
+         << std::endl;
+    for (int i = 0; i < poroity.size(); i++)
+        file << i + 1 << "," << poroity[i] << std::endl;
+    file.close();
 }
 
 void load_xy_file1(std::vector<Vector2F> &points, size_t &num, const char *filePath)
@@ -223,7 +238,7 @@ void VoronoiExample2()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-    auto cnt = 0, maxcnt = 500;
+    auto cnt = 0, maxcnt = 50;
     while (cnt < maxcnt)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
@@ -236,8 +251,8 @@ void VoronoiExample2()
 
     pd->SetBoundaryPolygon2(boundaryPoly);
     pd->ComputeDiagram();
-    //pd->SetRelaxIterNumber(100);
-    //pd->LloydRelaxation();
+    pd->SetRelaxIterNumber(100);
+    pd->LloydRelaxation();
 
     auto maxCir = pd->ComputeMaxInscribedCircle();
     auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxCir.x, maxCir.y), height) + offsetVec2, Vector3F(0.f, 0.f, 1.f), maxCir.z);
@@ -340,18 +355,30 @@ void LloydRelaxationExample()
     std::random_device seedGen;
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
-    for (size_t i = 0; i < 100; i++)
+    for (size_t i = 0; i < 20; i++)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
             pd->AddVoroSite(sitePos2);
         // pd->AddPowerSite(sitePos2, dist(rndEngine) * width * 100.f);
     }
+    // auto cnt = 0, maxcnt = 100;
+    // while (cnt < maxcnt)
+    // {
+    //     auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+    //     if (boundary.FindRegion(sitePos2) < 0.f)
+    //     {
+    //         auto radius = 10.f;
+    //         // auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y, MEpsilon<float>(), radius);
+    //         pd->AddVoroSite(sitePos2);
+    //         cnt++;
+    //     }
+    // }
 
     pd->SetBoundaryPolygon2(boundaryPoly);
     pd->ComputeDiagram();
-    pd->SetRelaxIterNumber(100);
-    pd->LloydRelaxation();
+    // pd->SetRelaxIterNumber(100);
+    // pd->LloydRelaxation();
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
@@ -658,13 +685,14 @@ void VoroTestExample()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-    auto cnt = 0, maxcnt = 100;
+    auto cnt = 0, maxcnt = 20;
     while (cnt < maxcnt)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
-            auto site = std::make_shared<KiriVoroSite>(sitePos2, dist(rndEngine));
+            auto radius = 100.f * dist(rndEngine);
+            auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y, MEpsilon<float>(), radius);
             voroPorOptiCore->AddSite(site);
             cnt++;
         }
@@ -715,13 +743,122 @@ void VoroTestExample()
     }
 }
 
+void VoroPorosityOptimizeExample()
+{
+    // scene renderer config
+    float windowheight = 4000.f;
+    float windowwidth = 4000.f;
+
+    // voronoi
+    float width = 3000.f;
+    float height = 3000.f;
+    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+
+    auto PI = 3.141592653f;
+    auto numPoints = 8;
+    auto radius = 2000.f;
+
+    Vector<Vector2F> boundary;
+    for (auto j = 0; j < numPoints; j++)
+    {
+        auto angle = 2.0 * PI * (j * 1.f / numPoints);
+        auto rotate = 2.0 * PI / numPoints / 2;
+        auto y = std::sin(angle + rotate) * radius;
+        auto x = std::cos(angle + rotate) * radius;
+        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+
+        boundary.emplace_back(pos);
+    }
+
+    auto opti = std::make_shared<KiriVoroPoroOpti>();
+    opti->SetRootBoundary2(boundary);
+    opti->GenExample(width, height);
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    Vector<float> errorArray, porosityArray;
+    for (size_t i = 0; i < 2000; i++)
+    {
+
+        auto error = opti->ComputeIterate();
+        errorArray.emplace_back(error);
+
+        if (i % 10 == 1)
+        {
+            opti->ComputeChildIterate();
+            auto porosity = opti->ComputeMiniumPorosity();
+            porosityArray.emplace_back(porosity);
+            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error);
+
+            Vector<KiriPoint2> points;
+            Vector<KiriLine2> lines;
+            Vector<KiriCircle2> circles;
+
+            auto sites = opti->GetLeafNodeSites();
+            for (size_t i = 0; i < sites.size(); i++)
+            {
+                //sites[i]->Print();
+                auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
+                points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
+                auto poly = sites[i]->GetCellPolygon();
+                if (poly != NULL)
+                {
+                    poly->ComputeVoroSitesList();
+                    auto list = poly->GetVoroSitesList();
+                    // list->PrintVertexList();
+
+                    auto node = list->GetHead();
+                    do
+                    {
+                        auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+
+                        node = node->next;
+                        auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+
+                        lines.emplace_back(KiriLine2(start, end));
+                    } while (node != list->GetHead());
+                }
+            }
+
+            auto maxIC = opti->GetLeafNodeMaxInscribedCircle();
+            for (size_t i = 0; i < maxIC.size(); i++)
+            {
+                auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+                circles.emplace_back(maxCir2);
+                //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
+            }
+
+            scene->AddLines(lines);
+            scene->AddParticles(points);
+            scene->AddCircles(circles);
+
+            renderer->DrawCanvas();
+            renderer->SaveImages2File();
+
+            renderer->ClearCanvas();
+            scene->Clear();
+        }
+    }
+    ExportPoroityData2CSVFile("D:/project/Kiri2D/export/csv/test.csv", errorArray, porosityArray);
+    // while (1)
+    // {
+
+    //     renderer->DrawCanvas();
+    //     //renderer->SaveImages2File();
+    //     cv::imshow("KIRI2D", renderer->GetCanvas());
+    //     cv::waitKey(5);
+    //     // renderer->ClearCanvas();
+    //     // scene->Clear();
+    // }
+}
 int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
     //VoronoiExample2();
 
-    //LloydRelaxationExample();
+    // LloydRelaxationExample();
 
     //GenRndTreemap();
 
@@ -729,6 +866,8 @@ int main()
     //NOCAJ12Example1();
 
     VoroTestExample();
+
+    //VoroPorosityOptimizeExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

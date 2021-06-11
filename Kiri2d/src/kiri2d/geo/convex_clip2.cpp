@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-06-02 23:41:21
+ * @LastEditTime: 2021-06-10 21:54:28
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_clip2.cpp
@@ -235,7 +235,7 @@ namespace KIRI
             p->ReverseVertexList(); //If list is not oriented counterclockwise
             if (!IsConvex(p))
             {
-                KIRI_LOG_ERROR("ComputeConvexPolygonIntersection: Polygons are not Convex");
+                // KIRI_LOG_ERROR("ComputeConvexPolygonIntersection: Polygons are not Convex");
                 return false;
             }
         }
@@ -244,7 +244,7 @@ namespace KIRI
             q->ReverseVertexList(); //If list is not oriented counterclockwise
             if (!IsConvex(q))
             {
-                KIRI_LOG_ERROR("ComputeConvexPolygonIntersection: Polygons are not Convex");
+                // KIRI_LOG_ERROR("ComputeConvexPolygonIntersection: Polygons are not Convex");
                 return false;
             }
         }

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-09 17:43:11
+ * @LastEditTime: 2021-06-10 22:46:24
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -29,7 +29,9 @@ namespace KIRI
         ~KiriVoroPoroOptiCore() noexcept {}
 
         void Compute();
-        void ComputeIterate();
+        void ComputeDiagram();
+        void ComputeLloyd(UInt num);
+        float ComputeIterate();
 
         void AddSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
         void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
@@ -45,15 +47,17 @@ namespace KIRI
 
         void Reset();
 
+        Vector3F ComputeMaxInscribedCircle() const { return mPowerDiagram->ComputeMaxInscribedCircle(); };
+
     private:
         void ComputeVoroSiteMovement();
-        void ComputeVoroSiteDistanceError();
+        void ComputeVoroSiteWeightError();
 
         void ComputeBoundaryPolygonArea();
 
         float GetGlobalAvgDistance();
 
-        void Iterate();
+        float Iterate();
 
         void CorrectVoroSitePos();
         void CorrectWeights();
@@ -62,8 +66,8 @@ namespace KIRI
 
         KiriPowerDiagramPtr mPowerDiagram;
 
-        float mCurGlobalDisError;
-        Vector<float> mVoroSitesDisError, mVoroSitesDisErrorAbs;
+        float mCurGlobalWeightError;
+        Vector<float> mVoroSitesWeightError, mVoroSitesWeightAbsError;
         Vector<Vector2F> mVoroSitesMovemnet;
 
         float mErrorThreshold;

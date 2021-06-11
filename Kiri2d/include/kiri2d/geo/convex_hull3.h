@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-06-07 17:16:58
+ * @LastEditTime: 2021-06-10 17:10:18
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\geo\convex_hull3.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\convex_hull3.h
  */
 
 #ifndef _KIRI_CONVEX_HULL3_H_
@@ -35,8 +35,8 @@ namespace KIRI
         UInt GetFaceEdgeId(const KiriFace3Ptr &f, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
         void LinkEdge(UInt eAId, UInt eBId);
         void LinkEdge(const KiriEdge3Ptr &eA, const KiriEdge3Ptr &eB);
-        void LinkFace(const KiriFace3Ptr &fA, const KiriFace3Ptr &fB, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
-        void LinkFaceEdge(const KiriFace3Ptr &f, const KiriEdge3Ptr &e);
+        bool LinkFace(const KiriFace3Ptr &fA, const KiriFace3Ptr &fB, const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
+        bool LinkFaceEdge(const KiriFace3Ptr &f, const KiriEdge3Ptr &e);
 
         void ResetFace(const KiriFace3Ptr &f, UInt idx);
         void CleanTwinEdge(const KiriEdge3Ptr &e);
@@ -54,7 +54,7 @@ namespace KIRI
         void FindHorizonEdgeList(const KiriEdge3Ptr &edge);
         const bool IsHorizonEdge(const KiriEdge3Ptr &edge);
 
-        void ComputeConvexHull();
+        bool ComputeConvexHull();
 
         void Reset();
 
