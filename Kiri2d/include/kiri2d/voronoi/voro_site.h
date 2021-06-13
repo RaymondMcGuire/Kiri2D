@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-10 18:44:01
+ * @LastEditTime: 2021-06-13 23:50:07
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
@@ -38,6 +38,7 @@ namespace KIRI
         {
             mWeight = weight;
             mPercentage = MEpsilon<float>();
+            mRadius = MEpsilon<float>();
         }
 
         explicit KiriVoroSite(float x, float y, float weight, float percent)
@@ -45,6 +46,7 @@ namespace KIRI
         {
             mWeight = weight;
             mPercentage = percent;
+            mRadius = MEpsilon<float>();
         }
 
         virtual ~KiriVoroSite() noexcept {}
@@ -55,9 +57,14 @@ namespace KIRI
             mWeight = weight;
             SetValue(Vector3F(v.x, v.y, ProjectZ(v.x, v.y, weight)));
         }
+
         void SetPercentage(float percent) { mPercentage = percent; }
+        void SetRadius(float radius) { mRadius = radius; }
+
         constexpr float GetWeight() const { return mWeight; }
         constexpr float GetPercentage() const { return mPercentage; }
+        constexpr float GetRadius() const { return mRadius; }
+
         const KiriVoroCellPolygon2Ptr &GetCellPolygon() const { return mVoroCellPolygon2; }
 
         const Vector<SharedPtr<KiriVoroSite>> &GetNeighborSites() const { return mNeighborSites; }
@@ -72,18 +79,12 @@ namespace KIRI
         void ResetValue(const Vector2F &val)
         {
             SetValue(Vector3F(val.x, val.y, ProjectZ(val.x, val.y, mWeight)));
-            //mNeighborSites.clear();
-            //mLastNeighborSites.clear();
-            //mVoroCellPolygon2->Reset();
         }
 
         void ResetValue(const Vector3F &val)
         {
             mWeight = val.z;
             SetValue(Vector3F(val.x, val.y, ProjectZ(val.x, val.y, val.z)));
-            //mNeighborSites.clear();
-            // mLastNeighborSites.clear();
-            // mVoroCellPolygon2->Reset();
         }
 
         void SetCellPolygon(const KiriVoroCellPolygon2Ptr &polygon)
@@ -109,7 +110,7 @@ namespace KIRI
     private:
         float ProjectZ(float x, float y, float weight) { return (x * x + y * y - weight); }
 
-        float mWeight, mPercentage;
+        float mWeight, mPercentage, mRadius;
         bool mBoundarySite = false;
 
         Vector<SharedPtr<KiriVoroSite>> mNeighborSites;

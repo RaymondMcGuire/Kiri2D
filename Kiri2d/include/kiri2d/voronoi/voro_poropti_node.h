@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-11 11:05:41
+ * @LastEditTime: 2021-06-13 23:52:17
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_node.h
@@ -23,8 +23,8 @@ namespace KIRI
         explicit KiriVoroPoroOptiNode(Vector2F pos, float radius)
         {
             mCore = std::make_shared<KiriVoroPoroOptiCore>();
-            mSite = std::make_shared<KiriVoroSite>(pos, radius);
-            //mSite = std::make_shared<KiriVoroSite>(pos.x, pos.y, radius * radius + MEpsilon<float>(), radius);
+            mSite = std::make_shared<KiriVoroSite>(pos);
+            mSite->SetRadius(radius);
         }
 
         ~KiriVoroPoroOptiNode() noexcept {}
@@ -37,7 +37,7 @@ namespace KIRI
 
         void ComputeIterate();
 
-        Vector4F ComputeMaxInscribedCircle() const { return Vector4F(mCore->ComputeMaxInscribedCircle(), mSite->GetPercentage()); };
+        Vector4F ComputeMaxInscribedCircle() const { return Vector4F(mCore->ComputeMaxInscribedCircle(), mSite->GetRadius()); };
 
     private:
         KiriVoroSitePtr mSite;

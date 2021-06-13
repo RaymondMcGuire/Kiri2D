@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-10 22:46:24
+ * @LastEditTime: 2021-06-14 00:03:55
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -50,9 +50,7 @@ namespace KIRI
         Vector3F ComputeMaxInscribedCircle() const { return mPowerDiagram->ComputeMaxInscribedCircle(); };
 
     private:
-        void ComputeVoroSiteMovement();
         void ComputeVoroSiteWeightError();
-
         void ComputeBoundaryPolygonArea();
 
         float GetGlobalAvgDistance();

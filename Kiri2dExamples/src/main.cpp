@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-11 11:17:54
+ * @LastEditTime: 2021-06-14 00:01:31
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -684,15 +684,22 @@ void VoroTestExample()
     std::random_device seedGen;
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
+    std::uniform_real_distribution<float> rdist(-1.f, 1.f);
 
+    auto totalArea = boundaryPoly->GetPolygonArea();
     auto cnt = 0, maxcnt = 20;
+    auto avgRadius = std::sqrt(totalArea / maxcnt / KIRI_PI<float>());
+    KIRI_LOG_DEBUG("avg radius={0}", avgRadius);
+
     while (cnt < maxcnt)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
-            auto radius = 100.f * dist(rndEngine);
-            auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y, MEpsilon<float>(), radius);
+            auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
+            KIRI_LOG_DEBUG("idx={0}, radius={1}", cnt, radius);
+            auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y);
+            site->SetRadius(radius);
             voroPorOptiCore->AddSite(site);
             cnt++;
         }

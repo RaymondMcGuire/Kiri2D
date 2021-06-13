@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-11 11:05:49
+ * @LastEditTime: 2021-06-14 00:27:25
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -25,30 +25,6 @@ namespace KIRI
 
     void KiriVoroPoroOptiCore::Reset()
     {
-    }
-
-    void KiriVoroPoroOptiCore::ComputeVoroSiteMovement()
-    {
-        auto epsilon = 0.001f;
-        auto voroSite = mPowerDiagram->GetVoroSites();
-        mVoroSitesMovemnet.assign(voroSite.size(), Vector2F(0.f));
-        for (size_t i = 0; i < voroSite.size(); i++)
-        {
-            // TODO change param name
-            auto radiusI = voroSite[i]->GetPercentage();
-            if (!voroSite[i]->GetNeighborSites().empty())
-            {
-                for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
-                {
-                    auto siteJ = voroSite[i]->GetNeighborSites()[j];
-                    auto distance = voroSite[i]->GetDistance2(siteJ);
-                    auto targetDis = distance - 2.f * radiusI;
-                    auto moveDir = Vector2F(voroSite[i]->GetValue().x, voroSite[i]->GetValue().y) - Vector2F(siteJ->GetValue().x, siteJ->GetValue().y);
-                    auto moveDis = moveDir.normalized() * targetDis * epsilon;
-                    mVoroSitesMovemnet[siteJ->GetIdx()] += moveDis;
-                }
-            }
-        }
     }
 
     void KiriVoroPoroOptiCore::CorrectVoroSitePos()
@@ -130,7 +106,7 @@ namespace KIRI
         {
             auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + MEpsilon<float>());
             auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
-            auto scale = 1000.f;
+            auto scale = 100.f;
             auto step = errorTransform * scale;
             auto weight = voroSite[i]->GetWeight();
 
@@ -139,13 +115,13 @@ namespace KIRI
             else if (mVoroSitesWeightError[i] > 0.f)
                 weight += step;
 
-            //KIRI_LOG_DEBUG("AdaptWeights: error={0}, step={1}, weight={2}", error, step, weight);
+            KIRI_LOG_DEBUG("AdaptWeights: error={0}, step={1}, weight={2}", error, step, weight);
             // // KIRI_LOG_DEBUG("AdaptWeights: mVoroSitesDisError={0}, mVoroSitesDisErrorAbs={1}, mCurGlobalDisError={2}", mVoroSitesDisError[i], mVoroSitesDisErrorAbs[i], mCurGlobalDisError);
 
             voroSite[i]->SetWeight(weight);
         }
 
-        // KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
+        KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
     }
 
     void KiriVoroPoroOptiCore::ComputeVoroSiteWeightError()
@@ -162,11 +138,12 @@ namespace KIRI
             if (!voroSite[i]->GetNeighborSites().empty())
             {
                 // TODO change param name
-                auto radiusI = voroSite[i]->GetPercentage();
+                auto radiusI = voroSite[i]->GetRadius();
                 for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
                 {
                     auto siteJ = voroSite[i]->GetNeighborSites()[j];
-                    total += siteJ->GetWeight() + siteJ->GetPercentage() * siteJ->GetPercentage();
+                    //total += siteJ->GetWeight() + siteJ->GetRadius() * siteJ->GetRadius();
+                    total += siteJ->GetWeight() - siteJ->GetRadius() * siteJ->GetRadius();
                     cnt++;
                 }
 
@@ -175,9 +152,14 @@ namespace KIRI
                 for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
                 {
                     auto siteJ = voroSite[i]->GetNeighborSites()[j];
-                    auto sum = siteJ->GetWeight() + siteJ->GetPercentage() * siteJ->GetPercentage();
-                    mVoroSitesWeightError[siteJ->GetIdx()] += avg - sum;
-                    mVoroSitesWeightAbsError[siteJ->GetIdx()] += std::abs(avg - sum);
+                    // auto sum = siteJ->GetWeight() + siteJ->GetRadius() * siteJ->GetRadius();
+                    // mVoroSitesWeightError[siteJ->GetIdx()] += avg - sum;
+                    // mVoroSitesWeightAbsError[siteJ->GetIdx()] += std::abs(avg - sum);
+                    // mCurGlobalWeightError += std::abs(avg - sum);
+
+                    auto sum = siteJ->GetWeight() - siteJ->GetRadius() * siteJ->GetRadius();
+                    mVoroSitesWeightError[i] += avg - sum;
+                    mVoroSitesWeightAbsError[i] += std::abs(avg - sum);
                     mCurGlobalWeightError += std::abs(avg - sum);
                 }
             }
