@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-13 23:52:17
+ * @LastEditTime: 2021-06-15 13:27:53
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_node.h
@@ -23,7 +23,7 @@ namespace KIRI
         explicit KiriVoroPoroOptiNode(Vector2F pos, float radius)
         {
             mCore = std::make_shared<KiriVoroPoroOptiCore>();
-            mSite = std::make_shared<KiriVoroSite>(pos);
+            mSite = std::make_shared<KiriVoroSite>(pos.x, pos.y);
             mSite->SetRadius(radius);
         }
 

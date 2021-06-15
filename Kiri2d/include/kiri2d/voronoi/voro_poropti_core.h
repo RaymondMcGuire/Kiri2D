@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-14 00:03:55
+ * @LastEditTime: 2021-06-15 11:52:16
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -44,6 +44,7 @@ namespace KIRI
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
 
         void Init();
+        void InitWeight();
 
         void Reset();
 
@@ -54,7 +55,7 @@ namespace KIRI
         void ComputeBoundaryPolygonArea();
 
         float GetGlobalAvgDistance();
-
+        float GetGlobalAreaError();
         float Iterate();
 
         void CorrectVoroSitePos();
@@ -64,6 +65,7 @@ namespace KIRI
 
         KiriPowerDiagramPtr mPowerDiagram;
 
+        float mCompleteArea;
         float mCurGlobalWeightError;
         Vector<float> mVoroSitesWeightError, mVoroSitesWeightAbsError;
         Vector<Vector2F> mVoroSitesMovemnet;

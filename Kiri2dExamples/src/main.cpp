@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-14 00:01:31
+ * @LastEditTime: 2021-06-15 13:43:06
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -687,7 +687,7 @@ void VoroTestExample()
     std::uniform_real_distribution<float> rdist(-1.f, 1.f);
 
     auto totalArea = boundaryPoly->GetPolygonArea();
-    auto cnt = 0, maxcnt = 20;
+    auto cnt = 0, maxcnt = 100;
     auto avgRadius = std::sqrt(totalArea / maxcnt / KIRI_PI<float>());
     KIRI_LOG_DEBUG("avg radius={0}", avgRadius);
 
@@ -698,7 +698,7 @@ void VoroTestExample()
         {
             auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
             KIRI_LOG_DEBUG("idx={0}, radius={1}", cnt, radius);
-            auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y);
+            auto site = std::make_shared<KiriVoroSite>(sitePos2);
             site->SetRadius(radius);
             voroPorOptiCore->AddSite(site);
             cnt++;
@@ -706,6 +706,7 @@ void VoroTestExample()
     }
     voroPorOptiCore->SetBoundaryPolygon2(boundaryPoly);
     voroPorOptiCore->Init();
+    //voroPorOptiCore->InitWeight();
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
@@ -833,7 +834,7 @@ void VoroPorosityOptimizeExample()
             {
                 auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
                 circles.emplace_back(maxCir2);
-                //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
+                KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
             }
 
             scene->AddLines(lines);
@@ -872,9 +873,9 @@ int main()
     //NOCAJ12Example();
     //NOCAJ12Example1();
 
-    VoroTestExample();
+    //VoroTestExample();
 
-    //VoroPorosityOptimizeExample();
+    VoroPorosityOptimizeExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

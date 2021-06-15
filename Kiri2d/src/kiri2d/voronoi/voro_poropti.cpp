@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-11 11:03:37
+ * @LastEditTime: 2021-06-15 13:43:38
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
@@ -25,7 +25,7 @@ namespace KIRI
         std::uniform_real_distribution<float> rdist(-1.f, 1.f);
 
         auto totalArea = mRootBoundary->GetPolygonArea();
-        auto cnt = 0, maxcnt = 1000;
+        auto cnt = 0, maxcnt = 20;
         auto avgRadius = std::sqrt(totalArea / maxcnt / KIRI_PI<float>());
         KIRI_LOG_DEBUG("avg radius={0}", avgRadius);
 

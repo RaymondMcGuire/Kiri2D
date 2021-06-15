@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-14 00:27:25
+ * @LastEditTime: 2021-06-15 13:23:12
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -16,15 +16,30 @@ namespace KIRI
 
         Reset();
 
-        // ComputeBoundaryPolygonArea();
+        ComputeBoundaryPolygonArea();
 
         CorrectVoroSitePos();
 
         mPowerDiagram->ComputeDiagram();
     }
 
+    void KiriVoroPoroOptiCore::InitWeight()
+    {
+        auto voroSite = mPowerDiagram->GetVoroSites();
+        for (size_t i = 0; i < voroSite.size(); i++)
+        {
+            auto neighborSize = voroSite[i]->GetNeighborSites().size();
+            if (neighborSize > 2)
+            {
+                auto sqrtWeight = voroSite[i]->GetRadius() / std::cosf(KIRI_PI<float>() / neighborSize);
+                voroSite[i]->SetWeight(sqrtWeight * sqrtWeight);
+            }
+        }
+    }
+
     void KiriVoroPoroOptiCore::Reset()
     {
+        mCompleteArea = 0.f;
     }
 
     void KiriVoroPoroOptiCore::CorrectVoroSitePos()
@@ -52,19 +67,19 @@ namespace KIRI
 
     void KiriVoroPoroOptiCore::ComputeBoundaryPolygonArea()
     {
-        // if (mPowerDiagram->GetBoundaryPolygon2() == NULL)
-        // {
-        //     KIRI_LOG_ERROR("GetBoundaryPolygonArea::Please set boundary polygon!!");
-        //     mCompleteArea = 0.f;
-        //     return;
-        // }
+        if (mPowerDiagram->GetBoundaryPolygon2() == NULL)
+        {
+            KIRI_LOG_ERROR("GetBoundaryPolygonArea::Please set boundary polygon!!");
+            mCompleteArea = 0.f;
+            return;
+        }
 
-        // mCompleteArea = mPowerDiagram->GetBoundaryPolygon2()->GetPolygonArea();
+        mCompleteArea = mPowerDiagram->GetBoundaryPolygon2()->GetPolygonArea();
     }
 
     void KiriVoroPoroOptiCore::SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary)
     {
-        //mCompleteArea = boundary->GetPolygonArea();
+        mCompleteArea = boundary->GetPolygonArea();
         mPowerDiagram->SetBoundaryPolygon2(boundary);
     }
 
@@ -92,33 +107,78 @@ namespace KIRI
         //auto outside = mPowerDiagram->MoveVoroSites(mVoroSitesMovemnet);
 
         auto outside = mPowerDiagram->Move2Centroid();
-        // if (outside)
-        //     CorrectWeights();
+        if (outside)
+            CorrectWeights();
+    }
+
+    float KiriVoroPoroOptiCore::GetGlobalAreaError()
+    {
+        auto error = 0.f;
+        auto voroSite = mPowerDiagram->GetVoroSites();
+        for (size_t i = 0; i < voroSite.size(); i++)
+        {
+            auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+            auto n = voroSite[i]->GetNeighborSites().size();
+            if (n > 2)
+            {
+                auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+                auto targetArea = n * voroSite[i]->GetRadius() * voroSite[i]->GetRadius() * std::tanf(KIRI_PI<float>() / n);
+                error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.f);
+            }
+        }
+        return error;
     }
 
     void KiriVoroPoroOptiCore::AdaptWeights()
     {
         ComputeVoroSiteWeightError();
-        //auto gAvg = GetGlobalAvgDistance();
+
+        auto gAreaError = GetGlobalAreaError();
+        auto gAvgDistance = GetGlobalAvgDistance();
+
+        auto gammaArea = 1.f;
+        auto gammaBC = 0.1f;
 
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (size_t i = 0; i < voroSite.size(); i++)
         {
-            auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + MEpsilon<float>());
-            auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
-            auto scale = 100.f;
-            auto step = errorTransform * scale;
             auto weight = voroSite[i]->GetWeight();
 
-            if (mVoroSitesWeightError[i] < 0.f)
-                weight -= step;
-            else if (mVoroSitesWeightError[i] > 0.f)
-                weight += step;
+            auto areaWeight = 0.f;
+            auto bcWeight = 0.f;
 
-            KIRI_LOG_DEBUG("AdaptWeights: error={0}, step={1}, weight={2}", error, step, weight);
+            auto n = voroSite[i]->GetNeighborSites().size();
+            if (n > 2)
+            {
+                auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+                auto targetArea = n * voroSite[i]->GetRadius() * voroSite[i]->GetRadius() * std::tanf(KIRI_PI<float>() / n);
+
+                auto pArea = 2.f;
+                if (currentArea != 0.f)
+                    pArea = targetArea / currentArea;
+
+                auto areaErrorTransform = (-(gAreaError - 1.f) * (gAreaError - 1.f) + 1.f);
+                auto areaStep = gAvgDistance * areaErrorTransform * gammaArea;
+                if (pArea < (1.f - MEpsilon<float>()))
+                    areaWeight -= areaStep;
+                else if (pArea > (1.f + MEpsilon<float>()))
+                    areaWeight += areaStep;
+            }
+
+            auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + MEpsilon<float>());
+            auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
+
+            auto step = errorTransform * gammaBC;
+            if (mVoroSitesWeightError[i] < 0.f)
+                bcWeight -= step;
+            else if (mVoroSitesWeightError[i] > 0.f)
+                bcWeight += step;
+
+            //KIRI_LOG_DEBUG("AdaptWeights: error={0}, step={1}, weight={2}", error, step, weight);
             // // KIRI_LOG_DEBUG("AdaptWeights: mVoroSitesDisError={0}, mVoroSitesDisErrorAbs={1}, mCurGlobalDisError={2}", mVoroSitesDisError[i], mVoroSitesDisErrorAbs[i], mCurGlobalDisError);
 
-            voroSite[i]->SetWeight(weight);
+            //KIRI_LOG_DEBUG("AdaptWeights: idx={0}, weight={1}", i, weight + areaWeight + bcWeight);
+            voroSite[i]->SetWeight(weight + areaWeight + bcWeight);
         }
 
         KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
@@ -135,13 +195,15 @@ namespace KIRI
         {
             auto total = 0.f;
             auto cnt = 0;
-            if (!voroSite[i]->GetNeighborSites().empty())
+            auto siteI = voroSite[i];
+
+            if (!siteI->GetNeighborSites().empty())
             {
-                // TODO change param name
-                auto radiusI = voroSite[i]->GetRadius();
-                for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
+
+                auto radiusI = siteI->GetRadius();
+                for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
                 {
-                    auto siteJ = voroSite[i]->GetNeighborSites()[j];
+                    auto siteJ = siteI->GetNeighborSites()[j];
                     //total += siteJ->GetWeight() + siteJ->GetRadius() * siteJ->GetRadius();
                     total += siteJ->GetWeight() - siteJ->GetRadius() * siteJ->GetRadius();
                     cnt++;
@@ -149,18 +211,30 @@ namespace KIRI
 
                 auto avg = total / cnt;
 
-                for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
+                for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
                 {
-                    auto siteJ = voroSite[i]->GetNeighborSites()[j];
+                    auto siteJ = siteI->GetNeighborSites()[j];
                     // auto sum = siteJ->GetWeight() + siteJ->GetRadius() * siteJ->GetRadius();
                     // mVoroSitesWeightError[siteJ->GetIdx()] += avg - sum;
                     // mVoroSitesWeightAbsError[siteJ->GetIdx()] += std::abs(avg - sum);
                     // mCurGlobalWeightError += std::abs(avg - sum);
 
-                    auto sum = siteJ->GetWeight() - siteJ->GetRadius() * siteJ->GetRadius();
-                    mVoroSitesWeightError[i] += avg - sum;
-                    mVoroSitesWeightAbsError[i] += std::abs(avg - sum);
-                    mCurGlobalWeightError += std::abs(avg - sum);
+                    auto distance = siteI->GetDistance2(siteJ);
+                    auto minW = std::abs(std::sqrt(siteJ->GetWeight()) - std::sqrt(siteI->GetWeight()));
+                    auto maxW = std::sqrt(siteJ->GetWeight()) + std::sqrt(siteI->GetWeight());
+                    if (distance < maxW && distance > minW)
+                    {
+                        auto sum = siteJ->GetWeight() - siteJ->GetRadius() * siteJ->GetRadius();
+                        mVoroSitesWeightError[i] += avg - sum;
+                        mVoroSitesWeightAbsError[i] += std::abs(avg - sum);
+                        mCurGlobalWeightError += std::abs(avg - sum);
+                    }
+                    else
+                    {
+                        mVoroSitesWeightError[i] += distance * distance - siteI->GetWeight();
+                        mVoroSitesWeightAbsError[i] += std::abs(distance * distance - siteI->GetWeight());
+                        mCurGlobalWeightError += std::abs(distance * distance - siteI->GetWeight());
+                    }
                 }
             }
         }
@@ -174,14 +248,11 @@ namespace KIRI
 
         for (size_t i = 0; i < voroSite.size(); i++)
         {
-            //KIRI_LOG_DEBUG("voro site pos={0},{1}", voroSite[i]->GetValue().x, voroSite[i]->GetValue().y);
-            // KIRI_LOG_ERROR("GetGlobalAvgDistance:: voro n num={0}", voroSite[i]->GetNeighborSites().size());
             if (!voroSite[i]->GetNeighborSites().empty())
             {
                 for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
                 {
                     auto distance = voroSite[i]->GetDistance2(voroSite[i]->GetNeighborSites()[j]);
-                    // KIRI_LOG_DEBUG("distance = {0}", distance);
                     sum += distance;
                     num++;
                 }
