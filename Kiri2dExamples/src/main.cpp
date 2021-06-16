@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-16 11:16:06
+ * @LastEditTime: 2021-06-16 17:59:34
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -221,32 +221,37 @@ void VoronoiExample2()
     auto radius = 500.f;
     auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
 
-    // for (auto j = 0; j < numPoints; j++)
-    // {
-    //     auto angle = 2.0 * PI * (j * 1.f / numPoints);
-    //     auto rotate = 2.0 * PI / numPoints / 2;
-    //     auto y = std::sin(angle + rotate) * radius;
-    //     auto x = std::cos(angle + rotate) * radius;
-    //     auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+    for (auto j = 0; j < numPoints; j++)
+    {
+        auto angle = 2.0 * PI * (j * 1.f / numPoints);
+        auto rotate = 2.0 * PI / numPoints / 2;
+        auto y = std::sin(angle + rotate) * radius;
+        auto x = std::cos(angle + rotate) * radius;
+        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
 
-    //     boundary.Append(pos);
-    //     boundaryPoly->AddPolygonVertex2(pos);
-    // }
+        boundary.Append(pos);
+        boundaryPoly->AddPolygonVertex2(pos);
+    }
 
-    auto bp1 = Vector2F(0, 0);
-    auto bp2 = Vector2F(width, 0);
-    auto bp3 = Vector2F(width, height);
-    auto bp4 = Vector2F(0, height);
+    // auto bp1 = Vector2F(0, 0);
+    // auto bp2 = Vector2F(width, 0);
+    // auto bp3 = Vector2F(width, height);
+    // auto bp4 = Vector2F(0, height);
 
-    boundary.Append(bp1);
-    boundary.Append(bp2);
-    boundary.Append(bp3);
-    boundary.Append(bp4);
+    // auto bp1 = Vector2F(0, height);
+    // auto bp2 = Vector2F(width, height);
+    // auto bp3 = Vector2F(width, 0);
+    // auto bp4 = Vector2F(0, 0);
 
-    boundaryPoly->AddPolygonVertex2(bp1);
-    boundaryPoly->AddPolygonVertex2(bp2);
-    boundaryPoly->AddPolygonVertex2(bp3);
-    boundaryPoly->AddPolygonVertex2(bp4);
+    // boundary.Append(bp1);
+    // boundary.Append(bp2);
+    // boundary.Append(bp3);
+    // boundary.Append(bp4);
+
+    // boundaryPoly->AddPolygonVertex2(bp1);
+    // boundaryPoly->AddPolygonVertex2(bp2);
+    // boundaryPoly->AddPolygonVertex2(bp3);
+    // boundaryPoly->AddPolygonVertex2(bp4);
 
     auto pd = std::make_shared<KiriPowerDiagram>();
 
@@ -282,20 +287,24 @@ void VoronoiExample2()
 
     Vector<KiriPoint2> points;
     Vector<KiriLine2> lines;
+    Vector<KiriCircle2> circles;
 
     // debug shrink
-    boundaryPoly->ComputeStraightSkeleton(100.f);
-    auto shrinks = boundaryPoly->GetShrinks();
-    //auto shrinks = boundaryPoly->GetSkeletons();
+    // boundaryPoly->ComputeStraightSkeleton(100.f);
+    // //auto shrinks = boundaryPoly->GetShrinks();
+    // auto skeletons = boundaryPoly->GetSkeletons();
+    // auto mic = boundaryPoly->ComputeMICByStraightSkeleton();
+    // auto micPos = Transform2Original(Vector2F(mic.x, mic.y), height) + offsetVec2;
+    // circles.emplace_back(KiriCircle2(micPos, Vector3F(255.f, 0.f, 255.f), mic.z));
 
-    for (size_t i = 0; i < shrinks.size(); i++)
-    {
-        auto start = Transform2Original(Vector2F(shrinks[i].x, shrinks[i].y), height) + offsetVec2;
-        auto end = Transform2Original(Vector2F(shrinks[i].z, shrinks[i].w), height) + offsetVec2;
-        auto line = KiriLine2(start, end);
-        line.col = Vector3F(0.f, 0.f, 255.f);
-        lines.emplace_back(line);
-    }
+    // for (size_t i = 0; i < skeletons.size(); i++)
+    // {
+    //     auto start = Transform2Original(Vector2F(skeletons[i].x, skeletons[i].y), height) + offsetVec2;
+    //     auto end = Transform2Original(Vector2F(skeletons[i].z, skeletons[i].w), height) + offsetVec2;
+    //     auto line = KiriLine2(start, end);
+    //     line.col = Vector3F(0.f, 0.f, 255.f);
+    //     lines.emplace_back(line);
+    // }
 
     //voronoi sites
     auto sites = pd->GetVoroSites();
@@ -307,6 +316,20 @@ void VoronoiExample2()
         auto poly = sites[i]->GetCellPolygon();
         if (poly != NULL)
         {
+            poly->ComputeStraightSkeleton(1.f);
+            auto mic = poly->ComputeMICByStraightSkeleton();
+            auto micPos = Transform2Original(Vector2F(mic.x, mic.y), height) + offsetVec2;
+            circles.emplace_back(KiriCircle2(micPos, Vector3F(0.f, 0.f, 100.f), mic.z));
+            auto skeletons = poly->GetSkeletons();
+            for (size_t j = 0; j < skeletons.size(); j++)
+            {
+                auto start = Transform2Original(Vector2F(skeletons[j].x, skeletons[j].y), height) + offsetVec2;
+                auto end = Transform2Original(Vector2F(skeletons[j].z, skeletons[j].w), height) + offsetVec2;
+                auto line = KiriLine2(start, end);
+                line.col = Vector3F(0.f, 0.f, 255.f);
+                lines.emplace_back(line);
+            }
+
             poly->ComputeVoroSitesList();
             auto list = poly->GetVoroSitesList();
             // list->PrintVertexList();
@@ -324,7 +347,7 @@ void VoronoiExample2()
 
     scene->AddLines(lines);
     scene->AddParticles(points);
-    //scene->AddCircle(maxCir2);
+    scene->AddCircles(circles);
 
     renderer->DrawCanvas();
 
@@ -816,7 +839,7 @@ void VoroPorosityOptimizeExample()
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     Vector<float> errorArray, porosityArray;
-    for (size_t i = 0; i < 2000; i++)
+    for (size_t i = 0; i < 1500; i++)
     {
 
         auto error = opti->ComputeIterate();
@@ -824,10 +847,8 @@ void VoroPorosityOptimizeExample()
 
         if (i % 10 == 1)
         {
-            opti->ComputeChildIterate();
-            auto porosity = opti->ComputeMiniumPorosity();
-            porosityArray.emplace_back(porosity);
-            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error);
+            //MIC calculated by vornoi
+            //opti->ComputeChildIterate();
 
             Vector<KiriPoint2> points;
             Vector<KiriLine2> lines;
@@ -859,17 +880,45 @@ void VoroPorosityOptimizeExample()
                 }
             }
 
-            auto maxIC = opti->GetLeafNodeMaxInscribedCircle();
+            // auto maxIC = opti->GetLeafNodeMaxInscribedCircle();
+            auto maxIC = opti->GetMICByStraightSkeleton();
+            auto porosity = opti->ComputeMiniumPorosity();
+            porosityArray.emplace_back(porosity);
+            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error);
+
             for (size_t i = 0; i < maxIC.size(); i++)
             {
                 auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
                 circles.emplace_back(maxCir2);
-                KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
+                //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
             }
 
-            scene->AddLines(lines);
+            // auto skeletons = opti->GetCellSkeletons();
+
+            // for (size_t j = 0; j < skeletons.size(); j++)
+            // {
+            //     auto start = Transform2Original(Vector2F(skeletons[j].x, skeletons[j].y), height) + offsetVec2;
+            //     auto end = Transform2Original(Vector2F(skeletons[j].z, skeletons[j].w), height) + offsetVec2;
+            //     auto line = KiriLine2(start, end);
+            //     line.col = Vector3F(0.f, 0.f, 100.f);
+
+            //     lines.emplace_back(line);
+            // }
+
+            // auto shrinks = opti->GetCellShrinks();
+
+            // for (size_t j = 0; j < shrinks.size(); j++)
+            // {
+            //     auto start = Transform2Original(Vector2F(shrinks[j].x, shrinks[j].y), height) + offsetVec2;
+            //     auto end = Transform2Original(Vector2F(shrinks[j].z, shrinks[j].w), height) + offsetVec2;
+            //     auto line = KiriLine2(start, end);
+            //     line.col = Vector3F(0.f, 0.f, 100.f);
+            //     lines.emplace_back(line);
+            // }
+
             scene->AddParticles(points);
             scene->AddCircles(circles);
+            scene->AddLines(lines);
 
             renderer->DrawCanvas();
             renderer->SaveImages2File();
@@ -878,7 +927,7 @@ void VoroPorosityOptimizeExample()
             scene->Clear();
         }
     }
-    ExportPoroityData2CSVFile("D:/project/Kiri2D/export/csv/test.csv", errorArray, porosityArray);
+    ExportPoroityData2CSVFile("E:/PBCGLab/project/Kiri2D/export/csv/test.csv", errorArray, porosityArray);
     // while (1)
     // {
 
@@ -894,7 +943,7 @@ int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
-    VoronoiExample2();
+    // VoronoiExample2();
 
     // LloydRelaxationExample();
 
@@ -905,7 +954,7 @@ int main()
 
     //VoroTestExample();
 
-    //VoroPorosityOptimizeExample();
+    VoroPorosityOptimizeExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

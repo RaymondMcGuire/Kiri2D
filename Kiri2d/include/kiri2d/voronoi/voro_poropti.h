@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-10 22:49:05
+ * @LastEditTime: 2021-06-16 16:55:42
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
@@ -61,6 +61,70 @@ namespace KIRI
                 circles.emplace_back(mNodes[i]->ComputeMaxInscribedCircle());
 
             return circles;
+        }
+
+        Vector<Vector4F> GetMICByStraightSkeleton()
+        {
+            Vector<Vector4F> circles;
+            auto sites = mRootCore->GetSites();
+
+            for (size_t i = 0; i < sites.size(); i++)
+            {
+                auto poly = sites[i]->GetCellPolygon();
+                if (poly != NULL)
+                {
+                    if (poly->GetSkeletons().empty())
+                        poly->ComputeStraightSkeleton(20.f);
+                    auto mic = poly->ComputeMICByStraightSkeleton();
+                    circles.emplace_back(Vector4F(mic, sites[i]->GetRadius()));
+                }
+                else
+                {
+                    KIRI_LOG_DEBUG("no polgyon");
+                }
+            }
+
+            return circles;
+        }
+
+        Vector<Vector4F> GetCellSkeletons()
+        {
+            Vector<Vector4F> skeletons;
+            auto sites = mRootCore->GetSites();
+
+            for (size_t i = 0; i < sites.size(); i++)
+            {
+                auto poly = sites[i]->GetCellPolygon();
+                if (poly != NULL)
+                {
+                    if (poly->GetSkeletons().empty())
+                        poly->ComputeStraightSkeleton(1.f);
+                    auto sk = poly->GetSkeletons();
+                    skeletons.insert(skeletons.end(), sk.begin(), sk.end());
+                }
+            }
+
+            return skeletons;
+        }
+
+        Vector<Vector4F> GetCellShrinks()
+        {
+            Vector<Vector4F> shrinks;
+            auto sites = mRootCore->GetSites();
+
+            for (size_t i = 0; i < sites.size(); i++)
+            {
+                auto poly = sites[i]->GetCellPolygon();
+                if (poly != NULL)
+                {
+                    if (poly->GetShrinks().empty())
+                        poly->ComputeStraightSkeleton(1.f);
+                    auto sr = poly->GetShrinks();
+                    shrinks.insert(shrinks.end(), sr.begin(), sr.end());
+                }
+            }
+
+            return shrinks;
         }
 
         float ComputeMiniumPorosity();

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-16 10:04:07
+ * @LastEditTime: 2021-06-16 16:29:38
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
@@ -52,6 +52,7 @@ namespace KIRI
             mPolygonVertices2.clear();
             mBisectors.clear();
             mShrinks.clear();
+            mSkeletons.clear();
         }
 
         bool CheckBBox();
@@ -83,6 +84,8 @@ namespace KIRI
         void ComputeStraightSkeleton(float lambda);
         const Vector<Vector4F> &GetShrinks() const { return mShrinks; }
         const Vector<Vector4F> &GetSkeletons() const { return mSkeletons; }
+
+        Vector3F ComputeMICByStraightSkeleton();
 
     private:
         BoundingBox2F mBBox2;

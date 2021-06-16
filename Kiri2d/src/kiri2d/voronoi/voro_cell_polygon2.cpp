@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-16 11:15:30
+ * @LastEditTime: 2021-06-16 16:38:57
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -32,12 +32,6 @@ namespace KIRI
     {
         auto cw = IsClockwise(poly);
         auto polySize = poly.size();
-
-        if (polySize < 3)
-        {
-            KIRI_LOG_ERROR("ComputeBisectors: voro cell is not polygon!");
-            return;
-        }
 
         mBisectors.clear();
 
@@ -77,7 +71,10 @@ namespace KIRI
             else
                 curPoint = s + mBisectors[i];
 
-            nextPoint = e + mBisectors[(i + 1) % polySize];
+            if (i == polySize - 1)
+                nextPoint = Vector2F(shrink[0].x, shrink[0].y);
+            else
+                nextPoint = e + mBisectors[i + 1];
 
             auto intersection = IntersectionPoint2(s, curPoint, e, nextPoint);
             if (intersection.z == 1.f)
@@ -89,6 +86,7 @@ namespace KIRI
                 if (shrink.size() > 0)
                     shrink[shrink.size() - 1] = Vector4F(shrink[shrink.size() - 1].x, shrink[shrink.size() - 1].y, curPoint.x, curPoint.y);
             }
+
             shrink.emplace_back(Vector4F(curPoint.x, curPoint.y, nextPoint.x, nextPoint.y));
         }
 
@@ -105,16 +103,30 @@ namespace KIRI
             auto v2 = mPolygonVertices2[(i + 1) % mPolygonVertices2.size()];
             poly.emplace_back(Vector4F(v1.x, v1.y, v2.x, v2.y));
         }
+
+        if (IsClockwise(poly))
+        {
+            Vector<Vector2F> rPolyVert(mPolygonVertices2);
+            std::reverse(rPolyVert.begin(), rPolyVert.end());
+
+            poly.clear();
+            for (size_t i = 0; i < rPolyVert.size(); i++)
+            {
+                auto v1 = rPolyVert[i];
+                auto v2 = rPolyVert[(i + 1) % rPolyVert.size()];
+                poly.emplace_back(Vector4F(v1.x, v1.y, v2.x, v2.y));
+            }
+        }
+
         Vector<Vector4F> oPoly(poly);
         Vector2F point = Vector2F(0.f);
         auto cnt = 0;
-        while (cnt < 10)
+        while (cnt < 10000)
         {
             auto status = ComputeShrink(poly, lambda);
             auto shrink = status.shrink;
             mShrinks.insert(mShrinks.end(), shrink.begin(), shrink.end());
 
-            poly = shrink;
             Vector<Vector4F> newPoly(shrink);
 
             if (status.intersection)
@@ -148,8 +160,6 @@ namespace KIRI
             if (newPoly.size() == 2)
                 if (IsApproxVec4(newPoly[0], newPoly[1], 0.01f))
                     newPoly.pop_back();
-                else
-                    newPoly.emplace_back(Vector4F(newPoly[1].z, newPoly[1].w, newPoly[0].x, newPoly[0].y));
 
             if (newPoly.size() <= 1)
             {
@@ -161,10 +171,44 @@ namespace KIRI
 
                 break;
             }
-
-            KIRI_LOG_DEBUG("poly size={0}", newPoly.size());
+            poly = newPoly;
             cnt++;
         }
+    }
+
+    Vector3F KiriVoroCellPolygon2::ComputeMICByStraightSkeleton()
+    {
+        auto maxCirVec = Vector2F(0.f);
+        auto maxCirRad = Tiny<float>();
+        if (!mSkeletons.empty())
+        {
+            for (size_t i = 0; i < mSkeletons.size(); i++)
+            {
+                auto v1 = Vector2F(mSkeletons[i].x, mSkeletons[i].y);
+                auto v2 = Vector2F(mSkeletons[i].z, mSkeletons[i].w);
+
+                if (Contains(v1))
+                {
+                    auto minDis = ComputeMinDisInPoly(v1);
+                    if (minDis > maxCirRad)
+                    {
+                        maxCirRad = minDis;
+                        maxCirVec = v1;
+                    }
+                }
+
+                if (Contains(v2))
+                {
+                    auto minDis = ComputeMinDisInPoly(v2);
+                    if (minDis > maxCirRad)
+                    {
+                        maxCirRad = minDis;
+                        maxCirVec = v2;
+                    }
+                }
+            }
+        }
+        return Vector3F(maxCirVec.x, maxCirVec.y, maxCirRad);
     }
 
     bool KiriVoroCellPolygon2::CheckBBox()

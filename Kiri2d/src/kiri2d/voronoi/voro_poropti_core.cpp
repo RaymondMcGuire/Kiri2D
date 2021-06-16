@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-15 13:23:12
+ * @LastEditTime: 2021-06-16 17:14:19
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -273,8 +273,9 @@ namespace KIRI
 
         AdaptPositionsWeights();
         AdaptWeights();
-        if (!mPowerDiagram->ComputeDiagram())
-            mPowerDiagram->ReGenVoroSites();
+        mPowerDiagram->ComputeDiagram();
+        //  if (!mPowerDiagram->ComputeDiagram())
+        //     mPowerDiagram->ReGenVoroSites();
 
         return mCurGlobalWeightError;
     }
@@ -286,8 +287,9 @@ namespace KIRI
 
     void KiriVoroPoroOptiCore::ComputeDiagram()
     {
-        if (!mPowerDiagram->ComputeDiagram())
-            mPowerDiagram->ReGenVoroSites();
+        //mPowerDiagram->ComputeDiagram()
+        // if (!mPowerDiagram->ComputeDiagram())
+        //     mPowerDiagram->ReGenVoroSites();
     }
 
     void KiriVoroPoroOptiCore::ComputeLloyd(UInt num)

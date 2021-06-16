@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-16 09:44:11
+ * @LastEditTime: 2021-06-16 14:55:23
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_util.h
@@ -65,6 +65,7 @@ namespace KIRI
         // the edges are ordered clockwise; positive when ordered counterclockwise
         if ((c > 0 && cw) || (c < 0 && !cw))
             a = 2 * KIRI_PI<float>() - a; // ensuring angle is that of the interior angle
+
         return a;
     }
 

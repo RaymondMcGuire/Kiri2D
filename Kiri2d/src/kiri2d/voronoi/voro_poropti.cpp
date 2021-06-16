@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-15 13:43:38
+ * @LastEditTime: 2021-06-16 16:56:05
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
@@ -25,7 +25,7 @@ namespace KIRI
         std::uniform_real_distribution<float> rdist(-1.f, 1.f);
 
         auto totalArea = mRootBoundary->GetPolygonArea();
-        auto cnt = 0, maxcnt = 20;
+        auto cnt = 0, maxcnt = 1000;
         auto avgRadius = std::sqrt(totalArea / maxcnt / KIRI_PI<float>());
         KIRI_LOG_DEBUG("avg radius={0}", avgRadius);
 
@@ -34,7 +34,6 @@ namespace KIRI
             auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
             if (mRootBoundary->Contains(sitePos2))
             {
-
                 auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
                 auto node = std::make_shared<KiriVoroPoroOptiNode>(sitePos2, radius);
                 mNodes.emplace_back(node);
@@ -49,15 +48,16 @@ namespace KIRI
         mRootCore->Init();
         mRootCore->ComputeIterate();
 
-        for (size_t i = 0; i < mNodes.size(); i++)
-        {
-            mNodes[i]->InitCore();
-        }
+        // for (size_t i = 0; i < mNodes.size(); i++)
+        // {
+        //     mNodes[i]->InitCore();
+        // }
     }
 
     float KiriVoroPoroOpti::ComputeMiniumPorosity()
     {
-        auto maxCircleArray = GetLeafNodeMaxInscribedCircle();
+        //auto maxCircleArray = GetLeafNodeMaxInscribedCircle();
+        auto maxCircleArray = GetMICByStraightSkeleton();
         auto sum = 0.f;
 
         for (size_t i = 0; i < maxCircleArray.size(); i++)
