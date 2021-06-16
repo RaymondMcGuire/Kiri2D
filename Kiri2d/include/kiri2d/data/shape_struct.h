@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-03-29 03:24:37
+ * @LastEditTime: 2021-06-16 01:35:10
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\shape_struct.h
@@ -47,6 +47,8 @@ namespace KIRI2D
     {
         Vector2F start;
         Vector2F end;
+        Vector3F col = Vector3F(253, 185, 134);
+        float thick = 5.f;
 
         KiriLine2(
             Vector2F _start,

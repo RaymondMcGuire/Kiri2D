@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-08 16:23:24
+ * @LastEditTime: 2021-06-16 11:15:30
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -13,6 +13,159 @@
 
 namespace KIRI
 {
+
+    bool KiriVoroCellPolygon2::IsClockwise(const Vector<Vector4F> &poly)
+    {
+        auto a = 0.f;
+        auto polySize = poly.size();
+        for (size_t i = 0; i < polySize; i++)
+        {
+            auto s = Vector2F(poly[i].x, poly[i].y);
+            auto e = Vector2F(poly[i].z, poly[i].w);
+            a += (e.x - s.x) * (e.y + s.y);
+        }
+
+        return a < 0.f;
+    }
+
+    void KiriVoroCellPolygon2::ComputeBisectors(const Vector<Vector4F> &poly, float lambda)
+    {
+        auto cw = IsClockwise(poly);
+        auto polySize = poly.size();
+
+        if (polySize < 3)
+        {
+            KIRI_LOG_ERROR("ComputeBisectors: voro cell is not polygon!");
+            return;
+        }
+
+        mBisectors.clear();
+
+        for (size_t i = polySize; i < polySize * 2; i++)
+        {
+            auto eprev = poly[(i - 1) % polySize];
+            auto ecurr = poly[i % polySize];
+            auto p1 = Vector2F(eprev.x, eprev.y);
+            auto p2 = Vector2F(eprev.z, eprev.w);
+            auto p3 = Vector2F(ecurr.z, ecurr.w);
+            auto d = DirectionBetween2Edges2(p1, p2, p3, cw);
+            mBisectors.emplace_back(d * lambda);
+        }
+    }
+
+    IntersectionStatus KiriVoroCellPolygon2::ComputeShrink(const Vector<Vector4F> &poly, float lambda)
+    {
+
+        ComputeBisectors(poly, lambda);
+
+        IntersectionStatus status;
+        Vector<Vector4F> shrink;
+
+        status.intersection = false;
+        auto updateNextPoint = false;
+        auto curPoint = Vector2F(0.f);
+        auto nextPoint = Vector2F(0.f);
+
+        auto polySize = poly.size();
+        for (size_t i = 0; i < polySize; i++)
+        {
+            auto s = Vector2F(poly[i].x, poly[i].y);
+            auto e = Vector2F(poly[i].z, poly[i].w);
+
+            if (updateNextPoint)
+                updateNextPoint = false;
+            else
+                curPoint = s + mBisectors[i];
+
+            nextPoint = e + mBisectors[(i + 1) % polySize];
+
+            auto intersection = IntersectionPoint2(s, curPoint, e, nextPoint);
+            if (intersection.z == 1.f)
+            {
+                status.intersection = true;
+                updateNextPoint = true;
+                curPoint = nextPoint = Vector2F(intersection.x, intersection.y);
+
+                if (shrink.size() > 0)
+                    shrink[shrink.size() - 1] = Vector4F(shrink[shrink.size() - 1].x, shrink[shrink.size() - 1].y, curPoint.x, curPoint.y);
+            }
+            shrink.emplace_back(Vector4F(curPoint.x, curPoint.y, nextPoint.x, nextPoint.y));
+        }
+
+        status.shrink = shrink;
+        return status;
+    }
+
+    void KiriVoroCellPolygon2::ComputeStraightSkeleton(float lambda)
+    {
+        Vector<Vector4F> poly;
+        for (size_t i = 0; i < mPolygonVertices2.size(); i++)
+        {
+            auto v1 = mPolygonVertices2[i];
+            auto v2 = mPolygonVertices2[(i + 1) % mPolygonVertices2.size()];
+            poly.emplace_back(Vector4F(v1.x, v1.y, v2.x, v2.y));
+        }
+        Vector<Vector4F> oPoly(poly);
+        Vector2F point = Vector2F(0.f);
+        auto cnt = 0;
+        while (cnt < 10)
+        {
+            auto status = ComputeShrink(poly, lambda);
+            auto shrink = status.shrink;
+            mShrinks.insert(mShrinks.end(), shrink.begin(), shrink.end());
+
+            poly = shrink;
+            Vector<Vector4F> newPoly(shrink);
+
+            if (status.intersection)
+            {
+                auto removePoints = std::remove_if(newPoly.begin(),
+                                                   newPoly.end(),
+                                                   [&point](const Vector4F &elem)
+                                                   {
+                                                       auto res = IsApproxVec2(Vector2F(elem.x, elem.y), Vector2F(elem.z, elem.w), 0.01f);
+
+                                                       if (res.z == 0.f)
+                                                       {
+                                                           point = Vector2F(res.x, res.y);
+                                                           return false;
+                                                       }
+                                                       else
+                                                           return true;
+                                                   });
+
+                newPoly.erase(removePoints, newPoly.end());
+            }
+
+            if (newPoly.size() < poly.size())
+            {
+                for (size_t i = 0; i < oPoly.size(); i++)
+                    mSkeletons.emplace_back(Vector4F(oPoly[i].x, oPoly[i].y, shrink[i].x, shrink[i].y));
+
+                oPoly = newPoly;
+            }
+
+            if (newPoly.size() == 2)
+                if (IsApproxVec4(newPoly[0], newPoly[1], 0.01f))
+                    newPoly.pop_back();
+                else
+                    newPoly.emplace_back(Vector4F(newPoly[1].z, newPoly[1].w, newPoly[0].x, newPoly[0].y));
+
+            if (newPoly.size() <= 1)
+            {
+                if (newPoly.size() == 1)
+                    mSkeletons.emplace_back(newPoly[0]);
+                else
+                    for (size_t i = 0; i < oPoly.size(); i++)
+                        mSkeletons.emplace_back(Vector4F(oPoly[i].x, oPoly[i].y, point.x, point.y));
+
+                break;
+            }
+
+            KIRI_LOG_DEBUG("poly size={0}", newPoly.size());
+            cnt++;
+        }
+    }
 
     bool KiriVoroCellPolygon2::CheckBBox()
     {

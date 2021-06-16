@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-08 16:20:08
+ * @LastEditTime: 2021-06-16 10:04:07
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
@@ -16,13 +16,17 @@
 
 namespace KIRI
 {
+    struct IntersectionStatus
+    {
+        bool intersection = false;
+        Vector<Vector4F> shrink;
+    };
 
     class KiriVoroCellPolygon2
     {
     public:
-        explicit KiriVoroCellPolygon2::KiriVoroCellPolygon2()
+        explicit KiriVoroCellPolygon2()
         {
-
             mVoroSitesList = std::make_shared<KiriVector2List>();
         }
 
@@ -46,6 +50,8 @@ namespace KIRI
             mBBox2.reset();
             mVoroSitesList->RemoveAll();
             mPolygonVertices2.clear();
+            mBisectors.clear();
+            mShrinks.clear();
         }
 
         bool CheckBBox();
@@ -71,10 +77,22 @@ namespace KIRI
 
         float ComputeMinDisInPoly(const Vector2F &p);
 
+        bool IsClockwise(const Vector<Vector4F> &poly);
+
+        IntersectionStatus ComputeShrink(const Vector<Vector4F> &poly, float lambda);
+        void ComputeStraightSkeleton(float lambda);
+        const Vector<Vector4F> &GetShrinks() const { return mShrinks; }
+        const Vector<Vector4F> &GetSkeletons() const { return mSkeletons; }
+
     private:
         BoundingBox2F mBBox2;
         KiriVector2ListPtr mVoroSitesList;
         Vector<Vector2F> mPolygonVertices2;
+
+        Vector<Vector2F> mBisectors;
+        Vector<Vector4F> mShrinks, mSkeletons;
+
+        void ComputeBisectors(const Vector<Vector4F> &poly, float lambda);
     };
 
     typedef SharedPtr<KiriVoroCellPolygon2> KiriVoroCellPolygon2Ptr;

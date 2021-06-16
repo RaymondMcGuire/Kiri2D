@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-06-10 21:15:23
+ * @LastEditTime: 2021-06-16 01:34:31
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\renderer\renderer.cpp
@@ -72,7 +72,7 @@ namespace KIRI2D
             Vector2F end_relate_position = mScene->GetCamera()->Project(lines[i].end);
             int ex = end_relate_position[0];
             int ey = mWindowHeight - end_relate_position[1];
-            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 5.f * mScene->GetCamera()->ViewScale());
+            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(lines[i].col.x, lines[i].col.y, lines[i].col.z), lines[i].thick * mScene->GetCamera()->ViewScale());
         }
 
         auto rects = mScene->GetRects();

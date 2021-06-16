@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-02 23:09:09
+ * @LastEditTime: 2021-06-16 00:38:26
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\vector2_list.h
@@ -94,7 +94,6 @@ namespace KIRI
         }
 
     private:
-        //??
         bool CheckVertex2Identity(const Vector2F &v1)
         {
             auto epsilon = 0.1f;

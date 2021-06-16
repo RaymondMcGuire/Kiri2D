@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2020-10-19 01:37:05
- * @LastEditTime: 2021-06-08 16:43:14
+ * @LastEditTime: 2021-06-16 01:11:41
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
@@ -137,6 +137,9 @@ template <class T>
 constexpr auto Tiny() { return std::numeric_limits<T>::min(); }
 template <class T>
 constexpr auto Huge() { return std::numeric_limits<T>::max(); }
+
+template <class T>
+constexpr auto KIRI_SGN(T val) { return (T(0) < val) - (val < T(0)); }
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <kiri_math/kiri_math_opengl.h>
