@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-15 11:52:16
+ * @LastEditTime: 2021-06-17 19:46:49
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -50,6 +50,8 @@ namespace KIRI
 
         Vector3F ComputeMaxInscribedCircle() const { return mPowerDiagram->ComputeMaxInscribedCircle(); };
 
+        void RemoveVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->RemoveVoroSitesByIndexArray(indexs); }
+
     private:
         void ComputeVoroSiteWeightError();
         void ComputeBoundaryPolygonArea();
@@ -62,13 +64,15 @@ namespace KIRI
         void CorrectWeights();
         void AdaptPositionsWeights();
         void AdaptWeights();
+        void DynamicAddSites();
 
         KiriPowerDiagramPtr mPowerDiagram;
 
         float mCompleteArea;
         float mCurGlobalWeightError;
         Vector<float> mVoroSitesWeightError, mVoroSitesWeightAbsError;
-        Vector<Vector2F> mVoroSitesMovemnet;
+
+        Vector<float> mGlobalErrorArray;
 
         float mErrorThreshold;
         UInt mCurIteration, mMaxIterationNum;

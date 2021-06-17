@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-16 16:38:57
+ * @LastEditTime: 2021-06-17 19:49:52
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -121,7 +121,7 @@ namespace KIRI
         Vector<Vector4F> oPoly(poly);
         Vector2F point = Vector2F(0.f);
         auto cnt = 0;
-        while (cnt < 10000)
+        while (cnt < 100000)
         {
             auto status = ComputeShrink(poly, lambda);
             auto shrink = status.shrink;

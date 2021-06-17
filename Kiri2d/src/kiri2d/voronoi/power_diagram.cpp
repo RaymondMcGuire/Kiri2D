@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-06-11 02:17:01
+ * @LastEditTime: 2021-06-17 19:00:58
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -13,6 +13,31 @@
 
 namespace KIRI
 {
+    void KiriPowerDiagram::RemoveVoroSitesByIndex(UInt idx)
+    {
+        if (!mVoroSites.empty() && idx < mVoroSites.size())
+        {
+            mVoroSites[idx] = mVoroSites.back();
+            mVoroSites.pop_back();
+        }
+    }
+
+    void KiriPowerDiagram::RemoveVoroSitesByIndexArray(Vector<UInt> indexs)
+    {
+
+        auto removeSites = std::remove_if(mVoroSites.begin(),
+                                          mVoroSites.end(),
+                                          [=](const KiriVoroSitePtr &site)
+                                          {
+                                              if (std::find(indexs.begin(), indexs.end(), site->GetIdx()) != indexs.end())
+                                                  return true;
+                                              else
+                                                  return false;
+                                          });
+
+        mVoroSites.erase(removeSites, mVoroSites.end());
+    }
+
     Vector3F KiriPowerDiagram::ComputeMaxInscribedCircle()
     {
         auto maxCirVec = Vector2F(0.f);

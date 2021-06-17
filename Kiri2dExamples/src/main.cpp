@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-16 17:59:34
+ * @LastEditTime: 2021-06-17 21:08:43
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -12,8 +12,9 @@
 #include <kiri2d/sdf/sdf_poly_2d.h>
 #include <kiri2d/treemap/treemap_layout.h>
 #include <kiri2d/voronoi/voro_poropti.h>
-
+#include <root_directory.h>
 #include <random>
+
 using namespace KIRI;
 using namespace KIRI2D;
 
@@ -22,18 +23,31 @@ Vector2F Transform2Original(const Vector2F &v, float h)
     return Vector2F(v.x, h - v.y);
 }
 
-void ExportPoroityData2CSVFile(const String fileName, const Vector<float> &error, const Vector<float> &poroity)
+void ExportPoroityData2CSVFile(const String fileName, const Vector<float> &error, const Vector<float> &poroity, const Vector<float> &radiusError, const Vector<Vector4F> &maxIC)
 {
+    String filePath = String(EXPORT_PATH) + "csv/" + fileName;
     std::fstream file;
-    file.open(fileName.c_str(), std::ios_base::out);
+    file.open(filePath.c_str(), std::ios_base::out);
     file << "iter,error"
          << std::endl;
     for (int i = 0; i < error.size(); i++)
         file << i + 1 << "," << error[i] << std::endl;
+
     file << "iter,poroity"
          << std::endl;
     for (int i = 0; i < poroity.size(); i++)
         file << i + 1 << "," << poroity[i] << std::endl;
+
+    file << "iter,radiusError"
+         << std::endl;
+    for (int i = 0; i < radiusError.size(); i++)
+        file << i + 1 << "," << radiusError[i] << std::endl;
+
+    file << "curRadius,tarRadius"
+         << std::endl;
+    for (int i = 0; i < maxIC.size(); i++)
+        file << maxIC[i].z << "," << maxIC[i].w << std::endl;
+
     file.close();
 }
 
@@ -737,22 +751,36 @@ void VoroTestExample()
     std::random_device seedGen;
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
-    std::uniform_real_distribution<float> rdist(-1.f, 1.f);
+    // std::uniform_real_distribution<float> rdist(-1.f, 1.f);
 
-    auto totalArea = boundaryPoly->GetPolygonArea();
-    auto cnt = 0, maxcnt = 100;
-    auto avgRadius = std::sqrt(totalArea / maxcnt / KIRI_PI<float>());
-    KIRI_LOG_DEBUG("avg radius={0}", avgRadius);
+    // auto totalArea = boundaryPoly->GetPolygonArea();
+    // auto avgRadius = std::sqrt(totalArea / maxcnt / KIRI_PI<float>());
+    // KIRI_LOG_DEBUG("avg radius={0}", avgRadius);
 
+    std::vector<float> radiusRange;
+    radiusRange.push_back(20.f);
+    radiusRange.push_back(50.f);
+    radiusRange.push_back(150.f);
+
+    std::vector<float> radiusRangeProb;
+    radiusRangeProb.push_back(0.9f);
+    radiusRangeProb.push_back(0.1f);
+
+    std::random_device engine;
+    std::mt19937 gen(engine());
+    std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
+
+    auto cnt = 0, maxcnt = 10;
     while (cnt < maxcnt)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
-            auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
-            KIRI_LOG_DEBUG("idx={0}, radius={1}", cnt, radius);
+            //auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
+            //KIRI_LOG_DEBUG("idx={0}, radius={1}", cnt, radius);
+            auto radius = pcdis(gen);
             auto site = std::make_shared<KiriVoroSite>(sitePos2);
-            site->SetRadius(radius);
+            site->SetRadius(20.f);
             voroPorOptiCore->AddSite(site);
             cnt++;
         }
@@ -838,8 +866,9 @@ void VoroPorosityOptimizeExample()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    Vector<float> errorArray, porosityArray;
-    for (size_t i = 0; i < 1500; i++)
+    Vector<float> errorArray, porosityArray, radiusErrorArray;
+    Vector<Vector4F> lastMaxCircle;
+    for (size_t i = 0; i < 2002; i++)
     {
 
         auto error = opti->ComputeIterate();
@@ -880,18 +909,23 @@ void VoroPorosityOptimizeExample()
                 }
             }
 
-            // auto maxIC = opti->GetLeafNodeMaxInscribedCircle();
-            auto maxIC = opti->GetMICByStraightSkeleton();
-            auto porosity = opti->ComputeMiniumPorosity();
-            porosityArray.emplace_back(porosity);
-            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error);
+            auto maxIC = opti->GetMICByStraightSkeleton(20.f);
+            lastMaxCircle = maxIC;
 
+            auto porosity = opti->ComputeMiniumPorosity(20.f);
+            porosityArray.emplace_back(porosity);
+
+            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
+
+            auto radiusError = 0.f;
             for (size_t i = 0; i < maxIC.size(); i++)
             {
                 auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
                 circles.emplace_back(maxCir2);
                 //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
+                radiusError += std::abs(maxIC[i].z - maxIC[i].w);
             }
+            radiusErrorArray.emplace_back(radiusError / maxIC.size());
 
             // auto skeletons = opti->GetCellSkeletons();
 
@@ -927,7 +961,8 @@ void VoroPorosityOptimizeExample()
             scene->Clear();
         }
     }
-    ExportPoroityData2CSVFile("E:/PBCGLab/project/Kiri2D/export/csv/test.csv", errorArray, porosityArray);
+    ExportPoroityData2CSVFile("test.csv", errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+
     // while (1)
     // {
 

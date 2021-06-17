@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-16 16:55:42
+ * @LastEditTime: 2021-06-17 19:50:56
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
@@ -63,31 +63,35 @@ namespace KIRI
             return circles;
         }
 
-        Vector<Vector4F> GetMICByStraightSkeleton()
+        Vector<Vector4F> GetMICByStraightSkeleton(float lambda)
         {
             Vector<Vector4F> circles;
             auto sites = mRootCore->GetSites();
 
+            Vector<UInt> removeVoroIdxs;
             for (size_t i = 0; i < sites.size(); i++)
             {
                 auto poly = sites[i]->GetCellPolygon();
                 if (poly != NULL)
                 {
                     if (poly->GetSkeletons().empty())
-                        poly->ComputeStraightSkeleton(20.f);
+                        poly->ComputeStraightSkeleton(lambda);
                     auto mic = poly->ComputeMICByStraightSkeleton();
                     circles.emplace_back(Vector4F(mic, sites[i]->GetRadius()));
                 }
                 else
                 {
-                    KIRI_LOG_DEBUG("no polgyon");
+                    removeVoroIdxs.emplace_back(sites[i]->GetIdx());
                 }
             }
+
+            if (!removeVoroIdxs.empty())
+                mRootCore->RemoveVoroSitesByIndexArray(removeVoroIdxs);
 
             return circles;
         }
 
-        Vector<Vector4F> GetCellSkeletons()
+        Vector<Vector4F> GetCellSkeletons(float lambda)
         {
             Vector<Vector4F> skeletons;
             auto sites = mRootCore->GetSites();
@@ -98,7 +102,7 @@ namespace KIRI
                 if (poly != NULL)
                 {
                     if (poly->GetSkeletons().empty())
-                        poly->ComputeStraightSkeleton(1.f);
+                        poly->ComputeStraightSkeleton(lambda);
                     auto sk = poly->GetSkeletons();
                     skeletons.insert(skeletons.end(), sk.begin(), sk.end());
                 }
@@ -127,7 +131,7 @@ namespace KIRI
             return shrinks;
         }
 
-        float ComputeMiniumPorosity();
+        float ComputeMiniumPorosity(float lambda);
 
     private:
         UInt mMaxDepth = 0;
