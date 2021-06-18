@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-17 21:08:43
+ * @LastEditTime: 2021-06-18 12:04:53
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -364,7 +364,7 @@ void VoronoiExample2()
     scene->AddCircles(circles);
 
     renderer->DrawCanvas();
-
+    renderer->SaveImages2File();
     while (1)
     {
         cv::imshow("KIRI2D", renderer->GetCanvas());
@@ -825,6 +825,7 @@ void VoroTestExample()
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
+        //renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
@@ -978,7 +979,7 @@ int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
-    // VoronoiExample2();
+    VoronoiExample2();
 
     // LloydRelaxationExample();
 
@@ -989,7 +990,7 @@ int main()
 
     //VoroTestExample();
 
-    VoroPorosityOptimizeExample();
+    //VoroPorosityOptimizeExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

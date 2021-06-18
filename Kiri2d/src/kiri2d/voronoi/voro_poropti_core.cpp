@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-17 20:36:04
+ * @LastEditTime: 2021-06-18 11:12:45
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -139,7 +139,6 @@ namespace KIRI
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (size_t i = 0; i < voroSite.size(); i++)
         {
-            auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
             auto n = voroSite[i]->GetNeighborSites().size();
             if (n > 2)
             {
@@ -293,7 +292,6 @@ namespace KIRI
                 for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
                 {
                     auto siteJ = siteI->GetNeighborSites()[j];
-                    //total += siteJ->GetWeight() + siteJ->GetRadius() * siteJ->GetRadius();
                     total += siteJ->GetWeight() - siteJ->GetRadius() * siteJ->GetRadius();
                     cnt++;
                 }
@@ -303,10 +301,6 @@ namespace KIRI
                 for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
                 {
                     auto siteJ = siteI->GetNeighborSites()[j];
-                    // auto sum = siteJ->GetWeight() + siteJ->GetRadius() * siteJ->GetRadius();
-                    // mVoroSitesWeightError[siteJ->GetIdx()] += avg - sum;
-                    // mVoroSitesWeightAbsError[siteJ->GetIdx()] += std::abs(avg - sum);
-                    // mCurGlobalWeightError += std::abs(avg - sum);
 
                     auto distance = siteI->GetDistance2(siteJ);
                     auto minW = std::abs(std::sqrt(siteJ->GetWeight()) - std::sqrt(siteI->GetWeight()));
