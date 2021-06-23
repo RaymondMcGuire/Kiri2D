@@ -1,14 +1,14 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-23 17:27:56
+ * @LastEditTime: 2021-06-23 17:13:39
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_treemap_core.h
  */
 
-#ifndef _KIRI_VORO_PORO_OPTI_CORE_H_
-#define _KIRI_VORO_PORO_OPTI_CORE_H_
+#ifndef _KIRI_VORO_PORO_OPTI_TREEMAP_CORE_H_
+#define _KIRI_VORO_PORO_OPTI_TREEMAP_CORE_H_
 
 #pragma once
 
@@ -17,18 +17,17 @@
 namespace KIRI
 {
 
-    class KiriVoroPoroOptiCore
+    class KiriVoroPoroOptiTreeMapCore
     {
     public:
-        explicit KiriVoroPoroOptiCore()
+        explicit KiriVoroPoroOptiTreeMapCore()
         {
             Reset();
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
-        ~KiriVoroPoroOptiCore() noexcept {}
+        ~KiriVoroPoroOptiTreeMapCore() noexcept {}
 
-        void ComputeLloyd(UInt num);
         float ComputeIterate();
 
         void AddSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
@@ -50,6 +49,8 @@ namespace KIRI
         void RemoveVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->RemoveVoroSitesByIndexArray(indexs); }
 
     private:
+        void ReComputePercentage();
+
         void ComputeVoroSiteWeightError();
         void ComputeBoundaryPolygonArea();
 
@@ -61,7 +62,6 @@ namespace KIRI
         void CorrectWeights();
         void AdaptPositionsWeights();
         void AdaptWeights();
-        void DynamicAddSites();
 
         KiriPowerDiagramPtr mPowerDiagram;
 
@@ -75,6 +75,6 @@ namespace KIRI
         UInt mCurIteration, mMaxIterationNum;
     };
 
-    typedef SharedPtr<KiriVoroPoroOptiCore> KiriVoroPoroOptiCorePtr;
+    typedef SharedPtr<KiriVoroPoroOptiTreeMapCore> KiriVoroPoroOptiTreeMapCorePtr;
 }
 #endif

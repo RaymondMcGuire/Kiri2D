@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-01 22:13:41
+ * @LastEditTime: 2021-06-23 18:02:03
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_data.h
@@ -94,7 +94,7 @@ namespace KIRI
             return w;
         }
 
-        const Vector<VoroTreeMapNode> &GetNodesByDepth(UInt depth)
+        Vector<VoroTreeMapNode> GetNodesByDepth(UInt depth)
         {
             Vector<VoroTreeMapNode> nodes;
             for (const auto &[key, value] : mData)

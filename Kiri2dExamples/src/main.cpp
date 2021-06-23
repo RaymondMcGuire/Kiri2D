@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-18 12:04:53
+ * @LastEditTime: 2021-06-23 18:16:25
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -12,6 +12,7 @@
 #include <kiri2d/sdf/sdf_poly_2d.h>
 #include <kiri2d/treemap/treemap_layout.h>
 #include <kiri2d/voronoi/voro_poropti.h>
+#include <kiri2d/voronoi/voro_poropti_treemap_core.h>
 #include <root_directory.h>
 #include <random>
 
@@ -787,7 +788,6 @@ void VoroTestExample()
     }
     voroPorOptiCore->SetBoundaryPolygon2(boundaryPoly);
     voroPorOptiCore->Init();
-    //voroPorOptiCore->InitWeight();
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
@@ -975,11 +975,158 @@ void VoroPorosityOptimizeExample()
     //     // scene->Clear();
     // }
 }
+
+void VoroPorosityTreemapOptiExample()
+{
+    float height = 1080.f;
+    float width = 1920.f;
+
+    float aspect = height / width;
+    float offset = height / 30.f;
+    Vector2F offsetVec2 = Vector2F(offset, offset);
+
+    String tempNodeName = "O";
+    KiriRect2 topRect(offsetVec2, Vector2F(width, height) - offsetVec2 * 2.f);
+
+    std::vector<float> radiusRange;
+    radiusRange.push_back(0.2f / 2.f);
+    radiusRange.push_back(0.2f);
+    radiusRange.push_back(0.2f * 1.5f);
+
+    std::vector<float> radiusRangeProb;
+    radiusRangeProb.push_back(0.8f);
+    radiusRangeProb.push_back(0.2f);
+
+    std::random_device engine;
+    std::mt19937 gen(engine());
+    std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
+
+    std::vector<TreemapNode> nodes;
+    std::vector<KiriCircle2> circles;
+
+    size_t totalNum = 10;
+    float totalValue = 0.f;
+    for (size_t i = 0; i < totalNum; i++)
+    {
+        float radius = pcdis(gen);
+        totalValue += radius;
+        nodes.emplace_back(TreemapNode("A", -1, -1, radius, 0));
+    }
+
+    //TreemapNode topNode(tempNodeName, 35, 10, topRect);
+    TreemapNode topNode(tempNodeName, 0, -1, totalValue, totalNum, topRect);
+
+    TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
+    treemap2d->AddTreeNodes(nodes);
+    treemap2d->ConstructTreemapLayout();
+    treemap2d->PrintTreemapLayout();
+
+    auto voroTreeNodes = treemap2d->Convert2VoroTreeData();
+    auto nodesResByDepth = voroTreeNodes->GetNodesByDepth(1);
+    for (size_t i = 0; i < nodesResByDepth.size(); i++)
+    {
+        KIRI_LOG_DEBUG("child: id={0}, pid={1}, weight={2}, depth={3}", nodesResByDepth[i].id, nodesResByDepth[i].pid, nodesResByDepth[i].weight, nodesResByDepth[i].depth);
+    }
+
+    // voronoi
+    auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
+    width = 1200.f;
+    height = 800.f;
+
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    // boundary polygon
+    KiriSDFPoly2D boundary;
+
+    auto PI = 3.141592653f;
+    auto numPoints = 8;
+    auto radius = 500.f;
+    offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+
+    for (auto j = 0; j < numPoints; j++)
+    {
+        auto angle = 2.0 * PI * (j * 1.f / numPoints);
+        auto rotate = 2.0 * PI / numPoints / 2;
+        auto y = std::sin(angle + rotate) * radius;
+        auto x = std::cos(angle + rotate) * radius;
+        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+
+        boundary.Append(pos);
+        boundaryPoly->AddPolygonVertex2(pos);
+    }
+
+    auto voroPorTreeMapOptiCore = std::make_shared<KiriVoroPoroOptiTreeMapCore>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
+
+    auto cnt = 0;
+    auto maxcnt = nodesResByDepth.size();
+    while (cnt < maxcnt)
+    {
+        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        if (boundary.FindRegion(sitePos2) < 0.f)
+        {
+
+            auto site = std::make_shared<KiriVoroSite>(sitePos2, nodesResByDepth[cnt].weight);
+            voroPorTreeMapOptiCore->AddSite(site);
+            cnt++;
+        }
+    }
+    voroPorTreeMapOptiCore->SetBoundaryPolygon2(boundaryPoly);
+    voroPorTreeMapOptiCore->Init();
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    while (1)
+    {
+        voroPorTreeMapOptiCore->ComputeIterate();
+        Vector<KiriPoint2> points;
+        Vector<KiriLine2> lines;
+
+        auto sites = voroPorTreeMapOptiCore->GetSites();
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            //sites[i]->Print();
+            points.emplace_back(KiriPoint2(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) + offsetVec2, Vector3F(1.f, 0.f, 0.f)));
+            auto poly = sites[i]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                poly->ComputeVoroSitesList();
+                auto list = poly->GetVoroSitesList();
+                // list->PrintVertexList();
+
+                auto node = list->GetHead();
+                do
+                {
+                    auto start = Vector2F(node->value) + offsetVec2;
+                    node = node->next;
+                    auto end = Vector2F(node->value) + offsetVec2;
+                    lines.emplace_back(KiriLine2(start, end));
+                } while (node != list->GetHead());
+            }
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        //renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
 int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
-    VoronoiExample2();
+    // VoronoiExample2();
 
     // LloydRelaxationExample();
 
@@ -991,6 +1138,8 @@ int main()
     //VoroTestExample();
 
     //VoroPorosityOptimizeExample();
+
+    VoroPorosityTreemapOptiExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

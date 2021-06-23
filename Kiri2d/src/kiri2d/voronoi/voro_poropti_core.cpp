@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-18 11:12:45
+ * @LastEditTime: 2021-06-23 17:28:26
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -44,20 +44,6 @@ namespace KIRI
         CorrectVoroSitePos();
 
         mPowerDiagram->ComputeDiagram();
-    }
-
-    void KiriVoroPoroOptiCore::InitWeight()
-    {
-        auto voroSite = mPowerDiagram->GetVoroSites();
-        for (size_t i = 0; i < voroSite.size(); i++)
-        {
-            auto neighborSize = voroSite[i]->GetNeighborSites().size();
-            if (neighborSize > 2)
-            {
-                auto sqrtWeight = voroSite[i]->GetRadius() / std::cosf(KIRI_PI<float>() / neighborSize);
-                voroSite[i]->SetWeight(sqrtWeight * sqrtWeight);
-            }
-        }
     }
 
     void KiriVoroPoroOptiCore::Reset()
@@ -370,28 +356,9 @@ namespace KIRI
         return error;
     }
 
-    void KiriVoroPoroOptiCore::ComputeDiagram()
-    {
-        //mPowerDiagram->ComputeDiagram()
-        // if (!mPowerDiagram->ComputeDiagram())
-        //     mPowerDiagram->ReGenVoroSites();
-    }
-
     void KiriVoroPoroOptiCore::ComputeLloyd(UInt num)
     {
         mPowerDiagram->SetRelaxIterNumber(num);
         mPowerDiagram->LloydRelaxation();
-    }
-
-    void KiriVoroPoroOptiCore::Compute()
-    {
-        Init();
-
-        while (mCurIteration < mMaxIterationNum)
-        {
-            Iterate();
-
-            mCurIteration++;
-        }
     }
 }
