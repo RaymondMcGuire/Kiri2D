@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:56:27
- * @LastEditTime: 2021-06-01 22:07:19
+ * @LastEditTime: 2021-06-24 18:18:28
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\treemap\treemap_layout.cpp
@@ -34,6 +34,13 @@ namespace KIRI
         tree<TreemapNode>::iterator sibe = mTreemap.begin(mDataTree);
         tree<TreemapNode>::iterator end = mTreemap.end(mDataTree);
 
+        VoroTreeMapNode root;
+        root.depth = 0;
+        root.id = 0;
+        root.pid = -1;
+        root.weight = 0.f;
+        root.child_num = 0;
+
         while (sibe != end)
         {
             VoroTreeMapNode node;
@@ -44,9 +51,19 @@ namespace KIRI
             node.child_num = (*sibe).child_num;
             mVoroTreeMapData->AddNode(node);
 
+            if (node.pid == 0)
+            {
+                root.weight += node.weight;
+                root.child_num += node.child_num + 1;
+            }
+
+            // KIRI_LOG_INFO("Depth={0},id={1}:weight={2},ChildNum={3},parent id={4}",
+            //               node.depth, node.id, node.weight, node.child_num, node.pid);
+
             ++sibe;
         }
 
+        mVoroTreeMapData->AddNode(root);
         return mVoroTreeMapData;
     }
 

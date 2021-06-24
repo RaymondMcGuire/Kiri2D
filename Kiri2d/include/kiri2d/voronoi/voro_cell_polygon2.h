@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-16 16:29:38
+ * @LastEditTime: 2021-06-24 22:03:58
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
@@ -36,6 +36,8 @@ namespace KIRI
         const BoundingBox2F &GetBBox() const { return mBBox2; }
         const Vector<Vector2F> &GetPolygonVertices() const { return mPolygonVertices2; }
         void AddPolygonVertex2(const Vector2F &v2) { mPolygonVertices2.emplace_back(Vector2F(v2)); }
+        void PopPolygonVertex2() { mPolygonVertices2.pop_back(); }
+        void ReversePolygonVertex2() { std::reverse(mPolygonVertices2.begin(), mPolygonVertices2.end()); }
 
         void Print();
         void PrintPolyVertices();

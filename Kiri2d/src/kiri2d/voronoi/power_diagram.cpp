@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-06-17 19:00:58
+ * @LastEditTime: 2021-06-24 22:23:57
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -9,6 +9,7 @@
 
 #include <kiri2d/voronoi/power_diagram.h>
 #include <kiri2d/geo/geo_plane3.h>
+#include <kiri2d/poly/PolygonClipping.h>
 #include <random>
 
 namespace KIRI
@@ -213,7 +214,7 @@ namespace KIRI
                 else
                 {
                     outside = true;
-                    //KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
+                    KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
                     mVoroSites[j]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
                 }
             }
@@ -373,9 +374,10 @@ namespace KIRI
                     }
                 }
             }
+
             clipedPolygon->UpdateBBox();
             clipedPolygon->ComputeVoroSitesList();
-            //clipedPolygon->Print();
+            // clipedPolygon->Print();
             return clipedPolygon;
         }
 
@@ -452,9 +454,68 @@ namespace KIRI
 
                             if (cellPoly->GetLength() > 2)
                             {
-                                auto newPoly = VoroCellPolygonClip(mBoundaryPolygon2, cellPoly);
-                                if (newPoly != NULL)
-                                    site->SetCellPolygon(newPoly);
+
+                                if (mBoundaryPolygon2->GetBBox().overlaps(cellPoly->GetBBox()))
+                                {
+                                    if (mBoundaryPolygon2->GetBBox().contains(cellPoly->GetBBox()))
+                                    {
+                                        site->SetCellPolygon(cellPoly);
+                                    }
+                                    else
+                                    {
+                                        mBoundaryPolygon2->ComputeVoroSitesList();
+                                        cellPoly->ComputeVoroSitesList();
+
+                                        std::vector<PolyClip::Point2d> polyA;
+                                        std::vector<PolyClip::Point2d> polyB;
+
+                                        auto A = mBoundaryPolygon2->GetPolygonVertices();
+                                        auto B = cellPoly->GetPolygonVertices();
+                                        for (size_t ai = 0; ai < A.size(); ai++)
+                                            polyA.push_back(PolyClip::Point2d(A[ai].x, A[ai].y));
+
+                                        for (size_t bi = 0; bi < B.size(); bi++)
+                                            polyB.push_back(PolyClip::Point2d(B[bi].x, B[bi].y));
+
+                                        PolyClip::Polygon polygon1(polyA);
+                                        PolyClip::Polygon polygon2(polyB);
+                                        PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
+                                        std::vector<std::vector<PolyClip::Point2d>> possible_result;
+                                        if (PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
+                                        {
+                                            auto clipedPolygon = std::make_shared<KiriVoroCellPolygon2>();
+                                            std::vector<std::vector<PolyClip::Point2d>> results = PolyClip::PloygonOpration::ExtractIntersectionResults(polygon1);
+                                            for (int pp = 0; pp < results.size(); ++pp)
+                                            {
+
+                                                for (size_t ppp = 0; ppp < results[pp].size(); ppp++)
+                                                {
+                                                    auto polyn = results[pp][ppp];
+                                                    clipedPolygon->AddPolygonVertex2(Vector2F(polyn.x_, polyn.y_));
+                                                }
+                                            }
+                                            clipedPolygon->PopPolygonVertex2();
+                                            clipedPolygon->ReversePolygonVertex2();
+
+                                            clipedPolygon->UpdateBBox();
+                                            clipedPolygon->ComputeVoroSitesList();
+                                            //clipedPolygon->Print();
+
+                                            site->SetCellPolygon(clipedPolygon);
+                                        }
+                                        else
+                                        {
+                                            if (mBoundaryPolygon2->GetBBox().contains(cellPoly->GetPolygonVertices()[0]))
+                                            {
+                                                site->SetCellPolygon(cellPoly);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // auto newPoly = VoroCellPolygonClip(mBoundaryPolygon2, cellPoly);
+                                // if (newPoly != NULL)
+                                //     site->SetCellPolygon(newPoly);
                             }
                         }
                     }

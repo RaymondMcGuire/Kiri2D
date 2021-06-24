@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-16 14:55:23
+ * @LastEditTime: 2021-06-25 01:30:34
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_util.h
@@ -24,7 +24,7 @@ namespace KIRI
      * @return {float} minimum distance between line segment vw and point p
      * @reference: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
      */
-    float MinDis2LineSegment2(Vector2F v, Vector2F w, Vector2F p)
+    static float MinDis2LineSegment2(Vector2F v, Vector2F w, Vector2F p)
     {
         const float l2 = v.distanceSquaredTo(w);
         if (l2 == 0.f)
@@ -37,14 +37,13 @@ namespace KIRI
 
     /*** 
      * @description: 
-     * @reference: https://github.com/savannaos/straight-skeletons/blob/master/polygon.js
      * @param {Vector2F} p1: start 
      * @param {Vector2F} p2: mid
      * @param {Vector2F} p3: end
      * @param {bool} cw: clockwise
      * @return {float} angle
      */
-    float AngleBetween2Edges2(Vector2F p1, Vector2F p2, Vector2F p3, bool cw)
+    static float AngleBetween2Edges2(Vector2F p1, Vector2F p2, Vector2F p3, bool cw)
     {
         auto x1 = p1.x;
         auto y1 = p1.y;
@@ -66,6 +65,17 @@ namespace KIRI
         if ((c > 0 && cw) || (c < 0 && !cw))
             a = 2 * KIRI_PI<float>() - a; // ensuring angle is that of the interior angle
 
+        // auto e1 = p2 - p1;
+        // auto e2 = p3 - p2;
+        // auto c = e1.cross(e2);
+
+        // //KIRI_LOG_DEBUG(" e1={0},{1}, e2={2},{3}, c={4}", e1.x, e1.y, e2.x, e2.y, c);
+        // auto e3 = p1 - p2;
+        // auto a = Vector2F::angle(e2, e3);
+
+        // if ((c > 0.f && cw) || (c < 0.f && !cw))
+        //     a = 2 * KIRI_PI<float>() - a; // ensuring angle is that of the interior angle
+
         return a;
     }
 
@@ -79,9 +89,10 @@ namespace KIRI
      * @param {bool} cw
      * @return {*}
      */
-    Vector2F DirectionBetween2Edges2(Vector2F p1, Vector2F p2, Vector2F p3, bool cw)
+    static Vector2F DirectionBetween2Edges2(Vector2F p1, Vector2F p2, Vector2F p3, bool cw)
     {
         auto a = AngleBetween2Edges2(p1, p2, p3, cw) / 2.f;
+
         auto x1 = p1.x;
         auto y1 = p1.y;
         if (!cw)
@@ -113,7 +124,7 @@ namespace KIRI
      * @param {Vector2F} p3
      * @return {Int} 0=co-linear, 1=counter clockwise, -1=clockwise
      */
-    Int CheckClockwise2(Vector2F p1, Vector2F p2, Vector2F p3)
+    static Int CheckClockwise2(Vector2F p1, Vector2F p2, Vector2F p3)
     {
         auto res = (p2.x - p1.x) * (p3.y - p1.y) - (p3.x - p1.x) * (p2.y - p1.y);
         if (res > 0.f)
@@ -132,7 +143,7 @@ namespace KIRI
      * @param {Vector2F} q2
      * @return {Vector3F} Vector2F intersection point 2d, float is intersection(0/1)
      */
-    Vector3F IntersectionPoint2(Vector2F p1, Vector2F p2, Vector2F q1, Vector2F q2)
+    static Vector3F IntersectionPoint2(Vector2F p1, Vector2F p2, Vector2F q1, Vector2F q2)
     {
 
         if ((CheckClockwise2(p1, p2, q1) == CheckClockwise2(p1, p2, q2)) &&
@@ -149,7 +160,7 @@ namespace KIRI
         return Vector3F(x, y, 1.f);
     }
 
-    bool IsApproxFloat(float a, float b, float eps)
+    static bool IsApproxFloat(float a, float b, float eps)
     {
         if (std::abs(a - b) < eps)
             return true;
@@ -163,7 +174,7 @@ namespace KIRI
      * @param {float} eps
      * @return {Vector3F} Vector2F point, float is IsApproxFloat or not(0/1)
      */
-    Vector3F IsApproxVec2(Vector2F p1, Vector2F p2, float eps)
+    static Vector3F IsApproxVec2(Vector2F p1, Vector2F p2, float eps)
     {
         if (IsApproxFloat(p1.x, p2.x, eps) && IsApproxFloat(p1.y, p2.y, eps))
             return Vector3F((p1 + p2) / 2.f, 1.f);
@@ -171,7 +182,7 @@ namespace KIRI
         return Vector3F(0.f);
     }
 
-    bool IsApproxVec4(Vector4F e1, Vector4F e2, float eps)
+    static bool IsApproxVec4(Vector4F e1, Vector4F e2, float eps)
     {
         if ((IsApproxFloat(e1.x, e2.x, eps) && IsApproxFloat(e1.y, e2.y, eps) &&
              IsApproxFloat(e1.z, e2.z, eps) && IsApproxFloat(e1.w, e2.w, eps)) ||

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-23 18:16:25
+ * @LastEditTime: 2021-06-25 01:49:16
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -12,7 +12,7 @@
 #include <kiri2d/sdf/sdf_poly_2d.h>
 #include <kiri2d/treemap/treemap_layout.h>
 #include <kiri2d/voronoi/voro_poropti.h>
-#include <kiri2d/voronoi/voro_poropti_treemap_core.h>
+#include <kiri2d/voronoi/voro_poropti_treemap.h>
 #include <root_directory.h>
 #include <random>
 
@@ -94,7 +94,7 @@ void GenRndTreemap()
     std::vector<TreemapNode> nodes;
     std::vector<KiriCircle2> circles;
 
-    size_t totalNum = 10;
+    size_t totalNum = 100;
     float totalValue = 0.f;
     for (size_t i = 0; i < totalNum; i++)
     {
@@ -385,23 +385,35 @@ void LloydRelaxationExample()
     float height = 1000.f;
     auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
 
+    Vector<Vector2F> bunny2d;
+    size_t bunnyNum;
+    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+
     KiriSDFPoly2D boundary;
 
-    auto PI = 3.141592653f;
-    auto numPoints = 8;
-    auto radius = 500.f;
-
-    for (auto j = 0; j < numPoints; j++)
+    for (size_t i = 0; i < bunny2d.size(); i++)
     {
-        auto angle = 2.0 * PI * (j * 1.f / numPoints);
-        auto rotate = 2.0 * PI / numPoints / 2;
-        auto y = std::sin(angle + rotate) * radius;
-        auto x = std::cos(angle + rotate) * radius;
-        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
-
-        boundary.Append(pos);
-        boundaryPoly->AddPolygonVertex2(pos);
+        auto point = KiriPoint2(bunny2d[i] * 800.f + Vector2F(500.f, 100.f), Vector3F(1.f, 0.f, 0.f));
+        boundary.Append(point.pos);
+        boundaryPoly->AddPolygonVertex2(point.pos);
     }
+
+    // auto PI = 3.141592653f;
+    // auto numPoints = 8;
+    // auto radius = 500.f;
+
+    // for (auto j = 0; j < numPoints; j++)
+    // {
+    //     auto angle = 2.0 * PI * (j * 1.f / numPoints);
+    //     auto rotate = 2.0 * PI / numPoints / 2;
+    //     auto y = std::sin(angle + rotate) * radius;
+    //     auto x = std::cos(angle + rotate) * radius;
+    //     auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+
+    //     boundary.Append(pos);
+    //     boundaryPoly->AddPolygonVertex2(pos);
+    // }
+
     // auto bp1 = Vector2F(0, 0);
     // auto bp2 = Vector2F(width, 0);
     // auto bp3 = Vector2F(width, height);
@@ -423,25 +435,19 @@ void LloydRelaxationExample()
     std::random_device seedGen;
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
-    for (size_t i = 0; i < 20; i++)
+
+    auto cnt = 0, maxcnt = 100;
+    while (cnt < maxcnt)
     {
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
+        {
+            auto radius = 10.f;
+            // auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y, MEpsilon<float>(), radius);
             pd->AddVoroSite(sitePos2);
-        // pd->AddPowerSite(sitePos2, dist(rndEngine) * width * 100.f);
+            cnt++;
+        }
     }
-    // auto cnt = 0, maxcnt = 100;
-    // while (cnt < maxcnt)
-    // {
-    //     auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
-    //     if (boundary.FindRegion(sitePos2) < 0.f)
-    //     {
-    //         auto radius = 10.f;
-    //         // auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y, MEpsilon<float>(), radius);
-    //         pd->AddVoroSite(sitePos2);
-    //         cnt++;
-    //     }
-    // }
 
     pd->SetBoundaryPolygon2(boundaryPoly);
     pd->ComputeDiagram();
@@ -836,28 +842,40 @@ void VoroTestExample()
 void VoroPorosityOptimizeExample()
 {
     // scene renderer config
-    float windowheight = 4000.f;
-    float windowwidth = 4000.f;
+    float windowheight = 5000.f;
+    float windowwidth = 5000.f;
 
     // voronoi
     float width = 3000.f;
     float height = 3000.f;
     auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
 
-    auto PI = 3.141592653f;
-    auto numPoints = 8;
-    auto radius = 2000.f;
+    // auto PI = 3.141592653f;
+    // auto numPoints = 8;
+    // auto radius = 2000.f;
+
+    // Vector<Vector2F> boundary;
+    // for (auto j = 0; j < numPoints; j++)
+    // {
+    //     auto angle = 2.0 * PI * (j * 1.f / numPoints);
+    //     auto rotate = 2.0 * PI / numPoints / 2;
+    //     auto y = std::sin(angle + rotate) * radius;
+    //     auto x = std::cos(angle + rotate) * radius;
+    //     auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+
+    //     boundary.emplace_back(pos);
+    // }
+
+    Vector<Vector2F> bunny2d;
+    size_t bunnyNum;
+    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
 
     Vector<Vector2F> boundary;
-    for (auto j = 0; j < numPoints; j++)
-    {
-        auto angle = 2.0 * PI * (j * 1.f / numPoints);
-        auto rotate = 2.0 * PI / numPoints / 2;
-        auto y = std::sin(angle + rotate) * radius;
-        auto x = std::cos(angle + rotate) * radius;
-        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
 
-        boundary.emplace_back(pos);
+    for (size_t i = 0; i < bunny2d.size(); i++)
+    {
+        auto newPos = bunny2d[i] * 4000.f + Vector2F(-width / 2.f, height / 5.f);
+        boundary.emplace_back(Transform2Original(Vector2F(newPos), height) + offsetVec2);
     }
 
     auto opti = std::make_shared<KiriVoroPoroOpti>();
@@ -869,7 +887,7 @@ void VoroPorosityOptimizeExample()
 
     Vector<float> errorArray, porosityArray, radiusErrorArray;
     Vector<Vector4F> lastMaxCircle;
-    for (size_t i = 0; i < 2002; i++)
+    for (size_t i = 0; i < 3002; i++)
     {
 
         auto error = opti->ComputeIterate();
@@ -910,10 +928,10 @@ void VoroPorosityOptimizeExample()
                 }
             }
 
-            auto maxIC = opti->GetMICByStraightSkeleton(20.f);
+            auto maxIC = opti->GetMICByStraightSkeleton(10.f);
             lastMaxCircle = maxIC;
 
-            auto porosity = opti->ComputeMiniumPorosity(20.f);
+            auto porosity = opti->ComputeMiniumPorosity(10.f);
             porosityArray.emplace_back(porosity);
 
             KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
@@ -1004,7 +1022,7 @@ void VoroPorosityTreemapOptiExample()
     std::vector<TreemapNode> nodes;
     std::vector<KiriCircle2> circles;
 
-    size_t totalNum = 10;
+    size_t totalNum = 200;
     float totalValue = 0.f;
     for (size_t i = 0; i < totalNum; i++)
     {
@@ -1019,14 +1037,7 @@ void VoroPorosityTreemapOptiExample()
     TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
     treemap2d->AddTreeNodes(nodes);
     treemap2d->ConstructTreemapLayout();
-    treemap2d->PrintTreemapLayout();
-
-    auto voroTreeNodes = treemap2d->Convert2VoroTreeData();
-    auto nodesResByDepth = voroTreeNodes->GetNodesByDepth(1);
-    for (size_t i = 0; i < nodesResByDepth.size(); i++)
-    {
-        KIRI_LOG_DEBUG("child: id={0}, pid={1}, weight={2}, depth={3}", nodesResByDepth[i].id, nodesResByDepth[i].pid, nodesResByDepth[i].weight, nodesResByDepth[i].depth);
-    }
+    // treemap2d->PrintTreemapLayout();
 
     // voronoi
     auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
@@ -1056,38 +1067,22 @@ void VoroPorosityTreemapOptiExample()
         boundaryPoly->AddPolygonVertex2(pos);
     }
 
-    auto voroPorTreeMapOptiCore = std::make_shared<KiriVoroPoroOptiTreeMapCore>();
+    auto voroTreeNodes = treemap2d->Convert2VoroTreeData();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
-    std::uniform_real_distribution<float> dist(0.f, 1.f);
-
-    auto cnt = 0;
-    auto maxcnt = nodesResByDepth.size();
-    while (cnt < maxcnt)
-    {
-        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
-        if (boundary.FindRegion(sitePos2) < 0.f)
-        {
-
-            auto site = std::make_shared<KiriVoroSite>(sitePos2, nodesResByDepth[cnt].weight);
-            voroPorTreeMapOptiCore->AddSite(site);
-            cnt++;
-        }
-    }
-    voroPorTreeMapOptiCore->SetBoundaryPolygon2(boundaryPoly);
-    voroPorTreeMapOptiCore->Init();
+    auto voroPorTreeMap = std::make_shared<KiriVoroPoroOptiTreeMap>(
+        voroTreeNodes, boundaryPoly);
+    voroPorTreeMap->InitTreeMapNodes();
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     while (1)
     {
-        voroPorTreeMapOptiCore->ComputeIterate();
+        voroPorTreeMap->ComputeIterate();
         Vector<KiriPoint2> points;
         Vector<KiriLine2> lines;
 
-        auto sites = voroPorTreeMapOptiCore->GetSites();
+        auto sites = voroPorTreeMap->GetNodeSitesByConstrain();
         for (size_t i = 0; i < sites.size(); i++)
         {
             //sites[i]->Print();
@@ -1137,9 +1132,9 @@ int main()
 
     //VoroTestExample();
 
-    //VoroPorosityOptimizeExample();
+    VoroPorosityOptimizeExample();
 
-    VoroPorosityTreemapOptiExample();
+    //VoroPorosityTreemapOptiExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

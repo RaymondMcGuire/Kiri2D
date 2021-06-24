@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-17 19:49:52
+ * @LastEditTime: 2021-06-25 01:29:33
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -30,9 +30,8 @@ namespace KIRI
 
     void KiriVoroCellPolygon2::ComputeBisectors(const Vector<Vector4F> &poly, float lambda)
     {
-        auto cw = IsClockwise(poly);
         auto polySize = poly.size();
-
+        auto cw = IsClockwise(poly);
         mBisectors.clear();
 
         for (size_t i = polySize; i < polySize * 2; i++)
@@ -42,6 +41,7 @@ namespace KIRI
             auto p1 = Vector2F(eprev.x, eprev.y);
             auto p2 = Vector2F(eprev.z, eprev.w);
             auto p3 = Vector2F(ecurr.z, ecurr.w);
+            // auto cw = CheckClockwise2(p1, p2, p3) == 1 ? true : false;
             auto d = DirectionBetween2Edges2(p1, p2, p3, cw);
             mBisectors.emplace_back(d * lambda);
         }
@@ -280,17 +280,39 @@ namespace KIRI
 
     Vector2F KiriVoroCellPolygon2::GetPolygonCentroid()
     {
-        auto centroid = Vector2F(0.f);
+        // auto centroid = Vector2F(0.f);
+        // auto length = GetLength();
+        // if (!mPolygonVertices2.empty())
+        // {
+        //     for (size_t i = 0; i < length; i++)
+        //         centroid += (mPolygonVertices2[i] + mPolygonVertices2[(i + 1) % length]) * (mPolygonVertices2[i].cross(mPolygonVertices2[(i + 1) % length]));
+
+        //     centroid /= 6.f * GetPolygonArea();
+        // }
+        Vector<Vector2F> tmpPolygonVertices(mPolygonVertices2);
         auto length = GetLength();
-        if (!mPolygonVertices2.empty())
+
+        auto first = tmpPolygonVertices[0], last = tmpPolygonVertices[tmpPolygonVertices.size() - 1];
+        if (first.x != last.x || first.y != last.y)
+            tmpPolygonVertices.emplace_back(first);
+
+        auto twicearea = 0.f,
+             x = 0.f, y = 0.f, f = 0.f;
+        auto nPts = tmpPolygonVertices.size();
+        Vector2F p1, p2;
+
+        for (size_t i = 0, j = nPts - 1; i < nPts; j = i++)
         {
-            for (size_t i = 0; i < length; i++)
-                centroid += (mPolygonVertices2[i] + mPolygonVertices2[(i + 1) % length]) * (mPolygonVertices2[i].cross(mPolygonVertices2[(i + 1) % length]));
-
-            centroid /= 6.f * GetPolygonArea();
+            p1 = tmpPolygonVertices[i];
+            p2 = tmpPolygonVertices[j];
+            f = p1.x * p2.y - p2.x * p1.y;
+            twicearea += f;
+            x += (p1.x + p2.x) * f;
+            y += (p1.y + p2.y) * f;
         }
+        f = twicearea * 3.f;
 
-        return centroid;
+        return Vector2F(x / f, y / f);
     }
 
     float KiriVoroCellPolygon2::ComputeMinDisInPoly(const Vector2F &p)
@@ -339,8 +361,8 @@ namespace KIRI
         KIRI_LOG_DEBUG("Voro cell polygon size={0}", mPolygonVertices2.size());
         KIRI_LOG_DEBUG("Voro cell mVoroSitesList size={0}", mVoroSitesList->Size());
 
-        // for (size_t i = 0; i < mPolygonVertices2.size(); i++)
-        //     KIRI_LOG_DEBUG("vertex2=({0},{1})", mPolygonVertices2[i].x, mPolygonVertices2[i].y);
+        for (size_t i = 0; i < mPolygonVertices2.size(); i++)
+            KIRI_LOG_DEBUG("vertex2=({0},{1}),size={2}", mPolygonVertices2[i].x, mPolygonVertices2[i].y, mPolygonVertices2.size());
 
         mVoroSitesList->PrintVertexList();
 

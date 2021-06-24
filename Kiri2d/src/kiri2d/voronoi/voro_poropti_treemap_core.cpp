@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-23 18:15:09
+ * @LastEditTime: 2021-06-24 16:01:43
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_treemap_core.cpp
@@ -174,7 +174,7 @@ namespace KIRI
         auto gAreaError = GetGlobalAreaError();
         //auto gAvgDistance = GetGlobalAvgDistance();
 
-        auto gammaArea = 100.f;
+        auto gammaArea = 1000.f;
         auto gammaBC = 1.f;
 
         auto voroSite = mPowerDiagram->GetVoroSites();
@@ -185,37 +185,37 @@ namespace KIRI
             auto areaWeight = 0.f;
             auto bcWeight = 0.f;
 
-            auto n = voroSite[i]->GetNeighborSites().size();
-            if (n > 2)
-            {
-                auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
-                auto targetArea = mCompleteArea * voroSite[i]->GetPercentage();
+            //auto n = voroSite[i]->GetNeighborSites().size();
+            //if (n > 2)
+            //{
+            auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+            auto targetArea = mCompleteArea * voroSite[i]->GetPercentage();
 
-                auto pArea = 2.f;
-                if (currentArea != 0.f)
-                    pArea = targetArea / currentArea;
+            auto pArea = 2.f;
+            if (currentArea != 0.f)
+                pArea = targetArea / currentArea;
 
-                auto areaErrorTransform = (-(gAreaError - 1.f) * (gAreaError - 1.f) + 1.f);
-                auto areaStep = areaErrorTransform * gammaArea;
-                if (pArea < (1.f - MEpsilon<float>()) && weight > 0.f)
-                    areaWeight -= areaStep;
-                else if (pArea > (1.f + MEpsilon<float>()))
-                    areaWeight += areaStep;
-            }
+            auto areaErrorTransform = (-(gAreaError - 1.f) * (gAreaError - 1.f) + 1.f);
+            auto areaStep = areaErrorTransform * gammaArea;
+            if (pArea < (1.f - MEpsilon<float>()) && weight > 0.f)
+                areaWeight -= areaStep;
+            else if (pArea > (1.f + MEpsilon<float>()))
+                areaWeight += areaStep;
+            //}
 
-            auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + MEpsilon<float>());
-            auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
+            // auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + MEpsilon<float>());
+            // auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
 
-            auto step = errorTransform * gammaBC;
-            if (mVoroSitesWeightError[i] < 0.f)
-                bcWeight -= step;
-            else if (mVoroSitesWeightError[i] > 0.f)
-                bcWeight += step;
+            // auto step = errorTransform * gammaBC;
+            // if (mVoroSitesWeightError[i] < 0.f)
+            //     bcWeight -= step;
+            // else if (mVoroSitesWeightError[i] > 0.f)
+            //     bcWeight += step;
 
             voroSite[i]->SetWeight(weight + areaWeight + bcWeight);
         }
 
-        KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
+        //KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
     }
 
     float KiriVoroPoroOptiTreeMapCore::GetGlobalAreaError()

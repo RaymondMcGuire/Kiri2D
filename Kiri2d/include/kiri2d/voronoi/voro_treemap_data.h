@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-23 18:02:03
+ * @LastEditTime: 2021-06-24 15:42:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_data.h
@@ -102,6 +102,14 @@ namespace KIRI
                     nodes.emplace_back(value);
 
             return nodes;
+        }
+
+        VoroTreeMapNode GetRootNode()
+        {
+            for (const auto &[key, value] : mData)
+                if (value.depth == 0)
+                    return value;
+            return VoroTreeMapNode();
         }
 
     private:
