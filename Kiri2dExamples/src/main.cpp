@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-25 01:49:16
+ * @LastEditTime: 2021-06-25 07:52:52
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1083,6 +1083,7 @@ void VoroPorosityTreemapOptiExample()
         Vector<KiriLine2> lines;
 
         auto sites = voroPorTreeMap->GetNodeSitesByConstrain();
+        //auto sites = voroPorTreeMap->GetLeafNodeSites();
         for (size_t i = 0; i < sites.size(); i++)
         {
             //sites[i]->Print();
@@ -1109,7 +1110,7 @@ void VoroPorosityTreemapOptiExample()
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
-        //renderer->SaveImages2File();
+        renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
@@ -1132,9 +1133,9 @@ int main()
 
     //VoroTestExample();
 
-    VoroPorosityOptimizeExample();
+    //VoroPorosityOptimizeExample();
 
-    //VoroPorosityTreemapOptiExample();
+    VoroPorosityTreemapOptiExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;
