@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-06-25 07:52:52
+ * @LastEditTime: 2021-07-05 15:11:35
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -16,6 +16,8 @@
 #include <root_directory.h>
 #include <random>
 
+#include <kiri2d/lib/tinycolormap.hpp>
+
 using namespace KIRI;
 using namespace KIRI2D;
 
@@ -24,32 +26,39 @@ Vector2F Transform2Original(const Vector2F &v, float h)
     return Vector2F(v.x, h - v.y);
 }
 
-void ExportPoroityData2CSVFile(const String fileName, const Vector<float> &error, const Vector<float> &poroity, const Vector<float> &radiusError, const Vector<Vector4F> &maxIC)
+void ExportSamplingData2CSVFile(const String fileName, const Vector<Vector2F> &center, const Vector<float> &radius)
 {
     String filePath = String(EXPORT_PATH) + "csv/" + fileName;
     std::fstream file;
     file.open(filePath.c_str(), std::ios_base::out);
-    file << "iter,error"
+    file << "cx,cy,rad"
          << std::endl;
-    for (int i = 0; i < error.size(); i++)
-        file << i + 1 << "," << error[i] << std::endl;
-
-    file << "iter,poroity"
-         << std::endl;
-    for (int i = 0; i < poroity.size(); i++)
-        file << i + 1 << "," << poroity[i] << std::endl;
-
-    file << "iter,radiusError"
-         << std::endl;
-    for (int i = 0; i < radiusError.size(); i++)
-        file << i + 1 << "," << radiusError[i] << std::endl;
-
-    file << "curRadius,tarRadius"
-         << std::endl;
-    for (int i = 0; i < maxIC.size(); i++)
-        file << maxIC[i].z << "," << maxIC[i].w << std::endl;
+    for (int i = 0; i < center.size(); i++)
+        file << center[i].x << "," << center[i].y << "," << radius[i] << std::endl;
 
     file.close();
+}
+
+void ExportPoroityData2CSVFile(const String fileName, const String idx, const Vector<float> &error, const Vector<float> &poroity, const Vector<float> &radiusError, const Vector<Vector4F> &maxIC)
+{
+    String errorFile = String(EXPORT_PATH) + "csv/" + fileName + "_error_" + idx + ".csv";
+    std::fstream efile;
+    efile.open(errorFile.c_str(), std::ios_base::out);
+    efile << "iter,error,radiusError,poroity"
+          << std::endl;
+    for (int i = 0; i < error.size(); i++)
+        efile << i + 1 << "," << error[i] << "," << radiusError[i] << "," << poroity[i] << std::endl;
+
+    efile.close();
+
+    String radiusFile = String(EXPORT_PATH) + "csv/" + fileName + "_radius_" + idx + ".csv";
+    std::fstream rfile;
+    rfile.open(radiusFile.c_str(), std::ios_base::out);
+    rfile << "curRadius,tarRadius"
+          << std::endl;
+    for (int i = 0; i < maxIC.size(); i++)
+        rfile << maxIC[i].z << "," << maxIC[i].w << std::endl;
+    rfile.close();
 }
 
 void load_xy_file1(std::vector<Vector2F> &points, size_t &num, const char *filePath)
@@ -839,6 +848,13 @@ void VoroTestExample()
     }
 }
 
+String UInt2Str4Digit(UInt Input)
+{
+    char output[5];
+    snprintf(output, 5, "%04d", Input);
+    return String(output);
+};
+
 void VoroPorosityOptimizeExample()
 {
     // scene renderer config
@@ -868,7 +884,8 @@ void VoroPorosityOptimizeExample()
 
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
-    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     Vector<Vector2F> boundary;
 
@@ -887,11 +904,12 @@ void VoroPorosityOptimizeExample()
 
     Vector<float> errorArray, porosityArray, radiusErrorArray;
     Vector<Vector4F> lastMaxCircle;
+    auto minRadius = Huge<float>();
+    auto maxRadius = Tiny<float>();
     for (size_t i = 0; i < 3002; i++)
     {
 
         auto error = opti->ComputeIterate();
-        errorArray.emplace_back(error);
 
         if (i % 10 == 1)
         {
@@ -922,8 +940,9 @@ void VoroPorosityOptimizeExample()
 
                         node = node->next;
                         auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
-
-                        lines.emplace_back(KiriLine2(start, end));
+                        auto line = KiriLine2(start, end);
+                        line.thick = 5.f;
+                        lines.emplace_back(line);
                     } while (node != list->GetHead());
                 }
             }
@@ -943,8 +962,21 @@ void VoroPorosityOptimizeExample()
                 circles.emplace_back(maxCir2);
                 //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
                 radiusError += std::abs(maxIC[i].z - maxIC[i].w);
+
+                minRadius = std::min(minRadius, maxIC[i].z);
+                maxRadius = std::max(maxRadius, maxIC[i].z);
             }
+
+            errorArray.emplace_back(error / maxIC.size());
             radiusErrorArray.emplace_back(radiusError / maxIC.size());
+
+            // re-color
+            for (size_t i = 0; i < maxIC.size(); i++)
+            {
+                auto rad = (maxIC[i].z - minRadius) / (maxRadius - minRadius);
+                const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
+                circles[i].col = Vector3F(color.r(), color.g(), color.b());
+            }
 
             // auto skeletons = opti->GetCellSkeletons();
 
@@ -979,19 +1011,12 @@ void VoroPorosityOptimizeExample()
             renderer->ClearCanvas();
             scene->Clear();
         }
+
+        if (i % 100 == 1)
+        {
+            ExportPoroityData2CSVFile("bunny", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+        }
     }
-    ExportPoroityData2CSVFile("test.csv", errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
-
-    // while (1)
-    // {
-
-    //     renderer->DrawCanvas();
-    //     //renderer->SaveImages2File();
-    //     cv::imshow("KIRI2D", renderer->GetCanvas());
-    //     cv::waitKey(5);
-    //     // renderer->ClearCanvas();
-    //     // scene->Clear();
-    // }
 }
 
 void VoroPorosityTreemapOptiExample()
@@ -1133,9 +1158,9 @@ int main()
 
     //VoroTestExample();
 
-    //VoroPorosityOptimizeExample();
+    VoroPorosityOptimizeExample();
 
-    VoroPorosityTreemapOptiExample();
+    //VoroPorosityTreemapOptiExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

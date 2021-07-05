@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-06-24 22:23:57
+ * @LastEditTime: 2021-07-05 16:04:51
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -215,7 +215,8 @@ namespace KIRI
                 {
                     outside = true;
                     KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
-                    mVoroSites[j]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
+                    auto rndPos = mBoundaryPolygon2->GetRndInnerPoint();
+                    mVoroSites[j]->ResetValue(rndPos);
                 }
             }
 

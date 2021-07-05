@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-17 19:50:42
+ * @LastEditTime: 2021-07-05 13:30:38
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
@@ -30,11 +30,13 @@ namespace KIRI
 
         std::vector<float> radiusRange;
         radiusRange.push_back(20.f);
-        radiusRange.push_back(50.f);
+        radiusRange.push_back(30.f);
+        radiusRange.push_back(80.f);
         radiusRange.push_back(150.f);
 
         std::vector<float> radiusRangeProb;
-        radiusRangeProb.push_back(0.9f);
+        radiusRangeProb.push_back(0.5f);
+        radiusRangeProb.push_back(0.4f);
         radiusRangeProb.push_back(0.1f);
 
         std::random_device engine;

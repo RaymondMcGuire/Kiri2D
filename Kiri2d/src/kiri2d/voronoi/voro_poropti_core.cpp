@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-23 17:28:26
+ * @LastEditTime: 2021-07-05 13:49:11
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -115,8 +115,8 @@ namespace KIRI
     void KiriVoroPoroOptiCore::AdaptPositionsWeights()
     {
         auto outside = mPowerDiagram->Move2Centroid();
-        if (outside)
-            CorrectWeights();
+        // if (outside)
+        //     CorrectWeights();
     }
 
     float KiriVoroPoroOptiCore::GetGlobalAreaError()
@@ -171,11 +171,13 @@ namespace KIRI
 
                             std::vector<float> radiusRange;
                             radiusRange.push_back(20.f);
-                            radiusRange.push_back(50.f);
+                            radiusRange.push_back(30.f);
+                            radiusRange.push_back(80.f);
                             radiusRange.push_back(150.f);
 
                             std::vector<float> radiusRangeProb;
-                            radiusRangeProb.push_back(0.9f);
+                            radiusRangeProb.push_back(0.5f);
+                            radiusRangeProb.push_back(0.4f);
                             radiusRangeProb.push_back(0.1f);
 
                             std::random_device engine;
