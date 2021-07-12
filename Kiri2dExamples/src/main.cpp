@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-07-05 15:11:35
+ * @LastEditTime: 2021-07-12 18:09:02
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1143,6 +1143,86 @@ void VoroPorosityTreemapOptiExample()
     }
 }
 
+void UniParticleSampler()
+{
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    float width = 1000.f;
+    float height = 1000.f;
+
+    Vector<KiriPoint2> points;
+    Vector<KiriLine2> lines;
+    Vector<KiriCircle2> circles;
+
+    KiriSDFPoly2D boundary;
+
+    Vector<Vector2F> bunny2d;
+    Vector<Vector2F> sbunny2d;
+    size_t bunnyNum;
+    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+
+    for (size_t i = 0; i < bunny2d.size(); i++)
+    {
+        auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
+        sbunny2d.emplace_back(newPos);
+        boundary.Append(newPos);
+    }
+
+    BoundingBox2F bbox;
+    for (size_t i = 0; i < bunnyNum; i++)
+        bbox.merge(sbunny2d[i]);
+
+    Vector<Vector2F> uniPoints;
+    auto radius = 10.f;
+    auto lower = bbox.LowestPoint;
+    auto higher = bbox.HighestPoint;
+    auto wn = UInt(((higher - lower) / (radius * 2.f)).x);
+    auto hn = UInt(((higher - lower) / (radius * 2.f)).y);
+    for (size_t i = 0; i <= wn; i++)
+    {
+
+        auto lineh = KiriLine2(lower + Vector2F(0.f, i * 2.f * radius), lower + Vector2F(higher.x - lower.x, i * 2.f * radius));
+        lineh.thick = 1.3f;
+        //lineh.col = Vector3F(0.f, 0.f, 0.f);
+        auto linev = KiriLine2(lower + Vector2F(i * 2.f * radius, 0.f), lower + Vector2F(i * 2.f * radius, higher.y - lower.y + radius));
+        linev.thick = 1.3f;
+        //linev.col = Vector3F(0.f, 0.f, 0.f);
+        lines.emplace_back(lineh);
+        lines.emplace_back(linev);
+        for (size_t j = 0; j < hn; j++)
+        {
+            auto pos = lower + Vector2F(radius, radius) + Vector2F(i, j) * (radius * 2.f);
+            uniPoints.emplace_back(pos);
+
+            if (boundary.FindRegion(pos) < 0.f)
+                circles.emplace_back(KiriCircle2(pos, Vector3F(100.f, 85.f, 134.f) / 255.f, radius));
+        }
+    }
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    // auto line = KiriLine2(start, end);
+    // line.col = Vector3F(0.f, 0.f, 255.f);
+    // lines.emplace_back(line);
+
+    scene->AddLines(lines);
+    scene->AddParticles(points);
+    scene->AddCircles(circles);
+    scene->AddObject(boundary);
+
+    renderer->DrawCanvas();
+    renderer->SaveImages2File();
+    while (1)
+    {
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+    }
+}
+
 int main()
 {
     KIRI::KiriLog::Init();
@@ -1158,9 +1238,11 @@ int main()
 
     //VoroTestExample();
 
-    VoroPorosityOptimizeExample();
+    //VoroPorosityOptimizeExample();
 
     //VoroPorosityTreemapOptiExample();
+
+    UniParticleSampler();
 
     // // scene renderer config
     // float windowheight = 1080.f;
