@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-05-24 16:46:15
+ * @LastEditTime: 2021-07-22 15:36:50
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\KiriCore\include\kiri2d\linked_list\circular_doubly_linked_list.h
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\linked_list\circular_doubly_linked_list.h
  */
 
 #ifndef _KIRI_CIRCULAR_DOUBLY_LINKED_LIST_H_
@@ -32,10 +32,7 @@ namespace KIRI
                 this->next = NULL;
                 this->prev = NULL;
             }
-            ~Node()
-            {
-                //KIRI_LOG_DEBUG("destruct node value: {0}", this->value);
-            }
+            ~Node() {}
         };
         SharedPtr<Node> mHead;
         UInt mCounter = 0;
@@ -115,14 +112,6 @@ namespace KIRI
 
         void Print()
         {
-            // static_assert(
-            //     IsSame_Int<T>::value ||
-            //         IsSame_SizeT<T>::value ||
-            //         IsSame_Float<T>::value ||
-            //         IsSame_Double<T>::value ||
-            //         IsSame_Bool<T>::value,
-            //     "data type is not correct");
-
             String printStr = "";
             if (mHead != NULL)
             {
@@ -139,13 +128,6 @@ namespace KIRI
 
         void PrintReverse()
         {
-            // static_assert(
-            //     IsSame_Int<T>::value ||
-            //         IsSame_SizeT<T>::value ||
-            //         IsSame_Float<T>::value ||
-            //         IsSame_Double<T>::value ||
-            //         IsSame_Bool<T>::value,
-            //     "data type is not correct");
 
             String printStr = "";
 

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-07-12 18:09:02
+ * @LastEditTime: 2021-07-22 21:24:13
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1161,8 +1161,8 @@ void UniParticleSampler()
     Vector<Vector2F> bunny2d;
     Vector<Vector2F> sbunny2d;
     size_t bunnyNum;
-    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
@@ -1223,6 +1223,20 @@ void UniParticleSampler()
     }
 }
 
+#include <kiri2d/straight_skeleton/sskel_lav.h>
+void StraightSkeletonExample1()
+{
+    Vec_Vec2F polygon;
+    polygon.emplace_back(Vector2F(40, 40));
+    polygon.emplace_back(Vector2F(40, 310));
+    polygon.emplace_back(Vector2F(520, 310));
+    polygon.emplace_back(Vector2F(520, 40));
+
+    auto lav = std::make_shared<KIRI2D::SSKEL::SSkelLAV>(polygon);
+    lav->PrintSSkelLAV();
+    lav->GenEvents();
+}
+
 int main()
 {
     KIRI::KiriLog::Init();
@@ -1242,7 +1256,9 @@ int main()
 
     //VoroPorosityTreemapOptiExample();
 
-    UniParticleSampler();
+    //UniParticleSampler();
+
+    StraightSkeletonExample1();
 
     // // scene renderer config
     // float windowheight = 1080.f;
