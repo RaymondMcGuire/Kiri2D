@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-06-25 01:29:33
+ * @LastEditTime: 2021-07-23 17:09:01
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -10,7 +10,7 @@
 #include <kiri2d/voronoi/voro_cell_polygon2.h>
 #include <kiri2d/voronoi/voro_util.h>
 #include <random>
-
+#include <kiri2d/straight_skeleton/sskel_convex.h>
 namespace KIRI
 {
 
@@ -28,74 +28,9 @@ namespace KIRI
         return a < 0.f;
     }
 
-    void KiriVoroCellPolygon2::ComputeBisectors(const Vector<Vector4F> &poly, float lambda)
+    void KiriVoroCellPolygon2::ComputeSSkel1998Convex()
     {
-        auto polySize = poly.size();
-        auto cw = IsClockwise(poly);
-        mBisectors.clear();
-
-        for (size_t i = polySize; i < polySize * 2; i++)
-        {
-            auto eprev = poly[(i - 1) % polySize];
-            auto ecurr = poly[i % polySize];
-            auto p1 = Vector2F(eprev.x, eprev.y);
-            auto p2 = Vector2F(eprev.z, eprev.w);
-            auto p3 = Vector2F(ecurr.z, ecurr.w);
-            // auto cw = CheckClockwise2(p1, p2, p3) == 1 ? true : false;
-            auto d = DirectionBetween2Edges2(p1, p2, p3, cw);
-            mBisectors.emplace_back(d * lambda);
-        }
-    }
-
-    IntersectionStatus KiriVoroCellPolygon2::ComputeShrink(const Vector<Vector4F> &poly, float lambda)
-    {
-
-        ComputeBisectors(poly, lambda);
-
-        IntersectionStatus status;
-        Vector<Vector4F> shrink;
-
-        status.intersection = false;
-        auto updateNextPoint = false;
-        auto curPoint = Vector2F(0.f);
-        auto nextPoint = Vector2F(0.f);
-
-        auto polySize = poly.size();
-        for (size_t i = 0; i < polySize; i++)
-        {
-            auto s = Vector2F(poly[i].x, poly[i].y);
-            auto e = Vector2F(poly[i].z, poly[i].w);
-
-            if (updateNextPoint)
-                updateNextPoint = false;
-            else
-                curPoint = s + mBisectors[i];
-
-            if (i == polySize - 1)
-                nextPoint = Vector2F(shrink[0].x, shrink[0].y);
-            else
-                nextPoint = e + mBisectors[i + 1];
-
-            auto intersection = IntersectionPoint2(s, curPoint, e, nextPoint);
-            if (intersection.z == 1.f)
-            {
-                status.intersection = true;
-                updateNextPoint = true;
-                curPoint = nextPoint = Vector2F(intersection.x, intersection.y);
-
-                if (shrink.size() > 0)
-                    shrink[shrink.size() - 1] = Vector4F(shrink[shrink.size() - 1].x, shrink[shrink.size() - 1].y, curPoint.x, curPoint.y);
-            }
-
-            shrink.emplace_back(Vector4F(curPoint.x, curPoint.y, nextPoint.x, nextPoint.y));
-        }
-
-        status.shrink = shrink;
-        return status;
-    }
-
-    void KiriVoroCellPolygon2::ComputeStraightSkeleton(float lambda)
-    {
+        mSkeletons.clear();
         Vector<Vector4F> poly;
         for (size_t i = 0; i < mPolygonVertices2.size(); i++)
         {
@@ -104,75 +39,19 @@ namespace KIRI
             poly.emplace_back(Vector4F(v1.x, v1.y, v2.x, v2.y));
         }
 
+        Vector<Vector2F> rPolyVert(mPolygonVertices2);
         if (IsClockwise(poly))
-        {
-            Vector<Vector2F> rPolyVert(mPolygonVertices2);
             std::reverse(rPolyVert.begin(), rPolyVert.end());
 
-            poly.clear();
-            for (size_t i = 0; i < rPolyVert.size(); i++)
-            {
-                auto v1 = rPolyVert[i];
-                auto v2 = rPolyVert[(i + 1) % rPolyVert.size()];
-                poly.emplace_back(Vector4F(v1.x, v1.y, v2.x, v2.y));
-            }
-        }
+        auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelConvex>(rPolyVert);
 
-        Vector<Vector4F> oPoly(poly);
-        Vector2F point = Vector2F(0.f);
-        auto cnt = 0;
-        while (cnt < 100000)
+        auto skeletons = sskel_convex->GetSkeletons();
+
+        for (size_t i = 0; i < skeletons.size(); i++)
         {
-            auto status = ComputeShrink(poly, lambda);
-            auto shrink = status.shrink;
-            mShrinks.insert(mShrinks.end(), shrink.begin(), shrink.end());
-
-            Vector<Vector4F> newPoly(shrink);
-
-            if (status.intersection)
-            {
-                auto removePoints = std::remove_if(newPoly.begin(),
-                                                   newPoly.end(),
-                                                   [&point](const Vector4F &elem)
-                                                   {
-                                                       auto res = IsApproxVec2(Vector2F(elem.x, elem.y), Vector2F(elem.z, elem.w), 0.01f);
-
-                                                       if (res.z == 0.f)
-                                                       {
-                                                           point = Vector2F(res.x, res.y);
-                                                           return false;
-                                                       }
-                                                       else
-                                                           return true;
-                                                   });
-
-                newPoly.erase(removePoints, newPoly.end());
-            }
-
-            if (newPoly.size() < poly.size())
-            {
-                for (size_t i = 0; i < oPoly.size(); i++)
-                    mSkeletons.emplace_back(Vector4F(oPoly[i].x, oPoly[i].y, shrink[i].x, shrink[i].y));
-
-                oPoly = newPoly;
-            }
-
-            if (newPoly.size() == 2)
-                if (IsApproxVec4(newPoly[0], newPoly[1], 0.01f))
-                    newPoly.pop_back();
-
-            if (newPoly.size() <= 1)
-            {
-                if (newPoly.size() == 1)
-                    mSkeletons.emplace_back(newPoly[0]);
-                else
-                    for (size_t i = 0; i < oPoly.size(); i++)
-                        mSkeletons.emplace_back(Vector4F(oPoly[i].x, oPoly[i].y, point.x, point.y));
-
-                break;
-            }
-            poly = newPoly;
-            cnt++;
+            auto [intersect, sinks] = skeletons[i];
+            for (size_t j = 0; j < sinks.size(); j++)
+                mSkeletons.emplace_back(Vector4F(intersect.x, intersect.y, sinks[j].x, sinks[j].y));
         }
     }
 

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-24 22:03:58
+ * @LastEditTime: 2021-07-23 17:09:22
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
@@ -82,10 +82,10 @@ namespace KIRI
 
         bool IsClockwise(const Vector<Vector4F> &poly);
 
-        IntersectionStatus ComputeShrink(const Vector<Vector4F> &poly, float lambda);
-        void ComputeStraightSkeleton(float lambda);
-        const Vector<Vector4F> &GetShrinks() const { return mShrinks; }
         const Vector<Vector4F> &GetSkeletons() const { return mSkeletons; }
+
+        // SSkel_1998
+        void ComputeSSkel1998Convex();
 
         Vector3F ComputeMICByStraightSkeleton();
 
@@ -96,8 +96,6 @@ namespace KIRI
 
         Vector<Vector2F> mBisectors;
         Vector<Vector4F> mShrinks, mSkeletons;
-
-        void ComputeBisectors(const Vector<Vector4F> &poly, float lambda);
     };
 
     typedef SharedPtr<KiriVoroCellPolygon2> KiriVoroCellPolygon2Ptr;

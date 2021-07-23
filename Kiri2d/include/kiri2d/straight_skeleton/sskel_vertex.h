@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-22 21:19:13
+ * @LastEditTime: 2021-07-23 15:15:13
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_vertex.h
@@ -20,27 +20,41 @@ namespace KIRI2D::SSKEL
     public:
         explicit SSkelVertex(Vector2F left,
                              Vector2F mid,
-                             Vector2F right)
+                             Vector2F right,
+                             Vector4F dir = Vector4F(0.f))
             : mPoint(mid),
               mLeft(left),
-              mRight(right)
+              mRight(right),
+              mDir(dir)
         {
             auto prev_dir = (mPoint - left).normalized() * -1.f;
             auto next_dir = (right - mid).normalized();
-            mDir = Vector4F(prev_dir.x, prev_dir.y, next_dir.x, next_dir.y);
-            mIsReflex = (Vector2F(mDir.x, mDir.y).cross(Vector2F(mDir.z, mDir.w))) < 0.f;
 
-            auto bisector_end = (Vector2F(mDir.x, mDir.y) + Vector2F(mDir.z, mDir.w)) * (mIsReflex ? -1.f : 1.f);
+            auto bi_dir = Vector4F(prev_dir.x, prev_dir.y, next_dir.x, next_dir.y);
+            if (dir == Vector4F(0.f))
+                mDir = bi_dir;
+
+            mIsReflex = (Vector2F(mDir.x, mDir.y).cross(Vector2F(mDir.z, mDir.w))) < 0.f;
+            mIsValid = true;
+
+            auto bisector_end = (Vector2F(bi_dir.x, bi_dir.y) + Vector2F(bi_dir.z, bi_dir.w)) * (mIsReflex ? -1.f : 1.f);
             mBisector = Vector4F(mPoint.x, mPoint.y, bisector_end.x, bisector_end.y);
         }
 
         SSkelVertex() = default;
         ~SSkelVertex() {}
 
+        SharedPtr<SSkelVertex> prev;
+        SharedPtr<SSkelVertex> next;
+
+        bool GetIsReflex() { return mIsReflex; }
+        bool GetIsValid() { return mIsValid; }
         Vector2F GetPoint() { return mPoint; }
         Vector2F GetLeftPoint() { return mLeft; }
         Vector2F GetRightPoint() { return mRight; }
         Vector4F GetBisector() { return mBisector; }
+
+        void SetInValid() { mIsValid = false; }
 
         void Print()
         {
@@ -57,7 +71,7 @@ namespace KIRI2D::SSKEL
         // v2:start point, v2:end point
         Vector4F mBisector;
 
-        bool mIsReflex;
+        bool mIsReflex, mIsValid;
     };
     typedef SharedPtr<SSkelVertex> SSkelVertexPtr;
 }

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-07-22 21:24:13
+ * @LastEditTime: 2021-07-23 16:26:58
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -340,7 +340,9 @@ void VoronoiExample2()
         auto poly = sites[i]->GetCellPolygon();
         if (poly != NULL)
         {
-            poly->ComputeStraightSkeleton(1.f);
+            // poly->ComputeStraightSkeleton(1.f);
+            poly->ComputeSSkel1998Convex();
+
             auto mic = poly->ComputeMICByStraightSkeleton();
             auto micPos = Transform2Original(Vector2F(mic.x, mic.y), height) + offsetVec2;
             circles.emplace_back(KiriCircle2(micPos, Vector3F(0.f, 0.f, 100.f), mic.z));
@@ -855,7 +857,158 @@ String UInt2Str4Digit(UInt Input)
     return String(output);
 };
 
-void VoroPorosityOptimizeExample()
+void VoroPorosityOptimizeConvexExample()
+{
+    // scene renderer config
+    float windowheight = 5000.f;
+    float windowwidth = 5000.f;
+
+    // voronoi
+    float width = 3000.f;
+    float height = 3000.f;
+    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+
+    auto PI = 3.141592653f;
+    auto numPoints = 8;
+    auto radius = 2000.f;
+
+    Vector<Vector2F> boundary;
+    for (auto j = 0; j < numPoints; j++)
+    {
+        auto angle = 2.0 * PI * (j * 1.f / numPoints);
+        auto rotate = 2.0 * PI / numPoints / 2;
+        auto y = std::sin(angle + rotate) * radius;
+        auto x = std::cos(angle + rotate) * radius;
+        auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
+
+        boundary.emplace_back(pos);
+    }
+
+    auto opti = std::make_shared<KiriVoroPoroOpti>();
+    opti->SetRootBoundary2(boundary);
+    opti->GenExample(width, height);
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    Vector<float> errorArray, porosityArray, radiusErrorArray;
+    Vector<Vector4F> lastMaxCircle;
+    auto minRadius = Huge<float>();
+    auto maxRadius = Tiny<float>();
+    for (size_t i = 0; i < 3002; i++)
+    {
+
+        auto error = opti->ComputeIterate();
+
+        if (i % 10 == 1)
+        {
+            //MIC calculated by vornoi
+            //opti->ComputeChildIterate();
+
+            Vector<KiriPoint2> points;
+            Vector<KiriLine2> lines;
+            Vector<KiriCircle2> circles;
+
+            auto sites = opti->GetLeafNodeSites();
+            for (size_t i = 0; i < sites.size(); i++)
+            {
+                //sites[i]->Print();
+                auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
+                points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
+                auto poly = sites[i]->GetCellPolygon();
+                if (poly != NULL)
+                {
+                    poly->ComputeVoroSitesList();
+                    auto list = poly->GetVoroSitesList();
+                    // list->PrintVertexList();
+
+                    auto node = list->GetHead();
+                    do
+                    {
+                        auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+
+                        node = node->next;
+                        auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                        auto line = KiriLine2(start, end);
+                        line.thick = 5.f;
+                        lines.emplace_back(line);
+                    } while (node != list->GetHead());
+                }
+            }
+
+            auto maxIC = opti->GetMICByStraightSkeleton(10.f);
+            lastMaxCircle = maxIC;
+
+            auto porosity = opti->ComputeMiniumPorosity(10.f);
+            porosityArray.emplace_back(porosity);
+
+            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
+
+            auto radiusError = 0.f;
+            for (size_t i = 0; i < maxIC.size(); i++)
+            {
+                auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+                circles.emplace_back(maxCir2);
+                //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
+                radiusError += std::abs(maxIC[i].z - maxIC[i].w);
+
+                minRadius = std::min(minRadius, maxIC[i].z);
+                maxRadius = std::max(maxRadius, maxIC[i].z);
+            }
+
+            errorArray.emplace_back(error / maxIC.size());
+            radiusErrorArray.emplace_back(radiusError / maxIC.size());
+
+            // re-color
+            for (size_t i = 0; i < maxIC.size(); i++)
+            {
+                auto rad = (maxIC[i].z - minRadius) / (maxRadius - minRadius);
+                const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
+                circles[i].col = Vector3F(color.r(), color.g(), color.b());
+            }
+
+            // auto skeletons = opti->GetCellSkeletons();
+
+            // for (size_t j = 0; j < skeletons.size(); j++)
+            // {
+            //     auto start = Transform2Original(Vector2F(skeletons[j].x, skeletons[j].y), height) + offsetVec2;
+            //     auto end = Transform2Original(Vector2F(skeletons[j].z, skeletons[j].w), height) + offsetVec2;
+            //     auto line = KiriLine2(start, end);
+            //     line.col = Vector3F(0.f, 0.f, 100.f);
+
+            //     lines.emplace_back(line);
+            // }
+
+            // auto shrinks = opti->GetCellShrinks();
+
+            // for (size_t j = 0; j < shrinks.size(); j++)
+            // {
+            //     auto start = Transform2Original(Vector2F(shrinks[j].x, shrinks[j].y), height) + offsetVec2;
+            //     auto end = Transform2Original(Vector2F(shrinks[j].z, shrinks[j].w), height) + offsetVec2;
+            //     auto line = KiriLine2(start, end);
+            //     line.col = Vector3F(0.f, 0.f, 100.f);
+            //     lines.emplace_back(line);
+            // }
+
+            scene->AddParticles(points);
+            scene->AddCircles(circles);
+            scene->AddLines(lines);
+
+            renderer->DrawCanvas();
+            renderer->SaveImages2File();
+
+            renderer->ClearCanvas();
+            scene->Clear();
+        }
+
+        if (i % 100 == 1)
+        {
+            ExportPoroityData2CSVFile("convex", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+        }
+    }
+}
+
+void VoroPorosityOptimizeBunnyExample()
 {
     // scene renderer config
     float windowheight = 5000.f;
@@ -1223,8 +1376,8 @@ void UniParticleSampler()
     }
 }
 
-#include <kiri2d/straight_skeleton/sskel_lav.h>
-void StraightSkeletonExample1()
+#include <kiri2d/straight_skeleton/sskel_convex.h>
+void StraightSkeletonConvexExample1()
 {
     Vec_Vec2F polygon;
     polygon.emplace_back(Vector2F(40, 40));
@@ -1232,16 +1385,45 @@ void StraightSkeletonExample1()
     polygon.emplace_back(Vector2F(520, 310));
     polygon.emplace_back(Vector2F(520, 40));
 
-    auto lav = std::make_shared<KIRI2D::SSKEL::SSkelLAV>(polygon);
-    lav->PrintSSkelLAV();
-    lav->GenEvents();
+    auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelConvex>(polygon);
+
+    Vector<KiriLine2> lines;
+    auto skeletons = sskel_convex->GetSkeletons();
+    for (size_t i = 0; i < skeletons.size(); i++)
+    {
+        auto [intersect, sinks] = skeletons[i];
+        for (size_t j = 0; j < sinks.size(); j++)
+        {
+            auto line = KiriLine2(intersect, sinks[j]);
+            lines.emplace_back(line);
+        }
+    }
+
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    float width = 1000.f;
+    float height = 1000.f;
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    scene->AddLines(lines);
+
+    renderer->DrawCanvas();
+    renderer->SaveImages2File();
+    while (1)
+    {
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+    }
 }
 
 int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
-    // VoronoiExample2();
+    //VoronoiExample2();
 
     // LloydRelaxationExample();
 
@@ -1258,7 +1440,9 @@ int main()
 
     //UniParticleSampler();
 
-    StraightSkeletonExample1();
+    //StraightSkeletonExample1();
+
+    VoroPorosityOptimizeConvexExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-17 19:50:56
+ * @LastEditTime: 2021-07-23 17:09:45
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
@@ -75,7 +75,11 @@ namespace KIRI
                 if (poly != NULL)
                 {
                     if (poly->GetSkeletons().empty())
-                        poly->ComputeStraightSkeleton(lambda);
+                    {
+
+                        poly->ComputeSSkel1998Convex();
+                    }
+
                     auto mic = poly->ComputeMICByStraightSkeleton();
                     circles.emplace_back(Vector4F(mic, sites[i]->GetRadius()));
                 }
@@ -102,33 +106,15 @@ namespace KIRI
                 if (poly != NULL)
                 {
                     if (poly->GetSkeletons().empty())
-                        poly->ComputeStraightSkeleton(lambda);
+                    {
+                        poly->ComputeSSkel1998Convex();
+                    }
                     auto sk = poly->GetSkeletons();
                     skeletons.insert(skeletons.end(), sk.begin(), sk.end());
                 }
             }
 
             return skeletons;
-        }
-
-        Vector<Vector4F> GetCellShrinks()
-        {
-            Vector<Vector4F> shrinks;
-            auto sites = mRootCore->GetSites();
-
-            for (size_t i = 0; i < sites.size(); i++)
-            {
-                auto poly = sites[i]->GetCellPolygon();
-                if (poly != NULL)
-                {
-                    if (poly->GetShrinks().empty())
-                        poly->ComputeStraightSkeleton(1.f);
-                    auto sr = poly->GetShrinks();
-                    shrinks.insert(shrinks.end(), sr.begin(), sr.end());
-                }
-            }
-
-            return shrinks;
         }
 
         float ComputeMiniumPorosity(float lambda);

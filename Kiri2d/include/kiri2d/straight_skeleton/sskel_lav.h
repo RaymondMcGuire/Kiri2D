@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-22 21:19:48
+ * @LastEditTime: 2021-07-23 14:39:23
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_lav.h
@@ -12,16 +12,16 @@
 
 #pragma once
 
-#include <kiri2d/linked_list/circular_doubly_linked_list.h>
 #include <kiri2d/straight_skeleton/sskel_event.h>
+#include <queue>
+#include <tuple>
 
 namespace KIRI2D::SSKEL
 {
-    class SSkelLAV : public KIRI::KiriCircularDoublyLinkedList<SSkelVertexPtr>
+    class SSkelLAV
     {
     public:
         explicit SSkelLAV(Vec_Vec2F poly)
-            : KIRI::KiriCircularDoublyLinkedList<SSkelVertexPtr>()
         {
             auto size = poly.size();
             for (size_t i = size; i < size + size; i++)
@@ -39,30 +39,29 @@ namespace KIRI2D::SSKEL
 
         ~SSkelLAV() {}
 
+        UInt Length() { return mCounter; }
+        Vector<std::tuple<Vector2F, Vec_Vec2F>> GetSkeletons() const { return mSkeletons; }
+
         void PrintSSkelLAV();
-        void GenEvents();
+
+        void GenInitEvents();
+        void HandleEvents();
 
     private:
-        void Push(const SSkelVertexPtr &x)
-        {
+        UInt mCounter = 0;
+        SSkelVertexPtr mHead = NULL;
+        std::priority_queue<
+            SSkelEdgeEventPtr,
+            Vector<SSkelEdgeEventPtr>,
+            SSkelEdgeEventCmpDistance>
+            mPriorityQueue;
 
-            if (mHead == NULL)
-            {
-                mHead = SharedPtr<Node>(new Node(x));
-                mHead->next = mHead->prev = mHead;
-                mCounter++;
-            }
-            else
-            {
+        Vector<std::tuple<Vector2F, Vec_Vec2F>> mSkeletons;
 
-                auto new_node = SharedPtr<Node>(new Node(x));
-                mHead->prev->next = new_node;
-                new_node->prev = mHead->prev;
-                new_node->next = mHead;
-                mHead->prev = new_node;
-                mCounter++;
-            }
-        }
+        void Push(const SSkelVertexPtr &x);
+        SSkelVertexPtr Unify(const SSkelVertexPtr &va, const SSkelVertexPtr &vb, Vector2F mid);
+        SSkelEdgeEventPtr GenEdgeEventByVertex(const SSkelVertexPtr &vertex);
+        Vector<SSkelEdgeEventPtr> HandleEdgeEvent(const SSkelEdgeEventPtr &edgeEvent);
     };
     typedef SharedPtr<SSkelLAV> SSkelLAVPtr;
 }

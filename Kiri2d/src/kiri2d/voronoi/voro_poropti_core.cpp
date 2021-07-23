@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-07-05 13:49:11
+ * @LastEditTime: 2021-07-23 15:43:45
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -159,7 +159,11 @@ namespace KIRI
                     if (poly != NULL)
                     {
                         if (poly->GetSkeletons().empty())
-                            poly->ComputeStraightSkeleton(lambda);
+                        {
+                            // poly->ComputeStraightSkeleton(lambda);
+                            poly->ComputeSSkel1998Convex();
+                        }
+
                         auto mic = poly->ComputeMICByStraightSkeleton();
                         auto maxRadius = mic.z;
                         auto targetRadius = voroSite[i]->GetRadius();
