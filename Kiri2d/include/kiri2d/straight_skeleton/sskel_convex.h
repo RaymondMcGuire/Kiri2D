@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-23 16:30:57
+ * @LastEditTime: 2021-07-24 20:28:17
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_convex.h
@@ -23,6 +23,7 @@ namespace KIRI2D::SSKEL
         {
             // TODO check poly is convex or not
             mLAV = std::make_shared<KIRI2D::SSKEL::SSkelLAV>(poly);
+            //mLAV->PrintSSkelLAV();
             mLAV->GenInitEvents();
             mLAV->HandleEvents();
         }

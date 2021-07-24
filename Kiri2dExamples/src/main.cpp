@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-07-23 16:26:58
+ * @LastEditTime: 2021-07-24 21:14:24
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1379,11 +1379,105 @@ void UniParticleSampler()
 #include <kiri2d/straight_skeleton/sskel_convex.h>
 void StraightSkeletonConvexExample1()
 {
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    float width = 1000.f;
+    float height = 1000.f;
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    Vector2F offset = Vector2F(width, height) / 12.f;
+
+    KiriSDFPoly2D boundary;
     Vec_Vec2F polygon;
-    polygon.emplace_back(Vector2F(40, 40));
-    polygon.emplace_back(Vector2F(40, 310));
-    polygon.emplace_back(Vector2F(520, 310));
-    polygon.emplace_back(Vector2F(520, 40));
+
+    // polygon.emplace_back(Vector2F(100, 50));
+    // polygon.emplace_back(Vector2F(150, 150));
+    // polygon.emplace_back(Vector2F(50, 100));
+    // polygon.emplace_back(Vector2F(50, 250));
+    // polygon.emplace_back(Vector2F(150, 250));
+    // polygon.emplace_back(Vector2F(50, 350));
+    // polygon.emplace_back(Vector2F(350, 350));
+    // polygon.emplace_back(Vector2F(350, 100));
+    // polygon.emplace_back(Vector2F(250, 150));
+    // polygon.emplace_back(Vector2F(300, 50));
+
+    polygon.emplace_back(Vector2F(208, 131));
+    polygon.emplace_back(Vector2F(213, 142));
+    polygon.emplace_back(Vector2F(168, 141));
+    polygon.emplace_back(Vector2F(260, 168));
+    polygon.emplace_back(Vector2F(246, 149));
+    polygon.emplace_back(Vector2F(277, 142));
+    polygon.emplace_back(Vector2F(271, 163));
+    polygon.emplace_back(Vector2F(302, 180));
+    polygon.emplace_back(Vector2F(268, 173));
+    polygon.emplace_back(Vector2F(305, 196));
+    polygon.emplace_back(Vector2F(319, 225));
+    polygon.emplace_back(Vector2F(367, 214));
+    polygon.emplace_back(Vector2F(423, 169));
+    polygon.emplace_back(Vector2F(471, 160));
+    polygon.emplace_back(Vector2F(540, 208));
+    polygon.emplace_back(Vector2F(588, 268));
+    polygon.emplace_back(Vector2F(616, 270));
+    polygon.emplace_back(Vector2F(644, 308));
+    polygon.emplace_back(Vector2F(630, 446));
+    polygon.emplace_back(Vector2F(647, 472));
+    polygon.emplace_back(Vector2F(641, 459));
+    polygon.emplace_back(Vector2F(656, 467));
+    polygon.emplace_back(Vector2F(660, 450));
+    polygon.emplace_back(Vector2F(646, 423));
+    polygon.emplace_back(Vector2F(687, 447));
+    polygon.emplace_back(Vector2F(666, 495));
+    polygon.emplace_back(Vector2F(651, 495));
+    polygon.emplace_back(Vector2F(711, 580));
+    polygon.emplace_back(Vector2F(728, 584));
+    polygon.emplace_back(Vector2F(714, 557));
+    polygon.emplace_back(Vector2F(746, 560));
+    polygon.emplace_back(Vector2F(735, 569));
+    polygon.emplace_back(Vector2F(744, 617));
+    polygon.emplace_back(Vector2F(769, 594));
+    polygon.emplace_back(Vector2F(753, 624));
+    polygon.emplace_back(Vector2F(771, 628));
+    polygon.emplace_back(Vector2F(793, 700));
+    polygon.emplace_back(Vector2F(842, 708));
+    polygon.emplace_back(Vector2F(871, 759));
+    polygon.emplace_back(Vector2F(902, 780));
+    polygon.emplace_back(Vector2F(891, 788));
+    polygon.emplace_back(Vector2F(871, 773));
+    polygon.emplace_back(Vector2F(887, 799));
+    polygon.emplace_back(Vector2F(947, 774));
+    polygon.emplace_back(Vector2F(964, 782));
+    polygon.emplace_back(Vector2F(978, 689));
+    polygon.emplace_back(Vector2F(985, 678));
+    polygon.emplace_back(Vector2F(990, 695));
+    polygon.emplace_back(Vector2F(984, 555));
+    polygon.emplace_back(Vector2F(868, 338));
+    polygon.emplace_back(Vector2F(854, 294));
+    polygon.emplace_back(Vector2F(869, 316));
+    polygon.emplace_back(Vector2F(887, 314));
+    polygon.emplace_back(Vector2F(892, 366));
+    polygon.emplace_back(Vector2F(895, 322));
+    polygon.emplace_back(Vector2F(805, 196));
+    polygon.emplace_back(Vector2F(747, 61));
+    polygon.emplace_back(Vector2F(759, 59));
+    polygon.emplace_back(Vector2F(753, 43));
+    polygon.emplace_back(Vector2F(691, 33));
+    polygon.emplace_back(Vector2F(683, 98));
+    polygon.emplace_back(Vector2F(661, 72));
+    polygon.emplace_back(Vector2F(355, 83));
+    polygon.emplace_back(Vector2F(333, 46));
+    polygon.emplace_back(Vector2F(35, 70));
+    polygon.emplace_back(Vector2F(70, 144));
+    polygon.emplace_back(Vector2F(50, 165));
+    polygon.emplace_back(Vector2F(77, 154));
+    polygon.emplace_back(Vector2F(87, 125));
+    polygon.emplace_back(Vector2F(99, 139));
+    polygon.emplace_back(Vector2F(106, 118));
+    polygon.emplace_back(Vector2F(122, 139));
+    polygon.emplace_back(Vector2F(89, 152));
+    polygon.emplace_back(Vector2F(169, 124));
 
     auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelConvex>(polygon);
 
@@ -1394,21 +1488,18 @@ void StraightSkeletonConvexExample1()
         auto [intersect, sinks] = skeletons[i];
         for (size_t j = 0; j < sinks.size(); j++)
         {
-            auto line = KiriLine2(intersect, sinks[j]);
+            auto line = KiriLine2(intersect + offset, sinks[j] + offset);
             lines.emplace_back(line);
         }
     }
 
-    // scene renderer config
-    float windowheight = 1080.f;
-    float windowwidth = 1920.f;
-
-    float width = 1000.f;
-    float height = 1000.f;
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    for (size_t i = 0; i < polygon.size(); i++)
+    {
+        boundary.Append(polygon[i] + offset);
+    }
 
     scene->AddLines(lines);
+    scene->AddObject(boundary);
 
     renderer->DrawCanvas();
     renderer->SaveImages2File();
@@ -1440,9 +1531,9 @@ int main()
 
     //UniParticleSampler();
 
-    //StraightSkeletonExample1();
+    StraightSkeletonConvexExample1();
 
-    VoroPorosityOptimizeConvexExample();
+    //VoroPorosityOptimizeConvexExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

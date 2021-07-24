@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2020-10-19 01:37:05
- * @LastEditTime: 2021-06-16 01:11:41
+ * @LastEditTime: 2021-07-24 19:51:32
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
@@ -129,6 +129,9 @@ template <class Type>
 using IsSame_SizeT = std::is_same<Type, size_t>;
 template <class Type>
 using IsSame_Bool = std::is_same<Type, bool>;
+
+template <class Base, class Type>
+constexpr auto IsInstanceOf(const std::shared_ptr<Type> ptr) { return std::dynamic_pointer_cast<const Base>(ptr) != nullptr; }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>

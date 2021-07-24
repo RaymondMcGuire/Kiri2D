@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-23 15:15:13
+ * @LastEditTime: 2021-07-24 22:15:02
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_vertex.h
@@ -18,17 +18,17 @@ namespace KIRI2D::SSKEL
     class SSkelVertex
     {
     public:
-        explicit SSkelVertex(Vector2F left,
-                             Vector2F mid,
-                             Vector2F right,
+        explicit SSkelVertex(Vector4F leftEdge,
+                             Vector2F point,
+                             Vector4F rightEdge,
                              Vector4F dir = Vector4F(0.f))
-            : mPoint(mid),
-              mLeft(left),
-              mRight(right),
+            : mPoint(point),
+              mLeftEdge(leftEdge),
+              mRightEdge(rightEdge),
               mDir(dir)
         {
-            auto prev_dir = (mPoint - left).normalized() * -1.f;
-            auto next_dir = (right - mid).normalized();
+            auto prev_dir = (Vector2F(leftEdge.z, leftEdge.w) - Vector2F(leftEdge.x, leftEdge.y)).normalized() * -1.f;
+            auto next_dir = (Vector2F(rightEdge.z, rightEdge.w) - Vector2F(rightEdge.x, rightEdge.y)).normalized();
 
             auto bi_dir = Vector4F(prev_dir.x, prev_dir.y, next_dir.x, next_dir.y);
             if (dir == Vector4F(0.f))
@@ -45,25 +45,28 @@ namespace KIRI2D::SSKEL
         ~SSkelVertex() {}
 
         SharedPtr<SSkelVertex> prev;
-        SharedPtr<SSkelVertex> next;
+        WeakPtr<SSkelVertex> next;
 
         bool GetIsReflex() { return mIsReflex; }
         bool GetIsValid() { return mIsValid; }
         Vector2F GetPoint() { return mPoint; }
-        Vector2F GetLeftPoint() { return mLeft; }
-        Vector2F GetRightPoint() { return mRight; }
+        Vector4F GetLeftEdge() { return mLeftEdge; }
+        Vector4F GetRightEdge() { return mRightEdge; }
         Vector4F GetBisector() { return mBisector; }
 
         void SetInValid() { mIsValid = false; }
 
         void Print()
         {
-            KIRI_LOG_DEBUG("prev_dir=({0},{1}),next_dir=({2},{3}),mIsReflex={4},bisector_end=({5},{6})",
-                           mDir.x, mDir.y, mDir.z, mDir.w, mIsReflex, mBisector.z, mBisector.w);
+            KIRI_LOG_DEBUG("left edge=({0},{1})--({2},{3}),right edge=({4},{5})--({6},{7}),mIsReflex={8},bisector_end=({9},{10}),point={11},{12}",
+                           mLeftEdge.x, mLeftEdge.y, mLeftEdge.z, mLeftEdge.w,
+                           mRightEdge.x, mRightEdge.y, mRightEdge.z, mRightEdge.w,
+                           mIsReflex, mBisector.z, mBisector.w, mPoint.x, mPoint.y);
         }
 
     private:
-        Vector2F mPoint, mLeft, mRight;
+        Vector2F mPoint;
+        Vector4F mLeftEdge, mRightEdge;
 
         // v2:prev edge dir, v2:next edge dir
         Vector4F mDir;
