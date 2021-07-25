@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-24 22:15:02
+ * @LastEditTime: 2021-07-25 17:45:40
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_vertex.h
@@ -18,11 +18,13 @@ namespace KIRI2D::SSKEL
     class SSkelVertex
     {
     public:
-        explicit SSkelVertex(Vector4F leftEdge,
+        explicit SSkelVertex(UInt lavId,
+                             Vector4F leftEdge,
                              Vector2F point,
                              Vector4F rightEdge,
                              Vector4F dir = Vector4F(0.f))
-            : mPoint(point),
+            : mLAVId(lavId),
+              mPoint(point),
               mLeftEdge(leftEdge),
               mRightEdge(rightEdge),
               mDir(dir)
@@ -47,6 +49,7 @@ namespace KIRI2D::SSKEL
         SharedPtr<SSkelVertex> prev;
         WeakPtr<SSkelVertex> next;
 
+        UInt GetLAVId() { return mLAVId; }
         bool GetIsReflex() { return mIsReflex; }
         bool GetIsValid() { return mIsValid; }
         Vector2F GetPoint() { return mPoint; }
@@ -54,6 +57,7 @@ namespace KIRI2D::SSKEL
         Vector4F GetRightEdge() { return mRightEdge; }
         Vector4F GetBisector() { return mBisector; }
 
+        void SetLAVId(UInt id) { mLAVId = id; }
         void SetInValid() { mIsValid = false; }
 
         void Print()
@@ -65,6 +69,8 @@ namespace KIRI2D::SSKEL
         }
 
     private:
+        UInt mLAVId;
+
         Vector2F mPoint;
         Vector4F mLeftEdge, mRightEdge;
 

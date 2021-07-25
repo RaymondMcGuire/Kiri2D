@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-07-23 17:09:01
+ * @LastEditTime: 2021-07-25 19:07:30
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -10,7 +10,7 @@
 #include <kiri2d/voronoi/voro_cell_polygon2.h>
 #include <kiri2d/voronoi/voro_util.h>
 #include <random>
-#include <kiri2d/straight_skeleton/sskel_convex.h>
+#include <kiri2d/straight_skeleton/sskel_slav.h>
 namespace KIRI
 {
 
@@ -43,7 +43,7 @@ namespace KIRI
         if (IsClockwise(poly))
             std::reverse(rPolyVert.begin(), rPolyVert.end());
 
-        auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelConvex>(rPolyVert);
+        auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelSLAV>(rPolyVert);
 
         auto skeletons = sskel_convex->GetSkeletons();
 

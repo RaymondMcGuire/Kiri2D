@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-07-24 21:14:24
+ * @LastEditTime: 2021-07-25 19:10:50
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1037,8 +1037,8 @@ void VoroPorosityOptimizeBunnyExample()
 
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
-    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     Vector<Vector2F> boundary;
 
@@ -1376,8 +1376,8 @@ void UniParticleSampler()
     }
 }
 
-#include <kiri2d/straight_skeleton/sskel_convex.h>
-void StraightSkeletonConvexExample1()
+#include <kiri2d/straight_skeleton/sskel_slav.h>
+void StraightSkeletonExample1()
 {
     // scene renderer config
     float windowheight = 1080.f;
@@ -1392,6 +1392,15 @@ void StraightSkeletonConvexExample1()
 
     KiriSDFPoly2D boundary;
     Vec_Vec2F polygon;
+
+    // polygon.emplace_back(Vector2F(100, 50));
+    // polygon.emplace_back(Vector2F(150, 150));
+    // polygon.emplace_back(Vector2F(50, 100));
+    // polygon.emplace_back(Vector2F(50, 350));
+    // polygon.emplace_back(Vector2F(350, 350));
+    // polygon.emplace_back(Vector2F(350, 100));
+    // polygon.emplace_back(Vector2F(250, 150));
+    // polygon.emplace_back(Vector2F(300, 50));
 
     // polygon.emplace_back(Vector2F(100, 50));
     // polygon.emplace_back(Vector2F(150, 150));
@@ -1479,7 +1488,7 @@ void StraightSkeletonConvexExample1()
     polygon.emplace_back(Vector2F(89, 152));
     polygon.emplace_back(Vector2F(169, 124));
 
-    auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelConvex>(polygon);
+    auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelSLAV>(polygon);
 
     Vector<KiriLine2> lines;
     auto skeletons = sskel_convex->GetSkeletons();
@@ -1489,6 +1498,7 @@ void StraightSkeletonConvexExample1()
         for (size_t j = 0; j < sinks.size(); j++)
         {
             auto line = KiriLine2(intersect + offset, sinks[j] + offset);
+            line.thick = 1;
             lines.emplace_back(line);
         }
     }
@@ -1525,15 +1535,14 @@ int main()
 
     //VoroTestExample();
 
-    //VoroPorosityOptimizeExample();
-
     //VoroPorosityTreemapOptiExample();
 
     //UniParticleSampler();
 
-    StraightSkeletonConvexExample1();
+    //StraightSkeletonExample1();
 
     //VoroPorosityOptimizeConvexExample();
+    VoroPorosityOptimizeBunnyExample();
 
     // // scene renderer config
     // float windowheight = 1080.f;

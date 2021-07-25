@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 11:03:44
- * @LastEditTime: 2021-07-24 22:43:02
+ * @LastEditTime: 2021-07-25 19:02:00
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\sskel_lav.cpp
@@ -48,26 +48,11 @@ namespace KIRI2D::SSKEL
         KIRI_LOG_DEBUG("--------------------------------------");
     }
 
-    void SSkelLAV::PrintSSkelEdges()
+    Vector<std::tuple<Vector4F, Vector4F, Vector4F>> SSkelLAV::GenEdgesData()
     {
-        KIRI_LOG_DEBUG("----------SSkelEdges----------");
-        KIRI_LOG_DEBUG("Edges list number={0}", mEdges.size());
-        for (size_t i = 0; i < mEdges.size(); i++)
-        {
-            auto [edge, left_bisector, right_bisector] = mEdges[i];
-            KIRI_LOG_DEBUG("edge=({0},{1})---({2},{3}); left_bisector=({4},{5})---({6},{7}); right_bisector=({8},{9})---({10},{11})",
-                           edge.x, edge.y, edge.z, edge.w,
-                           left_bisector.x, left_bisector.y,
-                           left_bisector.z, left_bisector.w,
-                           right_bisector.x, right_bisector.y,
-                           right_bisector.z, right_bisector.w);
-        }
+        // edge/ bisector left/ right
+        Vector<std::tuple<Vector4F, Vector4F, Vector4F>> edges;
 
-        KIRI_LOG_DEBUG("--------------------------------------");
-    }
-
-    void SSkelLAV::InitEdgesData()
-    {
         if (mHead != NULL)
         {
             auto x = mHead;
@@ -80,11 +65,12 @@ namespace KIRI2D::SSKEL
                     x->prev->GetBisector(),
                     x->GetBisector());
 
-                mEdges.emplace_back(edge);
+                edges.emplace_back(edge);
 
                 x = x->next.lock();
             } while (x != mHead);
         }
+        return edges;
     }
 
     SSkelVertexPtr SSkelLAV::Unify(const SSkelVertexPtr &va, const SSkelVertexPtr &vb, Vector2F mid)
@@ -93,6 +79,7 @@ namespace KIRI2D::SSKEL
         auto dir_vab = Vector2F(va->GetBisector().z, va->GetBisector().w).normalized();
         auto newVertex =
             std::make_shared<SSkelVertex>(
+                mId,
                 va->GetLeftEdge(),
                 mid,
                 vb->GetRightEdge(),
@@ -113,15 +100,15 @@ namespace KIRI2D::SSKEL
         return newVertex;
     }
 
-    Vector<SSkelEventPtr> SSkelLAV::GenSplitEventByVertex(const SSkelVertexPtr &vertex)
+    Vector<SSkelEventPtr> SSkelLAV::GenSplitEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
     {
         Vector<SSkelEventPtr> events;
         if (!vertex->GetIsReflex())
             return events;
 
-        for (size_t i = 0; i < mEdges.size(); i++)
+        for (size_t i = 0; i < originalEdges.size(); i++)
         {
-            auto [edge, left_bisector, right_bisector] = mEdges[i];
+            auto [edge, left_bisector, right_bisector] = originalEdges[i];
 
             auto left = vertex->GetLeftEdge();
             auto right = vertex->GetRightEdge();
@@ -193,11 +180,11 @@ namespace KIRI2D::SSKEL
         return events;
     }
 
-    SSkelEventPtr SSkelLAV::GenEventByVertex(const SSkelVertexPtr &vertex)
+    SSkelEventPtr SSkelLAV::GenEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
     {
         Vector<SSkelEventPtr> events;
 
-        auto split_event = GenSplitEventByVertex(vertex);
+        auto split_event = GenSplitEventByVertex(vertex, originalEdges);
         if (!split_event.empty())
             events.insert(events.end(), split_event.begin(), split_event.end());
 
@@ -252,104 +239,31 @@ namespace KIRI2D::SSKEL
                 [=](const SSkelEventPtr &event1, const SSkelEventPtr &event2)
                 { return event1->GetIntersectPoint().distanceTo(vertex->GetPoint()) < event2->GetIntersectPoint().distanceTo(vertex->GetPoint()); });
 
+            //(*min)->Print();
             return (*min);
         }
 
         return NULL;
     }
 
-    void SSkelLAV::GenInitEvents()
+    Vector<SSkelEventPtr> SSkelLAV::GenEvents(Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
     {
-        // reset priority queue
-        mPriorityQueue =
-            std::priority_queue<
-                SSkelEventPtr,
-                Vector<SSkelEventPtr>,
-                SSkelEventCmpDistance>();
+        Vector<SSkelEventPtr> events;
 
         if (mHead != NULL)
         {
             auto x = mHead;
             do
             {
-                auto edge_event = this->GenEventByVertex(x);
+                auto edge_event = this->GenEventByVertex(x, originalEdges);
                 if (edge_event != NULL)
-                    mPriorityQueue.push(edge_event);
+                    events.emplace_back(edge_event);
 
                 x = x->next.lock();
             } while (x != mHead);
-
-            //debug prior queue
-            while (!mPriorityQueue.empty())
-            {
-                auto p = mPriorityQueue.top();
-                mPriorityQueue.pop();
-                p->Print();
-            }
         }
-    }
-
-    Vector<SSkelEventPtr> SSkelLAV::HandleEdgeEvent(const SSkelEdgeEventPtr &edgeEvent)
-    {
-        Vec_Vec2F sinks;
-        Vector<SSkelEventPtr> events;
-
-        if (edgeEvent->GetVertA()->prev == edgeEvent->GetVertB()->next.lock())
-        {
-            // FIXME bug
-            KIRI_LOG_DEBUG("remove lav");
-            //todo remove lav
-            if (mHead != NULL)
-            {
-                auto x = mHead;
-                do
-                {
-                    sinks.emplace_back(x->GetPoint());
-                    x->SetInValid();
-                    x = x->next.lock();
-                } while (x != mHead);
-            }
-        }
-        else
-        {
-            auto new_vertex = this->Unify(edgeEvent->GetVertA(), edgeEvent->GetVertB(), edgeEvent->GetIntersectPoint());
-            sinks.emplace_back(edgeEvent->GetVertA()->GetPoint());
-            sinks.emplace_back(edgeEvent->GetVertB()->GetPoint());
-
-            auto new_event = GenEventByVertex(new_vertex);
-            if (new_event != NULL)
-                events.emplace_back(new_event);
-        }
-
-        //
-        auto skeleton = std::make_tuple(edgeEvent->GetIntersectPoint(), sinks);
-        mSkeletons.emplace_back(skeleton);
 
         return events;
     }
 
-    void SSkelLAV::HandleEvents()
-    {
-        //KIRI_LOG_DEBUG("-------------HandleEvents------------");
-        // while (!mPriorityQueue.empty())
-        // {
-        //     auto event = mPriorityQueue.top();
-        //     mPriorityQueue.pop();
-
-        //     Vector<SSkelEventPtr> new_events;
-        //     if (IsInstanceOf<SSkelEdgeEvent>(event))
-        //     {
-        //         auto edge_event = std::dynamic_pointer_cast<SSkelEdgeEvent>(event);
-
-        //         if (!edge_event->GetVertA()->GetIsValid() || !edge_event->GetVertB()->GetIsValid())
-        //             continue;
-
-        //         auto edge_events = HandleEdgeEvent(edge_event);
-        //         new_events.insert(new_events.end(), edge_events.begin(), edge_events.end());
-        //     }
-
-        //     for (size_t i = 0; i < new_events.size(); i++)
-        //         mPriorityQueue.push(new_events[i]);
-        // }
-    }
 }
