@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-06-23 17:27:56
+ * @LastEditTime: 2021-07-26 12:34:28
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -44,6 +44,10 @@ namespace KIRI
         void Init();
 
         void Reset();
+
+        float ComputeMiniumPorosity();
+        Vector<Vector4F> GetCellSSkel();
+        Vector<Vector4F> GetMICBySSkel();
 
         Vector3F ComputeMaxInscribedCircle() const { return mPowerDiagram->ComputeMaxInscribedCircle(); };
 

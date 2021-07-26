@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-07-23 15:43:45
+ * @LastEditTime: 2021-07-26 12:33:34
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -32,6 +32,75 @@ namespace KIRI
         float b = (A * D - B * C) / (tmp + MEpsilon<float>());
 
         return Vector2F(k, b);
+    }
+
+    Vector<Vector4F> KiriVoroPoroOptiCore::GetCellSSkel()
+    {
+        Vector<Vector4F> skeletons;
+        auto sites = this->GetSites();
+
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            auto poly = sites[i]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                if (poly->GetSkeletons().empty())
+                {
+                    poly->ComputeSSkel1998Convex();
+                }
+                auto sk = poly->GetSkeletons();
+                skeletons.insert(skeletons.end(), sk.begin(), sk.end());
+            }
+        }
+
+        return skeletons;
+    }
+
+    Vector<Vector4F> KiriVoroPoroOptiCore::GetMICBySSkel()
+    {
+        Vector<Vector4F> circles;
+        auto sites = this->GetSites();
+
+        Vector<UInt> removeVoroIdxs;
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            auto poly = sites[i]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                if (poly->GetSkeletons().empty())
+                {
+
+                    poly->ComputeSSkel1998Convex();
+                }
+
+                auto mic = poly->ComputeMICByStraightSkeleton();
+                circles.emplace_back(Vector4F(mic, sites[i]->GetRadius()));
+            }
+            else
+            {
+                removeVoroIdxs.emplace_back(sites[i]->GetIdx());
+            }
+        }
+
+        if (!removeVoroIdxs.empty())
+            this->RemoveVoroSitesByIndexArray(removeVoroIdxs);
+
+        return circles;
+    }
+
+    float KiriVoroPoroOptiCore::ComputeMiniumPorosity()
+    {
+        auto maxCircleArray = this->GetMICBySSkel();
+        auto sum = 0.f;
+
+        for (size_t i = 0; i < maxCircleArray.size(); i++)
+        {
+            auto circle = maxCircleArray[i];
+            sum += circle.z * circle.z * KIRI_PI<float>();
+        }
+
+        auto boundary = mPowerDiagram->GetBoundaryPolygon2();
+        return (boundary->GetPolygonArea() - sum) / boundary->GetPolygonArea();
     }
 
     void KiriVoroPoroOptiCore::Init()

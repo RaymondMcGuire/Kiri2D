@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-07-25 19:10:50
+ * @LastEditTime: 2021-07-26 12:36:54
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -936,10 +936,10 @@ void VoroPorosityOptimizeConvexExample()
                 }
             }
 
-            auto maxIC = opti->GetMICByStraightSkeleton(10.f);
+            auto maxIC = opti->GetMICBySSkel();
             lastMaxCircle = maxIC;
 
-            auto porosity = opti->ComputeMiniumPorosity(10.f);
+            auto porosity = opti->ComputeMiniumPorosity();
             porosityArray.emplace_back(porosity);
 
             KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
@@ -967,7 +967,7 @@ void VoroPorosityOptimizeConvexExample()
                 circles[i].col = Vector3F(color.r(), color.g(), color.b());
             }
 
-            // auto skeletons = opti->GetCellSkeletons();
+            // auto skeletons = opti->GetCellSSkel();
 
             // for (size_t j = 0; j < skeletons.size(); j++)
             // {
@@ -1100,10 +1100,10 @@ void VoroPorosityOptimizeBunnyExample()
                 }
             }
 
-            auto maxIC = opti->GetMICByStraightSkeleton(10.f);
+            auto maxIC = opti->GetMICBySSkel();
             lastMaxCircle = maxIC;
 
-            auto porosity = opti->ComputeMiniumPorosity(10.f);
+            auto porosity = opti->ComputeMiniumPorosity();
             porosityArray.emplace_back(porosity);
 
             KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
@@ -1131,7 +1131,7 @@ void VoroPorosityOptimizeBunnyExample()
                 circles[i].col = Vector3F(color.r(), color.g(), color.b());
             }
 
-            // auto skeletons = opti->GetCellSkeletons();
+            // auto skeletons = opti->GetCellSSkel();
 
             // for (size_t j = 0; j < skeletons.size(); j++)
             // {

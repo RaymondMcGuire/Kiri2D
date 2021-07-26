@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-07-23 17:09:45
+ * @LastEditTime: 2021-07-26 12:35:02
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
@@ -37,19 +37,15 @@ namespace KIRI
 
         const KiriVoroPoroOptiCorePtr &GetRootCore() const { return mRootCore; }
         const KiriVoroCellPolygon2Ptr &GetRootBoundary() const { return mRootBoundary; }
+        float ComputeMiniumPorosity() { return mRootCore->ComputeMiniumPorosity(); }
+        Vector<Vector4F> GetCellSSkel() { return mRootCore->GetCellSSkel(); }
+        Vector<Vector4F> GetMICBySSkel() { return mRootCore->GetMICBySSkel(); }
 
         Vector<KiriVoroSitePtr> GetLeafNodeSites()
         {
             Vector<KiriVoroSitePtr> sites;
             for (size_t i = 0; i < mRootCore->GetSites().size(); i++)
                 sites.emplace_back(mRootCore->GetSites()[i]);
-
-            // for (size_t i = 0; i < mNodes.size(); i++)
-            // {
-            //     auto nodeCore = mNodes[i]->GetCore();
-            //     for (size_t j = 0; j < nodeCore->GetSites().size(); j++)
-            //         sites.emplace_back(nodeCore->GetSites()[j]);
-            // }
 
             return sites;
         }
@@ -63,61 +59,6 @@ namespace KIRI
             return circles;
         }
 
-        Vector<Vector4F> GetMICByStraightSkeleton(float lambda)
-        {
-            Vector<Vector4F> circles;
-            auto sites = mRootCore->GetSites();
-
-            Vector<UInt> removeVoroIdxs;
-            for (size_t i = 0; i < sites.size(); i++)
-            {
-                auto poly = sites[i]->GetCellPolygon();
-                if (poly != NULL)
-                {
-                    if (poly->GetSkeletons().empty())
-                    {
-
-                        poly->ComputeSSkel1998Convex();
-                    }
-
-                    auto mic = poly->ComputeMICByStraightSkeleton();
-                    circles.emplace_back(Vector4F(mic, sites[i]->GetRadius()));
-                }
-                else
-                {
-                    removeVoroIdxs.emplace_back(sites[i]->GetIdx());
-                }
-            }
-
-            if (!removeVoroIdxs.empty())
-                mRootCore->RemoveVoroSitesByIndexArray(removeVoroIdxs);
-
-            return circles;
-        }
-
-        Vector<Vector4F> GetCellSkeletons(float lambda)
-        {
-            Vector<Vector4F> skeletons;
-            auto sites = mRootCore->GetSites();
-
-            for (size_t i = 0; i < sites.size(); i++)
-            {
-                auto poly = sites[i]->GetCellPolygon();
-                if (poly != NULL)
-                {
-                    if (poly->GetSkeletons().empty())
-                    {
-                        poly->ComputeSSkel1998Convex();
-                    }
-                    auto sk = poly->GetSkeletons();
-                    skeletons.insert(skeletons.end(), sk.begin(), sk.end());
-                }
-            }
-
-            return skeletons;
-        }
-
-        float ComputeMiniumPorosity(float lambda);
 
     private:
         UInt mMaxDepth = 0;
