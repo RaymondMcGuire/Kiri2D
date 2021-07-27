@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-07-26 12:36:54
+ * @LastEditTime: 2021-07-27 19:48:42
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -939,7 +939,7 @@ void VoroPorosityOptimizeConvexExample()
             auto maxIC = opti->GetMICBySSkel();
             lastMaxCircle = maxIC;
 
-            auto porosity = opti->ComputeMiniumPorosity();
+            auto porosity = opti->GetMiniumPorosity();
             porosityArray.emplace_back(porosity);
 
             KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
@@ -1048,7 +1048,8 @@ void VoroPorosityOptimizeBunnyExample()
         boundary.emplace_back(Transform2Original(Vector2F(newPos), height) + offsetVec2);
     }
 
-    auto opti = std::make_shared<KiriVoroPoroOpti>();
+    auto target_porosity = 0.21f;
+    auto opti = std::make_shared<KiriVoroPoroOpti>(target_porosity);
     opti->SetRootBoundary2(boundary);
     opti->GenExample(width, height);
 
@@ -1066,9 +1067,6 @@ void VoroPorosityOptimizeBunnyExample()
 
         if (i % 10 == 1)
         {
-            //MIC calculated by vornoi
-            //opti->ComputeChildIterate();
-
             Vector<KiriPoint2> points;
             Vector<KiriLine2> lines;
             Vector<KiriCircle2> circles;
@@ -1103,7 +1101,7 @@ void VoroPorosityOptimizeBunnyExample()
             auto maxIC = opti->GetMICBySSkel();
             lastMaxCircle = maxIC;
 
-            auto porosity = opti->ComputeMiniumPorosity();
+            auto porosity = opti->GetMiniumPorosity();
             porosityArray.emplace_back(porosity);
 
             KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
@@ -1130,30 +1128,6 @@ void VoroPorosityOptimizeBunnyExample()
                 const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
                 circles[i].col = Vector3F(color.r(), color.g(), color.b());
             }
-
-            // auto skeletons = opti->GetCellSSkel();
-
-            // for (size_t j = 0; j < skeletons.size(); j++)
-            // {
-            //     auto start = Transform2Original(Vector2F(skeletons[j].x, skeletons[j].y), height) + offsetVec2;
-            //     auto end = Transform2Original(Vector2F(skeletons[j].z, skeletons[j].w), height) + offsetVec2;
-            //     auto line = KiriLine2(start, end);
-            //     line.col = Vector3F(0.f, 0.f, 100.f);
-
-            //     lines.emplace_back(line);
-            // }
-
-            // auto shrinks = opti->GetCellShrinks();
-
-            // for (size_t j = 0; j < shrinks.size(); j++)
-            // {
-            //     auto start = Transform2Original(Vector2F(shrinks[j].x, shrinks[j].y), height) + offsetVec2;
-            //     auto end = Transform2Original(Vector2F(shrinks[j].z, shrinks[j].w), height) + offsetVec2;
-            //     auto line = KiriLine2(start, end);
-            //     line.col = Vector3F(0.f, 0.f, 100.f);
-            //     lines.emplace_back(line);
-            // }
-
             scene->AddParticles(points);
             scene->AddCircles(circles);
             scene->AddLines(lines);
@@ -1163,6 +1137,13 @@ void VoroPorosityOptimizeBunnyExample()
 
             renderer->ClearCanvas();
             scene->Clear();
+        }
+
+        auto cur_porosity = opti->GetMiniumPorosity();
+        if (abs(cur_porosity - target_porosity) < 0.001f)
+        {
+            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, diff={2}", i, cur_porosity, abs(cur_porosity - 0.3f));
+            break;
         }
 
         if (i % 100 == 1)

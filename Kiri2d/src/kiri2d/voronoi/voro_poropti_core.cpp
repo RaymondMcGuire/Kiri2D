@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-07-26 12:33:34
+ * @LastEditTime: 2021-07-27 18:56:26
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -287,6 +287,8 @@ namespace KIRI
         auto gammaArea = 1.f;
         auto gammaBC = 1.f;
 
+        auto invert_sgn = (mCurrentPorosity != 0.f && (mCurrentPorosity - mTargetPorosity) < 0.f) ? 100.f * (mCurrentPorosity - mTargetPorosity) : 1.f;
+
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (size_t i = 0; i < voroSite.size(); i++)
         {
@@ -327,7 +329,7 @@ namespace KIRI
 
             //KIRI_LOG_DEBUG("AdaptWeights: idx={0}, aw={1}, bw={2}", i, areaWeight, bcWeight);
 
-            voroSite[i]->SetWeight(weight + areaWeight + bcWeight);
+            voroSite[i]->SetWeight(weight + areaWeight + bcWeight * invert_sgn);
         }
 
         KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
@@ -414,13 +416,17 @@ namespace KIRI
 
     float KiriVoroPoroOptiCore::Iterate()
     {
-        DynamicAddSites();
+        if (mCurrentPorosity > mTargetPorosity || mTargetPorosity == 0.f)
+            DynamicAddSites();
+
         AdaptPositionsWeights();
         AdaptWeights();
         mPowerDiagram->ComputeDiagram();
         //  if (!mPowerDiagram->ComputeDiagram())
         //     mPowerDiagram->ReGenVoroSites();
 
+        if (mTargetPorosity != 0.f)
+            mCurrentPorosity = ComputeMiniumPorosity();
         return mCurGlobalWeightError;
     }
 

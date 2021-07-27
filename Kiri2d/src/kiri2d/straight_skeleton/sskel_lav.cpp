@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 11:03:44
- * @LastEditTime: 2021-07-25 19:02:00
+ * @LastEditTime: 2021-07-27 19:46:46
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\sskel_lav.cpp
@@ -167,13 +167,15 @@ namespace KIRI2D::SSKEL
                 // KIRI_LOG_DEBUG("b={0},{1}", b.x, b.y);
                 // KIRI_LOG_DEBUG("dis={0}", _distance_point2_line2(Vector2F(edge.x, edge.y), Vector2F(edge.z, edge.w), b2));
 
+                auto dis = _distance_point2_line2(Vector2F(edge.x, edge.y), Vector2F(edge.z, edge.w), b2);
                 auto split_event = std::make_shared<SSkelSplitEvent>(
-                    _distance_point2_line2(Vector2F(edge.x, edge.y), Vector2F(edge.z, edge.w), b2),
+                    dis,
                     b2,
                     vertex,
                     edge);
                 //split_event->Print();
-                events.emplace_back(split_event);
+                if (dis == dis)
+                    events.emplace_back(split_event);
             }
         }
 
@@ -212,24 +214,32 @@ namespace KIRI2D::SSKEL
         {
             auto left_edge = vertex->GetLeftEdge();
             auto intersect = Vector2F(istbi_prev.x, istbi_prev.y);
+            auto dis = _distance_point2_line2(Vector2F(left_edge.x, left_edge.y), Vector2F(left_edge.z, left_edge.w), intersect);
             auto event = std::make_shared<SSkelEdgeEvent>(
-                _distance_point2_line2(Vector2F(left_edge.x, left_edge.y), Vector2F(left_edge.z, left_edge.w), intersect),
+                dis,
                 intersect,
                 vertex->prev,
                 vertex);
-            events.emplace_back(event);
+
+            // FIXME
+            if (dis == dis)
+                events.emplace_back(event);
         }
 
         if (istbi_next.z != 0.f)
         {
             auto right_edge = vertex->GetRightEdge();
             auto intersect = Vector2F(istbi_next.x, istbi_next.y);
+            auto dis = _distance_point2_line2(Vector2F(right_edge.x, right_edge.y), Vector2F(right_edge.z, right_edge.w), intersect);
             auto event = std::make_shared<SSkelEdgeEvent>(
-                _distance_point2_line2(Vector2F(right_edge.x, right_edge.y), Vector2F(right_edge.z, right_edge.w), intersect),
+                dis,
                 intersect,
                 vertex,
                 vertex->next.lock());
-            events.emplace_back(event);
+
+            // FIXME
+            if (dis == dis)
+                events.emplace_back(event);
         }
 
         if (!events.empty())

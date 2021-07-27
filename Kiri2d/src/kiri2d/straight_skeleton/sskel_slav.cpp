@@ -17,41 +17,48 @@ namespace KIRI2D::SSKEL
         Vector<SSkelEventPtr> events;
 
         auto lav = mLAVMaps[edgeEvent->GetVertA()->GetLAVId()];
-        if (edgeEvent->GetVertA()->prev == edgeEvent->GetVertB()->next.lock())
+        if (lav != nullptr)
         {
-
-            mLAVMaps[lav->GetId()] = nullptr;
-            auto head = lav->GetHead();
-            //todo remove lav
-            if (head != NULL)
+            if (edgeEvent->GetVertA()->prev == edgeEvent->GetVertB()->next.lock())
             {
-                auto x = head;
-                do
+
+                //mLAVMaps[lav->GetId()] = nullptr;
+                mLAVMaps.erase(lav->GetId());
+
+                auto head = lav->GetHead();
+                //todo remove lav
+                if (head != NULL)
                 {
-                    sinks.emplace_back(x->GetPoint());
-                    x->SetInValid();
-                    x = x->next.lock();
-                } while (x != head);
+                    auto x = head;
+                    do
+                    {
+                        sinks.emplace_back(x->GetPoint());
+                        x->SetInValid();
+                        x = x->next.lock();
+                    } while (x != head);
+                }
+            }
+            else
+            {
+                // edgeEvent->Print();
+                auto new_vertex = lav->Unify(edgeEvent->GetVertA(), edgeEvent->GetVertB(), edgeEvent->GetIntersectPoint());
+                sinks.emplace_back(edgeEvent->GetVertA()->GetPoint());
+                sinks.emplace_back(edgeEvent->GetVertB()->GetPoint());
+
+                if ((lav->GetHead() == edgeEvent->GetVertA()) || (lav->GetHead() == edgeEvent->GetVertB()))
+                    lav->SetHead(new_vertex);
+
+                auto new_event = lav->GenEventByVertex(new_vertex, mEdges);
+                if (new_event != NULL)
+                    events.emplace_back(new_event);
             }
         }
-        else
+
+        if (!sinks.empty())
         {
-
-            auto new_vertex = lav->Unify(edgeEvent->GetVertA(), edgeEvent->GetVertB(), edgeEvent->GetIntersectPoint());
-            sinks.emplace_back(edgeEvent->GetVertA()->GetPoint());
-            sinks.emplace_back(edgeEvent->GetVertB()->GetPoint());
-
-            if ((lav->GetHead() == edgeEvent->GetVertA()) || (lav->GetHead() == edgeEvent->GetVertB()))
-                lav->SetHead(new_vertex);
-
-            auto new_event = lav->GenEventByVertex(new_vertex, mEdges);
-            if (new_event != NULL)
-                events.emplace_back(new_event);
+            auto skeleton = std::make_tuple(edgeEvent->GetIntersectPoint(), sinks);
+            mSkeletons.emplace_back(skeleton);
         }
-
-        //
-        auto skeleton = std::make_tuple(edgeEvent->GetIntersectPoint(), sinks);
-        mSkeletons.emplace_back(skeleton);
 
         return events;
     }
@@ -146,12 +153,15 @@ namespace KIRI2D::SSKEL
         Vector<SSkelLAVPtr> new_lavs;
         // remove current lav
         auto cur_lav = mLAVMaps[splitEvent->GetVert()->GetLAVId()];
-        mLAVMaps[splitEvent->GetVert()->GetLAVId()] = nullptr;
+
+        //mLAVMaps[splitEvent->GetVert()->GetLAVId()] = nullptr;
+        mLAVMaps.erase(splitEvent->GetVert()->GetLAVId());
 
         //KIRI_LOG_DEBUG("-----------------");
         if (cur_lav->GetId() != right_vertex->GetLAVId())
         {
-            mLAVMaps[right_vertex->GetLAVId()] = nullptr;
+            // mLAVMaps[right_vertex->GetLAVId()] = nullptr;
+            mLAVMaps.erase(right_vertex->GetLAVId());
             new_lavs.emplace_back(std::make_shared<SSkelLAV>(mLAVCounter++, newVertex1));
         }
         else
@@ -206,7 +216,7 @@ namespace KIRI2D::SSKEL
     void SSkelSLAV::HandleEvents()
     {
         //KIRI_LOG_DEBUG("-------------HandleEvents------------");
-        while (!mPriorityQueue.empty())
+        while (!(mPriorityQueue.empty() || mLAVMaps.empty()))
         {
             auto event = mPriorityQueue.top();
             mPriorityQueue.pop();
