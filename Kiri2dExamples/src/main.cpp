@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-07-27 19:48:42
+ * @LastEditTime: 2021-07-29 16:01:48
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1037,8 +1037,8 @@ void VoroPorosityOptimizeBunnyExample()
 
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
-    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     Vector<Vector2F> boundary;
 
@@ -1048,7 +1048,8 @@ void VoroPorosityOptimizeBunnyExample()
         boundary.emplace_back(Transform2Original(Vector2F(newPos), height) + offsetVec2);
     }
 
-    auto target_porosity = 0.21f;
+    auto target_porosity = 0.18f;
+    auto epsilon = 0.001f;
     auto opti = std::make_shared<KiriVoroPoroOpti>(target_porosity);
     opti->SetRootBoundary2(boundary);
     opti->GenExample(width, height);
@@ -1064,8 +1065,9 @@ void VoroPorosityOptimizeBunnyExample()
     {
 
         auto error = opti->ComputeIterate();
+        auto cur_porosity = opti->GetMiniumPorosity();
 
-        if (i % 10 == 1)
+        if ((i % 10 == 1) || (abs(cur_porosity - target_porosity) < epsilon))
         {
             Vector<KiriPoint2> points;
             Vector<KiriLine2> lines;
@@ -1128,6 +1130,7 @@ void VoroPorosityOptimizeBunnyExample()
                 const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
                 circles[i].col = Vector3F(color.r(), color.g(), color.b());
             }
+
             scene->AddParticles(points);
             scene->AddCircles(circles);
             scene->AddLines(lines);
@@ -1137,13 +1140,12 @@ void VoroPorosityOptimizeBunnyExample()
 
             renderer->ClearCanvas();
             scene->Clear();
-        }
 
-        auto cur_porosity = opti->GetMiniumPorosity();
-        if (abs(cur_porosity - target_porosity) < 0.001f)
-        {
-            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, diff={2}", i, cur_porosity, abs(cur_porosity - 0.3f));
-            break;
+            if (abs(cur_porosity - target_porosity) < epsilon)
+            {
+                KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, diff={2}", i, cur_porosity, abs(cur_porosity - target_porosity));
+                break;
+            }
         }
 
         if (i % 100 == 1)
