@@ -12,7 +12,7 @@ if(WIN32)
 endif()
 
 # KIRI Math Library
-set(KIRI_MATH_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/KiriMath/include)
+set(KIRI_MATH_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/KiriMathMini/include)
 
 # # KIRI PBS CUDA Library
 # set(KIRI_PBS_CUDA_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/KiriPBSCuda/include)

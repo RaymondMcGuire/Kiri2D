@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2020-10-19 01:37:05
- * @LastEditTime: 2021-07-24 19:51:32
+ * @LastEditTime: 2021-07-30 12:49:32
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
@@ -145,58 +145,51 @@ template <class T>
 constexpr auto KIRI_SGN(T val) { return (T(0) < val) - (val < T(0)); }
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <kiri_math/kiri_math_opengl.h>
+#include <kiri_math_mini/kiri_math_mini.h>
 
 //TODO need support Int type
 template <Int N, class Type>
-using VectorX = kiri_math::Vector<Type, N>;
+using VectorX = kiri_math_mini::Vector<Type, N>;
 
-using Vector2F = kiri_math::Vector2F;
-using Vector2D = kiri_math::Vector2D;
-using Vector3F = kiri_math::Vector3F;
-using Vector3D = kiri_math::Vector3D;
-using Vector4F = kiri_math::Vector4F;
-using Vector4D = kiri_math::Vector4D;
+using Vector2F = kiri_math_mini::Vector2F;
+using Vector2D = kiri_math_mini::Vector2D;
+using Vector3F = kiri_math_mini::Vector3F;
+using Vector3D = kiri_math_mini::Vector3D;
+using Vector4F = kiri_math_mini::Vector4F;
+using Vector4D = kiri_math_mini::Vector4D;
 
-using Matrix2x2F = kiri_math::Matrix2x2F;
-using Matrix3x3F = kiri_math::Matrix3x3F;
-using Matrix4x4F = kiri_math::Matrix4x4F;
+using Matrix2x2F = kiri_math_mini::Matrix2x2F;
+using Matrix3x3F = kiri_math_mini::Matrix3x3F;
+using Matrix4x4F = kiri_math_mini::Matrix4x4F;
 
 using Vec_Vec2F = Vector<Vector2F>;
 using Vec_Vec3F = Vector<Vector3F>;
 
 template <class T>
-constexpr auto KIRI_PI() { return kiri_math::pi<T>(); }
+constexpr auto KIRI_PI() { return kiri_math_mini::pi<T>(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class T>
-using Array1 = kiri_math::Array1<T>;
+using Array1 = kiri_math_mini::Array1<T>;
 template <class T>
-using Array2 = kiri_math::Array2<T>;
+using Array2 = kiri_math_mini::Array2<T>;
 template <class T>
-using Array3 = kiri_math::Array3<T>;
+using Array3 = kiri_math_mini::Array3<T>;
 
 template <class T>
-using ArrayAccessor1 = kiri_math::ArrayAccessor1<T>;
+using ArrayAccessor1 = kiri_math_mini::ArrayAccessor1<T>;
 
 template <class T>
-using ConstArrayAccessor1 = kiri_math::ConstArrayAccessor1<T>;
+using ConstArrayAccessor1 = kiri_math_mini::ConstArrayAccessor1<T>;
 
-using Array1Vec3F = kiri_math::Array1<Vector3F>;
-using Array1Vec4F = kiri_math::Array1<Vector4F>;
-using Array1Mat4x4F = kiri_math::Array1<Matrix4x4F>;
-using Array3UI = kiri_math::Array3<UInt>;
-using Array3F = kiri_math::Array3<float>;
+using Array1Vec3F = kiri_math_mini::Array1<Vector3F>;
+using Array1Vec4F = kiri_math_mini::Array1<Vector4F>;
+using Array1Mat4x4F = kiri_math_mini::Array1<Matrix4x4F>;
+using Array3UI = kiri_math_mini::Array3<UInt>;
+using Array3F = kiri_math_mini::Array3<float>;
 
-using ConstantVectorField3F = kiri_math::ConstantVectorField3F;
-using BccLatticePointGenerator = kiri_math::BccLatticePointGenerator;
-using BoundingBox2F = kiri_math::BoundingBox2F;
-using BoundingBox3F = kiri_math::BoundingBox3F;
-using PointNeighborSearcher3Ptr = kiri_math::PointNeighborSearcher3Ptr;
-using VectorField3FPtr = kiri_math::VectorField3FPtr;
-using Collider3Ptr = kiri_math::Collider3Ptr;
-using PointGenerator3Ptr = kiri_math::PointGenerator3Ptr;
-using PointParallelHashGridSearcher3 = kiri_math::PointParallelHashGridSearcher3;
+using BoundingBox2F = kiri_math_mini::BoundingBox2F;
+using BoundingBox3F = kiri_math_mini::BoundingBox3F;
 ////////////////////////////////////////////////////////////////////////////////
 #include <kiri_log.h>
 #include <kiri_timer.h>
