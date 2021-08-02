@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-07-27 19:06:52
+ * @LastEditTime: 2021-08-02 13:35:45
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
@@ -65,6 +65,16 @@ namespace KIRI
                 circles.emplace_back(mNodes[i]->ComputeMaxInscribedCircle());
 
             return circles;
+        }
+
+        Vector<Vector3F> GetVoronoiSitesData()
+        {
+            Vector<Vector3F> sites_data;
+            auto sites = mRootCore->GetSites();
+            for (size_t i = 0; i < sites.size(); i++)
+                sites_data.emplace_back(Vector3F(sites[i]->GetValue().x, sites[i]->GetValue().y, sites[i]->GetWeight()));
+
+            return sites_data;
         }
 
     private:

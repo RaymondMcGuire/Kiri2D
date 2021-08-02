@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-07-25 19:07:30
+ * @LastEditTime: 2021-08-02 12:33:33
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -53,6 +53,33 @@ namespace KIRI
             for (size_t j = 0; j < sinks.size(); j++)
                 mSkeletons.emplace_back(Vector4F(intersect.x, intersect.y, sinks[j].x, sinks[j].y));
         }
+    }
+
+    Vec_Vec3F KiriVoroCellPolygon2::ComputeAllCByStraightSkeleton()
+    {
+        //TODO remove same cir
+        Vec_Vec3F all_circles;
+        if (!mSkeletons.empty())
+        {
+            for (size_t i = 0; i < mSkeletons.size(); i++)
+            {
+                auto v1 = Vector2F(mSkeletons[i].x, mSkeletons[i].y);
+                auto v2 = Vector2F(mSkeletons[i].z, mSkeletons[i].w);
+
+                if (Contains(v1))
+                {
+                    auto minDis = ComputeMinDisInPoly(v1);
+                    all_circles.emplace_back(v1.x, v1.y, minDis);
+                }
+
+                if (Contains(v2))
+                {
+                    auto minDis = ComputeMinDisInPoly(v2);
+                    all_circles.emplace_back(v1.x, v1.y, minDis);
+                }
+            }
+        }
+        return all_circles;
     }
 
     Vector3F KiriVoroCellPolygon2::ComputeMICByStraightSkeleton()

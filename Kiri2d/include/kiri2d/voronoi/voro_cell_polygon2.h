@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-07-23 17:09:22
+ * @LastEditTime: 2021-08-02 12:15:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
@@ -88,6 +88,7 @@ namespace KIRI
         void ComputeSSkel1998Convex();
 
         Vector3F ComputeMICByStraightSkeleton();
+        Vec_Vec3F ComputeAllCByStraightSkeleton();
 
     private:
         BoundingBox2F mBBox2;

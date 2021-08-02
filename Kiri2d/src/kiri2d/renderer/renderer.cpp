@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
- * @LastEditTime: 2021-06-16 01:34:31
+ * @LastEditTime: 2021-08-02 17:22:29
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\renderer\renderer.cpp
@@ -60,7 +60,10 @@ namespace KIRI2D
             if (cx < 0 || cx >= mWindowWidth || cy < 0 || cy >= mWindowHeight)
                 continue;
             auto col = circles[i].col * 255.f;
-            cv::circle(mCanvas, cv::Point(cx, cy), circles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), -1);
+            if (circles[i].fill)
+                cv::circle(mCanvas, cv::Point(cx, cy), circles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), -1);
+            else
+                cv::circle(mCanvas, cv::Point(cx, cy), circles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), 1);
         }
 
         auto lines = mScene->GetLines();
@@ -72,7 +75,8 @@ namespace KIRI2D
             Vector2F end_relate_position = mScene->GetCamera()->Project(lines[i].end);
             int ex = end_relate_position[0];
             int ey = mWindowHeight - end_relate_position[1];
-            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(lines[i].col.x, lines[i].col.y, lines[i].col.z), lines[i].thick * mScene->GetCamera()->ViewScale());
+            auto col = lines[i].col * 255.f;
+            cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(col.x, col.y, col.z), lines[i].thick * mScene->GetCamera()->ViewScale());
         }
 
         auto rects = mScene->GetRects();

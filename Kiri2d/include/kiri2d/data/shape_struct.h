@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-06-16 01:35:10
+ * @LastEditTime: 2021-08-02 17:22:43
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\shape_struct.h
@@ -33,21 +33,24 @@ namespace KIRI2D
         Vector2F pos;
         Vector3F col;
         float radius;
+        bool fill;
 
         KiriCircle2(
             Vector2F _pos,
             Vector3F _col,
-            float _radius)
+            float _radius,
+            bool _fill = true)
             : pos(_pos),
               col(_col),
-              radius(_radius) {}
+              radius(_radius),
+              fill(_fill) {}
     };
 
     struct KiriLine2
     {
         Vector2F start;
         Vector2F end;
-        Vector3F col = Vector3F(253, 185, 134);
+        Vector3F col = Vector3F(253, 185, 134) / 255.f;
         float thick = 5.f;
 
         KiriLine2(
