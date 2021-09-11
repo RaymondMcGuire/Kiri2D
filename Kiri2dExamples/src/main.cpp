@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-08-02 17:54:52
+ * @LastEditTime: 2021-09-03 09:27:38
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1668,7 +1668,7 @@ void LoadVoronoiExample()
     scene->Clear();
 }
 
-int main()
+int main1()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();

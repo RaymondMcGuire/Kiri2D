@@ -5,4 +5,5 @@ build
 /export/**/*.png
 /export/**/*.jpg
 /export/**/*.csv
+/export/**/*.bgeo
 /**/*.pyc

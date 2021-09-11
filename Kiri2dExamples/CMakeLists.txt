@@ -3,9 +3,11 @@ set(PROJECT_NAME kiri2d_examples)
 
 # Find Extra Library Package
 set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/KiriExtlib/include)
-set(EXTLIBS_SRC ${CMAKE_SOURCE_DIR}/KiriExtlib/src)
 set(EXTLIBS_LIB ${CMAKE_SOURCE_DIR}/KiriExtlib/lib)
 link_directories(${EXTLIBS_LIB})
+
+# Find PBS2D Library Package
+set(PBS2D_CUDA_INCLUDE ${CMAKE_SOURCE_DIR}/Kiri2dPBSCuda/include)
 
 # Configuration File
 configure_file(${CMAKE_SOURCE_DIR}/configuration/root_directory.h.in  ${CMAKE_BINARY_DIR}/configuration/root_directory.h)
@@ -41,9 +43,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CONFIGURATION_INCLUDE}
     ${KIRI2D_LIB_INLCUDE}
     ${EXTLIBS_INCLUDE}
+    ${PBS2D_CUDA_INCLUDE}
 )
 
-target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 kiri2d)
+target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio kiri2d kiri2d_pbs_cuda)
 
 
 # WorkSpace

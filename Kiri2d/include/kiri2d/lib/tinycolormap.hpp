@@ -59,11 +59,6 @@
 #include <QColor>
 #endif
 
-#if defined(TINYCOLORMAP_WITH_QT5) and defined(TINYCOLORMAP_WITH_EIGEN)
-#include <QImage>
-#include <QString>
-#endif
-
 #if defined(TINYCOLORMAP_WITH_GLM)
 #include <glm/vec3.hpp>
 #endif
@@ -137,11 +132,6 @@ namespace tinycolormap
     inline Color GetViridisColor(double x);
     inline Color GetCividisColor(double x);
     inline Color GetGithubColor(double x);
-
-#if defined(TINYCOLORMAP_WITH_QT5) and defined(TINYCOLORMAP_WITH_EIGEN)
-    inline QImage CreateMatrixVisualization(const Eigen::MatrixXd& matrix);
-    inline void ExportMatrixVisualization(const Eigen::MatrixXd& matrix, const std::string& path);
-#endif
 
     //////////////////////////////////////////////////////////////////////////////////
     // Private Implementation - public usage is not intended
@@ -2165,33 +2155,6 @@ namespace tinycolormap
         return internal::CalcLerp(x, data);
     }
 
-#if defined(TINYCOLORMAP_WITH_QT5) and defined(TINYCOLORMAP_WITH_EIGEN)
-    inline QImage CreateMatrixVisualization(const Eigen::MatrixXd& matrix)
-    {
-        const int w = matrix.cols();
-        const int h = matrix.rows();
-        const double max_coeff = matrix.maxCoeff();
-        const double min_coeff = matrix.minCoeff();
-        const Eigen::MatrixXd normalized = (1.0 / (max_coeff - min_coeff)) * (matrix - Eigen::MatrixXd::Constant(h, w, min_coeff));
-
-        QImage image(w, h, QImage::Format_ARGB32);
-        for (int x = 0; x < w; ++ x)
-        {
-            for (int y = 0; y < h; ++ y)
-            {
-                const QColor color = tinycolormap::GetColor(normalized(y, x)).ConvertToQColor();
-                image.setPixel(x, y, color.rgb());
-            }
-        }
-
-        return image;
-    }
-
-    inline void ExportMatrixVisualization(const Eigen::MatrixXd& matrix, const std::string& path)
-    {
-        CreateMatrixVisualization(matrix).save(QString::fromStdString(path));
-    }
-#endif
 }
 
 #endif
