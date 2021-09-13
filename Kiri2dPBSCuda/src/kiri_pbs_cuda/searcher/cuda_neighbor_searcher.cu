@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-05 12:33:37
- * @LastEditTime: 2021-09-13 15:47:18
+ * @LastEditTime: 2021-09-13 19:35:40
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\searcher\cuda_neighbor_searcher.cu
@@ -76,6 +76,18 @@ namespace KIRI
                                         sands->GetPosPtr(),
                                         sands->GetVelPtr(),
                                         sands->GetColPtr())));
+        } else if (mSearcherParticleType == SearcherParticleType::MRDEM)
+        {
+            auto sands = std::dynamic_pointer_cast<CudaMRDemParticles>(particles);
+            thrust::sort_by_key(thrust::device,
+                                mGridIdxArray.Data(),
+                                mGridIdxArray.Data() + particles->Size(),
+                                thrust::make_zip_iterator(
+                                    thrust::make_tuple(
+                                        sands->GetPosPtr(),
+                                        sands->GetVelPtr(),
+                                        sands->GetColPtr(),
+                                        sands->GetRadiusPtr())));
         }
 
         cudaDeviceSynchronize();

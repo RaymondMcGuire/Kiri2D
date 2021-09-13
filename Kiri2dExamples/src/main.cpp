@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-09-13 15:52:02
+ * @LastEditTime: 2021-09-13 21:44:16
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1458,8 +1458,8 @@ void VoroPorosityOptimizeScaleExample()
 
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
-    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     Vector<Vector2F> boundary;
 
@@ -1535,7 +1535,7 @@ void VoroPorosityOptimizeScaleExample()
             for (size_t i = 0; i < maxIC.size(); i++)
             {
                 //auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
-                auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y), Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+                auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y) / 100.f, Vector3F(1.f, 0.f, 0.f), maxIC[i].z / 100.f);
                 circles.emplace_back(maxCir2);
                 //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
                 radiusError += std::abs(maxIC[i].z - maxIC[i].w);
@@ -1555,9 +1555,9 @@ void VoroPorosityOptimizeScaleExample()
                 circles[i].col = Vector3F(color.r(), color.g(), color.b());
             }
 
-            scene->AddParticles(points);
+            //scene->AddParticles(points);
             scene->AddCircles(circles);
-            scene->AddLines(lines);
+            //scene->AddLines(lines);
 
             renderer->DrawCanvas();
             renderer->SaveImages2File();
@@ -1576,6 +1576,11 @@ void VoroPorosityOptimizeScaleExample()
         {
             ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
             ExportPoroityData2CSVFile("bunny", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+        }
+
+        if (i == 1499)
+        {
+            ExportSamplerData2CSVFile("bunny", "1500", circles);
         }
     }
 
@@ -1741,8 +1746,8 @@ void LoadVoronoiExample()
 
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
-    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     Vector<Vector2F> boundary;
     auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
@@ -1841,13 +1846,13 @@ int main1()
 
     //VoroPorosityTreemapOptiExample();
 
-    UniParticleSampler();
+    //UniParticleSampler();
 
     //StraightSkeletonExample1();
 
     //VoroPorosityOptimizeConvexExample();
     //VoroPorosityOptimizeBunnyExample();
-    //VoroPorosityOptimizeScaleExample();
+    VoroPorosityOptimizeScaleExample();
 
     //LoadVoronoiExample();
     return 0;

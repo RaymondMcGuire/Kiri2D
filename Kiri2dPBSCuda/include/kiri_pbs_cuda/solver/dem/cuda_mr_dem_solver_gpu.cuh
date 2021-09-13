@@ -1,14 +1,14 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-09-13 18:52:07
+ * @LastEditTime: 2021-09-13 19:20:57
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_gpu.cuh
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_mr_dem_solver_gpu.cuh
  */
 
-#ifndef _CUDA_DEM_SOLVER_GPU_CUH_
-#define _CUDA_DEM_SOLVER_GPU_CUH_
+#ifndef _CUDA_MRDEM_SOLVER_GPU_CUH_
+#define _CUDA_MRDEM_SOLVER_GPU_CUH_
 
 #pragma once
 
@@ -18,14 +18,14 @@ namespace KIRI
 {
 
     /**
-     * @description: Uniform radius DEM method: normal force + shear force
+     * @description: Multi-radius DEM method: normal force
      */
-    static __device__ void ComputeUniRadiusDemForces(
+    static __device__ void ComputeMRDemForces(
         float2 *f,
         const size_t i,
-        float2 *pos,
-        float2 *vel,
-        const float radius,
+        const float2 *pos,
+        const float2 *vel,
+        const float *radius,
         const float young,
         const float poisson,
         const float tanFrictionAngle,
@@ -38,11 +38,16 @@ namespace KIRI
             if (i != j)
             {
                 float2 dij = pos[i] - pos[j];
-                float rij = 2.f * radius;
+                float rij = radius[i] + radius[j];
                 float2 vij = vel[j] - vel[i];
-                float kn = young * radius;
-                float ks = kn * poisson;
-                
+                float kni = young * radius[i];
+                float knj = young * radius[j];
+                float ksi = kni * poisson;
+                float ksj = knj * poisson;
+
+                float kn = 2.f * kni * knj / (kni + knj);
+                float ks = 2.f * ksi * ksj / (ksi + ksj);
+
                 *f += ComputeDemForces(dij, vij, rij, kn, ks, tanFrictionAngle);
             }
             ++j;
@@ -51,12 +56,12 @@ namespace KIRI
     }
 
     template <typename AttenuFunc>
-    static __device__ void ComputeUniRadiusDemCapillaryForces(
+    static __device__ void ComputeMRDemCapillaryForces(
         float2 *f,
         const size_t i,
-        float2 *pos,
-        float2 *vel,
-        const float radius,
+        const float2 *pos,
+        const float2 *vel,
+        const float *radius,
         const float sr,
         size_t j,
         const size_t cellEnd,
@@ -70,7 +75,7 @@ namespace KIRI
                 float2 dij = pos[i] - pos[j];
                 float2 vij = vel[i] - vel[j];
 
-                *f += ComputeDemCapillaryForces(dij, vij, radius, sr, G);
+                *f += ComputeMRDemCapillaryForces(dij, vij, radius[i], radius[j], sr, G);
             }
             ++j;
         }
@@ -78,12 +83,12 @@ namespace KIRI
     }
 
     template <typename Pos2GridXY, typename GridXY2GridHash, typename AttenuFunc>
-    __global__ void ComputeDemLinearMomentum_CUDA(
-        float2 *pos,
-        float2 *vel,
+    __global__ void ComputeMRDemLinearMomentum_CUDA(
+        const float2 *pos,
+        const float2 *vel,
         float2 *acc,
-        float *mass,
-        const float radius,
+        const float *mass,
+        const float *radius,
         const float young,
         const float poisson,
         const float tanFrictionAngle,
@@ -104,19 +109,19 @@ namespace KIRI
         auto f = make_float2(0.f);
         int2 grid_xy = p2xy(pos[i]);
 
-#pragma unroll
+        #pragma unroll
         for (int m = 0; m < 9; ++m)
         {
             int2 cur_grid_xy = grid_xy + make_int2(m / 3 - 1, m % 3 - 1);
             const size_t hash_idx = xy2hash(cur_grid_xy.x, cur_grid_xy.y);
             if (hash_idx == (gridSize.x * gridSize.y))
                 continue;
-            
-            ComputeUniRadiusDemForces(&f, i, pos, vel, radius, young, poisson, tanFrictionAngle, cellStart[hash_idx], cellStart[hash_idx + 1]);
-            ComputeUniRadiusDemCapillaryForces(&f, i, pos, vel, radius, sr, cellStart[hash_idx], cellStart[hash_idx + 1], G);
+
+            ComputeMRDemForces(&f, i, pos, vel, radius, young, poisson, tanFrictionAngle, cellStart[hash_idx], cellStart[hash_idx + 1]);
+            ComputeMRDemCapillaryForces(&f, i, pos, vel, radius, sr, cellStart[hash_idx], cellStart[hash_idx + 1], G);
         }
 
-        ComputeDemWorldBoundaryForces(&f, pos[i], -vel[i], radius, radius, young, poisson, tanFrictionAngle, num, lowestPoint, highestPoint);
+        ComputeDemWorldBoundaryForces(&f, pos[i], vel[i], radius[i], radius[i], young, poisson, tanFrictionAngle, num, lowestPoint, highestPoint);
 
         acc[i] += 2.f * f / mass[i];
         return;

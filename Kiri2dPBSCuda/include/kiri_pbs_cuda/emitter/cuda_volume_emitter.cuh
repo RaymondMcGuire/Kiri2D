@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-09-13 16:12:42
+ * @LastEditTime: 2021-09-13 19:49:43
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\emitter\cuda_volume_emitter.cuh
@@ -30,9 +30,18 @@ namespace KIRI
         Vec_Float mass;
     };
 
+    struct MRDemVolumeData
+    {
+        Vec_Float2 pos;
+        Vec_Float3 col;
+        Vec_Float mass;
+        Vec_Float radius;
+    };
+
     struct DemShapeVolumeData
     {
         float minRadius;
+        float maxRadius;
         Vec_Float2 pos;
         Vec_Float3 col;
         Vec_Float mass;
@@ -55,6 +64,7 @@ namespace KIRI
         void BuildSphVolume(SphVolumeData &data, float2 lowest, int2 vsize, float particleRadius, float3 color);
         void BuildUniDemVolume(DemVolumeData &data, float2 lowest, int2 vsize, float particleRadius, float3 color, float mass, float jitter = 0.001f);
         void BuildDemUniShapeVolume(DemShapeVolumeData &data, Vec_Float3 shape, float3 color, float mass, float2 offset=make_float2(0.f));
+        void BuildMRDemShapeVolume(DemShapeVolumeData &data,float density, Vec_Float3 shape, float3 color, float2 offset=make_float2(0.f));
 
         inline constexpr bool GetEmitterStatus() const { return bEnable; }
 

@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-26 17:30:04
- * @LastEditTime: 2021-09-03 08:28:15
+ * @LastEditTime: 2021-09-13 19:53:24
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\searcher\cuda_neighbor_searcher.cuh
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <kiri_pbs_cuda/particle/cuda_boundary_particles.cuh>
-#include <kiri_pbs_cuda/particle/cuda_dem_particles.cuh>
+#include <kiri_pbs_cuda/particle/cuda_mr_dem_particles.cuh>
 
 namespace KIRI
 {
@@ -21,6 +21,7 @@ namespace KIRI
     enum SearcherParticleType
     {
         DEM = 0,
+        MRDEM = 1,
     };
 
     class CudaGNBaseSearcher

@@ -35,6 +35,7 @@ namespace KIRI
     {
 
         mSearcher->BuildGNSearcher(mSands);
+        
         auto solver = std::dynamic_pointer_cast<CudaDemSolver>(mSolver);
         solver->UpdateSolver(
             mSands,
