@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-09-11 21:59:29
+ * @LastEditTime: 2021-09-13 15:46:49
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_gpu.cuh
@@ -83,7 +83,6 @@ namespace KIRI
         float2 *vel,
         float2 *acc,
         float *mass,
-        const size_t *id,
         const float radius,
         const float young,
         const float poisson,
@@ -119,7 +118,7 @@ namespace KIRI
                 continue;
             
             ComputeUniRadiusDemForces(&f, i, pos, vel, radius, young, poisson, tanFrictionAngle, cellStart[hash_idx], cellStart[hash_idx + 1]);
-           // ComputeUniRadiusDemCapillaryForces(&f, i, pos, vel, radius, sr, cellStart[hash_idx], cellStart[hash_idx + 1], G);
+            ComputeUniRadiusDemCapillaryForces(&f, i, pos, vel, radius, sr, cellStart[hash_idx], cellStart[hash_idx + 1], G);
         }
 
         ComputeDemWorldBoundaryForces(&f, pos[i], -vel[i], radius, radius, young, poisson, tanFrictionAngle, num, lowestPoint, highestPoint);

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-07-26 12:33:44
+ * @LastEditTime: 2021-09-13 10:36:22
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
@@ -19,6 +19,8 @@ namespace KIRI
 
     void KiriVoroPoroOpti::GenExample(float width, float height)
     {
+        KIRI_LOG_DEBUG("KiriVoroPoroOpti: Start GenExample");
+
         std::random_device seedGen;
         std::default_random_engine rndEngine(seedGen());
         std::uniform_real_distribution<float> dist(0.f, 1.f);
@@ -43,6 +45,7 @@ namespace KIRI
         while (cnt < maxcnt)
         {
             auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+
             if (mRootBoundary->Contains(sitePos2))
             {
                 //auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
@@ -52,6 +55,8 @@ namespace KIRI
                 cnt++;
             }
         }
+
+        KIRI_LOG_DEBUG("KiriVoroPoroOpti: Add mNodes");
 
         for (size_t i = 0; i < mNodes.size(); i++)
             mRootCore->AddSite(mNodes[i]->GetSite());

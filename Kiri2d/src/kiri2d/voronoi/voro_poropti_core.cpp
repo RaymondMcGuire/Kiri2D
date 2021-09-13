@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-07-27 18:56:26
+ * @LastEditTime: 2021-09-13 10:39:48
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -105,7 +105,6 @@ namespace KIRI
 
     void KiriVoroPoroOptiCore::Init()
     {
-
         Reset();
 
         ComputeBoundaryPolygonArea();
@@ -209,7 +208,6 @@ namespace KIRI
     {
         auto entityNum = 20;
         auto kThreshold = 200;
-        auto lambda = 20.f;
 
         if (mGlobalErrorArray.size() > entityNum)
         {
@@ -229,7 +227,6 @@ namespace KIRI
                     {
                         if (poly->GetSkeletons().empty())
                         {
-                            // poly->ComputeStraightSkeleton(lambda);
                             poly->ComputeSSkel1998Convex();
                         }
 
@@ -427,6 +424,7 @@ namespace KIRI
 
         if (mTargetPorosity != 0.f)
             mCurrentPorosity = ComputeMiniumPorosity();
+
         return mCurGlobalWeightError;
     }
 

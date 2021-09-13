@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-10 15:29:35
- * @LastEditTime: 2021-09-03 15:02:45
+ * @LastEditTime: 2021-09-13 16:18:08
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\data\cuda_dem_params.h
@@ -26,6 +26,8 @@ namespace KIRI
         float young;
         float poisson;
         float tan_friction_angle;
+
+        float c0;
 
         float2 gravity;
         float dt;

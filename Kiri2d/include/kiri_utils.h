@@ -1,7 +1,7 @@
 /*** 
  * @Author: Jayden Zhang
  * @Date: 2020-09-27 02:54:00
- * @LastEditTime: 2021-09-03 17:35:25
+ * @LastEditTime: 2021-09-13 14:00:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_utils.h
@@ -236,7 +236,7 @@ namespace KIRI
             size_t f3bytes = particles_num * sizeof(float3);
             size_t uintbytes = particles_num * sizeof(size_t);
 
-            float2 *cpu_positions = (float2 *)malloc(f3bytes);
+            float2 *cpu_positions = (float2 *)malloc(f2bytes);
             cudaMemcpy(cpu_positions, positions, f2bytes, cudaMemcpyDeviceToHost);
 
             for (UInt i = 0; i < particles_num; i++)

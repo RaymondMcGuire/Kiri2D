@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-05 12:33:37
- * @LastEditTime: 2021-09-03 23:08:25
+ * @LastEditTime: 2021-09-13 15:47:18
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\searcher\cuda_neighbor_searcher.cu
@@ -75,8 +75,7 @@ namespace KIRI
                                     thrust::make_tuple(
                                         sands->GetPosPtr(),
                                         sands->GetVelPtr(),
-                                        sands->GetColPtr(),
-                                        sands->GetIdPtr())));
+                                        sands->GetColPtr())));
         }
 
         cudaDeviceSynchronize();

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-09-03 09:27:38
+ * @LastEditTime: 2021-09-13 15:52:02
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -113,6 +113,19 @@ void ExportVoronoiData2CSVFile(const String fileName, const String idx, const Ve
           << std::endl;
     for (int i = 0; i < sites.size(); i++)
         vfile << sites[i].x << "," << sites[i].y << "," << sites[i].z << std::endl;
+
+    vfile.close();
+}
+
+void ExportSamplerData2CSVFile(const String fileName, const String idx, const Vector<KiriCircle2> &samplers)
+{
+    String voronoiFile = String(EXPORT_PATH) + "csv/" + fileName + "_samplers_" + idx + ".csv";
+    std::fstream vfile;
+    vfile.open(voronoiFile.c_str(), std::ios_base::out);
+    vfile << "x,y,r"
+          << std::endl;
+    for (int i = 0; i < samplers.size(); i++)
+        vfile << samplers[i].pos.x << "," << samplers[i].pos.y << "," << samplers[i].radius << std::endl;
 
     vfile.close();
 }
@@ -1365,12 +1378,13 @@ void UniParticleSampler()
     Vector<Vector2F> bunny2d;
     Vector<Vector2F> sbunny2d;
     size_t bunnyNum;
-    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
-        auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
+        //auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
+        auto newPos = bunny2d[i];
         sbunny2d.emplace_back(newPos);
         boundary.Append(newPos);
     }
@@ -1380,7 +1394,7 @@ void UniParticleSampler()
         bbox.merge(sbunny2d[i]);
 
     Vector<Vector2F> uniPoints;
-    auto radius = 10.f;
+    auto radius = 0.015f;
     auto lower = bbox.LowestPoint;
     auto higher = bbox.HighestPoint;
     auto wn = UInt(((higher - lower) / (radius * 2.f)).x);
@@ -1420,11 +1434,153 @@ void UniParticleSampler()
 
     renderer->DrawCanvas();
     renderer->SaveImages2File();
+
+    ExportSamplerData2CSVFile("uni_bunny", UInt2Str4Digit(0), circles);
+
     while (1)
     {
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
     }
+}
+
+void VoroPorosityOptimizeScaleExample()
+{
+    // scene renderer config
+    float windowheight = 5000.f;
+    float windowwidth = 5000.f;
+
+    // voronoi
+    float width = 3000.f;
+    float height = 3000.f;
+    // auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+    auto offsetVec2 = Vector2F(2000.f);
+
+    Vector<Vector2F> bunny2d;
+    size_t bunnyNum;
+    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+
+    Vector<Vector2F> boundary;
+
+    for (size_t i = 0; i < bunny2d.size(); i++)
+    {
+        //auto newPos = bunny2d[i] * 400.f + Vector2F(-width / 2.f, height / 5.f);
+        //boundary.emplace_back(Transform2Original(Vector2F(newPos), height) + offsetVec2);
+        auto newPos = bunny2d[i] * 4000.f;
+        boundary.emplace_back(newPos);
+    }
+
+    auto target_porosity = 0.f;
+    auto epsilon = 0.001f;
+    auto opti = std::make_shared<KiriVoroPoroOpti>(target_porosity);
+    opti->SetRootBoundary2(boundary);
+    opti->GenExample(width, height);
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    Vector<float> errorArray, porosityArray, radiusErrorArray;
+    Vector<Vector4F> lastMaxCircle;
+    auto minRadius = Huge<float>();
+    auto maxRadius = Tiny<float>();
+    for (size_t i = 0; i < 1500; i++)
+    {
+
+        auto error = opti->ComputeIterate();
+        auto cur_porosity = opti->GetMiniumPorosity();
+        Vector<KiriPoint2> points;
+        Vector<KiriLine2> lines;
+        Vector<KiriCircle2> circles;
+        if ((i % 10 == 1) || (abs(cur_porosity - target_porosity) < epsilon))
+        {
+            auto sites = opti->GetLeafNodeSites();
+            for (size_t i = 0; i < sites.size(); i++)
+            {
+                //sites[i]->Print();
+                //auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) , height) + offsetVec2;
+                auto p = Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y);
+                points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
+                auto poly = sites[i]->GetCellPolygon();
+                if (poly != NULL)
+                {
+                    poly->ComputeVoroSitesList();
+                    auto list = poly->GetVoroSitesList();
+                    // list->PrintVertexList();
+
+                    auto node = list->GetHead();
+                    do
+                    {
+                        // auto start = Transform2Original(Vector2F(node->value) * 10.f, height) + offsetVec2;
+                        auto start = Vector2F(node->value);
+                        node = node->next;
+                        //auto end = Transform2Original(Vector2F(node->value) * 10.f, height) + offsetVec2;
+                        auto end = Vector2F(node->value);
+                        auto line = KiriLine2(start, end);
+                        line.thick = 5.f;
+                        lines.emplace_back(line);
+                    } while (node != list->GetHead());
+                }
+            }
+
+            auto maxIC = opti->GetMICBySSkel();
+            lastMaxCircle = maxIC;
+
+            auto porosity = opti->GetMiniumPorosity();
+            porosityArray.emplace_back(porosity);
+
+            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
+
+            auto radiusError = 0.f;
+            for (size_t i = 0; i < maxIC.size(); i++)
+            {
+                //auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
+                auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y), Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+                circles.emplace_back(maxCir2);
+                //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
+                radiusError += std::abs(maxIC[i].z - maxIC[i].w);
+
+                minRadius = std::min(minRadius, maxIC[i].z);
+                maxRadius = std::max(maxRadius, maxIC[i].z);
+            }
+
+            errorArray.emplace_back(error / maxIC.size());
+            radiusErrorArray.emplace_back(radiusError / maxIC.size());
+
+            // re-color
+            for (size_t i = 0; i < maxIC.size(); i++)
+            {
+                auto rad = (maxIC[i].z - minRadius) / (maxRadius - minRadius);
+                const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
+                circles[i].col = Vector3F(color.r(), color.g(), color.b());
+            }
+
+            scene->AddParticles(points);
+            scene->AddCircles(circles);
+            scene->AddLines(lines);
+
+            renderer->DrawCanvas();
+            renderer->SaveImages2File();
+
+            renderer->ClearCanvas();
+            scene->Clear();
+
+            if (abs(cur_porosity - target_porosity) < epsilon)
+            {
+                KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, diff={2}", i, cur_porosity, abs(cur_porosity - target_porosity));
+                break;
+            }
+        }
+
+        if (i % 100 == 1)
+        {
+            ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
+            ExportPoroityData2CSVFile("bunny", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+        }
+    }
+
+    auto sites_data = opti->GetVoronoiSitesData();
+    ExportVoronoiData2CSVFile("bunny", "1500", sites_data);
 }
 
 #include <kiri2d/straight_skeleton/sskel_slav.h>
@@ -1685,13 +1841,14 @@ int main1()
 
     //VoroPorosityTreemapOptiExample();
 
-    //UniParticleSampler();
+    UniParticleSampler();
 
     //StraightSkeletonExample1();
 
     //VoroPorosityOptimizeConvexExample();
-    // VoroPorosityOptimizeBunnyExample();
+    //VoroPorosityOptimizeBunnyExample();
+    //VoroPorosityOptimizeScaleExample();
 
-    LoadVoronoiExample();
+    //LoadVoronoiExample();
     return 0;
 }

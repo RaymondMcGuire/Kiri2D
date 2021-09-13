@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-15 22:37:26
- * @LastEditTime: 2021-09-11 21:53:45
+ * @LastEditTime: 2021-09-13 16:19:05
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_dem_solver.cpp
@@ -30,6 +30,7 @@ namespace KIRI
             params.young,
             params.poisson,
             params.tan_friction_angle,
+            params.c0,
             cellStart,
             bparams.lowest_point,
             bparams.highest_point,

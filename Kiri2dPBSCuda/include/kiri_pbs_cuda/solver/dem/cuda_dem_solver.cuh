@@ -2,7 +2,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-01 14:31:30
- * @LastEditTime: 2021-09-11 21:53:55
+ * @LastEditTime: 2021-09-13 16:19:26
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver.cuh
@@ -56,6 +56,7 @@ namespace KIRI
             const float young,
             const float poisson,
             const float tanFrictionAngle,
+            const float c0,
             const CudaArray<size_t> &cellStart,
             const float2 lowestPoint,
             const float2 highestPoint,

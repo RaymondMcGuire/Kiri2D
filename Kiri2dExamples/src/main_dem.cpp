@@ -1,27 +1,89 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-09-03 09:27:54
- * @LastEditTime: 2021-09-11 21:58:34
+ * @LastEditTime: 2021-09-13 16:26:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
  */
 
 #include <kiri_utils.h>
+#include <kiri2d/renderer/renderer.h>
 
 using namespace KIRI;
+using namespace KIRI2D;
+
+// scene config
+float windowheight = 1080.f;
+float windowwidth = 800.f;
+auto particle_scale = 500.f;
+auto world_size = make_float2(1.5f, 1.5f);
+
+auto offsetvec2 = Vector2F(windowwidth - world_size.x * particle_scale, windowheight - world_size.y * particle_scale) / 2.f;
+
+auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+KIRI::Vector<KiriCircle2> boundaries;
 
 // global params
 const UInt RunLiquidNumber = 0;
 const UInt TotalFrameNumber = 300;
 UInt SimCount = 0;
 float TotalFrameTime = 0.f;
-float RenderInterval = 1.f / 30.f;
+float RenderInterval = 1.f / 60.f;
 
 KiriTimer PerFrameTimer;
 CudaDemSystemPtr DEMSystem;
 
 float radius = 0.015f;
+
+String ReadFileIntoString(const String &path)
+{
+    auto ss = std::ostringstream{};
+    std::ifstream input_file(path);
+    if (!input_file.is_open())
+        exit(EXIT_FAILURE);
+
+    ss << input_file.rdbuf();
+    return ss.str();
+}
+
+Vec_Float3 LoadCSVFile2ShapeSamplers(const String fileName)
+{
+
+    String filePath = String(EXPORT_PATH) + "csv/" + fileName;
+    KIRI_LOG_DEBUG("Load File Path={0}", filePath);
+
+    char delimiter = ',';
+
+    auto file_contents = ReadFileIntoString(filePath);
+    std::istringstream sstream(file_contents);
+    KIRI::Vector<String> row;
+    String record;
+
+    Vec_Float3 samplers;
+
+    // skip first header
+    std::getline(sstream, record);
+
+    // read
+    while (std::getline(sstream, record))
+    {
+        std::istringstream line(record);
+        while (std::getline(line, record, delimiter))
+            row.push_back(record);
+
+        samplers.emplace_back(make_float3(
+            std::stof(row[0]),
+            std::stof(row[1]),
+            std::stof(row[2])));
+
+        row.clear();
+    }
+    KIRI_LOG_DEBUG("Load File Finished");
+    return samplers;
+}
 
 void SetupParams()
 {
@@ -29,11 +91,12 @@ void SetupParams()
 
     // app
     CUDA_DEM_APP_PARAMS.max_num = 400;
+    CUDA_DEM_APP_PARAMS.bgeo_export = false;
     strcpy(CUDA_DEM_APP_PARAMS.bgeo_export_folder, (String(EXPORT_PATH) + "bgeo/dem").c_str());
 
     // scene config
     auto cuda_lowest_point = make_float2(0.f);
-    auto cuda_highest_point = make_float2(1.f, 1.f);
+    auto cuda_highest_point = world_size;
     auto cuda_world_size = cuda_highest_point - cuda_lowest_point;
     auto cuda_world_center = (cuda_highest_point + cuda_lowest_point) / 2.f;
 
@@ -47,6 +110,7 @@ void SetupParams()
     CUDA_DEM_PARAMS.young = 1e9f;
     CUDA_DEM_PARAMS.poisson = 0.3f;
     CUDA_DEM_PARAMS.tan_friction_angle = 0.5f;
+    CUDA_DEM_PARAMS.c0 = 0.f;
 
     CUDA_DEM_PARAMS.gravity = make_float2(0.0f, -9.8f);
 
@@ -68,11 +132,17 @@ void SetupParams()
     auto boundaryEmitter = std::make_shared<CudaBoundaryEmitter>();
 
     boundaryEmitter->BuildWorldBoundary(boundaryData, CUDA_BOUNDARY_PARAMS.lowest_point, CUDA_BOUNDARY_PARAMS.highest_point, CUDA_DEM_PARAMS.particle_radius);
+    for (size_t i = 0; i < boundaryData.pos.size(); i++)
+    {
+        auto pb = KiriCircle2(Vector2F(boundaryData.pos[i].x, boundaryData.pos[i].y) * particle_scale + offsetvec2, Vector3F(0.f, 0.f, 1.f), radius * particle_scale);
+        boundaries.emplace_back(pb);
+    }
 
-    int2 vbox = make_int2(20, 20);
+    auto volumeEmitter = std::make_shared<CudaVolumeEmitter>();
+
     // volume sampling
     DemVolumeData volumeData;
-    auto volumeEmitter = std::make_shared<CudaVolumeEmitter>();
+    int2 vbox = make_int2(20, 20);
     volumeEmitter->BuildUniDemVolume(
         volumeData,
         CUDA_BOUNDARY_PARAMS.world_center - make_float2(vbox.x * CUDA_DEM_PARAMS.particle_radius, vbox.y * CUDA_DEM_PARAMS.particle_radius),
@@ -82,13 +152,21 @@ void SetupParams()
         CUDA_DEM_PARAMS.rest_mass,
         0.001f * CUDA_DEM_PARAMS.particle_radius);
 
+    // DemShapeVolumeData volumeData;
+    // auto shape = LoadCSVFile2ShapeSamplers("uni_bunny_samplers_0000.csv");
+    // volumeEmitter->BuildDemUniShapeVolume(
+    //     volumeData,
+    //     shape,
+    //     make_float3(0.88f, 0.79552f, 0.5984f),
+    //     CUDA_DEM_PARAMS.rest_mass,
+    //     make_float2(0.25f, 0.f));
+
     // spatial searcher & particles
     CudaDemParticlesPtr particles =
         std::make_shared<CudaDemParticles>(
             volumeData.pos,
             volumeData.col,
-            volumeData.mass,
-            volumeData.id);
+            volumeData.mass);
 
     CudaGNSearcherPtr searcher;
     searcher = std::make_shared<CudaGNSearcher>(
@@ -127,6 +205,22 @@ void SetupParams()
     //DEMSystem->UpdateSystem(RenderInterval);
 }
 
+void UpdateScene(const KIRI::Vector<KiriCircle2> &circles)
+{
+
+    scene->AddCircles(boundaries);
+    scene->AddCircles(circles);
+
+    renderer->DrawCanvas();
+    renderer->SaveImages2File();
+
+    cv::imshow("DEM", renderer->GetCanvas());
+    cv::waitKey(5);
+
+    renderer->ClearCanvas();
+    scene->Clear();
+}
+
 void Update()
 {
     if (CUDA_DEM_APP_PARAMS.run && SimCount < TotalFrameNumber)
@@ -138,15 +232,16 @@ void Update()
         PerFrameTimer.Restart();
         for (size_t i = 0; i < numOfSubTimeSteps; i++)
         {
-            KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
+            //KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
             DEMSystem->UpdateSystem(RenderInterval);
         }
 
-        KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
+        //KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
         TotalFrameTime += PerFrameTimer.Elapsed();
+        auto particles = DEMSystem->GetParticles();
+
         if (CUDA_DEM_APP_PARAMS.bgeo_export)
         {
-            auto particles = DEMSystem->GetParticles();
             ExportBgeoFileCUDA(
                 CUDA_DEM_APP_PARAMS.bgeo_export_folder,
                 UInt2Str4Digit(SimCount - RunLiquidNumber),
@@ -156,11 +251,50 @@ void Update()
                 1,
                 particles->Size());
         }
+        else
+        {
+            KIRI::Vector<KiriCircle2> circles;
+
+            auto particles_num = particles->Size();
+            size_t f2bytes = particles_num * sizeof(float2);
+            float2 *particle_positions = (float2 *)malloc(f2bytes);
+            cudaMemcpy(particle_positions, particles->GetPosPtr(), f2bytes, cudaMemcpyDeviceToHost);
+
+            for (size_t i = 0; i < particles_num; i++)
+            {
+                auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) * particle_scale + offsetvec2, Vector3F(0.88f, 0.79552f, 0.5984f), radius * particle_scale);
+                circles.emplace_back(p);
+            }
+
+            UpdateScene(circles);
+        }
     }
     else if (CUDA_DEM_APP_PARAMS.run)
     {
         CUDA_DEM_APP_PARAMS.run = false;
     }
+}
+
+void UpdateRealTime()
+{
+    DEMSystem->UpdateSystem(RenderInterval);
+
+    auto particles = DEMSystem->GetParticles();
+
+    KIRI::Vector<KiriCircle2> circles;
+
+    auto particles_num = particles->Size();
+    size_t f2bytes = particles_num * sizeof(float2);
+    float2 *particle_positions = (float2 *)malloc(f2bytes);
+    cudaMemcpy(particle_positions, particles->GetPosPtr(), f2bytes, cudaMemcpyDeviceToHost);
+
+    for (size_t i = 0; i < particles_num; i++)
+    {
+        auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) * particle_scale + offsetvec2, Vector3F(1.f, 0.f, 0.f), radius * particle_scale);
+        circles.emplace_back(p);
+    }
+
+    UpdateScene(circles);
 }
 
 void main()
@@ -173,6 +307,7 @@ void main()
 
     while (CUDA_DEM_APP_PARAMS.run)
         Update();
+    //Update();
 
     return;
 }

@@ -2,7 +2,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-03 17:49:11
- * @LastEditTime: 2021-09-11 21:54:27
+ * @LastEditTime: 2021-09-13 16:18:45
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_dem_solver.cu
@@ -114,6 +114,7 @@ namespace KIRI
       const float young,
       const float poisson,
       const float tanFrictionAngle,
+      const float c0,
       const CudaArray<size_t> &cellStart,
       const float2 lowestPoint,
       const float2 highestPoint,
@@ -125,7 +126,6 @@ namespace KIRI
         sands->GetVelPtr(),
         sands->GetAccPtr(),
         sands->GetMassPtr(),
-        sands->GetIdPtr(),
         radius,
         young,
         poisson,
@@ -138,7 +138,7 @@ namespace KIRI
         gridSize,
         ThrustHelper::Pos2GridXY(lowestPoint, kernelRadius, gridSize),
         ThrustHelper::GridXY2GridHash(gridSize),
-        LinearAttenCoeff(0.f, 0.f));
+        LinearAttenCoeff(c0, 0.f));
     KIRI_CUCALL(cudaDeviceSynchronize());
     KIRI_CUKERNAL();
   }

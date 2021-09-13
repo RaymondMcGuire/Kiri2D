@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-09-11 22:18:52
+ * @LastEditTime: 2021-09-13 16:35:03
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
@@ -35,7 +35,7 @@ namespace KIRI
 
             // float dot_epslion = dot(vij, n);
             // float2 vij_tangential = vij - dot_epslion * n;
-            // float2 shear_force = -ks * vij_tangential;
+            // float2 shear_force = -ks*0.001f * vij_tangential;
 
             // float max_fs = lengthSquared(normal_force) * std::powf(tanFrictionAngle, 2.f);
 
@@ -82,7 +82,7 @@ namespace KIRI
             float neck_curvature_pressure = -2.f * KIRI_PI * coeff_c * radiusi * cosf(contact_angle) / (1.f + H / (2.f * d));
             float surface_tension_force = -2.f * KIRI_PI * coeff_c * radiusi * phi * sinf(contact_angle);
 
-            f = -N * (neck_curvature_pressure + surface_tension_force);
+            f = N * (neck_curvature_pressure + surface_tension_force);
         }
         return f;
     }
