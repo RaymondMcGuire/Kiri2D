@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-09-13 10:35:28
+ * @LastEditTime: 2021-09-14 15:28:44
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -227,6 +227,33 @@ namespace KIRI
         return outside;
     }
 
+    bool KiriPowerDiagram::Move2CentroidDisableSite()
+    {
+        bool outside = false;
+        // move sites to centroid
+        for (size_t j = 0; j < mVoroSites.size(); j++)
+        {
+            auto poly = mVoroSites[j]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                auto cen = poly->GetPolygonCentroid();
+                if (mBoundaryPolygon2->Contains(cen))
+                    mVoroSites[j]->ResetValue(cen);
+                else
+                {
+                    outside = true;
+                    KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
+                    mVoroSites[j]->SetCellPolygon(NULL);
+                    mVoroSites[j]->Disable();
+                }
+            }
+
+            //KIRI_LOG_DEBUG("voro site idx={0}, value=({1},{2},{3})", mVoroSites[j]->GetIdx(), mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y, mVoroSites[j]->GetValue().z);
+        }
+
+        return outside;
+    }
+
     bool KiriPowerDiagram::MoveVoroSites(Vector<Vector2F> movement)
     {
         bool outside = false;
@@ -275,6 +302,13 @@ namespace KIRI
             //PermutateVoroSites();
 
             Reset();
+
+            //Remove disabled voro sites
+            mVoroSites.erase(
+                std::remove_if(mVoroSites.begin(), mVoroSites.end(),
+                               [](const KiriVoroSitePtr &site)
+                               { return !site->IsEnable(); }),
+                mVoroSites.end());
 
             for (size_t i = 0; i < mVoroSites.size(); i++)
             {
@@ -510,6 +544,10 @@ namespace KIRI
                                             if (mBoundaryPolygon2->GetBBox().contains(cellPoly->GetPolygonVertices()[0]))
                                             {
                                                 site->SetCellPolygon(cellPoly);
+                                            }
+                                            else
+                                            {
+                                                site->SetCellPolygon(NULL);
                                             }
                                         }
                                     }

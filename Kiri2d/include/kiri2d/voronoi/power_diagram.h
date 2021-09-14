@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-08-02 14:19:06
+ * @LastEditTime: 2021-09-14 15:20:31
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
@@ -49,6 +49,7 @@ namespace KIRI
 
         bool MoveVoroSites(Vector<Vector2F> movement);
         bool Move2Centroid();
+        bool Move2CentroidDisableSite();
         void LloydRelaxation();
         void LloydIterate();
 

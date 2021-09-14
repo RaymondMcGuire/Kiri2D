@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-09-03 09:27:54
- * @LastEditTime: 2021-09-13 22:01:44
+ * @LastEditTime: 2021-09-14 13:25:38
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
@@ -402,7 +402,7 @@ void UpdateRealTime()
     UpdateScene(circles);
 }
 
-void main()
+void main1()
 {
     KiriLog::Init();
 

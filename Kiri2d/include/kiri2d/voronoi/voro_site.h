@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-13 23:50:07
+ * @LastEditTime: 2021-09-14 15:21:11
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
@@ -101,6 +101,11 @@ namespace KIRI
 
         const bool IsBoundarySite() const { return mBoundarySite; }
 
+        const bool IsEnable() const { return mEnable; }
+
+        void Enable() { mEnable = true; }
+        void Disable() { mEnable = false; }
+
         void PrintSite()
         {
             KIRI_LOG_DEBUG("site idx={0}", GetIdx());
@@ -111,6 +116,8 @@ namespace KIRI
         float ProjectZ(float x, float y, float weight) { return (x * x + y * y - weight); }
 
         float mWeight, mPercentage, mRadius;
+
+        bool mEnable = true;
         bool mBoundarySite = false;
 
         Vector<SharedPtr<KiriVoroSite>> mNeighborSites;

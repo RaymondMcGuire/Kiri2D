@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-09-13 10:39:48
+ * @LastEditTime: 2021-09-14 15:29:52
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -182,7 +182,7 @@ namespace KIRI
 
     void KiriVoroPoroOptiCore::AdaptPositionsWeights()
     {
-        auto outside = mPowerDiagram->Move2Centroid();
+        auto outside = mPowerDiagram->Move2CentroidDisableSite();
         // if (outside)
         //     CorrectWeights();
     }

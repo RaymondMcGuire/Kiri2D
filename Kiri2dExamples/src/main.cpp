@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-09-13 21:44:16
+ * @LastEditTime: 2021-09-14 13:55:44
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -20,6 +20,26 @@
 
 using namespace KIRI;
 using namespace KIRI2D;
+
+float ComputeRMSE(const Vec_Float &predict, const Vec_Float &real)
+{
+    auto sum = 0.f;
+    auto n = predict.size();
+    for (size_t i = 0; i < n; i++)
+        sum += std::powf(predict[i] - real[i], 2.f);
+
+    return std::sqrt(sum / n);
+}
+
+float ComputeRMSPE(const Vec_Float &predict, const Vec_Float &real)
+{
+    auto sum = 0.f;
+    auto n = predict.size();
+    for (size_t i = 0; i < n; i++)
+        sum += std::powf((predict[i] - real[i]) / real[i], 2.f);
+
+    return std::sqrt(sum / n);
+}
 
 Vector2F Transform2Original(const Vector2F &v, float h)
 {
@@ -102,6 +122,19 @@ void ExportPoroityData2CSVFile(const String fileName, const String idx, const Ve
     for (int i = 0; i < maxIC.size(); i++)
         rfile << maxIC[i].z << "," << maxIC[i].w << std::endl;
     rfile.close();
+}
+
+void ExportEvaluationData2CSVFile(const String fileName, const String idx, const Vec_Float &rmse, const Vec_Float &rmspe)
+{
+    String evalFile = String(EXPORT_PATH) + "csv/" + fileName + "_eval_" + idx + ".csv";
+    std::fstream efile;
+    efile.open(evalFile.c_str(), std::ios_base::out);
+    efile << "iter,RMSE,RMSPE"
+          << std::endl;
+    for (int i = 0; i < rmse.size(); i++)
+        efile << i + 1 << "," << rmse[i] << "," << rmspe[i] << std::endl;
+
+    efile.close();
 }
 
 void ExportVoronoiData2CSVFile(const String fileName, const String idx, const Vector<Vector3F> &sites)
@@ -1456,10 +1489,13 @@ void VoroPorosityOptimizeScaleExample()
     // auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
     auto offsetVec2 = Vector2F(2000.f);
 
+    // iter
+    auto maxIter = 3000;
+
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
-    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     Vector<Vector2F> boundary;
 
@@ -1480,11 +1516,12 @@ void VoroPorosityOptimizeScaleExample()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    Vector<float> errorArray, porosityArray, radiusErrorArray;
+    Vec_Float errorArray, porosityArray, radiusErrorArray;
+    Vec_Float RMSEArray, RMSPEArray;
     Vector<Vector4F> lastMaxCircle;
     auto minRadius = Huge<float>();
     auto maxRadius = Tiny<float>();
-    for (size_t i = 0; i < 1500; i++)
+    for (size_t i = 0; i < maxIter; i++)
     {
 
         auto error = opti->ComputeIterate();
@@ -1492,7 +1529,7 @@ void VoroPorosityOptimizeScaleExample()
         Vector<KiriPoint2> points;
         Vector<KiriLine2> lines;
         Vector<KiriCircle2> circles;
-        if ((i % 10 == 1) || (abs(cur_porosity - target_porosity) < epsilon))
+        if ((i % 10 == 1) || (i == maxIter - 1))
         {
             auto sites = opti->GetLeafNodeSites();
             for (size_t i = 0; i < sites.size(); i++)
@@ -1532,12 +1569,17 @@ void VoroPorosityOptimizeScaleExample()
             KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
 
             auto radiusError = 0.f;
+            auto radiusErrorPercent = 0.f;
+            Vec_Float predictRadiusArray, realRadiusArray;
             for (size_t i = 0; i < maxIC.size(); i++)
             {
                 //auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
-                auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y) / 100.f, Vector3F(1.f, 0.f, 0.f), maxIC[i].z / 100.f);
+                auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y), Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+
+                predictRadiusArray.emplace_back(maxIC[i].z);
+                realRadiusArray.emplace_back(maxIC[i].w);
+
                 circles.emplace_back(maxCir2);
-                //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
                 radiusError += std::abs(maxIC[i].z - maxIC[i].w);
 
                 minRadius = std::min(minRadius, maxIC[i].z);
@@ -1547,6 +1589,9 @@ void VoroPorosityOptimizeScaleExample()
             errorArray.emplace_back(error / maxIC.size());
             radiusErrorArray.emplace_back(radiusError / maxIC.size());
 
+            RMSEArray.emplace_back(ComputeRMSE(predictRadiusArray, realRadiusArray));
+            RMSPEArray.emplace_back(ComputeRMSPE(predictRadiusArray, realRadiusArray));
+
             // re-color
             for (size_t i = 0; i < maxIC.size(); i++)
             {
@@ -1555,9 +1600,9 @@ void VoroPorosityOptimizeScaleExample()
                 circles[i].col = Vector3F(color.r(), color.g(), color.b());
             }
 
-            //scene->AddParticles(points);
+            scene->AddParticles(points);
             scene->AddCircles(circles);
-            //scene->AddLines(lines);
+            scene->AddLines(lines);
 
             renderer->DrawCanvas();
             renderer->SaveImages2File();
@@ -1574,18 +1619,20 @@ void VoroPorosityOptimizeScaleExample()
 
         if (i % 100 == 1)
         {
-            ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
+            //ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
             ExportPoroityData2CSVFile("bunny", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
         }
 
-        if (i == 1499)
+        if (i == maxIter - 1)
         {
-            ExportSamplerData2CSVFile("bunny", "1500", circles);
+            ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
+            ExportPoroityData2CSVFile("bunny", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+            ExportEvaluationData2CSVFile("bunny", UInt2Str4Digit(i), RMSEArray, RMSPEArray);
         }
     }
 
-    auto sites_data = opti->GetVoronoiSitesData();
-    ExportVoronoiData2CSVFile("bunny", "1500", sites_data);
+    //auto sites_data = opti->GetVoronoiSitesData();
+    //ExportVoronoiData2CSVFile("bunny", "1500", sites_data);
 }
 
 #include <kiri2d/straight_skeleton/sskel_slav.h>
@@ -1829,7 +1876,7 @@ void LoadVoronoiExample()
     scene->Clear();
 }
 
-int main1()
+int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
