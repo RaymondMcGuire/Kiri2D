@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-09-14 13:55:44
+ * @LastEditTime: 2021-09-14 19:24:28
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1491,11 +1491,12 @@ void VoroPorosityOptimizeScaleExample()
 
     // iter
     auto maxIter = 3000;
-
+    String boundaryFileName = "cheburashka";
+    String filePath = "D:/project/Kiri2D/scripts/alphashape/" + boundaryFileName + ".xy";
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
-    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
+    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     Vector<Vector2F> boundary;
 
@@ -1620,14 +1621,14 @@ void VoroPorosityOptimizeScaleExample()
         if (i % 100 == 1)
         {
             //ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
-            ExportPoroityData2CSVFile("bunny", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+            ExportPoroityData2CSVFile(boundaryFileName, UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
         }
 
         if (i == maxIter - 1)
         {
-            ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
-            ExportPoroityData2CSVFile("bunny", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
-            ExportEvaluationData2CSVFile("bunny", UInt2Str4Digit(i), RMSEArray, RMSPEArray);
+            ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(i), circles);
+            ExportPoroityData2CSVFile(boundaryFileName, UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+            ExportEvaluationData2CSVFile(boundaryFileName, UInt2Str4Digit(i), RMSEArray, RMSPEArray);
         }
     }
 
