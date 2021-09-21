@@ -1491,9 +1491,9 @@ void VoroPorosityOptimizeScaleExample()
 
     // iter
     auto maxIter = 3000;
-    String boundaryFileName = "cow";
-    //String filePath = "D:/project/Kiri2D/scripts/alphashape/" + boundaryFileName + ".xy";
-    String filePath = "E:/PBCGLab/project/Kiri2D/scripts/alphashape/" + boundaryFileName + ".xy";
+    String boundaryFileName = "cheburashka";
+    String filePath = "D:/project/Kiri2D/scripts/alphashape/" + boundaryFileName + ".xy";
+    //String filePath = "E:/PBCGLab/project/Kiri2D/scripts/alphashape/" + boundaryFileName + ".xy";
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
     load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
