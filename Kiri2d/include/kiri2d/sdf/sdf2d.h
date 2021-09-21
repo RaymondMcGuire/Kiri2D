@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-22 14:40:10
- * @LastEditTime: 2021-02-23 00:30:29
+ * @LastEditTime: 2021-09-21 17:57:56
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\sdf\sdf2d.h
@@ -40,10 +40,12 @@ namespace KIRI2D
         KiriSDF2D(
             String name,
             Vector3F color,
-            bool moveable)
+            bool moveable,
+            Vector2F offset)
             : mName(name),
               mColor(color),
-              bMoveable(moveable)
+              bMoveable(moveable),
+              mOffset(offset)
         {
             mBBoxMin = Vector2F(Huge<float>());
             mBBoxMax = Vector2F(Tiny<float>());
@@ -51,11 +53,14 @@ namespace KIRI2D
 
         ~KiriSDF2D() noexcept {}
 
-        const Vec_Vec2F GetPoints()const { return mPoints; }
+        const Vec_Vec2F GetPoints() const { return mPoints; }
 
         void Append(Vector2F p, Vector2F v = Vector2F(0.f));
         const Int FindRegion(Vector2F p);
         const SDF2DInfo CalcClosestDistance(Vector2F p);
+
+        void SetOffset(const Vector2F &offset) { mOffset = offset; }
+        Vector2F GetOffset() { return mOffset; }
 
     protected:
         String mName;
@@ -63,6 +68,7 @@ namespace KIRI2D
 
         Vector2F mBBoxMin, mBBoxMax;
         Vector3F mColor;
+        Vector2F mOffset;
 
         Vec_Vec2F mPoints;
         Vec_Vec2F mVelocities;
