@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-09-21 18:00:23
+ * @LastEditTime: 2021-09-22 16:54:39
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1876,9 +1876,12 @@ void LoadVoronoiExample()
 #include <kiri2d/sampling/poisson_disk_sampling.h>
 void UniPoissonDiskSampler()
 {
+    String boundaryFileName = "bunny";
+    UInt counter = 0;
+
     // scene renderer config
-    float windowheight = 1080.f;
-    float windowwidth = 1920.f;
+    float windowheight = 5000.f;
+    float windowwidth = 5000.f;
 
     KiriSDFPoly2D boundary;
 
@@ -1891,7 +1894,7 @@ void UniPoissonDiskSampler()
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
         //auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
-        auto newPos = bunny2d[i] * 500.f;
+        auto newPos = bunny2d[i] * 4000.f;
         sbunny2d.emplace_back(newPos);
         boundary.Append(newPos);
     }
@@ -1900,48 +1903,81 @@ void UniPoissonDiskSampler()
     for (size_t i = 0; i < bunnyNum; i++)
         bbox.merge(sbunny2d[i]);
 
-    Vector2F offset = Vector2F(windowwidth - bbox.width(), windowheight - bbox.height()) / 2.f;
+    //Vector2F offset = Vector2F(windowwidth - bbox.width(), windowheight - bbox.height()) / 2.f;
+    Vector2F offset = Vector2F(0.f);
     boundary.SetOffset(offset);
 
     Vector<KiriPoint2> points;
     Vector<KiriLine2> lines;
     Vector<KiriCircle2> circles;
 
+    // uni
     auto radius = 30.f;
+
+    //multi
+    auto max_radius = 150.f;
+    std::vector<float> radius_range;
+    radius_range.push_back(20.f);
+    radius_range.push_back(30.f);
+    radius_range.push_back(80.f);
+    radius_range.push_back(max_radius);
+
+    std::vector<float> radius_prob;
+    radius_prob.push_back(0.5f);
+    radius_prob.push_back(0.4f);
+    radius_prob.push_back(0.1f);
+
     auto sampler = std::make_shared<KiriPoissonDiskSampling2D>();
-    sampler->InitUniSampler(radius, Vector2F(bbox.width(), bbox.height()));
+    //sampler->InitUniSampler(radius, Vector2F(bbox.width(), bbox.height()));
+    sampler->InitMultiRadiiSampler(20.f, max_radius, Vector2F(bbox.width(), bbox.height()));
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
     while (1)
     {
-        circles.clear();
-        lines.clear();
-        points.clear();
+        //auto uni_points = sampler->UniSampling(radius, Vector2F(bbox.width(), bbox.height()));
+        auto mr_points = sampler->MultiRadiiSampling(radius_range, radius_prob, Vector2F(bbox.width(), bbox.height()), 3600);
 
-        auto uni_points = sampler->UinSampling(radius, Vector2F(bbox.width(), bbox.height()));
-        for (auto i = 0; i < uni_points.size(); i++)
+        if (++counter % 10 == 0)
         {
-            auto pos = uni_points[i];
-            if (boundary.FindRegion(pos) < 0.f)
-                circles.emplace_back(KiriCircle2(pos + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, radius / 2.f));
+            circles.clear();
+            lines.clear();
+            points.clear();
+
+            // for (auto i = 0; i < uni_points.size(); i++)
+            // {
+            //     auto pos = uni_points[i];
+            //     if (boundary.FindRegion(pos) < 0.f)
+            //         circles.emplace_back(KiriCircle2(pos + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, radius / 2.f));
+            // }
+
+            for (auto i = 0; i < mr_points.size(); i++)
+            {
+                auto pos = Vector2F(mr_points[i].x, mr_points[i].y);
+                if (boundary.FindRegion(pos) < 0.f)
+                    circles.emplace_back(KiriCircle2(pos + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, mr_points[i].z / 2.f));
+            }
+
+            scene->AddLines(lines);
+            scene->AddParticles(points);
+            scene->AddCircles(circles);
+            scene->AddObject(boundary);
+
+            renderer->DrawCanvas();
+            renderer->SaveImages2File();
+
+            KIRI_LOG_DEBUG("sampling iterate idx:{0}", counter);
+            ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(counter), circles);
+
+            // cv::imshow("KIRI2D: Poisson Disk Sampling", renderer->GetCanvas());
+            // cv::waitKey(5);
+
+            renderer->ClearCanvas();
+            scene->Clear();
         }
-
-        scene->AddLines(lines);
-        scene->AddParticles(points);
-        scene->AddCircles(circles);
-        scene->AddObject(boundary);
-
-        renderer->DrawCanvas();
-
-        cv::imshow("KIRI2D:Uni Poisson Disk Sampling", renderer->GetCanvas());
-        cv::waitKey(5);
-
-        renderer->ClearCanvas();
-        scene->Clear();
     }
 }
-int main()
+int main1()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();

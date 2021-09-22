@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-09-03 09:27:54
- * @LastEditTime: 2021-09-14 13:25:38
+ * @LastEditTime: 2021-09-22 17:09:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
@@ -226,13 +226,13 @@ void MRDEM_SetupParams()
     CUDA_DEM_PARAMS.young = 1e9f;
     CUDA_DEM_PARAMS.poisson = 0.3f;
     CUDA_DEM_PARAMS.tan_friction_angle = 0.5f;
-    CUDA_DEM_PARAMS.c0 = 100.f;
+    CUDA_DEM_PARAMS.c0 = 0.f;
 
     CUDA_DEM_PARAMS.gravity = make_float2(0.0f, -9.8f);
 
     CUDA_DEM_PARAMS.damping = 0.4f;
     //CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
-    CUDA_DEM_PARAMS.dt = 1e-4f;
+    CUDA_DEM_PARAMS.dt = 5e-5f;
 
     // scene data
     CUDA_BOUNDARY_PARAMS.lowest_point = cuda_lowest_point;
@@ -243,7 +243,7 @@ void MRDEM_SetupParams()
     // volume sampling
     auto volumeEmitter = std::make_shared<CudaVolumeEmitter>();
     DemShapeVolumeData volumeData;
-    auto shape = LoadCSVFile2ShapeSamplers("bunny_samplers_0701.csv");
+    auto shape = LoadCSVFile2ShapeSamplers("bunny_samplers_1800.csv");
     volumeEmitter->BuildMRDemShapeVolume(
         volumeData,
         CUDA_DEM_PARAMS.rest_density,
@@ -251,7 +251,7 @@ void MRDEM_SetupParams()
         make_float3(0.88f, 0.79552f, 0.5984f),
         make_float2(0.1f, 0.f));
 
-    KIRI_LOG_DEBUG("max radius={0}, max radius={1}", volumeData.maxRadius, volumeData.minRadius);
+    KIRI_LOG_DEBUG("max radius={0}, min radius={1}", volumeData.maxRadius, volumeData.minRadius);
     CUDA_DEM_PARAMS.kernel_radius = 4.f * volumeData.maxRadius;
     CUDA_DEM_APP_PARAMS.max_num = volumeData.pos.size();
     CUDA_BOUNDARY_PARAMS.kernel_radius = CUDA_DEM_PARAMS.kernel_radius;
@@ -402,7 +402,7 @@ void UpdateRealTime()
     UpdateScene(circles);
 }
 
-void main1()
+void main()
 {
     KiriLog::Init();
 

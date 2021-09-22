@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-03-19 22:04:26
- * @LastEditTime: 2021-09-13 21:46:28
+ * @LastEditTime: 2021-09-22 17:05:06
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\emitter\cuda_volume_emitter.cpp
@@ -98,10 +98,10 @@ namespace KIRI
         data.maxRadius = Tiny<float>();
         for (size_t i = 0; i < shape.size(); i++)
         {
-            auto radius = shape[i].z / 30.f;
+            auto radius = shape[i].z / 3000.f;
             auto mass = density * std::powf(radius * 2.f, 2.f);
 
-            data.pos.emplace_back(make_float2(shape[i].x, shape[i].y) / 30.f + offset);
+            data.pos.emplace_back(make_float2(shape[i].x, shape[i].y) / 3000.f + offset);
             data.col.emplace_back(color);
             data.radius.emplace_back(radius);
             data.mass.emplace_back(mass);
