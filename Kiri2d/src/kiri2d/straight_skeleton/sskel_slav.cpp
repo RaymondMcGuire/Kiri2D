@@ -22,17 +22,19 @@ namespace KIRI2D::SSKEL
             if (edgeEvent->GetVertA()->prev == edgeEvent->GetVertB()->next.lock())
             {
 
-                //mLAVMaps[lav->GetId()] = nullptr;
-                mLAVMaps.erase(lav->GetId());
-
                 auto x = lav->GetHead();
                 auto len = lav->Length();
                 for (size_t i = 0; i < len; i++)
                 {
+                    if (x == nullptr)
+                        break;
+
                     sinks.emplace_back(x->GetPoint());
                     x->SetInValid();
                     x = x->next.lock();
                 }
+
+                mLAVMaps.erase(lav->GetId());
 
                 // //todo remove lav
                 // if (head != nullptr)
@@ -101,6 +103,9 @@ namespace KIRI2D::SSKEL
             auto len = _lav.second->Length();
             for (size_t i = 0; i < len; i++)
             {
+                if (x == nullptr)
+                    break;
+
                 auto edge_left = x->GetLeftEdge();
                 auto edge_left_dir = (Vector2F(edge_left.z, edge_left.w) - Vector2F(edge_left.x, edge_left.y)).normalized();
                 auto edge_right = x->GetRightEdge();

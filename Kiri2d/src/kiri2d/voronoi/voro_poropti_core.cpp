@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-04 21:28:56
+ * @LastEditTime: 2021-10-05 01:41:40
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -188,8 +188,8 @@ namespace KIRI
     void KiriVoroPoroOptiCore::AdaptPositionsWeights()
     {
         auto outside = mPowerDiagram->Move2CentroidDisableSite();
-        // if (outside)
-        //     CorrectWeights();
+        if (outside)
+            CorrectWeights();
     }
 
     float KiriVoroPoroOptiCore::GetGlobalAreaError()
@@ -216,7 +216,8 @@ namespace KIRI
 
         if (mGlobalErrorArray.size() > entityNum)
         {
-            bool isAddVoroSite = false;
+            bool bAddVoroSite = false;
+            Vector<KiriVoroSitePtr> newVoroArrays;
             Vector<float> errorArray(mGlobalErrorArray.end() - entityNum, mGlobalErrorArray.end());
             auto line = LineFitLeastSquares(errorArray);
             //KIRI_LOG_DEBUG("line k ={0}", line.x);
@@ -259,9 +260,9 @@ namespace KIRI
                             std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
                             nSite->SetRadius(pcdis(gen));
-                            AddSite(nSite);
+                            newVoroArrays.emplace_back(nSite);
 
-                            isAddVoroSite = true;
+                            bAddVoroSite = true;
                         }
                     }
                     else
@@ -278,8 +279,11 @@ namespace KIRI
             if (!removeVoroIdxs.empty())
                 mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
 
-            // if (isAddVoroSite)
-            //     mPowerDiagram->ResetVoroSitesWeight();
+            for (size_t i = 0; i < newVoroArrays.size(); i++)
+                AddSite(newVoroArrays[i]);
+
+            if (bAddVoroSite)
+                mPowerDiagram->ResetVoroSitesWeight();
         }
     }
 

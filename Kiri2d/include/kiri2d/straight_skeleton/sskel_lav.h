@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-10-04 20:54:32
+ * @LastEditTime: 2021-10-05 02:30:36
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_lav.h
@@ -31,14 +31,16 @@ namespace KIRI2D::SSKEL
             mHead = head;
             if (mHead != nullptr)
             {
+                //FIXME
                 auto x = mHead;
+                auto head_point = mHead->GetPoint();
                 do
                 {
                     mCounter++;
                     x->SetLAVId(id);
-                    // KIRI_LOG_DEBUG("vertex={0},{1};head={0},{1}", x->GetPoint().x, x->GetPoint().y, mHead->GetPoint().x, mHead->GetPoint().y);
+                    //KIRI_LOG_DEBUG("vertex={0},{1};head={0},{1}", x->GetPoint().x, x->GetPoint().y, mHead->GetPoint().x, mHead->GetPoint().y);
                     x = x->next.lock();
-                } while (x != mHead);
+                } while ((x->GetPoint() - head_point).length() > MEpsilon<float>());
             }
         }
 
