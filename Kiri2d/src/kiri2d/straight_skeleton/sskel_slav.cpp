@@ -19,28 +19,41 @@ namespace KIRI2D::SSKEL
         auto lav = mLAVMaps[edgeEvent->GetVertA()->GetLAVId()];
         if (lav != nullptr)
         {
-
             if (edgeEvent->GetVertA()->prev == edgeEvent->GetVertB()->next.lock())
             {
 
                 //mLAVMaps[lav->GetId()] = nullptr;
                 mLAVMaps.erase(lav->GetId());
 
-                auto head = lav->GetHead();
-
-                //todo remove lav
-                if (head != nullptr)
+                auto x = lav->GetHead();
+                auto len = lav->Length();
+                for (size_t i = 0; i < len; i++)
                 {
-
-                    auto x = head;
-                    do
-                    {
-                        sinks.emplace_back(x->GetPoint());
-                        x->SetInValid();
-                        x = x->next.lock();
-
-                    } while (x != head && x != nullptr);
+                    sinks.emplace_back(x->GetPoint());
+                    x->SetInValid();
+                    x = x->next.lock();
                 }
+
+                // //todo remove lav
+                // if (head != nullptr)
+                // {
+                //     // KIRI_LOG_DEBUG("-----Edge-----");
+                //     // lav->PrintSSkelLAV();
+                //     auto x = head;
+                //     do
+                //     {
+
+                //         sinks.emplace_back(x->GetPoint());
+                //         x->SetInValid();
+                //         x = x->next.lock();
+
+                //         if (x == head)
+                //         {
+                //             KIRI_LOG_DEBUG("-----x==head-----");
+                //             x->Print();
+                //         }
+                //     } while (x != head);
+                // }
             }
             else
             {
@@ -84,49 +97,91 @@ namespace KIRI2D::SSKEL
             if (_lav.second == nullptr)
                 continue;
 
-            auto head = _lav.second->GetHead();
-            if (head != nullptr)
+            auto x = _lav.second->GetHead();
+            auto len = _lav.second->Length();
+            for (size_t i = 0; i < len; i++)
             {
-
-                auto x = head;
-                do
+                auto edge_left = x->GetLeftEdge();
+                auto edge_left_dir = (Vector2F(edge_left.z, edge_left.w) - Vector2F(edge_left.x, edge_left.y)).normalized();
+                auto edge_right = x->GetRightEdge();
+                auto edge_right_dir = (Vector2F(edge_right.z, edge_right.w) - Vector2F(edge_right.x, edge_right.y)).normalized();
+                if ((opposite_edge_dir == edge_left_dir) && (Vector2F(edge_left.x, edge_left.y) == Vector2F(opposite_edge.x, opposite_edge.y)))
                 {
+                    right_vertex = x;
+                    left_vertex = x->prev;
+                }
+                else if ((opposite_edge_dir == edge_right_dir) && (Vector2F(edge_right.x, edge_right.y) == Vector2F(opposite_edge.x, opposite_edge.y)))
+                {
+                    left_vertex = x;
+                    right_vertex = x->next.lock();
+                }
 
-                    auto edge_left = x->GetLeftEdge();
-                    auto edge_left_dir = (Vector2F(edge_left.z, edge_left.w) - Vector2F(edge_left.x, edge_left.y)).normalized();
-                    auto edge_right = x->GetRightEdge();
-                    auto edge_right_dir = (Vector2F(edge_right.z, edge_right.w) - Vector2F(edge_right.x, edge_right.y)).normalized();
-                    if ((opposite_edge_dir == edge_left_dir) && (Vector2F(edge_left.x, edge_left.y) == Vector2F(opposite_edge.x, opposite_edge.y)))
+                if (right_vertex != nullptr)
+                {
+                    auto left_bi_norm = Vector2F(left_vertex->GetBisector().z, left_vertex->GetBisector().w).normalized();
+                    auto right_bi_norm = Vector2F(right_vertex->GetBisector().z, right_vertex->GetBisector().w).normalized();
+                    auto x_left = left_bi_norm.cross((splitEvent->GetIntersectPoint() - left_vertex->GetPoint()).normalized()) > -MEpsilon<float>();
+                    auto x_right = right_bi_norm.cross((splitEvent->GetIntersectPoint() - right_vertex->GetPoint()).normalized()) < MEpsilon<float>();
+
+                    if (x_left && x_right)
+                        break;
+                    else
                     {
-                        right_vertex = x;
-                        left_vertex = x->prev;
+                        left_vertex = nullptr;
+                        right_vertex = nullptr;
                     }
-                    else if ((opposite_edge_dir == edge_right_dir) && (Vector2F(edge_right.x, edge_right.y) == Vector2F(opposite_edge.x, opposite_edge.y)))
-                    {
-                        left_vertex = x;
-                        right_vertex = x->next.lock();
-                    }
+                }
 
-                    if (right_vertex != nullptr)
-                    {
-                        auto left_bi_norm = Vector2F(left_vertex->GetBisector().z, left_vertex->GetBisector().w).normalized();
-                        auto right_bi_norm = Vector2F(right_vertex->GetBisector().z, right_vertex->GetBisector().w).normalized();
-                        auto x_left = left_bi_norm.cross((splitEvent->GetIntersectPoint() - left_vertex->GetPoint()).normalized()) > -MEpsilon<float>();
-                        auto x_right = right_bi_norm.cross((splitEvent->GetIntersectPoint() - right_vertex->GetPoint()).normalized()) < MEpsilon<float>();
-
-                        if (x_left && x_right)
-                            break;
-                        else
-                        {
-                            left_vertex = nullptr;
-                            right_vertex = nullptr;
-                        }
-                    }
-
-                    x = x->next.lock();
-
-                } while (x != head && x != nullptr);
+                x = x->next.lock();
             }
+
+            // auto head = _lav.second->GetHead();
+            // if (head != nullptr)
+            // {
+            //     // KIRI_LOG_DEBUG("-----Split-----");
+            //     // _lav.second->PrintSSkelLAV();
+            //     auto x = head;
+            //     do
+            //     {
+            //         auto edge_left = x->GetLeftEdge();
+            //         auto edge_left_dir = (Vector2F(edge_left.z, edge_left.w) - Vector2F(edge_left.x, edge_left.y)).normalized();
+            //         auto edge_right = x->GetRightEdge();
+            //         auto edge_right_dir = (Vector2F(edge_right.z, edge_right.w) - Vector2F(edge_right.x, edge_right.y)).normalized();
+            //         if ((opposite_edge_dir == edge_left_dir) && (Vector2F(edge_left.x, edge_left.y) == Vector2F(opposite_edge.x, opposite_edge.y)))
+            //         {
+            //             right_vertex = x;
+            //             left_vertex = x->prev;
+            //         }
+            //         else if ((opposite_edge_dir == edge_right_dir) && (Vector2F(edge_right.x, edge_right.y) == Vector2F(opposite_edge.x, opposite_edge.y)))
+            //         {
+            //             left_vertex = x;
+            //             right_vertex = x->next.lock();
+            //         }
+
+            //         if (right_vertex != nullptr)
+            //         {
+            //             auto left_bi_norm = Vector2F(left_vertex->GetBisector().z, left_vertex->GetBisector().w).normalized();
+            //             auto right_bi_norm = Vector2F(right_vertex->GetBisector().z, right_vertex->GetBisector().w).normalized();
+            //             auto x_left = left_bi_norm.cross((splitEvent->GetIntersectPoint() - left_vertex->GetPoint()).normalized()) > -MEpsilon<float>();
+            //             auto x_right = right_bi_norm.cross((splitEvent->GetIntersectPoint() - right_vertex->GetPoint()).normalized()) < MEpsilon<float>();
+
+            //             if (x_left && x_right)
+            //                 break;
+            //             else
+            //             {
+            //                 left_vertex = nullptr;
+            //                 right_vertex = nullptr;
+            //             }
+            //         }
+
+            //         x = x->next.lock();
+            //         if (x == head)
+            //         {
+            //             KIRI_LOG_DEBUG("-----x==head-----");
+            //             x->Print();
+            //         }
+            //     } while (x != head);
+            //}
         }
 
         if (right_vertex == nullptr)
@@ -192,12 +247,21 @@ namespace KIRI2D::SSKEL
 
                 if (elem_lav_head != nullptr)
                 {
+
+                    auto len = elem_lav->Length();
                     auto x = elem_lav_head;
-                    do
+                    for (size_t i = 0; i < len; i++)
                     {
                         x->SetInValid();
                         x = x->next.lock();
-                    } while (x != elem_lav_head && x != nullptr);
+                    }
+
+                    // auto x = elem_lav_head;
+                    // do
+                    // {
+                    //     x->SetInValid();
+                    //     x = x->next.lock();
+                    // } while (x != elem_lav_head && x != nullptr);
                 }
             }
         }

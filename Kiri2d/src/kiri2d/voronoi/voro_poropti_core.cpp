@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-04 18:00:02
+ * @LastEditTime: 2021-10-04 21:28:56
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -120,6 +120,7 @@ namespace KIRI
 
     void KiriVoroPoroOptiCore::Reset()
     {
+        mCurIteration = 0;
         mCompleteArea = 0.f;
         mVoroSitesWeightError.clear();
         mVoroSitesWeightAbsError.clear();
@@ -277,8 +278,8 @@ namespace KIRI
             if (!removeVoroIdxs.empty())
                 mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
 
-            if (isAddVoroSite)
-                mPowerDiagram->ResetVoroSitesWeight();
+            // if (isAddVoroSite)
+            //     mPowerDiagram->ResetVoroSitesWeight();
         }
     }
 
@@ -380,9 +381,10 @@ namespace KIRI
                     }
                     else
                     {
-                        mVoroSitesWeightError[i] += distance * distance - siteI->GetWeight();
-                        mVoroSitesWeightAbsError[i] += std::abs(distance * distance - siteI->GetWeight());
-                        mCurGlobalWeightError += std::abs(distance * distance - siteI->GetWeight());
+                        auto pw = (distance * distance - siteI->GetWeight());
+                        mVoroSitesWeightError[i] += pw;
+                        mVoroSitesWeightAbsError[i] += std::abs(pw);
+                        mCurGlobalWeightError += std::abs(pw);
                     }
                 }
             }
@@ -419,6 +421,7 @@ namespace KIRI
 
     float KiriVoroPoroOptiCore::Iterate()
     {
+        mCurIteration++;
         DynamicAddSites();
         AdaptPositionsWeights();
         AdaptWeights();

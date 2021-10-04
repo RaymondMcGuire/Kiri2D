@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 11:03:44
- * @LastEditTime: 2021-10-04 13:42:35
+ * @LastEditTime: 2021-10-04 21:35:51
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\sskel_lav.cpp
@@ -42,7 +42,7 @@ namespace KIRI2D::SSKEL
             {
                 x->Print();
                 x = x->next.lock();
-            } while (x != mHead && x != nullptr);
+            } while (x != mHead);
         }
 
         KIRI_LOG_DEBUG("--------------------------------------");
@@ -68,7 +68,7 @@ namespace KIRI2D::SSKEL
                 edges.emplace_back(edge);
 
                 x = x->next.lock();
-            } while (x != mHead && x != nullptr);
+            } while (x != mHead);
         }
         return edges;
     }
@@ -270,7 +270,7 @@ namespace KIRI2D::SSKEL
                     events.emplace_back(edge_event);
 
                 x = x->next.lock();
-            } while (x != mHead && x != nullptr);
+            } while (x != mHead);
         }
 
         return events;

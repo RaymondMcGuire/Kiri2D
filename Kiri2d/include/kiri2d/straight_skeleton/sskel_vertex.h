@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-10-04 17:14:49
+ * @LastEditTime: 2021-10-04 20:21:33
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_vertex.h
@@ -63,10 +63,12 @@ namespace KIRI2D::SSKEL
 
         void Print()
         {
-            KIRI_LOG_DEBUG("left edge=({0},{1})--({2},{3}),right edge=({4},{5})--({6},{7}),mIsReflex={8},bisector_end=({9},{10}),point={11},{12}",
-                           mLeftEdge.x, mLeftEdge.y, mLeftEdge.z, mLeftEdge.w,
-                           mRightEdge.x, mRightEdge.y, mRightEdge.z, mRightEdge.w,
-                           mIsReflex, mBisector.z, mBisector.w, mPoint.x, mPoint.y);
+            // KIRI_LOG_DEBUG("left edge=({0},{1})--({2},{3}),right edge=({4},{5})--({6},{7}),mIsReflex={8},bisector_end=({9},{10}),point={11},{12}",
+            //                mLeftEdge.x, mLeftEdge.y, mLeftEdge.z, mLeftEdge.w,
+            //                mRightEdge.x, mRightEdge.y, mRightEdge.z, mRightEdge.w,
+            //                mIsReflex, mBisector.z, mBisector.w, mPoint.x, mPoint.y);
+
+            KIRI_LOG_DEBUG("point={0},{1}", mPoint.x, mPoint.y);
         }
 
     private:

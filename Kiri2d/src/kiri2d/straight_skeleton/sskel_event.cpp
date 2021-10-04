@@ -1,10 +1,10 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 11:03:44
- * @LastEditTime: 2021-07-22 11:05:03
+ * @LastEditTime: 2021-10-04 20:19:32
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\straight_skeleton.cpp
+ * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\sskel_event.cpp
  */
 
 #include <kiri2d/straight_skeleton/sskel_event.h>
