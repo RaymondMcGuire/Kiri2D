@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-08-02 13:35:45
+ * @LastEditTime: 2021-10-04 11:13:43
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
@@ -20,11 +20,9 @@ namespace KIRI
     class KiriVoroPoroOpti
     {
     public:
-        explicit KiriVoroPoroOpti(
-            float targetPorosity = 0.f)
-            : mTargetPorosity(targetPorosity)
+        explicit KiriVoroPoroOpti()
         {
-            mRootCore = std::make_shared<KiriVoroPoroOptiCore>(targetPorosity);
+            mRootCore = std::make_shared<KiriVoroPoroOptiCore>();
             mRootBoundary = std::make_shared<KiriVoroCellPolygon2>();
         }
 
@@ -39,13 +37,7 @@ namespace KIRI
 
         const KiriVoroPoroOptiCorePtr &GetRootCore() const { return mRootCore; }
         const KiriVoroCellPolygon2Ptr &GetRootBoundary() const { return mRootBoundary; }
-        float GetMiniumPorosity()
-        {
-            if (mTargetPorosity == 0.f)
-                return mRootCore->ComputeMiniumPorosity();
-            else
-                return mRootCore->GetMiniumPorosity();
-        }
+        float GetMiniumPorosity() { return mRootCore->ComputeMiniumPorosity(); }
         Vector<Vector4F> GetCellSSkel() { return mRootCore->GetCellSSkel(); }
         Vector<Vector4F> GetMICBySSkel() { return mRootCore->GetMICBySSkel(); }
 
@@ -78,7 +70,6 @@ namespace KIRI
         }
 
     private:
-        float mTargetPorosity;
         UInt mMaxDepth = 0;
         KiriVoroCellPolygon2Ptr mRootBoundary;
         KiriVoroPoroOptiCorePtr mRootCore;

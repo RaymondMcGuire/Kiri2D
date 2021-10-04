@@ -19,6 +19,7 @@ namespace KIRI2D::SSKEL
         auto lav = mLAVMaps[edgeEvent->GetVertA()->GetLAVId()];
         if (lav != nullptr)
         {
+
             if (edgeEvent->GetVertA()->prev == edgeEvent->GetVertB()->next.lock())
             {
 
@@ -26,20 +27,24 @@ namespace KIRI2D::SSKEL
                 mLAVMaps.erase(lav->GetId());
 
                 auto head = lav->GetHead();
+
                 //todo remove lav
-                if (head != NULL)
+                if (head != nullptr)
                 {
+
                     auto x = head;
                     do
                     {
                         sinks.emplace_back(x->GetPoint());
                         x->SetInValid();
                         x = x->next.lock();
-                    } while (x != head);
+
+                    } while (x != head && x != nullptr);
                 }
             }
             else
             {
+
                 // edgeEvent->Print();
                 auto new_vertex = lav->Unify(edgeEvent->GetVertA(), edgeEvent->GetVertB(), edgeEvent->GetIntersectPoint());
                 sinks.emplace_back(edgeEvent->GetVertA()->GetPoint());
@@ -49,7 +54,7 @@ namespace KIRI2D::SSKEL
                     lav->SetHead(new_vertex);
 
                 auto new_event = lav->GenEventByVertex(new_vertex, mEdges);
-                if (new_event != NULL)
+                if (new_event != nullptr)
                     events.emplace_back(new_event);
             }
         }
@@ -67,8 +72,6 @@ namespace KIRI2D::SSKEL
     {
         Vec_Vec2F sinks;
         Vector<SSkelEventPtr> events;
-
-        //KIRI_LOG_DEBUG("split event={0},{1}", splitEvent->GetVert()->GetPoint().x, splitEvent->GetVert()->GetPoint().y);
         sinks.emplace_back(splitEvent->GetVert()->GetPoint());
 
         auto opposite_edge = splitEvent->GetOppositeEdge();
@@ -82,11 +85,13 @@ namespace KIRI2D::SSKEL
                 continue;
 
             auto head = _lav.second->GetHead();
-            if (head != NULL)
+            if (head != nullptr)
             {
+
                 auto x = head;
                 do
                 {
+
                     auto edge_left = x->GetLeftEdge();
                     auto edge_left_dir = (Vector2F(edge_left.z, edge_left.w) - Vector2F(edge_left.x, edge_left.y)).normalized();
                     auto edge_right = x->GetRightEdge();
@@ -119,7 +124,8 @@ namespace KIRI2D::SSKEL
                     }
 
                     x = x->next.lock();
-                } while (x != head);
+
+                } while (x != head && x != nullptr);
             }
         }
 
@@ -184,14 +190,14 @@ namespace KIRI2D::SSKEL
             {
                 sinks.emplace_back(elem_lav_head->next.lock()->GetPoint());
 
-                if (elem_lav_head != NULL)
+                if (elem_lav_head != nullptr)
                 {
                     auto x = elem_lav_head;
                     do
                     {
                         x->SetInValid();
                         x = x->next.lock();
-                    } while (x != elem_lav_head);
+                    } while (x != elem_lav_head && x != nullptr);
                 }
             }
         }
@@ -201,7 +207,7 @@ namespace KIRI2D::SSKEL
             auto vert_lav_id = event_vertices[i]->GetLAVId();
             auto new_event = mLAVMaps[vert_lav_id]->GenEventByVertex(event_vertices[i], mEdges);
 
-            if (new_event != NULL)
+            if (new_event != nullptr)
                 events.emplace_back(new_event);
         }
 
@@ -216,8 +222,10 @@ namespace KIRI2D::SSKEL
     void SSkelSLAV::HandleEvents()
     {
         //KIRI_LOG_DEBUG("-------------HandleEvents------------");
+
         while (!(mPriorityQueue.empty() || mLAVMaps.empty()))
         {
+
             auto event = mPriorityQueue.top();
             mPriorityQueue.pop();
             //event->Print();
@@ -225,6 +233,7 @@ namespace KIRI2D::SSKEL
             Vector<SSkelEventPtr> new_events;
             if (IsInstanceOf<SSkelEdgeEvent>(event))
             {
+
                 auto edge_event = std::dynamic_pointer_cast<SSkelEdgeEvent>(event);
 
                 if (!edge_event->GetVertA()->GetIsValid() || !edge_event->GetVertB()->GetIsValid())
@@ -235,6 +244,7 @@ namespace KIRI2D::SSKEL
             }
             else if (IsInstanceOf<SSkelSplitEvent>(event))
             {
+
                 auto split_event = std::dynamic_pointer_cast<SSkelSplitEvent>(event);
 
                 if (!split_event->GetVert()->GetIsValid())

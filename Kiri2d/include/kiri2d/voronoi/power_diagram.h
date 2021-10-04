@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-09-14 15:20:31
+ * @LastEditTime: 2021-10-04 11:19:20
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
@@ -56,6 +56,7 @@ namespace KIRI
         void PrintVoroSites();
 
         void Reset();
+        void ResetVoroSitesWeight();
 
         void ReGenVoroSites();
 

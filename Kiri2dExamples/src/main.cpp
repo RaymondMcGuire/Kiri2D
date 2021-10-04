@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-09-26 16:16:39
+ * @LastEditTime: 2021-10-04 18:00:31
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1119,156 +1119,6 @@ void VoroPorosityOptimizeConvexExample()
     }
 }
 
-void VoroPorosityOptimizeBunnyExample()
-{
-    // scene renderer config
-    float windowheight = 5000.f;
-    float windowwidth = 5000.f;
-
-    // voronoi
-    float width = 3000.f;
-    float height = 3000.f;
-    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
-
-    // auto PI = 3.141592653f;
-    // auto numPoints = 8;
-    // auto radius = 2000.f;
-
-    // Vector<Vector2F> boundary;
-    // for (auto j = 0; j < numPoints; j++)
-    // {
-    //     auto angle = 2.0 * PI * (j * 1.f / numPoints);
-    //     auto rotate = 2.0 * PI / numPoints / 2;
-    //     auto y = std::sin(angle + rotate) * radius;
-    //     auto x = std::cos(angle + rotate) * radius;
-    //     auto pos = Vector2F(x, y) + Vector2F(width / 2, height / 2);
-
-    //     boundary.emplace_back(pos);
-    // }
-
-    Vector<Vector2F> bunny2d;
-    size_t bunnyNum;
-    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
-
-    Vector<Vector2F> boundary;
-
-    for (size_t i = 0; i < bunny2d.size(); i++)
-    {
-        auto newPos = bunny2d[i] * 4000.f + Vector2F(-width / 2.f, height / 5.f);
-        boundary.emplace_back(Transform2Original(Vector2F(newPos), height) + offsetVec2);
-    }
-
-    auto target_porosity = 0.f;
-    auto epsilon = 0.001f;
-    auto opti = std::make_shared<KiriVoroPoroOpti>(target_porosity);
-    opti->SetRootBoundary2(boundary);
-    opti->GenExample(width, height);
-
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
-
-    Vector<float> errorArray, porosityArray, radiusErrorArray;
-    Vector<Vector4F> lastMaxCircle;
-    auto minRadius = Huge<float>();
-    auto maxRadius = Tiny<float>();
-    for (size_t i = 0; i < 1500; i++)
-    {
-
-        auto error = opti->ComputeIterate();
-        auto cur_porosity = opti->GetMiniumPorosity();
-
-        if ((i % 10 == 1) || (abs(cur_porosity - target_porosity) < epsilon))
-        {
-            Vector<KiriPoint2> points;
-            Vector<KiriLine2> lines;
-            Vector<KiriCircle2> circles;
-
-            auto sites = opti->GetLeafNodeSites();
-            for (size_t i = 0; i < sites.size(); i++)
-            {
-                //sites[i]->Print();
-                auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
-                points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
-                auto poly = sites[i]->GetCellPolygon();
-                if (poly != NULL)
-                {
-                    poly->ComputeVoroSitesList();
-                    auto list = poly->GetVoroSitesList();
-                    // list->PrintVertexList();
-
-                    auto node = list->GetHead();
-                    do
-                    {
-                        auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
-
-                        node = node->next;
-                        auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
-                        auto line = KiriLine2(start, end);
-                        line.thick = 5.f;
-                        lines.emplace_back(line);
-                    } while (node != list->GetHead());
-                }
-            }
-
-            auto maxIC = opti->GetMICBySSkel();
-            lastMaxCircle = maxIC;
-
-            auto porosity = opti->GetMiniumPorosity();
-            porosityArray.emplace_back(porosity);
-
-            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
-
-            auto radiusError = 0.f;
-            for (size_t i = 0; i < maxIC.size(); i++)
-            {
-                auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
-                circles.emplace_back(maxCir2);
-                //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
-                radiusError += std::abs(maxIC[i].z - maxIC[i].w);
-
-                minRadius = std::min(minRadius, maxIC[i].z);
-                maxRadius = std::max(maxRadius, maxIC[i].z);
-            }
-
-            errorArray.emplace_back(error / maxIC.size());
-            radiusErrorArray.emplace_back(radiusError / maxIC.size());
-
-            // re-color
-            for (size_t i = 0; i < maxIC.size(); i++)
-            {
-                auto rad = (maxIC[i].z - minRadius) / (maxRadius - minRadius);
-                const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
-                circles[i].col = Vector3F(color.r(), color.g(), color.b());
-            }
-
-            scene->AddParticles(points);
-            scene->AddCircles(circles);
-            scene->AddLines(lines);
-
-            renderer->DrawCanvas();
-            renderer->SaveImages2File();
-
-            renderer->ClearCanvas();
-            scene->Clear();
-
-            if (abs(cur_porosity - target_porosity) < epsilon)
-            {
-                KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, diff={2}", i, cur_porosity, abs(cur_porosity - target_porosity));
-                break;
-            }
-        }
-
-        if (i % 100 == 1)
-        {
-            ExportPoroityData2CSVFile("bunny", UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
-        }
-    }
-
-    auto sites_data = opti->GetVoronoiSitesData();
-    ExportVoronoiData2CSVFile("bunny", "1500", sites_data);
-}
-
 void VoroPorosityTreemapOptiExample()
 {
     float height = 1080.f;
@@ -1492,8 +1342,8 @@ void VoroPorosityOptimizeScaleExample()
     // iter
     auto maxIter = 3000;
     String boundaryFileName = "cheburashka";
-    String filePath = "D:/project/Kiri2D/scripts/alphashape/" + boundaryFileName + ".xy";
-    //String filePath = "E:/PBCGLab/project/Kiri2D/scripts/alphashape/" + boundaryFileName + ".xy";
+    String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
+
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
     load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
@@ -1508,9 +1358,8 @@ void VoroPorosityOptimizeScaleExample()
         boundary.emplace_back(newPos);
     }
 
-    auto target_porosity = 0.f;
     auto epsilon = 0.001f;
-    auto opti = std::make_shared<KiriVoroPoroOpti>(target_porosity);
+    auto opti = std::make_shared<KiriVoroPoroOpti>();
     opti->SetRootBoundary2(boundary);
     opti->GenExample(width, height);
 
@@ -1610,12 +1459,6 @@ void VoroPorosityOptimizeScaleExample()
 
             renderer->ClearCanvas();
             scene->Clear();
-
-            if (abs(cur_porosity - target_porosity) < epsilon)
-            {
-                KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, diff={2}", i, cur_porosity, abs(cur_porosity - target_porosity));
-                break;
-            }
         }
 
         if ((i % 100 == 1) || (i == maxIter - 1))
@@ -1977,7 +1820,7 @@ void UniPoissonDiskSampler()
         }
     }
 }
-int main1()
+int main()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();
@@ -2000,9 +1843,10 @@ int main1()
 
     //VoroPorosityOptimizeConvexExample();
     //VoroPorosityOptimizeBunnyExample();
-    //VoroPorosityOptimizeScaleExample();
 
-    UniPoissonDiskSampler();
+    VoroPorosityOptimizeScaleExample();
+
+    //UniPoissonDiskSampler();
 
     //LoadVoronoiExample();
     return 0;

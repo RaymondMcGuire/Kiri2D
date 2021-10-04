@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-07-27 18:48:32
+ * @LastEditTime: 2021-10-04 11:24:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -20,10 +20,7 @@ namespace KIRI
     class KiriVoroPoroOptiCore
     {
     public:
-        explicit KiriVoroPoroOptiCore(
-            float targetPorosity = 0.f)
-            : mTargetPorosity(targetPorosity),
-              mCurrentPorosity(0.f)
+        explicit KiriVoroPoroOptiCore()
         {
             Reset();
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
@@ -43,7 +40,6 @@ namespace KIRI
 
         constexpr UInt GetMaxIterationNum() const { return mMaxIterationNum; }
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
-        constexpr float GetMiniumPorosity() const { return mCurrentPorosity; }
 
         void Init();
 
@@ -79,8 +75,6 @@ namespace KIRI
 
         Vector<float> mGlobalErrorArray;
 
-        float mTargetPorosity;
-        float mCurrentPorosity;
         float mErrorThreshold;
         UInt mCurIteration, mMaxIterationNum;
     };

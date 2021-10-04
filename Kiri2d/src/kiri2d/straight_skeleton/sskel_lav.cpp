@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 11:03:44
- * @LastEditTime: 2021-07-27 19:46:46
+ * @LastEditTime: 2021-10-04 13:42:35
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\sskel_lav.cpp
@@ -13,7 +13,7 @@ namespace KIRI2D::SSKEL
 {
     void SSkelLAV::Push(const SSkelVertexPtr &x)
     {
-        if (mHead == NULL)
+        if (mHead == nullptr)
         {
             mHead = x;
             mHead->next = mHead->prev = mHead;
@@ -35,14 +35,14 @@ namespace KIRI2D::SSKEL
         KIRI_LOG_DEBUG("----------SSkelLAV----------");
         KIRI_LOG_DEBUG("LAV list number={0}", this->Length());
 
-        if (mHead != NULL)
+        if (mHead != nullptr)
         {
             auto x = mHead;
             do
             {
                 x->Print();
                 x = x->next.lock();
-            } while (x != mHead);
+            } while (x != mHead && x != nullptr);
         }
 
         KIRI_LOG_DEBUG("--------------------------------------");
@@ -53,7 +53,7 @@ namespace KIRI2D::SSKEL
         // edge/ bisector left/ right
         Vector<std::tuple<Vector4F, Vector4F, Vector4F>> edges;
 
-        if (mHead != NULL)
+        if (mHead != nullptr)
         {
             auto x = mHead;
             do
@@ -68,7 +68,7 @@ namespace KIRI2D::SSKEL
                 edges.emplace_back(edge);
 
                 x = x->next.lock();
-            } while (x != mHead);
+            } while (x != mHead && x != nullptr);
         }
         return edges;
     }
@@ -253,24 +253,24 @@ namespace KIRI2D::SSKEL
             return (*min);
         }
 
-        return NULL;
+        return nullptr;
     }
 
     Vector<SSkelEventPtr> SSkelLAV::GenEvents(Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
     {
         Vector<SSkelEventPtr> events;
 
-        if (mHead != NULL)
+        if (mHead != nullptr)
         {
             auto x = mHead;
             do
             {
                 auto edge_event = this->GenEventByVertex(x, originalEdges);
-                if (edge_event != NULL)
+                if (edge_event != nullptr)
                     events.emplace_back(edge_event);
 
                 x = x->next.lock();
-            } while (x != mHead);
+            } while (x != mHead && x != nullptr);
         }
 
         return events;

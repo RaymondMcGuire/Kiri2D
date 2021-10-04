@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-10-18 01:10:38
- * @LastEditTime: 2020-11-04 00:41:15
+ * @LastEditTime: 2021-10-04 11:09:56
  * @LastEditors: Xu.WANG
  * @Description: 
- * @FilePath: \Kiri\configuration\root_directory.h.in
+ * @FilePath: \Kiri2D\configuration\root_directory.h.in
  */
 #pragma once
 #ifndef _KIRI_GLOBRL_FILE_PATH_

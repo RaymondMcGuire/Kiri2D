@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-09-14 15:21:11
+ * @LastEditTime: 2021-10-04 11:21:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
@@ -75,6 +75,8 @@ namespace KIRI
             auto dy = GetValue().y - site->GetValue().y;
             return std::sqrt(dx * dx + dy * dy);
         }
+
+        void ResetWeight() { mWeight = 0.f; }
 
         void ResetValue(const Vector2F &val)
         {

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-25 17:45:40
+ * @LastEditTime: 2021-10-04 17:14:49
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_vertex.h
@@ -56,6 +56,7 @@ namespace KIRI2D::SSKEL
         Vector4F GetLeftEdge() { return mLeftEdge; }
         Vector4F GetRightEdge() { return mRightEdge; }
         Vector4F GetBisector() { return mBisector; }
+        Vector4F GetDir() { return mDir; }
 
         void SetLAVId(UInt id) { mLAVId = id; }
         void SetInValid() { mIsValid = false; }

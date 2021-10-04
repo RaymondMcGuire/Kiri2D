@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-25 19:02:22
+ * @LastEditTime: 2021-10-04 17:14:32
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_lav.h
@@ -29,16 +29,16 @@ namespace KIRI2D::SSKEL
             : mId(id)
         {
             mHead = head;
-            if (mHead != NULL)
+            if (mHead != nullptr)
             {
                 auto x = mHead;
                 do
                 {
                     mCounter++;
                     x->SetLAVId(id);
-                    //KIRI_LOG_DEBUG("vertex={0},{1}", x->GetPoint().x, x->GetPoint().y);
+                    // KIRI_LOG_DEBUG("vertex={0},{1};head={0},{1}", x->GetPoint().x, x->GetPoint().y, mHead->GetPoint().x, mHead->GetPoint().y);
                     x = x->next.lock();
-                } while (x != mHead);
+                } while (x != mHead && x != nullptr);
             }
         }
 
@@ -66,7 +66,7 @@ namespace KIRI2D::SSKEL
     private:
         UInt mId;
         UInt mCounter = 0;
-        SSkelVertexPtr mHead = NULL;
+        SSkelVertexPtr mHead = nullptr;
 
         Vector<SSkelEventPtr> GenSplitEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
     };

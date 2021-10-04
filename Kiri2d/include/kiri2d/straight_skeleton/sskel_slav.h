@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-25 19:03:55
+ * @LastEditTime: 2021-10-04 13:50:30
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_slav.h
@@ -24,6 +24,7 @@ namespace KIRI2D::SSKEL
         {
 
             auto lav_poly = std::make_shared<KIRI2D::SSKEL::SSkelLAV>(mLAVCounter++);
+
             mLAVMaps[lav_poly->GetId()] = lav_poly;
 
             auto size = poly.size();
@@ -38,6 +39,7 @@ namespace KIRI2D::SSKEL
                     curr,
                     Vector4F(curr.x, curr.y, next.x, next.y)));
             }
+
             mEdges = lav_poly->GenEdgesData();
             auto events = lav_poly->GenEvents(mEdges);
 

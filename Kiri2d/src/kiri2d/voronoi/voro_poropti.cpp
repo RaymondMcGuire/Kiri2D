@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-09-13 10:36:22
+ * @LastEditTime: 2021-10-04 11:16:26
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
@@ -55,8 +55,6 @@ namespace KIRI
                 cnt++;
             }
         }
-
-        KIRI_LOG_DEBUG("KiriVoroPoroOpti: Add mNodes");
 
         for (size_t i = 0; i < mNodes.size(); i++)
             mRootCore->AddSite(mNodes[i]->GetSite());

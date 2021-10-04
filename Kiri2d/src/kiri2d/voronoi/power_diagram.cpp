@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-09-14 15:28:44
+ * @LastEditTime: 2021-10-04 18:01:39
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -14,6 +14,13 @@
 
 namespace KIRI
 {
+
+    void KiriPowerDiagram::ResetVoroSitesWeight()
+    {
+        for (size_t i = 0; i < mVoroSites.size(); i++)
+            mVoroSites[i]->ResetWeight();
+    }
+
     void KiriPowerDiagram::RemoveVoroSitesByIndex(UInt idx)
     {
         if (!mVoroSites.empty() && idx < mVoroSites.size())
@@ -331,7 +338,6 @@ namespace KIRI
         }
 
         return false;
-        //KIRI_LOG_INFO("Compute Power Diagram Finished!!");
     }
 
     KiriVoroCellPolygon2Ptr KiriPowerDiagram::VoroCellPolygonClip(const KiriVoroCellPolygon2Ptr &vcp1, const KiriVoroCellPolygon2Ptr &vcp2)
