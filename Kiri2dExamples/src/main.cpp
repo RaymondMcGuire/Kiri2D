@@ -1977,7 +1977,7 @@ void UniPoissonDiskSampler()
         }
     }
 }
-int main()
+int main1()
 {
     KIRI::KiriLog::Init();
     //VoronoiExample();

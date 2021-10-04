@@ -402,7 +402,7 @@ void UpdateRealTime()
     UpdateScene(circles);
 }
 
-void main1()
+void main()
 {
     KiriLog::Init();
 
