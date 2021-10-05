@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-10-04 18:01:39
+ * @LastEditTime: 2021-10-05 16:15:26
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -221,10 +221,11 @@ namespace KIRI
                 else
                 {
                     outside = true;
-                    KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
-                    auto rndPos = mBoundaryPolygon2->GetRndInnerPoint();
-                    mVoroSites[j]->ResetValue(rndPos);
-                    // mVoroSites[j]->SetCellPolygon(NULL);
+                    //KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
+                    // auto rndPos = mBoundaryPolygon2->GetRndInnerPoint();
+                    // mVoroSites[j]->ResetValue(rndPos);
+                    mVoroSites[j]->SetCellPolygon(NULL);
+                    mVoroSites[j]->Disable();
                 }
             }
 
@@ -236,6 +237,7 @@ namespace KIRI
 
     bool KiriPowerDiagram::Move2CentroidDisableSite()
     {
+        Vector<UInt> removeVoroIdxs;
         bool outside = false;
         // move sites to centroid
         for (size_t j = 0; j < mVoroSites.size(); j++)
@@ -252,11 +254,15 @@ namespace KIRI
                     KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
                     mVoroSites[j]->SetCellPolygon(NULL);
                     mVoroSites[j]->Disable();
+                    removeVoroIdxs.emplace_back(mVoroSites[j]->GetIdx());
                 }
             }
 
             //KIRI_LOG_DEBUG("voro site idx={0}, value=({1},{2},{3})", mVoroSites[j]->GetIdx(), mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y, mVoroSites[j]->GetValue().z);
         }
+
+        if (!removeVoroIdxs.empty())
+            RemoveVoroSitesByIndexArray(removeVoroIdxs);
 
         return outside;
     }

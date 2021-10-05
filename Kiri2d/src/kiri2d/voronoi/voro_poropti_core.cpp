@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-05 01:41:40
+ * @LastEditTime: 2021-10-05 17:32:25
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -188,8 +188,8 @@ namespace KIRI
     void KiriVoroPoroOptiCore::AdaptPositionsWeights()
     {
         auto outside = mPowerDiagram->Move2CentroidDisableSite();
-        if (outside)
-            CorrectWeights();
+        // if (outside)
+        //     CorrectWeights();
     }
 
     float KiriVoroPoroOptiCore::GetGlobalAreaError()
@@ -209,8 +209,58 @@ namespace KIRI
         return error;
     }
 
+    void KiriVoroPoroOptiCore::RemoveNoiseVoroSites()
+    {
+        Vector<UInt> removeVoroIdxs;
+        auto voroSite = mPowerDiagram->GetVoroSites();
+        for (size_t i = 0; i < voroSite.size(); i++)
+        {
+            auto siteI = voroSite[i];
+            auto polyI = siteI->GetCellPolygon();
+            if (polyI != NULL)
+            {
+                if (polyI->GetSkeletons().empty())
+                    polyI->ComputeSSkel1998Convex();
+
+                auto micI = polyI->ComputeMICByStraightSkeleton();
+
+                auto neighbors = siteI->GetNeighborSites();
+                for (size_t j = 0; j < neighbors.size(); j++)
+                {
+                    auto siteJ = neighbors[j];
+                    if (siteJ->GetIdx() == siteI->GetIdx())
+                        continue;
+
+                    auto polyJ = siteJ->GetCellPolygon();
+                    if (polyJ != NULL)
+                    {
+                        if (polyJ->GetSkeletons().empty())
+                            polyJ->ComputeSSkel1998Convex();
+
+                        auto micJ = polyJ->ComputeMICByStraightSkeleton();
+                        auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
+                        if ((disIJ < (micI.z + micJ.z) / 2.f) &&
+                            !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetIdx()) &&
+                            !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetIdx()))
+                            removeVoroIdxs.emplace_back(siteJ->GetIdx());
+                    }
+                }
+            }
+        }
+
+        if (!removeVoroIdxs.empty())
+        {
+            KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
+            mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
+            mPowerDiagram->ComputeDiagram();
+        }
+    }
+
     void KiriVoroPoroOptiCore::DynamicAddSites()
     {
+        if (mPowerDiagram->GetVoroSites().size() >= mMaxiumNum)
+            return;
+
         auto entityNum = 20;
         auto kThreshold = 200;
 
@@ -279,11 +329,17 @@ namespace KIRI
             if (!removeVoroIdxs.empty())
                 mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
 
-            for (size_t i = 0; i < newVoroArrays.size(); i++)
+            auto new_vorosite_num = newVoroArrays.size();
+            auto cur_vorosite_num = mPowerDiagram->GetVoroSites().size();
+            auto need_append_vorosite_num = new_vorosite_num;
+            if ((new_vorosite_num + cur_vorosite_num) > mMaxiumNum)
+                need_append_vorosite_num = mMaxiumNum - cur_vorosite_num;
+
+            for (size_t i = 0; i < need_append_vorosite_num; i++)
                 AddSite(newVoroArrays[i]);
 
-            if (bAddVoroSite)
-                mPowerDiagram->ResetVoroSitesWeight();
+            // if (bAddVoroSite)
+            //     mPowerDiagram->ResetVoroSitesWeight();
         }
     }
 
@@ -340,7 +396,7 @@ namespace KIRI
             voroSite[i]->SetWeight(weight + areaWeight + bcWeight);
         }
 
-        KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
+        //KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
     }
 
     void KiriVoroPoroOptiCore::ComputeVoroSiteWeightError()
@@ -434,7 +490,7 @@ namespace KIRI
         mPowerDiagram->ComputeDiagram();
         //  if (!mPowerDiagram->ComputeDiagram())
         //     mPowerDiagram->ReGenVoroSites();
-
+        RemoveNoiseVoroSites();
         return mCurGlobalWeightError;
     }
 

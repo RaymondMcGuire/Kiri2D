@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-04 18:00:31
+ * @LastEditTime: 2021-10-05 18:50:30
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1337,11 +1337,11 @@ void VoroPorosityOptimizeScaleExample()
     float width = 3000.f;
     float height = 3000.f;
     // auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
-    auto offsetVec2 = Vector2F(2000.f);
+    auto offsetVec2 = Vector2F(500.f);
 
     // iter
-    auto maxIter = 3000;
-    String boundaryFileName = "cheburashka";
+    auto maxIter = 10000;
+    String boundaryFileName = "cow";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;
@@ -1352,9 +1352,7 @@ void VoroPorosityOptimizeScaleExample()
 
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
-        //auto newPos = bunny2d[i] * 400.f + Vector2F(-width / 2.f, height / 5.f);
-        //boundary.emplace_back(Transform2Original(Vector2F(newPos), height) + offsetVec2);
-        auto newPos = bunny2d[i] * 4000.f;
+        auto newPos = bunny2d[i] * 4000.f + offsetVec2;
         boundary.emplace_back(newPos);
     }
 
@@ -1379,7 +1377,8 @@ void VoroPorosityOptimizeScaleExample()
         Vector<KiriPoint2> points;
         Vector<KiriLine2> lines;
         Vector<KiriCircle2> circles;
-        if ((i % 10 == 1) || (i == maxIter - 1))
+        //if (1)
+        if ((i % 100 == 1) || (i == maxIter - 1))
         {
             auto sites = opti->GetLeafNodeSites();
             for (size_t i = 0; i < sites.size(); i++)
@@ -1416,8 +1415,6 @@ void VoroPorosityOptimizeScaleExample()
             auto porosity = opti->GetMiniumPorosity();
             porosityArray.emplace_back(porosity);
 
-            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}", i, porosity, error / maxIC.size());
-
             auto radiusError = 0.f;
             auto radiusErrorPercent = 0.f;
             Vec_Float predictRadiusArray, realRadiusArray;
@@ -1439,8 +1436,14 @@ void VoroPorosityOptimizeScaleExample()
             errorArray.emplace_back(error / maxIC.size());
             radiusErrorArray.emplace_back(radiusError / maxIC.size());
 
-            RMSEArray.emplace_back(ComputeRMSE(predictRadiusArray, realRadiusArray));
-            RMSPEArray.emplace_back(ComputeRMSPE(predictRadiusArray, realRadiusArray));
+            auto cur_rmse = ComputeRMSE(predictRadiusArray, realRadiusArray);
+            auto cur_rmsp = ComputeRMSPE(predictRadiusArray, realRadiusArray);
+            RMSEArray.emplace_back(cur_rmse);
+            RMSPEArray.emplace_back(cur_rmsp);
+
+            KIRI_LOG_DEBUG("iterate idx:{0}, porosity={1}, error={2}, rmse={3},rmsp={4}",
+                           i, porosity, error / maxIC.size(),
+                           cur_rmse, cur_rmsp);
 
             // re-color
             for (size_t i = 0; i < maxIC.size(); i++)
@@ -1461,7 +1464,7 @@ void VoroPorosityOptimizeScaleExample()
             scene->Clear();
         }
 
-        if ((i % 100 == 1) || (i == maxIter - 1))
+        if ((i % 1000 == 1) || (i == maxIter - 1))
         {
             //ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
 

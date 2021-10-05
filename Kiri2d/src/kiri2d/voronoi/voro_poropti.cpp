@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-04 11:16:26
+ * @LastEditTime: 2021-10-05 16:30:49
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
@@ -41,7 +41,33 @@ namespace KIRI
         std::mt19937 gen(engine());
         std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
-        auto cnt = 0, maxcnt = 100;
+        Vec_Float ary1, ary2;
+        for (size_t i = 0; i < 4; i++)
+        {
+            ary1.emplace_back(radiusRange[i]);
+        }
+
+        ary2.emplace_back(0.f);
+        for (size_t i = 0; i < 3; i++)
+        {
+            ary2.emplace_back(radiusRangeProb[i]);
+        }
+
+        auto total_sum = 0.f;
+        for (size_t i = 0; i < 3; i++)
+        {
+            auto m = 0.5f * (ary2[i + 1] - ary2[i]) / (ary1[i + 1] - ary1[i]);
+            auto b = (ary2[i] * ary1[i + 1] - ary1[i] * ary2[i + 1]) / (ary1[i + 1] - ary1[i]);
+            total_sum += m * (ary1[i + 1] * ary1[i + 1] - ary1[i] * ary1[i]) + b * (ary1[i + 1] - ary1[i]);
+        }
+
+        auto total_area = mRootBoundary->GetPolygonArea();
+        auto total_num = total_area / (KIRI_PI<float>() * total_sum * total_sum);
+
+        KIRI_LOG_DEBUG("avg_radius={0},total_area={1},total_num={2}", total_sum, total_area, total_num);
+
+        auto cnt = 0;
+        auto maxcnt = 100;
         while (cnt < maxcnt)
         {
             auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
@@ -50,15 +76,18 @@ namespace KIRI
             {
                 //auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
                 auto radius = pcdis(gen);
-                auto node = std::make_shared<KiriVoroPoroOptiNode>(sitePos2, radius);
-                mNodes.emplace_back(node);
+                // auto node = std::make_shared<KiriVoroPoroOptiNode>(sitePos2, radius);
+                // mNodes.emplace_back(node);
+                auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y);
+                site->SetRadius(radius);
+                mRootCore->AddSite(site);
                 cnt++;
             }
         }
 
-        for (size_t i = 0; i < mNodes.size(); i++)
-            mRootCore->AddSite(mNodes[i]->GetSite());
-
+        // for (size_t i = 0; i < mNodes.size(); i++)
+        //     mRootCore->AddSite(mNodes[i]->GetSite());
+        mRootCore->SetMaxiumVorosite(static_cast<size_t>(total_num));
         mRootCore->SetBoundaryPolygon2(mRootBoundary);
         mRootCore->Init();
         mRootCore->ComputeIterate();

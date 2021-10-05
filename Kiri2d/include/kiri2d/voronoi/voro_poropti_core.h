@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-10-04 11:24:59
+ * @LastEditTime: 2021-10-05 17:02:52
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -53,6 +53,8 @@ namespace KIRI
 
         void RemoveVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->RemoveVoroSitesByIndexArray(indexs); }
 
+        void SetMaxiumVorosite(UInt num) { mMaxiumNum = num; }
+
     private:
         void ComputeVoroSiteWeightError();
         void ComputeBoundaryPolygonArea();
@@ -67,6 +69,8 @@ namespace KIRI
         void AdaptWeights();
         void DynamicAddSites();
 
+        void RemoveNoiseVoroSites();
+
         KiriPowerDiagramPtr mPowerDiagram;
 
         float mCompleteArea;
@@ -76,6 +80,7 @@ namespace KIRI
         Vector<float> mGlobalErrorArray;
 
         float mErrorThreshold;
+        UInt mMaxiumNum = 1000;
         UInt mCurIteration, mMaxIterationNum;
     };
 
