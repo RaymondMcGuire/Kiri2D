@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-06 23:28:28
+ * @LastEditTime: 2021-10-07 02:31:10
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1340,8 +1340,8 @@ void VoroPorosityOptimizeScaleExample()
     auto offsetVec2 = Vector2F(500.f);
 
     // iter
-    auto maxIter = 3000;
-    String boundaryFileName = "woody";
+    auto maxIter = 4000;
+    String boundaryFileName = "teapot";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;
@@ -1726,7 +1726,6 @@ void LoadVoronoiExample()
 #include <kiri2d/sampling/poisson_disk_sampling.h>
 void UniPoissonDiskSampler()
 {
-    String boundaryFileName = "bunny";
     UInt counter = 0;
 
     // scene renderer config
@@ -1738,9 +1737,9 @@ void UniPoissonDiskSampler()
     Vector<Vector2F> bunny2d;
     Vector<Vector2F> sbunny2d;
     size_t bunnyNum;
-    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/bunny.xy");
-    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/bunny.xy");
-
+    String boundaryFileName = "horse";
+    String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
+    load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
         //auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);

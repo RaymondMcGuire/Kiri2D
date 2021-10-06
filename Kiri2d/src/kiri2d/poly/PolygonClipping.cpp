@@ -74,7 +74,9 @@ bool PolyClip::PloygonOpration::DetectIntersection(Polygon &clip_poly, Polygon &
 	if (intersection_point_count % 2 == 0)
 		return true;
 	else
+	{
 		return false;
+	}
 }
 
 bool PolyClip::PloygonOpration::Mark(Polygon &clip_poly, Polygon &sub_poly, /*out parameter*/ std::vector<std::vector<Point2d>> &possible_result, int markType)

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-04 13:46:59
+ * @LastEditTime: 2021-10-07 02:16:06
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
@@ -170,6 +170,10 @@ namespace KIRI
             auto vertj = mPolygonVertices2[j];
             if ((((verti.y <= v.y) && (v.y < vertj.y) || ((vertj.y <= v.y) && (v.y < verti.y))) && (v.x < (vertj.x - verti.x) * (v.y - verti.y) / (vertj.y - verti.y) + verti.x)))
                 contains = !contains;
+
+            // if (((verti.y > v.y) != (vertj.y > v.y)) &&
+            //     (v.x < (vertj.x - verti.x) * (v.y - verti.y) / (vertj.y - verti.y) + verti.x))
+            //     contains = !contains;
         }
         return contains;
     }
