@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 11:03:44
- * @LastEditTime: 2021-10-05 01:58:33
+ * @LastEditTime: 2021-10-06 19:43:31
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\sskel_lav.cpp
@@ -91,7 +91,7 @@ namespace KIRI2D::SSKEL
         return edges;
     }
 
-    SSkelVertexPtr SSkelLAV::Unify(const SSkelVertexPtr &va, const SSkelVertexPtr &vb, Vector2F mid)
+    SSkelVertexPtr SSkelLAV::Unify(SSkelVertexPtr va, SSkelVertexPtr vb, Vector2F mid)
     {
         auto dir_vbb = Vector2F(vb->GetBisector().z, vb->GetBisector().w).normalized();
         auto dir_vab = Vector2F(va->GetBisector().z, va->GetBisector().w).normalized();
@@ -107,9 +107,18 @@ namespace KIRI2D::SSKEL
             mHead = newVertex;
 
         va->prev->next = newVertex;
-        vb->next.lock()->prev = newVertex;
         newVertex->prev = va->prev;
-        newVertex->next = vb->next;
+
+        //FIXME
+        if (vb->next.expired())
+        {
+            newVertex->next = va->prev;
+        }
+        else
+        {
+            vb->next.lock()->prev = newVertex;
+            newVertex->next = vb->next;
+        }
 
         va->SetInValid();
         vb->SetInValid();

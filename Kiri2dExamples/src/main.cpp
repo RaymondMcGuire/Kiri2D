@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-06 17:02:51
+ * @LastEditTime: 2021-10-06 20:06:58
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1341,7 +1341,7 @@ void VoroPorosityOptimizeScaleExample()
 
     // iter
     auto maxIter = 6000;
-    String boundaryFileName = "alligator";
+    String boundaryFileName = "armadillo";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;

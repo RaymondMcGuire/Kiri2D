@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-06 17:09:13
+ * @LastEditTime: 2021-10-06 19:50:58
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -249,7 +249,7 @@ namespace KIRI
 
                         auto micJ = polyJ->ComputeMICByStraightSkeleton();
                         auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
-                        if ((disIJ < ((micI.z + micJ.z) - MEpsilon<float>())) &&
+                        if ((disIJ < ((micI.z + micJ.z) / 3.f)) &&
                             !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetIdx()) &&
                             !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetIdx()))
                             removeVoroIdxs.emplace_back(siteJ->GetIdx());

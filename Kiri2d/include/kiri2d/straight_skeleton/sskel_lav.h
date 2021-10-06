@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-10-05 02:30:36
+ * @LastEditTime: 2021-10-06 19:33:27
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_lav.h
@@ -63,7 +63,7 @@ namespace KIRI2D::SSKEL
         Vector<std::tuple<Vector4F, Vector4F, Vector4F>> GenEdgesData();
         Vector<SSkelEventPtr> GenEvents(Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
         SSkelEventPtr GenEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
-        SSkelVertexPtr Unify(const SSkelVertexPtr &va, const SSkelVertexPtr &vb, Vector2F mid);
+        SSkelVertexPtr Unify(SSkelVertexPtr va, SSkelVertexPtr vb, Vector2F mid);
 
     private:
         UInt mId;
