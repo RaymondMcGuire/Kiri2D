@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-06 20:06:58
+ * @LastEditTime: 2021-10-06 20:31:30
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1367,8 +1367,11 @@ void VoroPorosityOptimizeScaleExample()
     Vec_Float errorArray, porosityArray, radiusErrorArray;
     Vec_Float RMSEArray, RMSPEArray;
     Vector<Vector4F> lastMaxCircle;
-    auto minRadius = Huge<float>();
-    auto maxRadius = Tiny<float>();
+    // auto minRadius = Huge<float>();
+    // auto maxRadius = Tiny<float>();
+
+    auto minRadius = 0.f;
+    auto maxRadius = 300.f;
     for (size_t i = 0; i < maxIter; i++)
     {
 
@@ -1429,8 +1432,8 @@ void VoroPorosityOptimizeScaleExample()
                 circles.emplace_back(maxCir2);
                 radiusError += std::abs(maxIC[i].z - maxIC[i].w);
 
-                minRadius = std::min(minRadius, maxIC[i].z);
-                maxRadius = std::max(maxRadius, maxIC[i].z);
+                // minRadius = std::min(minRadius, maxIC[i].z);
+                // maxRadius = std::max(maxRadius, maxIC[i].z);
             }
 
             errorArray.emplace_back(error / maxIC.size());

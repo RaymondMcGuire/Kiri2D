@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-06 19:50:58
+ * @LastEditTime: 2021-10-06 20:48:20
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -249,8 +249,7 @@ namespace KIRI
 
                         auto micJ = polyJ->ComputeMICByStraightSkeleton();
                         auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
-                        if ((disIJ < ((micI.z + micJ.z) / 3.f)) &&
-                            !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetIdx()) &&
+                        if ((disIJ < ((micI.z + micJ.z) / 2.f)) &&
                             !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetIdx()))
                             removeVoroIdxs.emplace_back(siteJ->GetIdx());
                     }
@@ -271,7 +270,7 @@ namespace KIRI
         if (mPowerDiagram->GetVoroSites().size() >= mMaxiumNum)
             return;
 
-        auto entityNum = 20;
+        auto entityNum = 10;
         auto kThreshold = 200;
 
         if (mGlobalErrorArray.size() > entityNum)
