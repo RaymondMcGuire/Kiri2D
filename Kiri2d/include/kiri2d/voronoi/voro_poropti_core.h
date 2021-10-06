@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-10-05 17:02:52
+ * @LastEditTime: 2021-10-06 22:57:06
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -82,6 +82,9 @@ namespace KIRI
         float mErrorThreshold;
         UInt mMaxiumNum = 1000;
         UInt mCurIteration, mMaxIterationNum;
+
+        bool bReachMaxuimNum = false;
+        float mLastMP = 1.f;
     };
 
     typedef SharedPtr<KiriVoroPoroOptiCore> KiriVoroPoroOptiCorePtr;

@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-06 20:48:20
+ * @LastEditTime: 2021-10-06 23:13:43
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -250,6 +250,7 @@ namespace KIRI
                         auto micJ = polyJ->ComputeMICByStraightSkeleton();
                         auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
                         if ((disIJ < ((micI.z + micJ.z) / 2.f)) &&
+                            !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetIdx()) &&
                             !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetIdx()))
                             removeVoroIdxs.emplace_back(siteJ->GetIdx());
                     }
@@ -267,10 +268,10 @@ namespace KIRI
 
     void KiriVoroPoroOptiCore::DynamicAddSites()
     {
-        if (mPowerDiagram->GetVoroSites().size() >= mMaxiumNum)
-            return;
+        if (mPowerDiagram->GetVoroSites().size() >= mMaxiumNum && bReachMaxuimNum == false)
+            bReachMaxuimNum = true;
 
-        auto entityNum = 10;
+        auto entityNum = 20;
         auto kThreshold = 200;
 
         if (mGlobalErrorArray.size() > entityNum)
@@ -279,73 +280,70 @@ namespace KIRI
             Vector<KiriVoroSitePtr> newVoroArrays;
             Vector<float> errorArray(mGlobalErrorArray.end() - entityNum, mGlobalErrorArray.end());
             auto line = LineFitLeastSquares(errorArray);
-            //KIRI_LOG_DEBUG("line k ={0}", line.x);
 
-            Vector<UInt> removeVoroIdxs;
-            auto voroSite = mPowerDiagram->GetVoroSites();
-            for (int i = 0; i < voroSite.size(); i++)
+            if (std::abs(line.x) < kThreshold)
             {
-                bool bNoPoly = false;
-                if (std::abs(line.x) < kThreshold)
+
+                std::vector<float> radiusRange;
+                radiusRange.push_back(20.f);
+                radiusRange.push_back(30.f);
+                radiusRange.push_back(80.f);
+                radiusRange.push_back(150.f);
+
+                std::vector<float> radiusRangeProb;
+                radiusRangeProb.push_back(0.5f);
+                radiusRangeProb.push_back(0.4f);
+                radiusRangeProb.push_back(0.1f);
+
+                std::random_device engine;
+                std::mt19937 gen(engine());
+                std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
+
+                if (bReachMaxuimNum)
                 {
-                    auto poly = voroSite[i]->GetCellPolygon();
-                    if (poly != NULL)
-                    {
-                        if (poly->GetSkeletons().empty())
-                            poly->ComputeSSkel1998Convex();
-
-                        auto mic = poly->ComputeMICByStraightSkeleton();
-                        auto maxRadius = mic.z;
-                        auto targetRadius = voroSite[i]->GetRadius();
-                        // KIRI_LOG_DEBUG("maxRadius ={0},targetRadius={1}", maxRadius, targetRadius);
-                        if (maxRadius > targetRadius)
-                        {
-                            auto pos = mPowerDiagram->GetBoundaryPolygon2()->GetRndInnerPoint();
-                            auto nSite = std::make_shared<KiriVoroSite>(pos.x, pos.y);
-
-                            std::vector<float> radiusRange;
-                            radiusRange.push_back(20.f);
-                            radiusRange.push_back(30.f);
-                            radiusRange.push_back(80.f);
-                            radiusRange.push_back(150.f);
-
-                            std::vector<float> radiusRangeProb;
-                            radiusRangeProb.push_back(0.5f);
-                            radiusRangeProb.push_back(0.4f);
-                            radiusRangeProb.push_back(0.1f);
-
-                            std::random_device engine;
-                            std::mt19937 gen(engine());
-                            std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
-
-                            nSite->SetRadius(pcdis(gen));
-                            newVoroArrays.emplace_back(nSite);
-
-                            bAddVoroSite = true;
-                        }
-                    }
-                    else
-                        bNoPoly = true;
+                    auto pos = mPowerDiagram->GetBoundaryPolygon2()->GetRndInnerPoint();
+                    auto site = std::make_shared<KiriVoroSite>(pos.x, pos.y);
+                    site->SetRadius(pcdis(gen));
+                    newVoroArrays.emplace_back(site);
                 }
+                else
+                {
+                    auto voroSite = mPowerDiagram->GetVoroSites();
+                    for (int i = 0; i < voroSite.size(); i++)
+                    {
+                        auto pos = mPowerDiagram->GetBoundaryPolygon2()->GetRndInnerPoint();
+                        auto nSite = std::make_shared<KiriVoroSite>(pos.x, pos.y);
 
-                // if (voroSite[i]->GetWeight() < 0.f || bNoPoly)
-                //     removeVoroIdxs.emplace_back(voroSite[i]->GetIdx());
-
-                if (bNoPoly)
-                    removeVoroIdxs.emplace_back(voroSite[i]->GetIdx());
+                        nSite->SetRadius(pcdis(gen));
+                        newVoroArrays.emplace_back(nSite);
+                    }
+                }
             }
-
-            if (!removeVoroIdxs.empty())
-                mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
 
             auto new_vorosite_num = newVoroArrays.size();
             auto cur_vorosite_num = mPowerDiagram->GetVoroSites().size();
             auto need_append_vorosite_num = new_vorosite_num;
-            if ((new_vorosite_num + cur_vorosite_num) > mMaxiumNum)
-                need_append_vorosite_num = mMaxiumNum - cur_vorosite_num;
 
-            for (int i = 0; i < need_append_vorosite_num; i++)
-                AddSite(newVoroArrays[i]);
+            if (!bReachMaxuimNum)
+            {
+                if ((new_vorosite_num + cur_vorosite_num) > mMaxiumNum)
+                    need_append_vorosite_num = mMaxiumNum - cur_vorosite_num;
+
+                for (int i = 0; i < need_append_vorosite_num; i++)
+                    AddSite(newVoroArrays[i]);
+            }
+            else
+            {
+                auto current_mp = ComputeMiniumPorosity();
+                if (mLastMP > current_mp)
+                {
+                    KIRI_LOG_DEBUG("Add P");
+                    for (int i = 0; i < need_append_vorosite_num; i++)
+                        AddSite(newVoroArrays[i]);
+
+                    mLastMP = current_mp;
+                }
+            }
 
             // if (bAddVoroSite)
             //     mPowerDiagram->ResetVoroSitesWeight();
@@ -450,7 +448,8 @@ namespace KIRI
                     }
                     else
                     {
-                        auto pw = (distance * distance - siteI->GetWeight());
+
+                        auto pw = distance * distance - siteI->GetWeight();
                         mVoroSitesWeightError[i] += pw;
                         mVoroSitesWeightAbsError[i] += std::abs(pw);
                         mCurGlobalWeightError += std::abs(pw);

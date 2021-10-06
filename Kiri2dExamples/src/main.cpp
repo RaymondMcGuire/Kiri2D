@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-06 20:31:30
+ * @LastEditTime: 2021-10-06 23:28:28
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1340,8 +1340,8 @@ void VoroPorosityOptimizeScaleExample()
     auto offsetVec2 = Vector2F(500.f);
 
     // iter
-    auto maxIter = 6000;
-    String boundaryFileName = "armadillo";
+    auto maxIter = 3000;
+    String boundaryFileName = "woody";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;
@@ -1360,6 +1360,7 @@ void VoroPorosityOptimizeScaleExample()
     auto opti = std::make_shared<KiriVoroPoroOpti>();
     opti->SetRootBoundary2(boundary);
     opti->GenExample(width, height);
+    opti->SetMaxIterationNum(maxIter);
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);

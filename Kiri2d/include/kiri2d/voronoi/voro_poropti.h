@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-10-04 11:13:43
+ * @LastEditTime: 2021-10-06 21:59:23
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
@@ -34,6 +34,8 @@ namespace KIRI
 
         float ComputeIterate();
         void ComputeChildIterate();
+
+        void SetMaxIterationNum(UInt num) { mRootCore->SetMaxIterationNum(num); }
 
         const KiriVoroPoroOptiCorePtr &GetRootCore() const { return mRootCore; }
         const KiriVoroCellPolygon2Ptr &GetRootBoundary() const { return mRootBoundary; }

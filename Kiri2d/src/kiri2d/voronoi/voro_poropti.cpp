@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-06 16:22:03
+ * @LastEditTime: 2021-10-06 22:27:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
@@ -82,7 +82,7 @@ namespace KIRI
             }
         }
 
-        mRootCore->SetMaxiumVorosite(static_cast<size_t>(total_num));
+        mRootCore->SetMaxiumVorosite(static_cast<size_t>(total_num * 1.5f));
         mRootCore->SetBoundaryPolygon2(mRootBoundary);
         mRootCore->Init();
         mRootCore->ComputeIterate();
