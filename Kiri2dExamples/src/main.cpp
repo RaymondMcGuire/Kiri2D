@@ -1341,7 +1341,7 @@ void VoroPorosityOptimizeScaleExample()
 
     // iter
     auto maxIter = 10000;
-    String boundaryFileName = "cow";
+    String boundaryFileName = "bunny";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;
