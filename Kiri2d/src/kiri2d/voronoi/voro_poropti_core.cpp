@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-06 11:24:01
+ * @LastEditTime: 2021-10-06 17:09:13
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -9,6 +9,8 @@
 
 #include <kiri2d/voronoi/voro_poropti_core.h>
 #include <random>
+#include <omp.h>
+
 namespace KIRI
 {
     Vector2F LineFitLeastSquares(Vector<float> data)
@@ -39,7 +41,8 @@ namespace KIRI
         Vector<Vector4F> skeletons;
         auto sites = this->GetSites();
 
-        for (size_t i = 0; i < sites.size(); i++)
+#pragma omp parallel for
+        for (int i = 0; i < sites.size(); i++)
         {
             auto poly = sites[i]->GetCellPolygon();
             if (poly != NULL)
@@ -62,7 +65,8 @@ namespace KIRI
         auto sites = this->GetSites();
 
         Vector<UInt> removeVoroIdxs;
-        for (size_t i = 0; i < sites.size(); i++)
+
+        for (int i = 0; i < sites.size(); i++)
         {
             auto poly = sites[i]->GetCellPolygon();
             if (poly != NULL)
@@ -96,8 +100,9 @@ namespace KIRI
         //KIRI_LOG_INFO("Compeleted GetMICBySSkel");
 
         auto sum = 0.f;
-
-        for (size_t i = 0; i < maxCircleArray.size(); i++)
+#pragma omp parallel for reduction(+ \
+                                   : sum)
+        for (int i = 0; i < maxCircleArray.size(); i++)
         {
             auto circle = maxCircleArray[i];
             sum += circle.z * circle.z * KIRI_PI<float>();
@@ -139,7 +144,8 @@ namespace KIRI
         if (!voroSite.empty())
         {
             auto boundary = mPowerDiagram->GetBoundaryPolygon2();
-            for (size_t i = 0; i < voroSite.size(); i++)
+#pragma omp parallel for
+            for (int i = 0; i < voroSite.size(); i++)
             {
                 auto pos = voroSite[i]->GetValue();
                 if (!boundary->Contains(Vector2F(pos.x, pos.y)))
@@ -171,7 +177,8 @@ namespace KIRI
     void KiriVoroPoroOptiCore::CorrectWeights()
     {
         auto voroSite = mPowerDiagram->GetVoroSites();
-        for (size_t i = 0; i < voroSite.size(); i++)
+#pragma omp parallel for
+        for (int i = 0; i < voroSite.size(); i++)
         {
             for (size_t j = 0; j < voroSite.size(); j++)
             {
@@ -196,7 +203,10 @@ namespace KIRI
     {
         auto error = 0.f;
         auto voroSite = mPowerDiagram->GetVoroSites();
-        for (size_t i = 0; i < voroSite.size(); i++)
+
+#pragma omp parallel for reduction(+ \
+                                   : error)
+        for (int i = 0; i < voroSite.size(); i++)
         {
             auto n = voroSite[i]->GetNeighborSites().size();
             if (n > 2)
@@ -213,7 +223,7 @@ namespace KIRI
     {
         Vector<UInt> removeVoroIdxs;
         auto voroSite = mPowerDiagram->GetVoroSites();
-        for (size_t i = 0; i < voroSite.size(); i++)
+        for (int i = 0; i < voroSite.size(); i++)
         {
             auto siteI = voroSite[i];
             auto polyI = siteI->GetCellPolygon();
@@ -239,7 +249,7 @@ namespace KIRI
 
                         auto micJ = polyJ->ComputeMICByStraightSkeleton();
                         auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
-                        if ((disIJ < (micI.z + micJ.z) / 2.f) &&
+                        if ((disIJ < ((micI.z + micJ.z) - MEpsilon<float>())) &&
                             !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetIdx()) &&
                             !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetIdx()))
                             removeVoroIdxs.emplace_back(siteJ->GetIdx());
@@ -274,7 +284,7 @@ namespace KIRI
 
             Vector<UInt> removeVoroIdxs;
             auto voroSite = mPowerDiagram->GetVoroSites();
-            for (size_t i = 0; i < voroSite.size(); i++)
+            for (int i = 0; i < voroSite.size(); i++)
             {
                 bool bNoPoly = false;
                 if (std::abs(line.x) < kThreshold)
@@ -335,7 +345,7 @@ namespace KIRI
             if ((new_vorosite_num + cur_vorosite_num) > mMaxiumNum)
                 need_append_vorosite_num = mMaxiumNum - cur_vorosite_num;
 
-            for (size_t i = 0; i < need_append_vorosite_num; i++)
+            for (int i = 0; i < need_append_vorosite_num; i++)
                 AddSite(newVoroArrays[i]);
 
             // if (bAddVoroSite)
@@ -354,7 +364,7 @@ namespace KIRI
         auto gammaBC = 1.f;
 
         auto voroSite = mPowerDiagram->GetVoroSites();
-        for (size_t i = 0; i < voroSite.size(); i++)
+        for (int i = 0; i < voroSite.size(); i++)
         {
             auto weight = voroSite[i]->GetWeight();
 
@@ -406,7 +416,7 @@ namespace KIRI
         mVoroSitesWeightError.assign(voroSite.size(), 0.f);
         mVoroSitesWeightAbsError.assign(voroSite.size(), 0.f);
 
-        for (size_t i = 0; i < voroSite.size(); i++)
+        for (int i = 0; i < voroSite.size(); i++)
         {
             auto total = 0.f;
             auto cnt = 0;
@@ -457,7 +467,7 @@ namespace KIRI
         UInt num = 0;
         auto voroSite = mPowerDiagram->GetVoroSites();
 
-        for (size_t i = 0; i < voroSite.size(); i++)
+        for (int i = 0; i < voroSite.size(); i++)
         {
             if (!voroSite[i]->GetNeighborSites().empty())
             {

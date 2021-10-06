@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-05 18:50:30
+ * @LastEditTime: 2021-10-06 17:02:51
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1340,8 +1340,8 @@ void VoroPorosityOptimizeScaleExample()
     auto offsetVec2 = Vector2F(500.f);
 
     // iter
-    auto maxIter = 10000;
-    String boundaryFileName = "bunny";
+    auto maxIter = 6000;
+    String boundaryFileName = "alligator";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;
@@ -1378,7 +1378,7 @@ void VoroPorosityOptimizeScaleExample()
         Vector<KiriLine2> lines;
         Vector<KiriCircle2> circles;
         //if (1)
-        if ((i % 100 == 1) || (i == maxIter - 1))
+        if ((i % 10 == 1) || (i == maxIter - 1))
         {
             auto sites = opti->GetLeafNodeSites();
             for (size_t i = 0; i < sites.size(); i++)
@@ -1823,6 +1823,7 @@ void UniPoissonDiskSampler()
         }
     }
 }
+
 int main()
 {
     KIRI::KiriLog::Init();
@@ -1852,5 +1853,6 @@ int main()
     //UniPoissonDiskSampler();
 
     //LoadVoronoiExample();
+
     return 0;
 }

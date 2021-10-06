@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-05 16:30:49
+ * @LastEditTime: 2021-10-06 16:22:03
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
@@ -74,10 +74,7 @@ namespace KIRI
 
             if (mRootBoundary->Contains(sitePos2))
             {
-                //auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
                 auto radius = pcdis(gen);
-                // auto node = std::make_shared<KiriVoroPoroOptiNode>(sitePos2, radius);
-                // mNodes.emplace_back(node);
                 auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y);
                 site->SetRadius(radius);
                 mRootCore->AddSite(site);
@@ -85,8 +82,6 @@ namespace KIRI
             }
         }
 
-        // for (size_t i = 0; i < mNodes.size(); i++)
-        //     mRootCore->AddSite(mNodes[i]->GetSite());
         mRootCore->SetMaxiumVorosite(static_cast<size_t>(total_num));
         mRootCore->SetBoundaryPolygon2(mRootBoundary);
         mRootCore->Init();

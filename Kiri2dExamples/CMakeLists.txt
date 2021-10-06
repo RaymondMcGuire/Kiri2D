@@ -18,6 +18,15 @@ set(KIRI2D_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/Kiri2d/include)
 
 # Extra Static Library
 # set(EXTLIBS_LINK_LIBS XXXXX)
+if(WIN32)
+    find_package(OpenMP REQUIRED)
+    if(OPENMP_FOUND)
+        message(STATUS "OpenMP_C_Found   : ${OpenMP_C_FOUND}")
+        message(STATUS "OpenMP_CXX_Found : ${OpenMP_CXX_FOUND}")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    endif()
+endif()
 
 # Project Config
 file(GLOB_RECURSE SOURCES  "src/*.cpp" "src/*.c")

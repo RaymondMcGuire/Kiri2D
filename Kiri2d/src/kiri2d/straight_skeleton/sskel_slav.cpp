@@ -219,16 +219,12 @@ namespace KIRI2D::SSKEL
         Vector<SSkelLAVPtr> new_lavs;
         // remove current lav
         auto cur_lav = mLAVMaps[splitEvent->GetVert()->GetLAVId()];
-        if (cur_lav == nullptr)
-            KIRI_LOG_DEBUG("invalid lav id={0}", splitEvent->GetVert()->GetLAVId());
 
-        //mLAVMaps[splitEvent->GetVert()->GetLAVId()] = nullptr;
-		mLAVMaps.erase(splitEvent->GetVert()->GetLAVId());
+        if (cur_lav != nullptr)
+            mLAVMaps.erase(splitEvent->GetVert()->GetLAVId());
 
-        //KIRI_LOG_DEBUG("-----------------");
-        if (cur_lav->GetId() != right_vertex->GetLAVId())
+        if (cur_lav == nullptr || (cur_lav->GetId() != right_vertex->GetLAVId()))
         {
-            // mLAVMaps[right_vertex->GetLAVId()] = nullptr;
             mLAVMaps.erase(right_vertex->GetLAVId());
             new_lavs.emplace_back(std::make_shared<SSkelLAV>(mLAVCounter++, newVertex1));
         }
