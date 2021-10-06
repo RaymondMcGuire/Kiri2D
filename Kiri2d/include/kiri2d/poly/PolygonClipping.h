@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-06-24 20:20:19
- * @LastEditTime: 2021-06-24 20:21:26
+ * @LastEditTime: 2021-10-06 11:22:29
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\poly\PolygonClipping.h
@@ -24,7 +24,7 @@ namespace PolyClip
 	public:
 		/************************* Phase 1 **************************/
 		// Detect intersection points between two polygons.
-		static void DetectIntersection(Polygon &clip_poly, Polygon &sub_poly);
+		static bool DetectIntersection(Polygon &clip_poly, Polygon &sub_poly);
 
 		/************************* Phase 2 **************************/
 		// Mark points for intersection

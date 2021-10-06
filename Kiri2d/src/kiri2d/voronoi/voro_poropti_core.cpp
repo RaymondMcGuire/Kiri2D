@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-05 17:32:25
+ * @LastEditTime: 2021-10-06 11:24:01
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -250,7 +250,7 @@ namespace KIRI
 
         if (!removeVoroIdxs.empty())
         {
-            KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
+            //KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
             mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
             mPowerDiagram->ComputeDiagram();
         }

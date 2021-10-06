@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cassert>
 
-void PolyClip::PloygonOpration::DetectIntersection(Polygon &clip_poly, Polygon &sub_poly)
+bool PolyClip::PloygonOpration::DetectIntersection(Polygon &clip_poly, Polygon &sub_poly)
 {
 	int intersection_point_count = 0;
 	// record current correct loop status, because insert operation will modify iterator. We do not use iterator to traversal.
@@ -70,7 +70,11 @@ void PolyClip::PloygonOpration::DetectIntersection(Polygon &clip_poly, Polygon &
 		}
 		iter1 = next_check;
 	}
-	assert(intersection_point_count % 2 == 0 && "The intersection points should be even!");
+
+	if (intersection_point_count % 2 == 0)
+		return true;
+	else
+		return false;
 }
 
 bool PolyClip::PloygonOpration::Mark(Polygon &clip_poly, Polygon &sub_poly, /*out parameter*/ std::vector<std::vector<Point2d>> &possible_result, int markType)

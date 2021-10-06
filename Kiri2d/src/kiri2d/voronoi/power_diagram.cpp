@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
- * @LastEditTime: 2021-10-05 16:15:26
+ * @LastEditTime: 2021-10-06 11:24:47
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
@@ -251,7 +251,7 @@ namespace KIRI
                 else
                 {
                     outside = true;
-                    KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
+                    //KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
                     mVoroSites[j]->SetCellPolygon(NULL);
                     mVoroSites[j]->Disable();
                     removeVoroIdxs.emplace_back(mVoroSites[j]->GetIdx());
@@ -527,9 +527,9 @@ namespace KIRI
 
                                         PolyClip::Polygon polygon1(polyA);
                                         PolyClip::Polygon polygon2(polyB);
-                                        PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
+                                        auto bintersection = PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
                                         std::vector<std::vector<PolyClip::Point2d>> possible_result;
-                                        if (PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
+                                        if (bintersection && PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
                                         {
                                             auto clipedPolygon = std::make_shared<KiriVoroCellPolygon2>();
                                             std::vector<std::vector<PolyClip::Point2d>> results = PolyClip::PloygonOpration::ExtractIntersectionResults(polygon1);
