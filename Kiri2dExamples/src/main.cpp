@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-07 02:31:10
+ * @LastEditTime: 2021-10-07 12:14:09
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1337,11 +1337,14 @@ void VoroPorosityOptimizeScaleExample()
     float width = 3000.f;
     float height = 3000.f;
     // auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
-    auto offsetVec2 = Vector2F(500.f);
+    auto offsetVec2 = Vector2F(500.f, 1000.f);
+
+    // teapot 500 1500
+    // cow 500 1000
 
     // iter
     auto maxIter = 4000;
-    String boundaryFileName = "teapot";
+    String boundaryFileName = "cow";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;
@@ -1382,7 +1385,8 @@ void VoroPorosityOptimizeScaleExample()
         Vector<KiriLine2> lines;
         Vector<KiriCircle2> circles;
         //if (1)
-        if ((i % 10 == 1) || (i == maxIter - 1))
+        //if ((i % 10 == 1) || (i == maxIter - 1))
+        if (1)
         {
             auto sites = opti->GetLeafNodeSites();
             for (size_t i = 0; i < sites.size(); i++)
@@ -1468,14 +1472,14 @@ void VoroPorosityOptimizeScaleExample()
             scene->Clear();
         }
 
-        if ((i % 1000 == 1) || (i == maxIter - 1))
-        {
-            //ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
+        // if ((i % 1000 == 1) || (i == maxIter - 1))
+        // {
+        //     //ExportSamplerData2CSVFile("bunny", UInt2Str4Digit(i), circles);
 
-            ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(i), circles);
-            ExportPoroityData2CSVFile(boundaryFileName, UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
-            ExportEvaluationData2CSVFile(boundaryFileName, UInt2Str4Digit(i), RMSEArray, RMSPEArray);
-        }
+        //     ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(i), circles);
+        //     ExportPoroityData2CSVFile(boundaryFileName, UInt2Str4Digit(i), errorArray, porosityArray, radiusErrorArray, lastMaxCircle);
+        //     ExportEvaluationData2CSVFile(boundaryFileName, UInt2Str4Digit(i), RMSEArray, RMSPEArray);
+        // }
     }
 
     //auto sites_data = opti->GetVoronoiSitesData();
