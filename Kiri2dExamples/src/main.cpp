@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-07 12:14:09
+ * @LastEditTime: 2021-10-07 16:48:48
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -1337,14 +1337,16 @@ void VoroPorosityOptimizeScaleExample()
     float width = 3000.f;
     float height = 3000.f;
     // auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
-    auto offsetVec2 = Vector2F(500.f, 1000.f);
+    auto offsetVec2 = Vector2F(500.f, 500.f);
 
     // teapot 500 1500
     // cow 500 1000
+    // woody 800 500
+    // armadillo 800 400
 
     // iter
     auto maxIter = 4000;
-    String boundaryFileName = "cow";
+    String boundaryFileName = "cheburashka";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;
