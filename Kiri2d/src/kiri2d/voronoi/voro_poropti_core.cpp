@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
- * @LastEditTime: 2021-10-06 23:13:43
+ * @LastEditTime: 2021-10-20 00:47:43
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
@@ -125,11 +125,13 @@ namespace KIRI
 
     void KiriVoroPoroOptiCore::Reset()
     {
+        mCurGlobalPorosity = 0.f;
         mCurIteration = 0;
         mCompleteArea = 0.f;
         mVoroSitesWeightError.clear();
         mVoroSitesWeightAbsError.clear();
         mGlobalErrorArray.clear();
+        mGlobalPorosityArray.clear();
     }
 
     void KiriVoroPoroOptiCore::CorrectVoroSitePos()
@@ -262,7 +264,7 @@ namespace KIRI
         {
             //KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
             mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
-            mPowerDiagram->ComputeDiagram();
+            AdaptPositionsWeights();
         }
     }
 
@@ -274,16 +276,16 @@ namespace KIRI
         auto entityNum = 20;
         auto kThreshold = 200;
 
-        if (mGlobalErrorArray.size() > entityNum)
+        if (mGlobalPorosityArray.size() > entityNum)
         {
             bool bAddVoroSite = false;
             Vector<KiriVoroSitePtr> newVoroArrays;
-            Vector<float> errorArray(mGlobalErrorArray.end() - entityNum, mGlobalErrorArray.end());
+            Vector<float> errorArray(mGlobalPorosityArray.end() - entityNum, mGlobalPorosityArray.end());
             auto line = LineFitLeastSquares(errorArray);
-
-            if (std::abs(line.x) < kThreshold)
+            KIRI_LOG_DEBUG("line k={0}", std::abs(line.x));
+            if (std::abs(line.x) < 1e-6f)
             {
-
+                KIRI_LOG_DEBUG("reach line res={0}", std::abs(line.x) < 1e-6f);
                 std::vector<float> radiusRange;
                 radiusRange.push_back(20.f);
                 radiusRange.push_back(30.f);
@@ -499,14 +501,16 @@ namespace KIRI
         //  if (!mPowerDiagram->ComputeDiagram())
         //     mPowerDiagram->ReGenVoroSites();
         RemoveNoiseVoroSites();
-        return mCurGlobalWeightError;
+
+        return ComputeMiniumPorosity();
     }
 
     float KiriVoroPoroOptiCore::ComputeIterate()
     {
-        auto error = Iterate();
-        mGlobalErrorArray.emplace_back(error);
-        return error;
+        mCurGlobalPorosity = Iterate();
+        mGlobalPorosityArray.emplace_back(mCurGlobalPorosity);
+        mGlobalErrorArray.emplace_back(mCurGlobalWeightError);
+        return mCurGlobalWeightError;
     }
 
     void KiriVoroPoroOptiCore::ComputeLloyd(UInt num)

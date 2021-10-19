@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
- * @LastEditTime: 2021-10-07 16:48:48
+ * @LastEditTime: 2021-10-20 00:18:46
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
@@ -273,8 +273,10 @@ void VoronoiExample()
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
-            pd->AddVoroSite(sitePos2);
-            //pd->AddPowerSite(sitePos2, dist(rndEngine) * 1000.f);
+            if (sitePos2.x < width / 2.f)
+                pd->AddPowerSite(sitePos2, 0.f);
+            else
+                pd->AddPowerSite(sitePos2, dist(rndEngine) * 10000.f);
             cnt++;
         }
     }
@@ -297,7 +299,12 @@ void VoronoiExample()
         {
             //sites[i]->Print();
             auto pos = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
-            points.emplace_back(KiriPoint2(pos, Vector3F(1.f, 0.f, 0.f)));
+
+            if (sites[i]->GetValue().x < width / 2.f)
+                points.emplace_back(KiriPoint2(pos, Vector3F(1.f, 0.f, 0.f)));
+            else
+                points.emplace_back(KiriPoint2(pos, Vector3F(1.f, 0.f, 1.f)));
+
             auto poly = sites[i]->GetCellPolygon();
             if (poly != NULL)
             {
@@ -311,7 +318,11 @@ void VoronoiExample()
                     auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
                     node = node->next;
                     auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
-                    lines.emplace_back(KiriLine2(start, end));
+                    auto line = KiriLine2(start, end);
+                    if (sites[i]->GetValue().x > width / 2.f)
+                        line.col = Vector3F(134, 185, 253) / 255.f;
+
+                    lines.emplace_back(line);
                 } while (node != list->GetHead());
             }
         }
@@ -1346,7 +1357,7 @@ void VoroPorosityOptimizeScaleExample()
 
     // iter
     auto maxIter = 4000;
-    String boundaryFileName = "cheburashka";
+    String boundaryFileName = "bunny";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;

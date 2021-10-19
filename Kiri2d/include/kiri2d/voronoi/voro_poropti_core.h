@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-10-06 22:57:06
+ * @LastEditTime: 2021-10-20 00:26:47
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
@@ -40,6 +40,7 @@ namespace KIRI
 
         constexpr UInt GetMaxIterationNum() const { return mMaxIterationNum; }
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
+        constexpr float GetCurGlobalPorosity() const { return mCurGlobalPorosity; }
 
         void Init();
 
@@ -74,10 +75,10 @@ namespace KIRI
         KiriPowerDiagramPtr mPowerDiagram;
 
         float mCompleteArea;
-        float mCurGlobalWeightError;
+        float mCurGlobalWeightError, mCurGlobalPorosity = 0.f;
         Vector<float> mVoroSitesWeightError, mVoroSitesWeightAbsError;
 
-        Vector<float> mGlobalErrorArray;
+        Vector<float> mGlobalErrorArray, mGlobalPorosityArray;
 
         float mErrorThreshold;
         UInt mMaxiumNum = 1000;

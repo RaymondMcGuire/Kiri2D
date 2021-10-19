@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-10-06 21:59:23
+ * @LastEditTime: 2021-10-20 00:28:59
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
@@ -39,7 +39,14 @@ namespace KIRI
 
         const KiriVoroPoroOptiCorePtr &GetRootCore() const { return mRootCore; }
         const KiriVoroCellPolygon2Ptr &GetRootBoundary() const { return mRootBoundary; }
-        float GetMiniumPorosity() { return mRootCore->ComputeMiniumPorosity(); }
+        float GetMiniumPorosity()
+        {
+            auto porosity = mRootCore->GetCurGlobalPorosity();
+            if (porosity != 0.f)
+                return porosity;
+            else
+                return mRootCore->ComputeMiniumPorosity();
+        }
         Vector<Vector4F> GetCellSSkel() { return mRootCore->GetCellSSkel(); }
         Vector<Vector4F> GetMICBySSkel() { return mRootCore->GetMICBySSkel(); }
 
