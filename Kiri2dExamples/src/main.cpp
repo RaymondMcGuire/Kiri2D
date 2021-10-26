@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
  * @LastEditTime: 2021-10-20 00:18:46
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
  */
 
@@ -76,7 +76,7 @@ Vector<Vector3F> LoadCSVFile2VoronoiSites(const String fileName)
         while (std::getline(line, record, delimiter))
             row.push_back(record);
 
-        //KIRI_LOG_DEBUG("{0},{1},{2}", std::stof(row[0]), std::stof(row[1]), std::stof(row[2]));
+        // KIRI_LOG_DEBUG("{0},{1},{2}", std::stof(row[0]), std::stof(row[1]), std::stof(row[2]));
 
         voro_sites.emplace_back(Vector3F(
             std::stof(row[0]),
@@ -214,7 +214,7 @@ void GenRndTreemap()
         nodes.emplace_back(TreemapNode("A", -1, -1, radius, 0));
     }
 
-    //TreemapNode topNode(tempNodeName, 35, 10, topRect);
+    // TreemapNode topNode(tempNodeName, 35, 10, topRect);
     TreemapNode topNode(tempNodeName, 0, -1, totalValue, totalNum, topRect);
 
     TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
@@ -297,7 +297,7 @@ void VoronoiExample()
         auto sites = pd->GetVoroSites();
         for (size_t i = 0; i < sites.size(); i++)
         {
-            //sites[i]->Print();
+            // sites[i]->Print();
             auto pos = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
 
             if (sites[i]->GetValue().x < width / 2.f)
@@ -443,11 +443,11 @@ void VoronoiExample2()
     //     lines.emplace_back(line);
     // }
 
-    //voronoi sites
+    // voronoi sites
     auto sites = pd->GetVoroSites();
     for (size_t i = 0; i < sites.size(); i++)
     {
-        //sites[i]->Print();
+        // sites[i]->Print();
         auto pos = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
         points.emplace_back(KiriPoint2(pos, Vector3F(1.f, 0.f, 0.f)));
         auto poly = sites[i]->GetCellPolygon();
@@ -599,7 +599,7 @@ void LloydRelaxationExample()
         auto sites = pd->GetVoroSites();
         for (size_t i = 0; i < sites.size(); i++)
         {
-            //sites[i]->Print();
+            // sites[i]->Print();
             points.emplace_back(KiriPoint2(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) + offsetVec2, Vector3F(1.f, 0.f, 0.f)));
             auto poly = sites[i]->GetCellPolygon();
             if (poly != NULL)
@@ -675,7 +675,7 @@ void NOCAJ12Example()
         auto sites = nocaj12->GetLeafNodeSites();
         for (size_t i = 0; i < sites.size(); i++)
         {
-            //sites[i]->Print();
+            // sites[i]->Print();
             auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
             points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
             auto poly = sites[i]->GetCellPolygon();
@@ -916,8 +916,8 @@ void VoroTestExample()
         auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
-            //auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
-            //KIRI_LOG_DEBUG("idx={0}, radius={1}", cnt, radius);
+            // auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
+            // KIRI_LOG_DEBUG("idx={0}, radius={1}", cnt, radius);
             auto radius = pcdis(gen);
             auto site = std::make_shared<KiriVoroSite>(sitePos2);
             site->SetRadius(20.f);
@@ -940,7 +940,7 @@ void VoroTestExample()
         auto sites = voroPorOptiCore->GetSites();
         for (size_t i = 0; i < sites.size(); i++)
         {
-            //sites[i]->Print();
+            // sites[i]->Print();
             points.emplace_back(KiriPoint2(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) + offsetVec2, Vector3F(1.f, 0.f, 0.f)));
             auto poly = sites[i]->GetCellPolygon();
             if (poly != NULL)
@@ -964,7 +964,7 @@ void VoroTestExample()
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
-        //renderer->SaveImages2File();
+        // renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
@@ -1024,8 +1024,8 @@ void VoroPorosityOptimizeConvexExample()
 
         if (i % 10 == 1)
         {
-            //MIC calculated by vornoi
-            //opti->ComputeChildIterate();
+            // MIC calculated by vornoi
+            // opti->ComputeChildIterate();
 
             Vector<KiriPoint2> points;
             Vector<KiriLine2> lines;
@@ -1034,7 +1034,7 @@ void VoroPorosityOptimizeConvexExample()
             auto sites = opti->GetLeafNodeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
-                //sites[i]->Print();
+                // sites[i]->Print();
                 auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
                 points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
                 auto poly = sites[i]->GetCellPolygon();
@@ -1071,7 +1071,7 @@ void VoroPorosityOptimizeConvexExample()
             {
                 auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
                 circles.emplace_back(maxCir2);
-                //KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
+                // KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
                 radiusError += std::abs(maxIC[i].z - maxIC[i].w);
 
                 minRadius = std::min(minRadius, maxIC[i].z);
@@ -1167,7 +1167,7 @@ void VoroPorosityTreemapOptiExample()
         nodes.emplace_back(TreemapNode("A", -1, -1, radius, 0));
     }
 
-    //TreemapNode topNode(tempNodeName, 35, 10, topRect);
+    // TreemapNode topNode(tempNodeName, 35, 10, topRect);
     TreemapNode topNode(tempNodeName, 0, -1, totalValue, totalNum, topRect);
 
     TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
@@ -1219,10 +1219,10 @@ void VoroPorosityTreemapOptiExample()
         Vector<KiriLine2> lines;
 
         auto sites = voroPorTreeMap->GetNodeSitesByConstrain();
-        //auto sites = voroPorTreeMap->GetLeafNodeSites();
+        // auto sites = voroPorTreeMap->GetLeafNodeSites();
         for (size_t i = 0; i < sites.size(); i++)
         {
-            //sites[i]->Print();
+            // sites[i]->Print();
             points.emplace_back(KiriPoint2(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) + offsetVec2, Vector3F(1.f, 0.f, 0.f)));
             auto poly = sites[i]->GetCellPolygon();
             if (poly != NULL)
@@ -1272,12 +1272,12 @@ void UniParticleSampler()
     Vector<Vector2F> bunny2d;
     Vector<Vector2F> sbunny2d;
     size_t bunnyNum;
-    //load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
+    // load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
     load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
 
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
-        //auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
+        // auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
         auto newPos = bunny2d[i];
         sbunny2d.emplace_back(newPos);
         boundary.Append(newPos);
@@ -1298,10 +1298,10 @@ void UniParticleSampler()
 
         auto lineh = KiriLine2(lower + Vector2F(0.f, i * 2.f * radius), lower + Vector2F(higher.x - lower.x, i * 2.f * radius));
         lineh.thick = 1.3f;
-        //lineh.col = Vector3F(0.f, 0.f, 0.f);
+        // lineh.col = Vector3F(0.f, 0.f, 0.f);
         auto linev = KiriLine2(lower + Vector2F(i * 2.f * radius, 0.f), lower + Vector2F(i * 2.f * radius, higher.y - lower.y + radius));
         linev.thick = 1.3f;
-        //linev.col = Vector3F(0.f, 0.f, 0.f);
+        // linev.col = Vector3F(0.f, 0.f, 0.f);
         lines.emplace_back(lineh);
         lines.emplace_back(linev);
         for (size_t j = 0; j < hn; j++)
@@ -1397,15 +1397,14 @@ void VoroPorosityOptimizeScaleExample()
         Vector<KiriPoint2> points;
         Vector<KiriLine2> lines;
         Vector<KiriCircle2> circles;
-        //if (1)
-        //if ((i % 10 == 1) || (i == maxIter - 1))
-        if (1)
+        // if (1)
+        if ((i % 10 == 1) || (i == maxIter - 1))
         {
             auto sites = opti->GetLeafNodeSites();
             for (size_t i = 0; i < sites.size(); i++)
             {
-                //sites[i]->Print();
-                //auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) , height) + offsetVec2;
+                // sites[i]->Print();
+                // auto p = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y) , height) + offsetVec2;
                 auto p = Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y);
                 points.emplace_back(KiriPoint2(p, Vector3F(1.f, 0.f, 0.f)));
                 auto poly = sites[i]->GetCellPolygon();
@@ -1421,7 +1420,7 @@ void VoroPorosityOptimizeScaleExample()
                         // auto start = Transform2Original(Vector2F(node->value) * 10.f, height) + offsetVec2;
                         auto start = Vector2F(node->value);
                         node = node->next;
-                        //auto end = Transform2Original(Vector2F(node->value) * 10.f, height) + offsetVec2;
+                        // auto end = Transform2Original(Vector2F(node->value) * 10.f, height) + offsetVec2;
                         auto end = Vector2F(node->value);
                         auto line = KiriLine2(start, end);
                         line.thick = 5.f;
@@ -1429,6 +1428,9 @@ void VoroPorosityOptimizeScaleExample()
                     } while (node != list->GetHead());
                 }
             }
+
+            auto sites_data = opti->GetVoronoiSitesData();
+            ExportVoronoiData2CSVFile(boundaryFileName, UInt2Str4Digit(i), sites_data);
 
             auto maxIC = opti->GetMICBySSkel();
             lastMaxCircle = maxIC;
@@ -1441,7 +1443,7 @@ void VoroPorosityOptimizeScaleExample()
             Vec_Float predictRadiusArray, realRadiusArray;
             for (size_t i = 0; i < maxIC.size(); i++)
             {
-                //auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
+                // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
                 auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y), Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
 
                 predictRadiusArray.emplace_back(maxIC[i].z);
@@ -1494,9 +1496,6 @@ void VoroPorosityOptimizeScaleExample()
         //     ExportEvaluationData2CSVFile(boundaryFileName, UInt2Str4Digit(i), RMSEArray, RMSPEArray);
         // }
     }
-
-    //auto sites_data = opti->GetVoronoiSitesData();
-    //ExportVoronoiData2CSVFile("bunny", "1500", sites_data);
 }
 
 #include <kiri2d/straight_skeleton/sskel_slav.h>
@@ -1653,24 +1652,26 @@ void LoadVoronoiExample()
     // voronoi
     float width = 3000.f;
     float height = 3000.f;
-    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+    auto offsetVec2 = Vector2F(500.f, 500.f);
+
+    String boundaryFileName = "bunny";
+    String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
     Vector<Vector2F> bunny2d;
     size_t bunnyNum;
-    load_xy_file1(bunny2d, bunnyNum, "D:/project/Kiri2D/scripts/alphashape/test.xy");
-    //load_xy_file1(bunny2d, bunnyNum, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
 
     Vector<Vector2F> boundary;
     auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
 
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
-        auto newPos = bunny2d[i] * 4000.f + Vector2F(-width / 2.f, height / 5.f);
-        boundary.emplace_back(Transform2Original(Vector2F(newPos), height) + offsetVec2);
-        boundaryPoly->AddPolygonVertex2(Transform2Original(Vector2F(newPos), height) + offsetVec2);
+        auto newPos = bunny2d[i] * 4000.f + offsetVec2;
+        boundary.emplace_back(newPos);
+        boundaryPoly->AddPolygonVertex2(newPos);
     }
 
-    auto voro_data = LoadCSVFile2VoronoiSites("bunny_sites_1500.csv");
+    auto voro_data = LoadCSVFile2VoronoiSites("bunny_sites_3999.csv");
 
     auto spliter = std::make_shared<KiriVoroSplit>();
 
@@ -1687,13 +1688,17 @@ void LoadVoronoiExample()
     Vector<KiriLine2> lines;
     Vector<KiriCircle2> circles;
 
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
+
     auto sites = spliter->GetVoroSites();
     for (size_t i = 0; i < sites.size(); i++)
     {
         auto site_i = std::dynamic_pointer_cast<KiriVoroGroupSite>(sites[i]);
-        auto p = Transform2Original(Vector2F(site_i->GetValue().x, site_i->GetValue().y), height) + offsetVec2;
+        auto p = Vector2F(site_i->GetValue().x, site_i->GetValue().y);
 
-        auto point = KiriPoint2(p, Vector3F(1.f, 0.f, 0.f));
+        auto point = KiriPoint2(p, Vector3F(1.f, 1.f, 1.f));
         if (site_i->GetIsGroup())
             point.col = site_i->GetGroupColor();
 
@@ -1707,10 +1712,10 @@ void LoadVoronoiExample()
             auto node = list->GetHead();
             do
             {
-                auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                auto start = Vector2F(node->value);
 
                 node = node->next;
-                auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                auto end = Vector2F(node->value);
                 auto line = KiriLine2(start, end);
                 line.thick = 5.f;
 
@@ -1720,16 +1725,29 @@ void LoadVoronoiExample()
             if (poly->GetSkeletons().empty())
                 poly->ComputeSSkel1998Convex();
 
-            auto mic = poly->ComputeMICByStraightSkeleton();
-            auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(mic.x, mic.y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), mic.z);
-            if (site_i->GetIsGroup())
-                maxCir2.col = site_i->GetGroupColor();
+            // auto mic = poly->ComputeMICByStraightSkeleton();
+            auto mic = poly->ComputeMICByStraightSkeletonTest();
+            auto gcolor = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
+            // KIRI_LOG_DEBUG("g size={0}", mic.size());
+            for (size_t idx = 0; idx < mic.size(); idx++)
+            {
+                auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
+                // if (site_i->GetIsGroup())
+                //     maxCir2.col = site_i->GetGroupColor();
+                //  maxCir2.fill = false;
+                maxCir2.col = gcolor;
+                circles.emplace_back(maxCir2);
+            }
 
-            circles.emplace_back(maxCir2);
+            // auto maxCir2 = KiriCircle2(Vector2F(mic.x, mic.y), Vector3F(1.f, 0.f, 1.f), mic.z);
+            // if (site_i->GetIsGroup())
+            //     maxCir2.col = site_i->GetGroupColor();
+
+            // circles.emplace_back(maxCir2);
         }
     }
 
-    scene->AddParticles(points);
+    // scene->AddParticles(points);
     scene->AddLines(lines);
     scene->AddCircles(circles);
 
@@ -1759,7 +1777,7 @@ void UniPoissonDiskSampler()
     load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
-        //auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
+        // auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
         auto newPos = bunny2d[i] * 4000.f;
         sbunny2d.emplace_back(newPos);
         boundary.Append(newPos);
@@ -1769,7 +1787,7 @@ void UniPoissonDiskSampler()
     for (size_t i = 0; i < bunnyNum; i++)
         bbox.merge(sbunny2d[i]);
 
-    //Vector2F offset = Vector2F(windowwidth - bbox.width(), windowheight - bbox.height()) / 2.f;
+    // Vector2F offset = Vector2F(windowwidth - bbox.width(), windowheight - bbox.height()) / 2.f;
     Vector2F offset = Vector2F(0.f);
     boundary.SetOffset(offset);
 
@@ -1780,7 +1798,7 @@ void UniPoissonDiskSampler()
     // uni
     auto radius = 100.f;
 
-    //multi
+    // multi
     auto max_radius = 150.f;
     std::vector<float> radius_range;
     radius_range.push_back(20.f);
@@ -1847,32 +1865,32 @@ void UniPoissonDiskSampler()
 int main()
 {
     KIRI::KiriLog::Init();
-    //VoronoiExample();
-    //VoronoiExample2();
+    // VoronoiExample();
+    // VoronoiExample2();
 
     // LloydRelaxationExample();
 
-    //GenRndTreemap();
+    // GenRndTreemap();
 
-    //NOCAJ12Example();
-    //NOCAJ12Example1();
+    // NOCAJ12Example();
+    // NOCAJ12Example1();
 
-    //VoroTestExample();
+    // VoroTestExample();
 
-    //VoroPorosityTreemapOptiExample();
+    // VoroPorosityTreemapOptiExample();
 
-    //UniParticleSampler();
+    // UniParticleSampler();
 
-    //StraightSkeletonExample1();
+    // StraightSkeletonExample1();
 
-    //VoroPorosityOptimizeConvexExample();
-    //VoroPorosityOptimizeBunnyExample();
+    // VoroPorosityOptimizeConvexExample();
+    // VoroPorosityOptimizeBunnyExample();
 
-    VoroPorosityOptimizeScaleExample();
+    // VoroPorosityOptimizeScaleExample();
 
-    //UniPoissonDiskSampler();
+    // UniPoissonDiskSampler();
 
-    //LoadVoronoiExample();
+    LoadVoronoiExample();
 
     return 0;
 }

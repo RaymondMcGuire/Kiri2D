@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
  * @LastEditTime: 2021-08-02 17:47:15
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_split_test.cpp
  */
 
@@ -11,9 +11,21 @@
 #include <random>
 namespace KIRI
 {
+
+    Vec_Vec3F KiriVoroSplit::GetMIC(const KiriVoroSitePtr &site)
+    {
+        auto poly = site->GetCellPolygon();
+
+        if (poly->GetSkeletons().empty())
+        {
+            poly->ComputeSSkel1998Convex();
+        }
+
+        return poly->ComputeMICByStraightSkeletonTest();
+    }
+
     Vector<Vector4F> KiriVoroSplit::GetMICBySSkel()
     {
-        Vector<Vector4F> circles;
         auto sites = this->GetVoroSites();
 
         Vector<UInt> removeVoroIdxs;
@@ -24,83 +36,84 @@ namespace KIRI
             {
                 if (poly->GetSkeletons().empty())
                 {
-
                     poly->ComputeSSkel1998Convex();
                 }
 
                 auto mic = poly->ComputeMICByStraightSkeleton();
-                circles.emplace_back(Vector4F(mic, sites[i]->GetRadius()));
+                mMIC.emplace_back(Vector4F(mic, sites[i]->GetRadius()));
             }
             else
             {
-                removeVoroIdxs.emplace_back(sites[i]->GetIdx());
+                KIRI_LOG_DEBUG("error!!!");
             }
         }
 
-        if (!removeVoroIdxs.empty())
-            mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
-
-        return circles;
+        return mMIC;
     }
 
     void KiriVoroSplit::Init()
     {
+        mMIC.clear();
         mPowerDiagram->ComputeDiagram();
-        ComputeGroup();
+        // ComputeGroup();
     }
 
     void KiriVoroSplit::ComputeGroup()
     {
 
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
-        std::uniform_real_distribution<float> dist(0.f, 1.f);
+        // std::random_device seedGen;
+        // std::default_random_engine rndEngine(seedGen());
+        // std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-        auto voroSite = mPowerDiagram->GetVoroSites();
+        // auto voroSite = mPowerDiagram->GetVoroSites();
 
-        for (size_t i = 0; i < voroSite.size(); i++)
-        {
-            auto vi = std::dynamic_pointer_cast<KiriVoroGroupSite>(voroSite[i]);
-            if (vi->GetIsGroup())
-                continue;
+        // for (size_t i = 0; i < voroSite.size(); i++)
+        // {
+        //     auto vi = std::dynamic_pointer_cast<KiriVoroGroupSite>(voroSite[i]);
+        //     if (vi->GetIsGroup())
+        //         continue;
 
-            auto group_col = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
-            vi->SetGroupId(mGroupCounter);
-            vi->SetGroupColor(group_col);
+        //     auto neighbors = voroSite[i]->GetNeighborSites();
+        //     if (neighbors.empty())
+        //         continue;
 
-            auto neighbors = voroSite[i]->GetNeighborSites();
-            if (neighbors.size() < 2)
-                continue;
+        //     auto group_col = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
+        //     vi->SetGroupId(mGroupCounter);
+        //     vi->SetGroupColor(group_col);
 
-            auto tmp_num = 0;
-            for (size_t j = 0; j < neighbors.size(); j++)
-            {
-                auto nj = std::dynamic_pointer_cast<KiriVoroGroupSite>(neighbors[j]);
-                if (nj->GetIsGroup())
-                    continue;
+        //              auto mic = GetMIC(voroSite[i]);
+        //     auto tmp_num = 0;
+        //     for (size_t j = 0; j < mic.size(); j++)
+        //     {
 
-                nj->SetGroupId(mGroupCounter);
-                nj->SetGroupColor(group_col);
-                tmp_num++;
+        //         auto micJ = GetMIC(neighbors[j]);
+        //         // judge
+        //         auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
+        //         KIRI_LOG_DEBUG("disIJ={0}, radiusIJ={1}", disIJ, micI.z + micJ.z);
+        //         if (disIJ == (micI.z + micJ.z))
+        //         {
+        //             nj->SetGroupId(mGroupCounter);
+        //             nj->SetGroupColor(group_col);
+        //             tmp_num++;
+        //         }
 
-                if (tmp_num == 2)
-                    break;
-            }
+        //         if (tmp_num == 2)
+        //             break;
+        //     }
 
-            if (tmp_num < 2)
-            {
-                vi->DisGroup();
-                for (size_t j = 0; j < neighbors.size(); j++)
-                {
-                    auto nj = std::dynamic_pointer_cast<KiriVoroGroupSite>(neighbors[j]);
+        //     if (tmp_num == 0)
+        //     {
+        //         vi->DisGroup();
+        //         // for (size_t j = 0; j < neighbors.size(); j++)
+        //         // {
+        //         //     auto nj = std::dynamic_pointer_cast<KiriVoroGroupSite>(neighbors[j]);
 
-                    if (nj->GetIsGroup() && nj->GetGroupId() == mGroupCounter)
-                        nj->DisGroup();
-                }
-            }
-            else
-                mGroupCounter++;
-        }
-    }
-
+        //         //     if (nj->GetIsGroup() && nj->GetGroupId() == mGroupCounter)
+        //         //         nj->DisGroup();
+        //         // }
+        //     }
+        //     else
+        //         mGroupCounter++;
+    //}
+}
 }

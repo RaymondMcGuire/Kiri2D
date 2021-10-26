@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-08-02 12:15:59
+ * @LastEditTime: 2021-10-26 16:07:06
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_cell_polygon2.h
  */
 
@@ -62,16 +62,16 @@ namespace KIRI
 
         Vector2F GetRndInnerPoint();
 
-        /*** 
-         * @description: Nürnberg, R. (2013). Calculating the volume and centroid of a polyhedron in 3d. 
+        /***
+         * @description: Nürnberg, R. (2013). Calculating the volume and centroid of a polyhedron in 3d.
          * @url:http://paulbourke.net/geometry/polygonmesh/centroid.pdf
          * @param {*}
          * @return {*}
          */
         float GetPolygonArea();
 
-        /*** 
-         * @description: Nürnberg, R. (2013). Calculating the volume and centroid of a polyhedron in 3d. 
+        /***
+         * @description: Nürnberg, R. (2013). Calculating the volume and centroid of a polyhedron in 3d.
          * @url:http://paulbourke.net/geometry/polygonmesh/centroid.pdf
          * @param {*}
          * @return {*}
@@ -88,6 +88,8 @@ namespace KIRI
         void ComputeSSkel1998Convex();
 
         Vector3F ComputeMICByStraightSkeleton();
+        Vec_Vec3F ComputeMICByStraightSkeletonTest();
+
         Vec_Vec3F ComputeAllCByStraightSkeleton();
 
     private:

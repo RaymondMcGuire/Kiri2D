@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
  * @LastEditTime: 2021-10-20 00:47:43
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_core.cpp
  */
 
@@ -83,21 +83,21 @@ namespace KIRI
             }
         }
 
-        //KIRI_LOG_INFO("GetMICBySSkel:EndPoint1");
+        // KIRI_LOG_INFO("GetMICBySSkel:EndPoint1");
 
         if (!removeVoroIdxs.empty())
             this->RemoveVoroSitesByIndexArray(removeVoroIdxs);
 
-        //KIRI_LOG_INFO("GetMICBySSkel:EndPoint2");
+        // KIRI_LOG_INFO("GetMICBySSkel:EndPoint2");
 
         return circles;
     }
 
     float KiriVoroPoroOptiCore::ComputeMiniumPorosity()
     {
-        //KIRI_LOG_INFO("Start GetMICBySSkel");
+        // KIRI_LOG_INFO("Start GetMICBySSkel");
         auto maxCircleArray = this->GetMICBySSkel();
-        //KIRI_LOG_INFO("Compeleted GetMICBySSkel");
+        // KIRI_LOG_INFO("Compeleted GetMICBySSkel");
 
         auto sum = 0.f;
 #pragma omp parallel for reduction(+ \
@@ -262,7 +262,7 @@ namespace KIRI
 
         if (!removeVoroIdxs.empty())
         {
-            //KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
+            // KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
             mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
             AdaptPositionsWeights();
         }
@@ -282,10 +282,10 @@ namespace KIRI
             Vector<KiriVoroSitePtr> newVoroArrays;
             Vector<float> errorArray(mGlobalPorosityArray.end() - entityNum, mGlobalPorosityArray.end());
             auto line = LineFitLeastSquares(errorArray);
-            KIRI_LOG_DEBUG("line k={0}", std::abs(line.x));
+            // KIRI_LOG_DEBUG("line k={0}", std::abs(line.x));
             if (std::abs(line.x) < 1e-6f)
             {
-                KIRI_LOG_DEBUG("reach line res={0}", std::abs(line.x) < 1e-6f);
+                // KIRI_LOG_DEBUG("reach line res={0}", std::abs(line.x) < 1e-6f);
                 std::vector<float> radiusRange;
                 radiusRange.push_back(20.f);
                 radiusRange.push_back(30.f);
@@ -339,7 +339,7 @@ namespace KIRI
                 auto current_mp = ComputeMiniumPorosity();
                 if (mLastMP > current_mp)
                 {
-                    KIRI_LOG_DEBUG("Add P");
+                    // KIRI_LOG_DEBUG("Add P");
                     for (int i = 0; i < need_append_vorosite_num; i++)
                         AddSite(newVoroArrays[i]);
 
@@ -397,15 +397,15 @@ namespace KIRI
             else if (mVoroSitesWeightError[i] > 0.f)
                 bcWeight += step;
 
-            //KIRI_LOG_DEBUG("AdaptWeights: error={0}, step={1}, weight={2}", error, step, weight);
-            // // KIRI_LOG_DEBUG("AdaptWeights: mVoroSitesDisError={0}, mVoroSitesDisErrorAbs={1}, mCurGlobalDisError={2}", mVoroSitesDisError[i], mVoroSitesDisErrorAbs[i], mCurGlobalDisError);
+            // KIRI_LOG_DEBUG("AdaptWeights: error={0}, step={1}, weight={2}", error, step, weight);
+            //  // KIRI_LOG_DEBUG("AdaptWeights: mVoroSitesDisError={0}, mVoroSitesDisErrorAbs={1}, mCurGlobalDisError={2}", mVoroSitesDisError[i], mVoroSitesDisErrorAbs[i], mCurGlobalDisError);
 
-            //KIRI_LOG_DEBUG("AdaptWeights: idx={0}, aw={1}, bw={2}", i, areaWeight, bcWeight);
+            // KIRI_LOG_DEBUG("AdaptWeights: idx={0}, aw={1}, bw={2}", i, areaWeight, bcWeight);
 
             voroSite[i]->SetWeight(weight + areaWeight + bcWeight);
         }
 
-        //KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
+        // KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
     }
 
     void KiriVoroPoroOptiCore::ComputeVoroSiteWeightError()
@@ -496,7 +496,7 @@ namespace KIRI
         AdaptPositionsWeights();
         AdaptWeights();
 
-        //KIRI_LOG_DEBUG("---compute power---");
+        // KIRI_LOG_DEBUG("---compute power---");
         mPowerDiagram->ComputeDiagram();
         //  if (!mPowerDiagram->ComputeDiagram())
         //     mPowerDiagram->ReGenVoroSites();

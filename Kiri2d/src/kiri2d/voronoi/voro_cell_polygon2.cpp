@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
  * @LastEditTime: 2021-10-07 02:16:06
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_cell_polygon2.cpp
  */
 
@@ -11,6 +11,8 @@
 #include <kiri2d/voronoi/voro_util.h>
 #include <random>
 #include <kiri2d/straight_skeleton/sskel_slav.h>
+
+#include <remove_at.hpp>
 namespace KIRI
 {
 
@@ -57,7 +59,7 @@ namespace KIRI
 
     Vec_Vec3F KiriVoroCellPolygon2::ComputeAllCByStraightSkeleton()
     {
-        //TODO remove same cir
+        // TODO remove same cir
         Vec_Vec3F all_circles;
         if (!mSkeletons.empty())
         {
@@ -80,6 +82,64 @@ namespace KIRI
             }
         }
         return all_circles;
+    }
+
+    Vec_Vec3F KiriVoroCellPolygon2::ComputeMICByStraightSkeletonTest()
+    {
+        Vec_Vec3F mic;
+        Vector<int> removeMIC;
+        if (!mSkeletons.empty())
+        {
+            for (size_t i = 0; i < mSkeletons.size(); i++)
+            {
+                auto v1 = Vector2F(mSkeletons[i].x, mSkeletons[i].y);
+
+                if (Contains(v1))
+                {
+                    auto minDis = ComputeMinDisInPoly(v1);
+                    mic.emplace_back(Vector3F(v1.x, v1.y, minDis));
+                }
+
+                auto v2 = Vector2F(mSkeletons[i].z, mSkeletons[i].w);
+                if (Contains(v2))
+                {
+                    auto minDis = ComputeMinDisInPoly(v2);
+                    mic.emplace_back(Vector3F(v2.x, v2.y, minDis));
+                }
+            }
+        }
+
+        if (mic.size() > 1)
+        {
+            for (size_t i = 0; i < mic.size() - 1; i++)
+            {
+                bool bRemoveContain = false;
+                for (size_t j = i + 1; j < mic.size(); j++)
+                {
+                    auto disIJ = (Vector2F(mic[i].x, mic[i].y) - Vector2F(mic[j].x, mic[j].y)).length();
+
+                    if ((mic[j].z > (mic[i].z + disIJ)) || (mic[i] == mic[j]))
+                    {
+                        bRemoveContain = true;
+                        break;
+                    }
+                }
+
+                if (bRemoveContain)
+                    removeMIC.emplace_back(static_cast<int>(i));
+            }
+
+            // KIRI_LOG_DEBUG("o size={0}, re size={1}", mic.size(), removeMIC.size());
+        }
+
+        if (!removeMIC.empty())
+        {
+            remove_at<Vector3F>(mic, removeMIC);
+        }
+
+        // KIRI_LOG_DEBUG("current o size={0}", mic.size());
+
+        return mic;
     }
 
     Vector3F KiriVoroCellPolygon2::ComputeMICByStraightSkeleton()
