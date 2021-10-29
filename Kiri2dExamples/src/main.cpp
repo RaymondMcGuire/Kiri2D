@@ -1726,15 +1726,15 @@ void LoadVoronoiExample()
                 poly->ComputeSSkel1998Convex();
 
             // auto mic = poly->ComputeMICByStraightSkeleton();
+
             auto mic = poly->ComputeMICByStraightSkeletonTest();
             auto gcolor = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
             // KIRI_LOG_DEBUG("g size={0}", mic.size());
+
             for (size_t idx = 0; idx < mic.size(); idx++)
             {
                 auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
-                // if (site_i->GetIsGroup())
-                //     maxCir2.col = site_i->GetGroupColor();
-                //  maxCir2.fill = false;
+                // maxCir2.fill = false;
                 maxCir2.col = gcolor;
                 circles.emplace_back(maxCir2);
             }

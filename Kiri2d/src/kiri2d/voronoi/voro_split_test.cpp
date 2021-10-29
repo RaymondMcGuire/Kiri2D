@@ -61,59 +61,60 @@ namespace KIRI
     void KiriVoroSplit::ComputeGroup()
     {
 
-        // std::random_device seedGen;
-        // std::default_random_engine rndEngine(seedGen());
-        // std::uniform_real_distribution<float> dist(0.f, 1.f);
+        std::random_device seedGen;
+        std::default_random_engine rndEngine(seedGen());
+        std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-        // auto voroSite = mPowerDiagram->GetVoroSites();
+        auto voroSite = mPowerDiagram->GetVoroSites();
 
-        // for (size_t i = 0; i < voroSite.size(); i++)
-        // {
-        //     auto vi = std::dynamic_pointer_cast<KiriVoroGroupSite>(voroSite[i]);
-        //     if (vi->GetIsGroup())
-        //         continue;
+        for (size_t i = 0; i < voroSite.size(); i++)
+        {
+            auto vi = std::dynamic_pointer_cast<KiriVoroGroupSite>(voroSite[i]);
+            if (vi->GetIsGroup())
+                continue;
 
-        //     auto neighbors = voroSite[i]->GetNeighborSites();
-        //     if (neighbors.empty())
-        //         continue;
+            auto neighbors = voroSite[i]->GetNeighborSites();
+            if (neighbors.empty())
+                continue;
 
-        //     auto group_col = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
-        //     vi->SetGroupId(mGroupCounter);
-        //     vi->SetGroupColor(group_col);
+            auto group_col = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
+            vi->SetGroupId(mGroupCounter);
+            vi->SetGroupColor(group_col);
 
-        //              auto mic = GetMIC(voroSite[i]);
-        //     auto tmp_num = 0;
-        //     for (size_t j = 0; j < mic.size(); j++)
-        //     {
+            auto mic = GetMICBySSkel();
+            auto micI = mic[i];
+            auto tmp_num = 0;
+            for (size_t j = 0; j < neighbors.size(); j++)
+            {
 
-        //         auto micJ = GetMIC(neighbors[j]);
-        //         // judge
-        //         auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
-        //         KIRI_LOG_DEBUG("disIJ={0}, radiusIJ={1}", disIJ, micI.z + micJ.z);
-        //         if (disIJ == (micI.z + micJ.z))
-        //         {
-        //             nj->SetGroupId(mGroupCounter);
-        //             nj->SetGroupColor(group_col);
-        //             tmp_num++;
-        //         }
+                auto micJ = mic[neighbors[j]->GetIdx()];
+                // judge
+                auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
+                if (disIJ == (micI.z + micJ.z))
+                {
+                    auto nj = std::dynamic_pointer_cast<KiriVoroGroupSite>(neighbors[j]);
+                    nj->SetGroupId(mGroupCounter);
+                    nj->SetGroupColor(group_col);
+                    tmp_num++;
+                }
 
-        //         if (tmp_num == 2)
-        //             break;
-        //     }
+                if (tmp_num == 2)
+                    break;
+            }
 
-        //     if (tmp_num == 0)
-        //     {
-        //         vi->DisGroup();
-        //         // for (size_t j = 0; j < neighbors.size(); j++)
-        //         // {
-        //         //     auto nj = std::dynamic_pointer_cast<KiriVoroGroupSite>(neighbors[j]);
+            if (tmp_num == 0)
+            {
+                vi->DisGroup();
+                // for (size_t j = 0; j < neighbors.size(); j++)
+                // {
+                //     auto nj = std::dynamic_pointer_cast<KiriVoroGroupSite>(neighbors[j]);
 
-        //         //     if (nj->GetIsGroup() && nj->GetGroupId() == mGroupCounter)
-        //         //         nj->DisGroup();
-        //         // }
-        //     }
-        //     else
-        //         mGroupCounter++;
-    //}
-}
+                //     if (nj->GetIsGroup() && nj->GetGroupId() == mGroupCounter)
+                //         nj->DisGroup();
+                // }
+            }
+            else
+                mGroupCounter++;
+        }
+    }
 }
