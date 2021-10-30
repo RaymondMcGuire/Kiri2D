@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-20 21:44:20
  * @LastEditTime: 2021-10-06 11:24:47
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\power_diagram.cpp
  */
 
@@ -72,6 +72,25 @@ namespace KIRI
         return Vector3F(maxCirVec.x, maxCirVec.y, maxCirRad);
     }
 
+    Vector<Vector4F> KiriPowerDiagram::ComputeDelaunayTriangulation()
+    {
+        Vector<Vector4F> dela_tri;
+        if (!mVoroSites.empty())
+        {
+            for (size_t i = 0; i < mVoroSites.size(); i++)
+            {
+                auto posi = mVoroSites[i]->GetValue();
+                auto neighbors = mVoroSites[i]->GetNeighborSites();
+                for (size_t j = 0; j < neighbors.size(); j++)
+                {
+                    auto posj = neighbors[j]->GetValue();
+                    dela_tri.emplace_back(Vector4F(posi.x, posi.y, posj.x, posj.y));
+                }
+            }
+        }
+        return dela_tri;
+    }
+
     float KiriPowerDiagram::ComputeMinPorosity()
     {
         auto maxCir = ComputeMaxInscribedCircle();
@@ -138,7 +157,7 @@ namespace KIRI
         auto edges = mConvexHull->GetEdges();
         do
         {
-            //prevEdge = prevEdge->GetTwinEdge()->GetPrevEdge();
+            // prevEdge = prevEdge->GetTwinEdge()->GetPrevEdge();
             if (prevEdge->GetTwinEdgeId() == -1)
                 break;
 
@@ -221,15 +240,15 @@ namespace KIRI
                 else
                 {
                     outside = true;
-                    //KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
-                    // auto rndPos = mBoundaryPolygon2->GetRndInnerPoint();
-                    // mVoroSites[j]->ResetValue(rndPos);
+                    // KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
+                    //  auto rndPos = mBoundaryPolygon2->GetRndInnerPoint();
+                    //  mVoroSites[j]->ResetValue(rndPos);
                     mVoroSites[j]->SetCellPolygon(NULL);
                     mVoroSites[j]->Disable();
                 }
             }
 
-            //KIRI_LOG_DEBUG("voro site idx={0}, value=({1},{2},{3})", mVoroSites[j]->GetIdx(), mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y, mVoroSites[j]->GetValue().z);
+            // KIRI_LOG_DEBUG("voro site idx={0}, value=({1},{2},{3})", mVoroSites[j]->GetIdx(), mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y, mVoroSites[j]->GetValue().z);
         }
 
         return outside;
@@ -251,14 +270,14 @@ namespace KIRI
                 else
                 {
                     outside = true;
-                    //KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
+                    // KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
                     mVoroSites[j]->SetCellPolygon(NULL);
                     mVoroSites[j]->Disable();
                     removeVoroIdxs.emplace_back(mVoroSites[j]->GetIdx());
                 }
             }
 
-            //KIRI_LOG_DEBUG("voro site idx={0}, value=({1},{2},{3})", mVoroSites[j]->GetIdx(), mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y, mVoroSites[j]->GetValue().z);
+            // KIRI_LOG_DEBUG("voro site idx={0}, value=({1},{2},{3})", mVoroSites[j]->GetIdx(), mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y, mVoroSites[j]->GetValue().z);
         }
 
         if (!removeVoroIdxs.empty())
@@ -290,7 +309,7 @@ namespace KIRI
 
     void KiriPowerDiagram::LloydRelaxation()
     {
-        //TODO need optimize
+        // TODO need optimize
         ComputeDiagram();
 
         for (size_t i = 0; i < mRelaxIterNumber; i++)
@@ -312,11 +331,11 @@ namespace KIRI
     {
         if (!mVoroSites.empty())
         {
-            //PermutateVoroSites();
+            // PermutateVoroSites();
 
             Reset();
 
-            //Remove disabled voro sites
+            // Remove disabled voro sites
             mVoroSites.erase(
                 std::remove_if(mVoroSites.begin(), mVoroSites.end(),
                                [](const KiriVoroSitePtr &site)
@@ -367,17 +386,17 @@ namespace KIRI
 
         if (vcp1->GetBBox().contains(vcp2->GetBBox()))
         {
-            //KIRI_LOG_DEBUG("Contains");
+            // KIRI_LOG_DEBUG("Contains");
             return vcp2;
         }
 
-        //vcp2->PrintPolyVertices();
+        // vcp2->PrintPolyVertices();
 
         vcp1->ComputeVoroSitesList();
         vcp2->ComputeVoroSitesList();
 
-        //vcp2->PrintPolyVertices();
-        //vcp2->PrintVoroSitesList();
+        // vcp2->PrintPolyVertices();
+        // vcp2->PrintVoroSitesList();
 
         // auto rmpo = vcp2->GetPolygonVertices();
         // KIRI_LOG_DEBUG("---------------");
@@ -393,8 +412,8 @@ namespace KIRI
 
         auto intersection = mConvexClip->GetIntersectionList();
 
-        //KIRI_LOG_DEBUG("Voro cell intersection size={0}", intersection->Size());
-        //intersection->PrintVertexList();
+        // KIRI_LOG_DEBUG("Voro cell intersection size={0}", intersection->Size());
+        // intersection->PrintVertexList();
         if (intersection != NULL && intersection->Size() > 0)
         {
             auto node = intersection->GetHead();
@@ -429,7 +448,7 @@ namespace KIRI
             return clipedPolygon;
         }
 
-        //no intersection between the two polygons, so check if one is inside the other
+        // no intersection between the two polygons, so check if one is inside the other
         if (vcp1->GetBBox().contains(vcp2->GetPolygonVertices()[0]))
             return vcp2;
 
@@ -447,7 +466,7 @@ namespace KIRI
             {
                 for (size_t e = 0; e < 3; e++)
                 {
-                    //auto edge = facet->GetEdgesByIdx(e);
+                    // auto edge = facet->GetEdgesByIdx(e);
                     auto edge = edges[facet->GetEdgeIdByIdx(e)];
 
                     auto dst = edge->GetDestVertex();
@@ -465,7 +484,7 @@ namespace KIRI
                         auto lastX = Huge<float>(), lastY = Huge<float>();
                         auto dx = 1.f, dy = 1.f;
 
-                        //edge->PrintEdgeInfo();
+                        // edge->PrintEdgeInfo();
 
                         for (size_t j = 0; j < mFacetsAroundVertex.size(); j++)
                         {
@@ -488,7 +507,7 @@ namespace KIRI
                             }
                             if (dx > MEpsilon<float>() || dy > MEpsilon<float>())
                             {
-                                //KIRI_LOG_DEBUG("dual={0},{1}", dual.x, dual.y);
+                                // KIRI_LOG_DEBUG("dual={0},{1}", dual.x, dual.y);
                                 cellPoly->AddPolygonVertex2(dual);
                                 lastX = dual.x;
                                 lastY = dual.y;
@@ -547,7 +566,7 @@ namespace KIRI
 
                                             clipedPolygon->UpdateBBox();
                                             clipedPolygon->ComputeVoroSitesList();
-                                            //clipedPolygon->Print();
+                                            // clipedPolygon->Print();
 
                                             site->SetCellPolygon(clipedPolygon);
                                         }

@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
- * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-10-04 11:19:20
+ * @Date: 2021-10-05 00:08:58
+ * @LastEditTime: 2021-10-31 02:07:56
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
  */
 
@@ -60,12 +60,14 @@ namespace KIRI
 
         void ReGenVoroSites();
 
-        /*** 
-         * @description: 
+        /***
+         * @description:
          * @param {*}
          * @return {Vector3F} Vector2F center, float radius
          */
         Vector3F ComputeMaxInscribedCircle();
+
+        Vector<Vector4F> ComputeDelaunayTriangulation();
 
         float ComputeMinPorosity();
 
@@ -83,7 +85,7 @@ namespace KIRI
         void ComputeVoroCells();
         void ComputeFacetsAroundVertex(const KiriEdge3Ptr &edge);
 
-        /*** 
+        /***
          * @description: Uses the linear time algorithm of O'Rourke to compute the intersection of two convex polygons.
          * @param {const KiriVoroCellPolygon2Ptr} &vcp1
          * @param {const KiriVoroCellPolygon2Ptr} &vcp2

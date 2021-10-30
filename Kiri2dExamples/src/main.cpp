@@ -339,6 +339,119 @@ void VoronoiExample()
     }
 }
 
+void VoronoiExample1()
+{
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    // voronoi
+    auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
+    float width = 1000.f;
+    float height = 1000.f;
+    auto offsetVec2 = Vector2F((windowwidth - width) / 2.f, (windowheight - height) / 2.f);
+
+    // boundary polygon
+    KiriSDFPoly2D boundary;
+    auto bp1 = Vector2F(0, 0);
+    auto bp2 = Vector2F(width, 0);
+    auto bp3 = Vector2F(width, height);
+    auto bp4 = Vector2F(0, height);
+
+    boundary.Append(bp1);
+    boundary.Append(bp2);
+    boundary.Append(bp3);
+    boundary.Append(bp4);
+
+    boundaryPoly->AddPolygonVertex2(bp1);
+    boundaryPoly->AddPolygonVertex2(bp2);
+    boundaryPoly->AddPolygonVertex2(bp3);
+    boundaryPoly->AddPolygonVertex2(bp4);
+
+    auto pd = std::make_shared<KiriPowerDiagram>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
+
+    auto cnt = 0, maxcnt = 100;
+    while (cnt < maxcnt)
+    {
+        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        if (boundary.FindRegion(sitePos2) < 0.f)
+        {
+            pd->AddPowerSite(sitePos2, 0.f);
+            cnt++;
+        }
+    }
+
+    pd->SetBoundaryPolygon2(boundaryPoly);
+    pd->ComputeDiagram();
+    // pd->SetRelaxIterNumber(100);
+    // pd->LloydRelaxation();
+
+    auto del_tri = pd->ComputeDelaunayTriangulation();
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    while (1)
+    {
+        Vector<KiriPoint2> points;
+        Vector<KiriLine2> lines;
+
+        auto sites = pd->GetVoroSites();
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            // sites[i]->Print();
+            auto pos = Transform2Original(Vector2F(sites[i]->GetValue().x, sites[i]->GetValue().y), height) + offsetVec2;
+
+            if (sites[i]->GetValue().x < width / 2.f)
+                points.emplace_back(KiriPoint2(pos, Vector3F(1.f, 0.f, 0.f)));
+            else
+                points.emplace_back(KiriPoint2(pos, Vector3F(1.f, 0.f, 1.f)));
+
+            auto poly = sites[i]->GetCellPolygon();
+            if (poly != NULL)
+            {
+                poly->ComputeVoroSitesList();
+                auto list = poly->GetVoroSitesList();
+                // list->PrintVertexList();
+
+                auto node = list->GetHead();
+                do
+                {
+                    auto start = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                    node = node->next;
+                    auto end = Transform2Original(Vector2F(node->value), height) + offsetVec2;
+                    auto line = KiriLine2(start, end);
+                    lines.emplace_back(line);
+                } while (node != list->GetHead());
+            }
+        }
+
+        for (size_t i = 0; i < del_tri.size(); i++)
+        {
+            auto start = Transform2Original(Vector2F(del_tri[i].x, del_tri[i].y), height) + offsetVec2;
+            auto end = Transform2Original(Vector2F(del_tri[i].z, del_tri[i].w), height) + offsetVec2;
+            auto line = KiriLine2(start, end);
+            line.col = Vector3F(0, 0, 0) / 255.f;
+            line.thick = 2.f;
+            lines.emplace_back(line);
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
 void VoronoiExample2()
 {
     // scene renderer config
@@ -1865,8 +1978,9 @@ void UniPoissonDiskSampler()
 int main()
 {
     KIRI::KiriLog::Init();
-    // VoronoiExample();
-    // VoronoiExample2();
+    VoronoiExample();
+    // VoronoiExample1();
+    //  VoronoiExample2();
 
     // LloydRelaxationExample();
 
@@ -1890,7 +2004,7 @@ int main()
 
     // UniPoissonDiskSampler();
 
-    LoadVoronoiExample();
+    // LoadVoronoiExample();
 
     return 0;
 }
