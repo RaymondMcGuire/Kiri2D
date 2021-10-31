@@ -1877,21 +1877,21 @@ void UniPoissonDiskSampler()
     UInt counter = 0;
 
     // scene renderer config
-    float windowheight = 5000.f;
-    float windowwidth = 5000.f;
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
 
     KiriSDFPoly2D boundary;
 
     Vector<Vector2F> bunny2d;
     Vector<Vector2F> sbunny2d;
     size_t bunnyNum;
-    String boundaryFileName = "horse";
+    String boundaryFileName = "bunny";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
     load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
         // auto newPos = bunny2d[i] * 1000.f + Vector2F(width / 2.f, height / 25.f);
-        auto newPos = bunny2d[i] * 4000.f;
+        auto newPos = bunny2d[i] * 1000.f;
         sbunny2d.emplace_back(newPos);
         boundary.Append(newPos);
     }
@@ -1901,7 +1901,7 @@ void UniPoissonDiskSampler()
         bbox.merge(sbunny2d[i]);
 
     // Vector2F offset = Vector2F(windowwidth - bbox.width(), windowheight - bbox.height()) / 2.f;
-    Vector2F offset = Vector2F(0.f);
+    Vector2F offset = Vector2F(500.f, 0.f);
     boundary.SetOffset(offset);
 
     Vector<KiriPoint2> points;
@@ -1909,7 +1909,7 @@ void UniPoissonDiskSampler()
     Vector<KiriCircle2> circles;
 
     // uni
-    auto radius = 100.f;
+    auto radius = 10.f;
 
     // multi
     auto max_radius = 150.f;
@@ -1963,11 +1963,11 @@ void UniPoissonDiskSampler()
             renderer->DrawCanvas();
             renderer->SaveImages2File();
 
-            KIRI_LOG_DEBUG("sampling iterate idx:{0}", counter);
-            ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(counter), circles);
+            // KIRI_LOG_DEBUG("sampling iterate idx:{0}", counter);
+            // ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(counter), circles);
 
-            // cv::imshow("KIRI2D: Poisson Disk Sampling", renderer->GetCanvas());
-            // cv::waitKey(5);
+            cv::imshow("KIRI2D", renderer->GetCanvas());
+            cv::waitKey(5);
 
             renderer->ClearCanvas();
             scene->Clear();
@@ -1978,9 +1978,9 @@ void UniPoissonDiskSampler()
 int main()
 {
     KIRI::KiriLog::Init();
-    VoronoiExample();
-    // VoronoiExample1();
-    //  VoronoiExample2();
+    // VoronoiExample();
+    //  VoronoiExample1();
+    //   VoronoiExample2();
 
     // LloydRelaxationExample();
 
@@ -2002,7 +2002,7 @@ int main()
 
     // VoroPorosityOptimizeScaleExample();
 
-    // UniPoissonDiskSampler();
+    UniPoissonDiskSampler();
 
     // LoadVoronoiExample();
 
