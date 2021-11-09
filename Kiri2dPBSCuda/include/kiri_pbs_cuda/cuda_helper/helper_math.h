@@ -1446,6 +1446,11 @@ inline __host__ __device__ float3 reflect(float3 i, float3 n)
 // cross product
 ////////////////////////////////////////////////////////////////////////////////
 
+inline __host__ __device__ float cross(float2 a, float2 b)
+{
+    return  a.x * b.y - a.y * b.x;
+}
+
 inline __host__ __device__ float3 cross(float3 a, float3 b)
 {
     return make_float3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);

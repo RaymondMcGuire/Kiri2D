@@ -31,6 +31,7 @@ namespace KIRI
             params.poisson,
             params.tan_friction_angle,
             params.c0,
+            params.dt,
             cellStart,
             bparams.lowest_point,
             bparams.highest_point,

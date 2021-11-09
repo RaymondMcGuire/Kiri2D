@@ -10,7 +10,7 @@
 #include <kiri2d/voronoi/voro_treemap_nocaj12.h>
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>
-#include <kiri2d/treemap/treemap_layout.h>
+#include <kiri2d/treemap/treemap_layout.h> 
 #include <kiri2d/voronoi/voro_poropti.h>
 #include <kiri2d/voronoi/voro_poropti_treemap.h>
 #include <root_directory.h>
@@ -1975,7 +1975,7 @@ void UniPoissonDiskSampler()
     }
 }
 
-int main()
+int main1()
 {
     KIRI::KiriLog::Init();
     // VoronoiExample();

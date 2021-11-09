@@ -1,7 +1,7 @@
 /*** 
  * @Author: Xu.WANG
  * @Date: 2021-09-03 09:27:54
- * @LastEditTime: 2021-10-04 11:05:43
+ * @LastEditTime: 2021-11-10 01:16:34
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
@@ -243,13 +243,13 @@ void MRDEM_SetupParams()
     // volume sampling
     auto volumeEmitter = std::make_shared<CudaVolumeEmitter>();
     DemShapeVolumeData volumeData;
-    auto shape = LoadCSVFile2ShapeSamplers("bunny_samplers_1800.csv");
+    auto shape = LoadCSVFile2ShapeSamplers("bunny_samplers_7001.csv");
     volumeEmitter->BuildMRDemShapeVolume(
         volumeData,
         CUDA_DEM_PARAMS.rest_density,
         shape,
         make_float3(0.88f, 0.79552f, 0.5984f),
-        make_float2(0.1f, 0.f));
+        make_float2(-0.1f, -0.1f));
 
     KIRI_LOG_DEBUG("max radius={0}, min radius={1}", volumeData.maxRadius, volumeData.minRadius);
     CUDA_DEM_PARAMS.kernel_radius = 4.f * volumeData.maxRadius;
@@ -402,7 +402,7 @@ void UpdateRealTime()
     UpdateScene(circles);
 }
 
-void main1()
+void main()
 {
     KiriLog::Init();
 

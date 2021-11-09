@@ -14,130 +14,161 @@
 #include <kiri_pbs_cuda/cuda_helper/helper_math.h>
 #include <kiri_pbs_cuda/math/cuda_math_tensor.cuh>
 
-// quaternion(s,vx,vy,vz)
-struct quaternion
-{
-    float s;
-    float3 v;
+// x y
+// z w
+struct matrix2x2 {
+  float4 v;
 };
 
-inline __host__ __device__ quaternion make_quaternion(float s, float3 v)
-{
-    quaternion q;
-    q.s = s;
-    q.v = v;
-
-    return q;
+inline __host__ __device__ matrix2x2 make_matrix2x2(float4 v) {
+  matrix2x2 m;
+  m.v = v;
+  return m;
 }
 
-inline __host__ __device__ quaternion make_quaternion(float4 v4)
-{
-    quaternion q;
-    q.s = v4.x;
-    q.v = make_float3(v4.y, v4.z, v4.w);
-
-    return q;
+inline __host__ __device__ matrix2x2 operator*(matrix2x2 m1, matrix2x2 m2) {
+  return make_matrix2x2(make_float4(
+      m1.v.x * m2.v.x + m1.v.y * m2.v.z, m1.v.x * m2.v.y + m1.v.y * m2.v.w,
+      m1.v.z * m2.v.x + m1.v.w * m2.v.z, m1.v.z * m2.v.y + m1.v.w * m2.v.w));
 }
 
-inline __host__ __device__ quaternion make_quaternion(quaternion q0)
-{
-    quaternion q;
-    q.s = q0.s;
-    q.v = q0.v;
-
-    return q;
+inline __host__ __device__ float2 operator*(matrix2x2 m1, float2 f2) {
+  return make_float2(m1.v.x * f2.x + m1.v.y * f2.y,
+                     m1.v.z * f2.x + m1.v.w * f2.y);
 }
 
-inline __host__ __device__ quaternion make_quaternion(float s, float vx, float vy, float vz)
-{
-    quaternion q;
-    q.s = s;
-    q.v = make_float3(vx, vy, vz);
+struct rotation2 {
+  float angle;
+};
 
-    return q;
+inline __host__ __device__ rotation2 make_rotation2(float a) {
+  rotation2 r;
+  r.angle = a;
+  return r;
 }
 
-inline __host__ __device__ float4 coeffs(quaternion q)
-{
-    return make_float4(q.s, q.v.x, q.v.y, q.v.z);
+inline __host__ __device__ matrix2x2 cvt_rotation_matrix(rotation2 r) {
+  float sina = sin(r.angle);
+  float cosa = cos(r.angle);
+  return make_matrix2x2(make_float4(cosa, -sina, sina, cosa));
 }
 
-inline __host__ __device__ quaternion cross(quaternion q0, quaternion q1)
-{
-    quaternion q;
-    q.s = q0.s * q1.s - dot(q0.v, q1.v);
-    q.v = q0.s * q1.v + q1.s * q0.v + cross(q0.v, q1.v);
+// quaternion(s,vx,vy,vz)
+struct quaternion {
+  float s;
+  float3 v;
+};
 
-    return q;
+inline __host__ __device__ quaternion make_quaternion(float s, float3 v) {
+  quaternion q;
+  q.s = s;
+  q.v = v;
+
+  return q;
 }
 
-inline __host__ __device__ quaternion conjugate(quaternion q0)
-{
-    quaternion q;
-    q.s = q0.s;
-    q.v = -q0.v;
+inline __host__ __device__ quaternion make_quaternion(float4 v4) {
+  quaternion q;
+  q.s = v4.x;
+  q.v = make_float3(v4.y, v4.z, v4.w);
 
-    return q;
+  return q;
 }
 
-inline __host__ __device__ quaternion normalize(quaternion q)
-{
-    quaternion nq;
-    float invLen = rsqrtf(dot(q.v, q.v) + q.s * q.s);
-    nq.s = q.s * invLen;
-    nq.v = q.v * invLen;
-    return nq;
+inline __host__ __device__ quaternion make_quaternion(quaternion q0) {
+  quaternion q;
+  q.s = q0.s;
+  q.v = q0.v;
+
+  return q;
 }
 
-inline __host__ __device__ tensor3x3 rotation_matrix_by_quaternion(quaternion q)
-{
-    tensor3x3 t3x3;
-    float e11 = 1.f - 2.f * q.v.y * q.v.y - 2.f * q.v.z * q.v.z;
-    float e22 = 1.f - 2.f * q.v.x * q.v.x - 2.f * q.v.z * q.v.z;
-    float e33 = 1.f - 2.f * q.v.x * q.v.x - 2.f * q.v.y * q.v.y;
+inline __host__ __device__ quaternion make_quaternion(float s, float vx,
+                                                      float vy, float vz) {
+  quaternion q;
+  q.s = s;
+  q.v = make_float3(vx, vy, vz);
 
-    float e12 = 2.f * q.v.x * q.v.y - 2.f * q.s * q.v.z;
-    float e13 = 2.f * q.v.x * q.v.z + 2.f * q.s * q.v.y;
+  return q;
+}
 
-    float e21 = 2.f * q.v.x * q.v.y + 2.f * q.s * q.v.z;
-    float e23 = 2.f * q.v.y * q.v.z - 2.f * q.s * q.v.x;
+inline __host__ __device__ float4 coeffs(quaternion q) {
+  return make_float4(q.s, q.v.x, q.v.y, q.v.z);
+}
 
-    float e31 = 2.f * q.v.x * q.v.z - 2.f * q.s * q.v.y;
-    float e32 = 2.f * q.v.y * q.v.z + 2.f * q.s * q.v.x;
+inline __host__ __device__ quaternion cross(quaternion q0, quaternion q1) {
+  quaternion q;
+  q.s = q0.s * q1.s - dot(q0.v, q1.v);
+  q.v = q0.s * q1.v + q1.s * q0.v + cross(q0.v, q1.v);
 
-    t3x3.e1 = make_float3(e11, e12, e13);
-    t3x3.e2 = make_float3(e21, e22, e23);
-    t3x3.e3 = make_float3(e31, e32, e33);
+  return q;
+}
 
-    return t3x3;
+inline __host__ __device__ quaternion conjugate(quaternion q0) {
+  quaternion q;
+  q.s = q0.s;
+  q.v = -q0.v;
+
+  return q;
+}
+
+inline __host__ __device__ quaternion normalize(quaternion q) {
+  quaternion nq;
+  float invLen = rsqrtf(dot(q.v, q.v) + q.s * q.s);
+  nq.s = q.s * invLen;
+  nq.v = q.v * invLen;
+  return nq;
+}
+
+inline __host__ __device__ tensor3x3
+rotation_matrix_by_quaternion(quaternion q) {
+  tensor3x3 t3x3;
+  float e11 = 1.f - 2.f * q.v.y * q.v.y - 2.f * q.v.z * q.v.z;
+  float e22 = 1.f - 2.f * q.v.x * q.v.x - 2.f * q.v.z * q.v.z;
+  float e33 = 1.f - 2.f * q.v.x * q.v.x - 2.f * q.v.y * q.v.y;
+
+  float e12 = 2.f * q.v.x * q.v.y - 2.f * q.s * q.v.z;
+  float e13 = 2.f * q.v.x * q.v.z + 2.f * q.s * q.v.y;
+
+  float e21 = 2.f * q.v.x * q.v.y + 2.f * q.s * q.v.z;
+  float e23 = 2.f * q.v.y * q.v.z - 2.f * q.s * q.v.x;
+
+  float e31 = 2.f * q.v.x * q.v.z - 2.f * q.s * q.v.y;
+  float e32 = 2.f * q.v.y * q.v.z + 2.f * q.s * q.v.x;
+
+  t3x3.e1 = make_float3(e11, e12, e13);
+  t3x3.e2 = make_float3(e21, e22, e23);
+  t3x3.e3 = make_float3(e31, e32, e33);
+
+  return t3x3;
 }
 
 // https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
-inline __host__ __device__ float3 rotate_vector_by_quaternion(float3 v, quaternion q)
-{
-    float3 u = q.v;
-    float s = q.s;
+inline __host__ __device__ float3 rotate_vector_by_quaternion(float3 v,
+                                                              quaternion q) {
+  float3 u = q.v;
+  float s = q.s;
 
-    float3 v_prime = 2.f * dot(u, v) * u + (s * s - dot(u, u)) * v + 2.f * s * cross(u, v);
+  float3 v_prime =
+      2.f * dot(u, v) * u + (s * s - dot(u, u)) * v + 2.f * s * cross(u, v);
 
-    return v_prime;
+  return v_prime;
 }
 
 // http://www.euclideanspace.com/physics/kinematics/angularvelocity/QuaternionDifferentiation2.pdf
-inline __host__ __device__ quaternion dot(float3 angVel, quaternion Q)
-{
-    quaternion nq;
+inline __host__ __device__ quaternion dot(float3 angVel, quaternion Q) {
+  quaternion nq;
 
-    float qw = Q.s;
-    float3 qv = Q.v;
-    nq.s = (-qv.x * angVel.x - qv.y * angVel.y - qv.z * angVel.z) / 2.f;
+  float qw = Q.s;
+  float3 qv = Q.v;
+  nq.s = (-qv.x * angVel.x - qv.y * angVel.y - qv.z * angVel.z) / 2.f;
 
-    float x = (qw * angVel.x - qv.z * angVel.y + qv.y * angVel.z) / 2.f;
-    float y = (qv.z * angVel.x + qw * angVel.y - qv.x * angVel.z) / 2.f;
-    float z = (-qv.y * angVel.x + qv.x * angVel.y + qw * angVel.z) / 2.f;
+  float x = (qw * angVel.x - qv.z * angVel.y + qv.y * angVel.z) / 2.f;
+  float y = (qv.z * angVel.x + qw * angVel.y - qv.x * angVel.z) / 2.f;
+  float z = (-qv.y * angVel.x + qv.x * angVel.y + qw * angVel.z) / 2.f;
 
-    nq.v = make_float3(x, y, z);
-    return nq;
+  nq.v = make_float3(x, y, z);
+  return nq;
 }
 
 // // rotation matrix: MM^-1 = MM^T = I
