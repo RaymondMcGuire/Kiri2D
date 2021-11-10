@@ -47,6 +47,12 @@ inline __host__ __device__ rotation2 make_rotation2(float a) {
   return r;
 }
 
+inline __host__ __device__ rotation2 inverse_rot2(rotation2 r) {
+  rotation2 nr;
+  nr.angle = -r.angle;
+  return nr;
+}
+
 inline __host__ __device__ matrix2x2 cvt_rotation_matrix(rotation2 r) {
   float sina = sin(r.angle);
   float cosa = cos(r.angle);

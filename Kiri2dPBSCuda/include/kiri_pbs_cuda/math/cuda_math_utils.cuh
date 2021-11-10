@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-10-18 02:13:36
- * @LastEditTime: 2021-11-09 21:58:25
+ * @LastEditTime: 2021-11-11 03:21:47
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath:
@@ -27,11 +27,22 @@ inline __host__ __device__ bool operator!=(float3 a, float3 b) {
     return true;
 }
 
+inline __host__ __device__ bool operator!=(float2 a, float2 b) {
+  if (a.x == b.x && a.y == b.y)
+    return false;
+  else
+    return true;
+}
+
 inline __host__ __device__ float3 roundf3(float3 v) {
   return make_float3(roundf(v.x), roundf(v.y), roundf(v.z));
 }
 
+inline __host__ __device__ float2 ones2() { return make_float2(1.f); }
+
 inline __host__ __device__ float3 ones() { return make_float3(1.f); }
+
+inline __host__ __device__ float2 zeros2() { return make_float2(0.f); }
 
 inline __host__ __device__ float3 zeros() { return make_float3(0.f); }
 
