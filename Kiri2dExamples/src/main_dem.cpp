@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-09-03 09:27:54
  * @LastEditTime: 2021-11-10 01:16:34
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
  */
 
@@ -14,10 +14,15 @@ using namespace KIRI;
 using namespace KIRI2D;
 
 // scene config
+// float windowheight = 1080.f;
+// float windowwidth = 800.f;
+// auto world_size = make_float2(1.5f, 1.5f);
+
 float windowheight = 1080.f;
-float windowwidth = 800.f;
+float windowwidth = 1920.f;
+auto world_size = make_float2(900, 800);
+
 auto particle_scale = 500.f;
-auto world_size = make_float2(1.5f, 1.5f);
 
 auto offsetvec2 = Vector2F(windowwidth - world_size.x * particle_scale, windowheight - world_size.y * particle_scale) / 2.f;
 
@@ -35,6 +40,8 @@ float RenderInterval = 1.f / 60.f;
 
 KiriTimer PerFrameTimer;
 CudaDemSystemPtr DEMSystem;
+
+CudaDemNSSystemPtr DEMNSSystem;
 
 float radius = 0.015f;
 
@@ -115,7 +122,7 @@ void DEM_SetupParams()
     CUDA_DEM_PARAMS.gravity = make_float2(0.0f, -9.8f);
 
     CUDA_DEM_PARAMS.damping = 0.4f;
-    //CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
+    // CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
     CUDA_DEM_PARAMS.dt = 1e-4f;
 
     // scene data
@@ -203,7 +210,7 @@ void DEM_SetupParams()
         searcher,
         boundary_searcher);
 
-    //DEMSystem->UpdateSystem(RenderInterval);
+    // DEMSystem->UpdateSystem(RenderInterval);
 }
 
 void MRDEM_SetupParams()
@@ -231,7 +238,7 @@ void MRDEM_SetupParams()
     CUDA_DEM_PARAMS.gravity = make_float2(0.0f, -9.8f);
 
     CUDA_DEM_PARAMS.damping = 0.4f;
-    //CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
+    // CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
     CUDA_DEM_PARAMS.dt = 5e-5f;
 
     // scene data
@@ -332,11 +339,11 @@ void Update()
         PerFrameTimer.Restart();
         for (size_t i = 0; i < numOfSubTimeSteps; i++)
         {
-            //KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
+            // KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
             DEMSystem->UpdateSystem(RenderInterval);
         }
 
-        //KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
+        // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
         TotalFrameTime += PerFrameTimer.Elapsed();
         auto particles = DEMSystem->GetParticles();
 
@@ -402,17 +409,260 @@ void UpdateRealTime()
     UpdateScene(circles);
 }
 
+void NSDEM_SetupParams()
+{
+    KIRI_LOG_DEBUG("NSDEM: SetupParams");
+
+    // app
+    CUDA_DEM_APP_PARAMS.bgeo_export = false;
+    strcpy(CUDA_DEM_APP_PARAMS.bgeo_export_folder, (String(EXPORT_PATH) + "bgeo/dem").c_str());
+
+    // windowheight = 1080.f;
+    // windowwidth = 1920.f;
+    // world_size = make_float2(900, 800);
+
+    // scene config
+    auto cuda_lowest_point = make_float2(0.f);
+    auto cuda_highest_point = world_size;
+    auto cuda_world_size = cuda_highest_point - cuda_lowest_point;
+    auto cuda_world_center = (cuda_highest_point + cuda_lowest_point) / 2.f;
+
+    offsetvec2 = Vector2F(windowwidth - world_size.x, windowheight - world_size.y) / 2.f;
+
+    // scene = std::make_shared<KiriScene2D>((size_t)windowheight, (size_t)windowheight);
+    // renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    // dem params
+    CUDA_DEM_NS_PARAMS.rest_density = 2000.f;
+
+    CUDA_DEM_NS_PARAMS.young = 1e9f;
+    CUDA_DEM_NS_PARAMS.poisson = 0.3f;
+    CUDA_DEM_NS_PARAMS.tan_friction_angle = 0.5f;
+
+    CUDA_DEM_NS_PARAMS.gravity = make_float2(0.0f, -9.8f);
+
+    CUDA_DEM_NS_PARAMS.damping = 0.4f;
+    // CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
+    CUDA_DEM_NS_PARAMS.dt = 5e-5f;
+
+    // scene data
+    CUDA_BOUNDARY_PARAMS.lowest_point = cuda_lowest_point;
+    CUDA_BOUNDARY_PARAMS.highest_point = cuda_highest_point;
+    CUDA_BOUNDARY_PARAMS.world_size = cuda_world_size;
+    CUDA_BOUNDARY_PARAMS.world_center = cuda_world_center;
+
+    // volume sampling
+    auto volumeEmitter = std::make_shared<CudaVolumeEmitter>();
+
+    DemNSBoxVolumeData volumeData;
+    std::vector<NSPackPtr> pack_types;
+    pack_types.emplace_back(std::make_shared<NSPack>(MSM_L2, 10.f));
+    pack_types.emplace_back(std::make_shared<NSPack>(MSM_L3, 10.f));
+
+    volumeEmitter->BuildRndNSDemBoxVolume(volumeData, cuda_lowest_point + make_float2(200.f, 10.f),
+                                          cuda_highest_point - make_float2(200.f), 10.f, 0.f,
+                                          3000,
+                                          pack_types);
+
+    KIRI_LOG_DEBUG("max radius={0}, min radius={1}", volumeData.max_radius, volumeData.min_radius);
+    CUDA_DEM_NS_PARAMS.kernel_radius = 4.f * volumeData.max_radius;
+    CUDA_DEM_APP_PARAMS.max_num = volumeData.sphere_data.size();
+    CUDA_BOUNDARY_PARAMS.kernel_radius = CUDA_DEM_NS_PARAMS.kernel_radius;
+    CUDA_BOUNDARY_PARAMS.grid_size = make_int2((CUDA_BOUNDARY_PARAMS.highest_point - CUDA_BOUNDARY_PARAMS.lowest_point) / CUDA_BOUNDARY_PARAMS.kernel_radius);
+
+    // boundary sampling
+    BoundaryData boundaryData;
+    auto boundaryEmitter = std::make_shared<CudaBoundaryEmitter>();
+
+    boundaryEmitter->BuildWorldBoundary(boundaryData, CUDA_BOUNDARY_PARAMS.lowest_point, CUDA_BOUNDARY_PARAMS.highest_point, volumeData.min_radius);
+    for (size_t i = 0; i < boundaryData.pos.size(); i++)
+    {
+        auto pb = KiriCircle2(Vector2F(boundaryData.pos[i].x, boundaryData.pos[i].y) + offsetvec2, Vector3F(0.f, 0.f, 1.f), volumeData.min_radius);
+        boundaries.emplace_back(pb);
+    }
+
+    // cvt data
+    std::vector<float> rad;
+    std::vector<float2> pos;
+    std::vector<float3> col;
+
+    for (size_t i = 0; i < volumeData.sphere_data.size(); i++)
+    {
+        rad.emplace_back(volumeData.sphere_data[i].radius);
+        pos.emplace_back(volumeData.sphere_data[i].center);
+        col.emplace_back(volumeData.sphere_data[i].color);
+    }
+
+    // spatial searcher & particles
+    auto particles =
+        std::make_shared<CudaNonSphericalParticles>(
+            pos,
+            col,
+            rad,
+            volumeData.ns_data,
+            volumeData.map_data);
+
+    KIRI_LOG_DEBUG("max size={0}", particles->MaxSize());
+
+    CudaGNSearcherPtr searcher;
+    searcher = std::make_shared<CudaGNSearcher>(
+        CUDA_BOUNDARY_PARAMS.lowest_point,
+        CUDA_BOUNDARY_PARAMS.highest_point,
+        particles->MaxSize(),
+        CUDA_BOUNDARY_PARAMS.kernel_radius,
+        SearcherParticleType::NON_SPHERICAL);
+
+    auto boundary_particles = std::make_shared<CudaBoundaryParticles>(boundaryData.pos, boundaryData.label);
+    KIRI_LOG_INFO("Number of Boundary Particles = {0}", boundary_particles->Size());
+
+    CudaGNBoundarySearcherPtr boundary_searcher = std::make_shared<CudaGNBoundarySearcher>(
+        CUDA_BOUNDARY_PARAMS.lowest_point,
+        CUDA_BOUNDARY_PARAMS.highest_point,
+        boundary_particles->MaxSize(),
+        CUDA_BOUNDARY_PARAMS.kernel_radius);
+
+    // group num
+    CUDA_DEM_NS_PARAMS.group_num = volumeData.ns_data.size();
+
+    // debug group
+    // KIRI_LOG_DEBUG("group num={0}", volumeData.ns_data.size());
+    // for (size_t i = 0; i < volumeData.ns_data.size(); i++)
+    // {
+    //     auto g = volumeData.ns_data[i];
+    //     KIRI_LOG_DEBUG("id={0},mass={1},interia={2},ang_acc={3},ang_vel={4};subnum={5}", g.ns_id, g.mass, g.inertia, g.angle_acc, g.angle_vel, g.sub_num);
+
+    //     for (size_t j = 0; j < g.sub_num; j++)
+    //     {
+    //         KIRI_LOG_DEBUG("pos={0},{1}", g.sub_pos_list[j].x, g.sub_pos_list[j].y);
+    //     }
+    // }
+
+    auto pSolver = std::make_shared<CudaNonSphericalSolver>(particles->Size(), volumeData.ns_data.size());
+
+    DEMNSSystem = std::make_shared<CudaDemNSSystem>(
+        particles,
+        boundary_particles,
+        pSolver,
+        searcher,
+        boundary_searcher);
+}
+
+void UpdateNSSystem()
+{
+    if (CUDA_DEM_APP_PARAMS.run && SimCount < TotalFrameNumber)
+    {
+
+        auto numOfSubTimeSteps = DEMNSSystem->GetNumOfSubTimeSteps();
+        KIRI_LOG_INFO("Simulation Frame={0}, Sub-Simulation Total Number={1}", ++SimCount, numOfSubTimeSteps);
+
+        PerFrameTimer.Restart();
+        for (size_t i = 0; i < numOfSubTimeSteps; i++)
+        {
+            KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
+            DEMNSSystem->UpdateSystem(RenderInterval);
+        }
+
+        // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
+        TotalFrameTime += PerFrameTimer.Elapsed();
+        auto particles = DEMNSSystem->GetParticles();
+
+        if (CUDA_DEM_APP_PARAMS.bgeo_export)
+        {
+            ExportBgeoFileCUDA(
+                CUDA_DEM_APP_PARAMS.bgeo_export_folder,
+                UInt2Str4Digit(SimCount - RunLiquidNumber),
+                particles->GetPosPtr(),
+                particles->GetColPtr(),
+                radius,
+                1,
+                particles->Size());
+        }
+        else
+        {
+
+            KIRI::Vector<KiriCircle2> circles;
+            auto particles_num = particles->Size();
+            size_t fbytes = particles_num * sizeof(float);
+            size_t f2bytes = particles_num * sizeof(float2);
+            size_t f3bytes = particles_num * sizeof(float3);
+
+            float *particle_radius = (float *)malloc(fbytes);
+            float2 *particle_positions = (float2 *)malloc(f2bytes);
+            float3 *particle_colors = (float3 *)malloc(f3bytes);
+
+            cudaMemcpy(particle_radius, particles->GetRadiusPtr(), fbytes, cudaMemcpyDeviceToHost);
+            cudaMemcpy(particle_positions, particles->GetPosPtr(), f2bytes, cudaMemcpyDeviceToHost);
+            cudaMemcpy(particle_colors, particles->GetColPtr(), f3bytes, cudaMemcpyDeviceToHost);
+
+            for (size_t i = 0; i < particles_num; i++)
+            {
+                auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) + offsetvec2, Vector3F(particle_colors[i].x, particle_colors[i].y, particle_colors[i].z), particle_radius[i]);
+                circles.emplace_back(p);
+            }
+
+            UpdateScene(circles);
+        }
+    }
+    else if (CUDA_DEM_APP_PARAMS.run)
+    {
+        CUDA_DEM_APP_PARAMS.run = false;
+    }
+}
+
+void UpdateNSSystemRealTime()
+{
+
+    auto numOfSubTimeSteps = DEMNSSystem->GetNumOfSubTimeSteps();
+    KIRI_LOG_INFO("Simulation Frame={0}, Sub-Simulation Total Number={1}", ++SimCount, numOfSubTimeSteps);
+
+    PerFrameTimer.Restart();
+    for (size_t i = 0; i < numOfSubTimeSteps; i++)
+    {
+        KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
+        DEMNSSystem->UpdateSystem(RenderInterval);
+    }
+
+    // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
+    TotalFrameTime += PerFrameTimer.Elapsed();
+    auto particles = DEMNSSystem->GetParticles();
+
+    KIRI::Vector<KiriCircle2> circles;
+    auto particles_num = particles->Size();
+    size_t fbytes = particles_num * sizeof(float);
+    size_t f2bytes = particles_num * sizeof(float2);
+    size_t f3bytes = particles_num * sizeof(float3);
+
+    float *particle_radius = (float *)malloc(fbytes);
+    float2 *particle_positions = (float2 *)malloc(f2bytes);
+    float3 *particle_colors = (float3 *)malloc(f3bytes);
+
+    cudaMemcpy(particle_radius, particles->GetRadiusPtr(), fbytes, cudaMemcpyDeviceToHost);
+    cudaMemcpy(particle_positions, particles->GetPosPtr(), f2bytes, cudaMemcpyDeviceToHost);
+    cudaMemcpy(particle_colors, particles->GetColPtr(), f3bytes, cudaMemcpyDeviceToHost);
+
+    for (size_t i = 0; i < particles_num; i++)
+    {
+        auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) + offsetvec2, Vector3F(particle_colors[i].x, particle_colors[i].y, particle_colors[i].z), particle_radius[i]);
+        circles.emplace_back(p);
+    }
+
+    UpdateScene(circles);
+}
+
 void main()
 {
     KiriLog::Init();
 
-    // DEM_SetupParams();
-    MRDEM_SetupParams();
-
     CUDA_DEM_APP_PARAMS.run = true;
 
+    // DEM_SetupParams();
+    // MRDEM_SetupParams();
+    // while (CUDA_DEM_APP_PARAMS.run)
+    //     Update();
+
+    NSDEM_SetupParams();
     while (CUDA_DEM_APP_PARAMS.run)
-        Update();
+        UpdateNSSystemRealTime();
 
     return;
 }

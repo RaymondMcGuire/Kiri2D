@@ -2,7 +2,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-01 14:31:30
- * @LastEditTime: 2021-11-08 01:21:00
+ * @LastEditTime: 2021-11-11 19:28:25
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath:
@@ -26,19 +26,30 @@ class CudaNonSphericalSolver : public CudaBaseSolver {
 public:
   virtual void UpdateSolver(CudaNonSphericalParticlesPtr &sands,
                             const CudaArray<size_t> &cellStart,
-                            float timeIntervalInSeconds, CudaDemParams params,
+                            float timeIntervalInSeconds,
+                            const CudaDemNonSphericalParams params,
                             CudaBoundaryParams bparams);
 
-  explicit CudaNonSphericalSolver(const size_t num) : CudaBaseSolver(num) {}
+  explicit CudaNonSphericalSolver(const size_t num, const size_t group_num)
+      : CudaBaseSolver(num), mCudaGridGroupSize(CuCeilDiv(group_num, 8)) {}
 
   virtual ~CudaNonSphericalSolver() noexcept {}
 
 protected:
-  virtual void ExtraForces(CudaNonSphericalParticlesPtr &sands,
-                           const float2 gravity);
+  void ComputeNSDemLinearMomentum(
+      CudaNonSphericalParticlesPtr &sands, const float young,
+      const float poisson, const float tanFrictionAngle, const float dt,
+      const CudaArray<size_t> &cellStart, const float2 lowestPoint,
+      const float2 highestPoint, const float kernelRadius, const int2 gridSize);
 
-  virtual void Advect(CudaNonSphericalParticlesPtr &sands, const float dt,
-                      const float damping);
+  void ComputeNSMomentum(CudaNonSphericalParticlesPtr &sands,
+                         const CudaDemNonSphericalParams params);
+
+  void
+  NonSphericalParticlesTimeIntegration(CudaNonSphericalParticlesPtr &sands,
+                                       const CudaDemNonSphericalParams params);
+
+  size_t mCudaGridGroupSize;
 };
 
 typedef SharedPtr<CudaNonSphericalSolver> CudaNonSphericalSolverPtr;

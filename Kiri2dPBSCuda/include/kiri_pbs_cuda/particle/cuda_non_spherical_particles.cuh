@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-11-09 16:09:45
+ * @LastEditTime: 2021-11-11 19:33:57
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath:
@@ -21,19 +21,30 @@ namespace KIRI {
 class CudaNonSphericalParticles : public CudaParticles {
 public:
   explicit CudaNonSphericalParticles::CudaNonSphericalParticles(
-      const uint numOfMaxParticles)
-      : CudaParticles(numOfMaxParticles), mId(numOfMaxParticles),
-        mVel(numOfMaxParticles), mAcc(numOfMaxParticles),
-        mCol(numOfMaxParticles), mMass(numOfMaxParticles),
-        mNsMapping(numOfMaxParticles) {}
+      const uint numOfMaxParticles, const uint numOfMaxNsParticles)
+      : CudaParticles(numOfMaxParticles), mVel(numOfMaxParticles),
+        mRadius(numOfMaxParticles), mCol(numOfMaxParticles),
+        mNsMapping(numOfMaxParticles), mNsParticles(numOfMaxNsParticles) {}
 
   explicit CudaNonSphericalParticles::CudaNonSphericalParticles(
-      const Vec_Float2 &p, const Vec_Float3 &col, const Vec_Float &mass)
-      : CudaParticles(p), mId(p.size()), mVel(p.size()), mAcc(p.size()),
-        mCol(p.size()), mMass(p.size()), mNsMapping(p.size()) {
+      const Vec_Float2 &p, const Vec_Float3 &col, const Vec_Float &rad,
+      const std::vector<non_spherical_particles> &ns,
+      const std::vector<ns_mapping> &map)
+      : CudaParticles(p), mVel(p.size()), mCol(p.size()), mRadius(p.size()),
+        mNsMapping(p.size()), mNsParticles(ns.size()) {
+
     KIRI_CUCALL(cudaMemcpy(mCol.Data(), &col[0], sizeof(float3) * col.size(),
                            cudaMemcpyHostToDevice));
-    KIRI_CUCALL(cudaMemcpy(mMass.Data(), &mass[0], sizeof(float) * mass.size(),
+
+    KIRI_CUCALL(cudaMemcpy(mRadius.Data(), &rad[0], sizeof(float) * rad.size(),
+                           cudaMemcpyHostToDevice));
+
+    KIRI_CUCALL(cudaMemcpy(mNsParticles.Data(), &ns[0],
+                           sizeof(non_spherical_particles) * ns.size(),
+                           cudaMemcpyHostToDevice));
+
+    KIRI_CUCALL(cudaMemcpy(mNsMapping.Data(), &map[0],
+                           sizeof(ns_mapping) * map.size(),
                            cudaMemcpyHostToDevice));
   }
 
@@ -44,24 +55,22 @@ public:
 
   void Advect(const float dt, const float damping);
 
-  inline uint *GetIdPtr() const { return mId.Data(); }
-
+  inline float *GetRadiusPtr() const { return mRadius.Data(); }
   inline float2 *GetVelPtr() const { return mVel.Data(); }
-  inline float2 *GetAccPtr() const { return mAcc.Data(); }
   inline float3 *GetColPtr() const { return mCol.Data(); }
-  inline float *GetMassPtr() const { return mMass.Data(); }
 
   inline ns_mapping *GetNSMappingPtr() const { return mNsMapping.Data(); }
+  inline non_spherical_particles *GetNSParticlesPtr() const {
+    return mNsParticles.Data();
+  }
 
 protected:
-  CudaArray<uint> mId;
-
   CudaArray<float2> mVel;
-  CudaArray<float2> mAcc;
   CudaArray<float3> mCol;
-  CudaArray<float> mMass;
+  CudaArray<float> mRadius;
 
   CudaArray<ns_mapping> mNsMapping;
+  CudaArray<non_spherical_particles> mNsParticles;
 };
 
 typedef SharedPtr<CudaNonSphericalParticles> CudaNonSphericalParticlesPtr;

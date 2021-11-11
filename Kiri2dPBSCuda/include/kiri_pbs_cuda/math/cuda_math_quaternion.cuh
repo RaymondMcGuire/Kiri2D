@@ -37,26 +37,29 @@ inline __host__ __device__ float2 operator*(matrix2x2 m1, float2 f2) {
                      m1.v.z * f2.x + m1.v.w * f2.y);
 }
 
+inline __host__ __device__ matrix2x2 compute_rotation2d_matrix(float angle) {
+  float sina = sin(angle);
+  float cosa = cos(angle);
+  return make_matrix2x2(make_float4(cosa, -sina, sina, cosa));
+}
+
 struct rotation2 {
   float angle;
+  matrix2x2 mat;
 };
 
 inline __host__ __device__ rotation2 make_rotation2(float a) {
   rotation2 r;
   r.angle = a;
+  r.mat = compute_rotation2d_matrix(a);
   return r;
 }
 
 inline __host__ __device__ rotation2 inverse_rot2(rotation2 r) {
   rotation2 nr;
   nr.angle = -r.angle;
+  nr.mat = compute_rotation2d_matrix(-r.angle);
   return nr;
-}
-
-inline __host__ __device__ matrix2x2 cvt_rotation_matrix(rotation2 r) {
-  float sina = sin(r.angle);
-  float cosa = cos(r.angle);
-  return make_matrix2x2(make_float4(cosa, -sina, sina, cosa));
 }
 
 // quaternion(s,vx,vy,vz)

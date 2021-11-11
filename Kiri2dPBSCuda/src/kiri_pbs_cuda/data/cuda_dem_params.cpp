@@ -1,10 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
- * @Date: 2021-02-10 15:39:08
- * @LastEditTime: 2021-03-15 23:56:03
+ * @Date: 2021-09-03 13:50:05
+ * @LastEditTime: 2021-11-11 18:36:11
  * @LastEditors: Xu.WANG
- * @Description: 
- * @FilePath: \Kiri\KiriPBSCuda\src\kiri_pbs_cuda\data\cuda_dem_params.cpp
+ * @Description:
  */
 
 #include <kiri_pbs_cuda/data/cuda_dem_params.h>
@@ -13,4 +12,6 @@ namespace KIRI
 {
     CudaDemParams CUDA_DEM_PARAMS;
     CudaDemAppParams CUDA_DEM_APP_PARAMS;
+
+    CudaDemNonSphericalParams CUDA_DEM_NS_PARAMS;
 } // namespace KIRI

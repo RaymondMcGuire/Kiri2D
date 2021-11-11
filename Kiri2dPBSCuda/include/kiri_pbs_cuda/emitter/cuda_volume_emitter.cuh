@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-11-11 03:23:25
+ * @LastEditTime: 2021-11-11 19:35:28
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath:
@@ -48,6 +48,9 @@ struct DemShapeVolumeData {
 struct DemNSBoxVolumeData {
   std::vector<ns_sphere_data> sphere_data;
   std::vector<non_spherical_particles> ns_data;
+  std::vector<ns_mapping> map_data;
+  float min_radius;
+  float max_radius;
 };
 
 class CudaVolumeEmitter {

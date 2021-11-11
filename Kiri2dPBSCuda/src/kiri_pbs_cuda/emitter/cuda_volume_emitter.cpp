@@ -124,6 +124,9 @@ namespace KIRI
 
         float max_radius = 0.f;
 
+        data.min_radius = Huge<float>();
+        data.max_radius = Tiny<float>();
+
         // define random engine
         std::random_device engine;
         std::mt19937 gen(engine());
@@ -256,13 +259,14 @@ namespace KIRI
 
                 ns_packs_data.ns_id = pack_num;
                 ns_packs_data.centroid = ns_moment / ns_mass;
-                ns_packs_data.mass = ns_mass * 2700.f;
+                ns_packs_data.mass = ns_mass * 2000.f;
                 ns_packs_data.vel = make_float2(0.f);
                 ns_packs_data.angle_vel = 0.f;
                 ns_packs_data.angle_acc = 0.f;
                 ns_packs_data.sub_num = sub_num;
 
-                ns_packs_data.rot = make_rotation2(0.f);
+                auto pack_rot = make_rotation2(0.f);
+                ns_packs_data.rot = pack_rot.mat;
                 ns_packs_data.inertia = inertia_tensor - ns_mass * dot(ns_packs_data.centroid, ns_packs_data.centroid);
 
                 for (size_t i = 0; i < sub_num; i++)
@@ -270,11 +274,22 @@ namespace KIRI
 
                     ns_packs_data.sub_color_list[i] = ns_trans.GetPack()[i].color;
                     ns_packs_data.sub_radius_list[i] = ns_trans.GetPack()[i].radius;
-                    ns_packs_data.sub_pos_list[i] = cvt_rotation_matrix(inverse_rot2(ns_packs_data.rot)) * (ns_trans.GetPack()[i].center - ns_packs_data.centroid);
-                    ns_packs_data.sub_rot_list[i] = cvt_rotation_matrix(inverse_rot2(ns_packs_data.rot)) * cvt_rotation_matrix(ns_trans.GetPack()[i].rot);
+
+                    data.min_radius = std::min(ns_trans.GetPack()[i].radius, data.min_radius);
+                    data.max_radius = std::max(ns_trans.GetPack()[i].radius, data.max_radius);
+
+                    ns_packs_data.sub_pos_list[i] = inverse_rot2(pack_rot).mat * (ns_trans.GetPack()[i].center - ns_packs_data.centroid);
+                    ns_packs_data.sub_rot_list[i] = inverse_rot2(pack_rot).mat * ns_trans.GetPack()[i].rot.mat;
 
                     ns_packs_data.force_list[i] = make_float2(0.f);
                     ns_packs_data.torque_list[i] = 0.f;
+
+                    ns_mapping map_data;
+                    map_data.ns_id = pack_num;
+                    map_data.sub_id = i;
+                    map_data.rel_pos = ns_packs_data.sub_pos_list[i];
+                    map_data.rel_rot = ns_packs_data.sub_rot_list[i];
+                    data.map_data.emplace_back(map_data);
                 }
 
                 data.ns_data.emplace_back(ns_packs_data);

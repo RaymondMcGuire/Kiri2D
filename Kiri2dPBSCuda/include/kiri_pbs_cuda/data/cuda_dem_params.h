@@ -73,7 +73,7 @@ namespace KIRI
             : center(_c), radius(_r), color(_color), ns_id(_id){};
     };
 
-    struct non_spherical_params
+    struct CudaDemNonSphericalParams
     {
         float rest_mass;
         float rest_density;
@@ -83,8 +83,6 @@ namespace KIRI
         float young;
         float poisson;
         float tan_friction_angle;
-
-        float c0;
 
         float2 gravity;
         float dt;
@@ -102,7 +100,7 @@ namespace KIRI
         float2 centroid;
         float angle_vel;
         float angle_acc;
-        rotation2 rot;
+        matrix2x2 rot;
 
         int sub_num;
         float2 force_list[MAX_SUB_SPHERICAL_NUM];
@@ -119,11 +117,13 @@ namespace KIRI
         uint ns_id;
         int sub_id;
         float2 rel_pos;
-        rotation2 rel_rot;
+        matrix2x2 rel_rot;
     };
 
     extern CudaDemParams CUDA_DEM_PARAMS;
     extern CudaDemAppParams CUDA_DEM_APP_PARAMS;
+
+    extern CudaDemNonSphericalParams CUDA_DEM_NS_PARAMS;
 
 } // namespace KIRI
 

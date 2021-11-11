@@ -1,10 +1,9 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2020-08-22 23:22:26
- * @LastEditTime: 2021-11-10 22:23:14
+ * @Date: 2021-11-10 21:59:44
+ * @LastEditTime: 2021-11-11 17:53:25
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \KiriPBSCuda\\src\dem\msm_pack.cpp
  */
 
 #include <kiri_pbs_cuda/data/cuda_ns_pack.h>
@@ -49,9 +48,8 @@ namespace KIRI
         for (auto &s : mPack)
         {
             auto rot = make_rotation2(angle);
-            auto mat = cvt_rotation_matrix(rot);
             s.rot = rot;
-            s.center = mat * s.center;
+            s.center = rot.mat * s.center;
         }
     }
 

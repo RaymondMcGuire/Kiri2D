@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-05 12:33:37
- * @LastEditTime: 2021-11-09 16:10:06
+ * @LastEditTime: 2021-11-11 18:15:23
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath:
@@ -79,12 +79,12 @@ void CudaGNSearcher::SortData(const CudaParticlesPtr &particles) {
   } else if (mSearcherParticleType == SearcherParticleType::NON_SPHERICAL) {
     auto sands =
         std::dynamic_pointer_cast<CudaNonSphericalParticles>(particles);
-    thrust::sort_by_key(thrust::device, mGridIdxArray.Data(),
-                        mGridIdxArray.Data() + particles->Size(),
-                        thrust::make_zip_iterator(thrust::make_tuple(
-                            sands->GetIdPtr(), sands->GetPosPtr(),
-                            sands->GetVelPtr(), sands->GetColPtr(),
-                            sands->GetMassPtr(), sands->GetNSMappingPtr())));
+    thrust::sort_by_key(
+        thrust::device, mGridIdxArray.Data(),
+        mGridIdxArray.Data() + particles->Size(),
+        thrust::make_zip_iterator(thrust::make_tuple(
+            sands->GetPosPtr(), sands->GetVelPtr(), sands->GetColPtr(),
+            sands->GetRadiusPtr(), sands->GetNSMappingPtr())));
   }
   cudaDeviceSynchronize();
   KIRI_CUKERNAL();

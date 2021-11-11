@@ -10,7 +10,7 @@
 #include <kiri2d/voronoi/voro_treemap_nocaj12.h>
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>
-#include <kiri2d/treemap/treemap_layout.h> 
+#include <kiri2d/treemap/treemap_layout.h>
 #include <kiri2d/voronoi/voro_poropti.h>
 #include <kiri2d/voronoi/voro_poropti_treemap.h>
 #include <root_directory.h>
@@ -1975,6 +1975,55 @@ void UniPoissonDiskSampler()
     }
 }
 
+#include <kiri_pbs_cuda/emitter/cuda_volume_emitter.cuh>
+void DebugNSParticles()
+{
+
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    auto emitter = std::make_shared<CudaVolumeEmitter>();
+
+    DemNSBoxVolumeData data;
+    std::vector<NSPackPtr> pack_types;
+    pack_types.emplace_back(std::make_shared<NSPack>(MSM_L2, 10.f));
+    pack_types.emplace_back(std::make_shared<NSPack>(MSM_L3, 10.f));
+
+    emitter->BuildRndNSDemBoxVolume(data, make_float2(500.f, 200.f),
+                                    make_float2(1500.f, 800.f), 10.f, 0.f,
+                                    10000,
+                                    pack_types);
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    std::vector<KiriCircle2> circles;
+    while (1)
+    {
+        circles.clear();
+
+        for (size_t i = 0; i < data.sphere_data.size(); i++)
+        {
+            auto sp = data.sphere_data[i];
+            circles.emplace_back(KiriCircle2(Vector2F(sp.center.x, sp.center.y), Vector3F(sp.color.x, sp.color.y, sp.color.z), sp.radius));
+        }
+
+        scene->AddCircles(circles);
+
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+
+        // KIRI_LOG_DEBUG("sampling iterate idx:{0}", counter);
+        // ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(counter), circles);
+
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
 int main1()
 {
     KIRI::KiriLog::Init();
@@ -2002,9 +2051,11 @@ int main1()
 
     // VoroPorosityOptimizeScaleExample();
 
-    UniPoissonDiskSampler();
+    // UniPoissonDiskSampler();
 
     // LoadVoronoiExample();
+
+    DebugNSParticles();
 
     return 0;
 }
