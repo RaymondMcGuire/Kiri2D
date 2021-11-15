@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-10 02:00:46
+ * @LastEditTime: 2021-11-15 15:44:56
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  */
 
@@ -42,7 +42,7 @@ static __device__ void ComputeDemForces(float2 *f, float2 dij, float2 vij,
 }
 
 static __device__ void
-ComputeDemForcesAndTorque(float2 *f, float *torque, const float2 dij,
+ComputeDemForcesAndTorque(float2 *f, float *torque,const float ang_veli,float ang_velj, const float2 dij,
                           const float2 vij, const float ri, const float rij,
                           const float kn, const float ks,
                           const float tanFrictionAngle, float dt) {
@@ -52,8 +52,12 @@ ComputeDemForcesAndTorque(float2 *f, float *torque, const float2 dij,
   float2 n = dij / dist;
   float2 normal_force = kn * max(penetration_depth, 0.f) * n;
 
-  float dot_epslion = dot(vij, n);
-  float2 vij_tangential = vij - dot_epslion * n;
+  float alpha = rij / penetration_depth;
+  float2 del = make_float2(-n.y,n.x);
+  float2 n_vij = vij * alpha - ang_veli * ri * del - ang_velj * (rij-ri) * del;
+
+  float dot_epslion = dot(n_vij, n);
+  float2 vij_tangential = n_vij - dot_epslion * n;
   float2 shear_inc = vij_tangential * dt;
   float2 shear_force = -ks * shear_inc;
 
@@ -67,7 +71,11 @@ ComputeDemForcesAndTorque(float2 *f, float *torque, const float2 dij,
   float2 tf = normal_force + shear_force;
 
   float theta = atan2(tf.y, tf.x) - atan2(n.y, n.x);
-  theta = length(tf) * sin(theta);
+   theta = length(tf) * sin(theta)* 1e-6f;
+  //theta = sin(theta);
+
+  // if(theta!=theta)
+  // printf("rij=%.3f, dist=%.3f \n", rij,dist);
 
   *f += tf;
   *torque += (ri - 0.5f * penetration_depth) * theta;
@@ -201,7 +209,7 @@ static __device__ void ComputeDemWorldBoundaryForces(
 }
 
 static __device__ void ComputeNSDemWorldBoundaryForces(
-    float2 *f, float *torque, float2 posi, float2 veli, const float radiusi,
+    float2 *f, float *torque, const float2 posi, const float2 veli,const float ang_veli, const float radiusi,
     const float boundaryRadius, const float young, const float poisson,
     const float tanFrictionAngle, const size_t num, const float2 lowestPoint,
     const float2 highestPoint, const float dt) {
@@ -219,29 +227,29 @@ static __device__ void ComputeNSDemWorldBoundaryForces(
   if (posi.x > highestPoint.x - rij) {
     N = make_float2(-1.f, 0.f);
     diff = abs(posi.x - highestPoint.x);
-    ComputeDemForcesAndTorque(f, torque, N * diff, veli, radiusi, rij, kn, ks,
+    ComputeDemForcesAndTorque(f, torque,ang_veli,0.f, N * diff, veli, radiusi, rij, kn, ks,
                               tanFrictionAngle, dt);
   }
 
   if (posi.x < lowestPoint.x + rij) {
     N = make_float2(1.f, 0.f);
     diff = abs(posi.x - lowestPoint.x);
-    ComputeDemForcesAndTorque(f, torque, N * diff, veli, radiusi, rij, kn, ks,
-                              tanFrictionAngle, dt);
+    ComputeDemForcesAndTorque(f, torque,ang_veli,0.f, N * diff, veli, radiusi, rij, kn, ks,
+      tanFrictionAngle, dt);
   }
 
   if (posi.y > highestPoint.y - rij) {
     N = make_float2(0.f, -1.f);
     diff = abs(posi.y - highestPoint.y);
-    ComputeDemForcesAndTorque(f, torque, N * diff, veli, radiusi, rij, kn, ks,
-                              tanFrictionAngle, dt);
+    ComputeDemForcesAndTorque(f, torque,ang_veli,0.f, N * diff, veli, radiusi, rij, kn, ks,
+      tanFrictionAngle, dt);
   }
 
   if (posi.y < lowestPoint.y + rij) {
     N = make_float2(0.f, 1.f);
     diff = abs(posi.y - lowestPoint.y);
-    ComputeDemForcesAndTorque(f, torque, N * diff, veli, radiusi, rij, kn, ks,
-                              tanFrictionAngle, dt);
+    ComputeDemForcesAndTorque(f, torque,ang_veli,0.f, N * diff, veli, radiusi, rij, kn, ks,
+      tanFrictionAngle, dt);
   }
 
   return;

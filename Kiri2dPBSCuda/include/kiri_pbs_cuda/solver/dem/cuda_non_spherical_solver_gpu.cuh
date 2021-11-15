@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-11 20:32:41
+ * @LastEditTime: 2021-11-15 15:47:43
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_mr_dem_solver_gpu.cuh
  */
 
@@ -20,7 +20,7 @@ namespace KIRI {
 
 static __device__ void
 ComputeNSDemForces(float2 *f, float *torque, const size_t i,
-                   const ns_mapping *map, const float2 *pos, const float2 *vel,
+                   const ns_mapping *map, const float2 *pos, const float2 *vel, const float* ang_vel,
                    const float *radius, const float young, const float poisson,
                    const float tanFrictionAngle, const float dt, size_t j,
                    const size_t cellEnd) {
@@ -38,7 +38,7 @@ ComputeNSDemForces(float2 *f, float *torque, const size_t i,
       float kn = 2.f * kni * knj / (kni + knj);
       float ks = 2.f * ksi * ksj / (ksi + ksj);
 
-      ComputeDemForcesAndTorque(f, torque, dij, vij, radius[i], rij, kn, ks,
+      ComputeDemForcesAndTorque(f, torque,ang_vel[i],ang_vel[j], dij, vij, radius[i], rij, kn, ks,
                                 tanFrictionAngle, dt);
     }
     ++j;
@@ -49,7 +49,7 @@ ComputeNSDemForces(float2 *f, float *torque, const size_t i,
 template <typename Pos2GridXY, typename GridXY2GridHash>
 __global__ void ComputeNSDemLinearMomentum_CUDA(
     non_spherical_particles *nsParticles, const ns_mapping *map,
-    const float2 *pos, const float2 *vel, const float *radius,
+    const float2 *pos, const float2 *vel,const float*ang_vel, const float *radius,
     const float young, const float poisson, const float tanFrictionAngle,
     const size_t num, const float2 lowestPoint, const float2 highestPoint,
     const float dt, size_t *cellStart, const int2 gridSize, Pos2GridXY p2xy,
@@ -70,17 +70,20 @@ __global__ void ComputeNSDemLinearMomentum_CUDA(
     if (hash_idx == (gridSize.x * gridSize.y))
       continue;
 
-    ComputeNSDemForces(&f, &torque, i, map, pos, vel, radius, young, poisson,
+    ComputeNSDemForces(&f, &torque, i, map, pos, vel,ang_vel, radius, young, poisson,
                        tanFrictionAngle, dt, cellStart[hash_idx],
                        cellStart[hash_idx + 1]);
   }
 
-  ComputeNSDemWorldBoundaryForces(&f, &torque, pos[i], vel[i], radius[i],
+  ComputeNSDemWorldBoundaryForces(&f, &torque, pos[i], vel[i],ang_vel[i], radius[i],
                                   radius[i], young, poisson, tanFrictionAngle,
                                   num, lowestPoint, highestPoint, dt);
 
   nsParticles[map[i].ns_id].force_list[map[i].sub_id] = f;
   nsParticles[map[i].ns_id].torque_list[map[i].sub_id] = torque;
+
+  // if(i == 10)
+  //   printf("torque=%.5f \n", torque);
 
   return;
 }
@@ -103,18 +106,21 @@ __global__ void ComputeNSMomentum_CUDA(non_spherical_particles *nsParticles,
   // rigidBody Velocity
   float2 acc = force / nsParticles[i].mass + params.gravity;
 
-  printf("acc=%.3f,%.3f \n", acc.x, acc.y);
-
   float2 sgn_val = sgn(acc * (nsParticles[i].vel + 0.5f * params.dt * acc));
   acc *= make_float2(1.f) - params.damping * sgn_val;
 
   // angular Velocity
   float angle_acc = torque / nsParticles[i].inertia;
+  if(angle_acc!=angle_acc)
+  printf("torque=%.3f, inertia=%.3f \n", torque,nsParticles[i].inertia);
+
+
   float sgn_ang_val = sgn(
       angle_acc * (nsParticles[i].angle_vel + 0.5f * params.dt * angle_acc));
-  angle_acc *= 1.f - params.damping * sgn_ang_val;
+  float damping_coef = 1.f - params.damping * sgn_ang_val;
+  angle_acc *= damping_coef;
 
-  nsParticles[i].angle_vel += params.dt * angle_acc;
+  nsParticles[i].angle_vel += params.dt * angle_acc * 1e-3f;
 
   rotation2 rot2 = make_rotation2(nsParticles[i].angle_vel * params.dt);
   nsParticles[i].rot = rot2.mat * nsParticles[i].rot;
@@ -126,7 +132,7 @@ __global__ void ComputeNSMomentum_CUDA(non_spherical_particles *nsParticles,
 }
 
 __global__ void
-NSTimeIntegration_CUDA(float2 *pos, float2 *vel,
+NSTimeIntegration_CUDA(float2 *pos, float2 *vel,float* ang_vel,
                        const non_spherical_particles *nsParticles,
                        const ns_mapping *map, const size_t num,
                        const CudaDemNonSphericalParams params) {
@@ -141,6 +147,9 @@ NSTimeIntegration_CUDA(float2 *pos, float2 *vel,
   pos[i] = ns.centroid + ns.rot * map[i].rel_pos;
 
   vel[i] = ns.vel + ns.angle_vel * (pos[i] - ns.centroid);
+  //vel[i] = ns.vel;
+
+  ang_vel[i] = ns.angle_vel;
 }
 
 } // namespace KIRI

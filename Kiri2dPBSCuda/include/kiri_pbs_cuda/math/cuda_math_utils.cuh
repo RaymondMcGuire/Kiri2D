@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-10-18 02:13:36
- * @LastEditTime: 2021-11-11 03:21:47
+ * @LastEditTime: 2021-11-15 15:11:42
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\math\cuda_math_utils.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\math\cuda_math_utils.cuh
  */
 

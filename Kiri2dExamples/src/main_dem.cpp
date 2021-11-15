@@ -443,7 +443,7 @@ void NSDEM_SetupParams()
 
     CUDA_DEM_NS_PARAMS.damping = 0.4f;
     // CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
-    CUDA_DEM_NS_PARAMS.dt = 5e-5f;
+    CUDA_DEM_NS_PARAMS.dt = 5e-4f;
 
     // scene data
     CUDA_BOUNDARY_PARAMS.lowest_point = cuda_lowest_point;

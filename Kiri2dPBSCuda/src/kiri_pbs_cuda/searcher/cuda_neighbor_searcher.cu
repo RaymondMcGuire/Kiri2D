@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-05 12:33:37
- * @LastEditTime: 2021-11-11 18:15:23
+ * @LastEditTime: 2021-11-15 14:07:37
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\searcher\cuda_neighbor_searcher.cu
  * \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\searcher\cuda_neighbor_searcher.cu
  */
 
@@ -83,7 +83,7 @@ void CudaGNSearcher::SortData(const CudaParticlesPtr &particles) {
         thrust::device, mGridIdxArray.Data(),
         mGridIdxArray.Data() + particles->Size(),
         thrust::make_zip_iterator(thrust::make_tuple(
-            sands->GetPosPtr(), sands->GetVelPtr(), sands->GetColPtr(),
+            sands->GetPosPtr(), sands->GetVelPtr(),sands->GetAngVelPtr(), sands->GetColPtr(),
             sands->GetRadiusPtr(), sands->GetNSMappingPtr())));
   }
   cudaDeviceSynchronize();

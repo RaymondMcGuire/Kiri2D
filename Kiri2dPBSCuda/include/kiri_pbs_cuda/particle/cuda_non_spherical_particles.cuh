@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-11-11 19:33:57
+ * @LastEditTime: 2021-11-15 14:03:21
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\particle\cuda_non_spherical_particles.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\particle\cuda_non_spherical_particles.cuh
  */
 
@@ -22,7 +22,7 @@ class CudaNonSphericalParticles : public CudaParticles {
 public:
   explicit CudaNonSphericalParticles::CudaNonSphericalParticles(
       const uint numOfMaxParticles, const uint numOfMaxNsParticles)
-      : CudaParticles(numOfMaxParticles), mVel(numOfMaxParticles),
+      : CudaParticles(numOfMaxParticles), mVel(numOfMaxParticles),mAngVel(numOfMaxParticles),
         mRadius(numOfMaxParticles), mCol(numOfMaxParticles),
         mNsMapping(numOfMaxParticles), mNsParticles(numOfMaxNsParticles) {}
 
@@ -30,7 +30,7 @@ public:
       const Vec_Float2 &p, const Vec_Float3 &col, const Vec_Float &rad,
       const std::vector<non_spherical_particles> &ns,
       const std::vector<ns_mapping> &map)
-      : CudaParticles(p), mVel(p.size()), mCol(p.size()), mRadius(p.size()),
+      : CudaParticles(p), mVel(p.size()),mAngVel(p.size()), mCol(p.size()), mRadius(p.size()),
         mNsMapping(p.size()), mNsParticles(ns.size()) {
 
     KIRI_CUCALL(cudaMemcpy(mCol.Data(), &col[0], sizeof(float3) * col.size(),
@@ -56,6 +56,7 @@ public:
   void Advect(const float dt, const float damping);
 
   inline float *GetRadiusPtr() const { return mRadius.Data(); }
+  inline float *GetAngVelPtr() const { return mAngVel.Data(); }
   inline float2 *GetVelPtr() const { return mVel.Data(); }
   inline float3 *GetColPtr() const { return mCol.Data(); }
 
@@ -65,6 +66,7 @@ public:
   }
 
 protected:
+  CudaArray<float> mAngVel;
   CudaArray<float2> mVel;
   CudaArray<float3> mCol;
   CudaArray<float> mRadius;

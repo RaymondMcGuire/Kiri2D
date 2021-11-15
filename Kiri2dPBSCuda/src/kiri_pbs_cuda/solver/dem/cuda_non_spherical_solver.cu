@@ -2,10 +2,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-03 17:49:11
- * @LastEditTime: 2021-11-11 19:28:01
+ * @LastEditTime: 2021-11-15 14:09:18
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cu
  * \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cu
  */
 
@@ -25,7 +25,7 @@ void CudaNonSphericalSolver::ComputeNSDemLinearMomentum(
 
   ComputeNSDemLinearMomentum_CUDA<<<mCudaGridSize, KIRI_CUBLOCKSIZE>>>(
       sands->GetNSParticlesPtr(), sands->GetNSMappingPtr(), sands->GetPosPtr(),
-      sands->GetVelPtr(), sands->GetRadiusPtr(), young, poisson,
+      sands->GetVelPtr(),sands->GetAngVelPtr(), sands->GetRadiusPtr(), young, poisson,
       tanFrictionAngle, sands->Size(), lowestPoint, highestPoint, dt,
       cellStart.Data(), gridSize,
       ThrustHelper::Pos2GridXY(lowestPoint, kernelRadius, gridSize),
@@ -50,7 +50,7 @@ void CudaNonSphericalSolver::NonSphericalParticlesTimeIntegration(
     const CudaDemNonSphericalParams params) {
 
   NSTimeIntegration_CUDA<<<mCudaGridSize, KIRI_CUBLOCKSIZE>>>(
-      sands->GetPosPtr(), sands->GetVelPtr(), sands->GetNSParticlesPtr(),
+      sands->GetPosPtr(), sands->GetVelPtr(), sands->GetAngVelPtr(), sands->GetNSParticlesPtr(),
       sands->GetNSMappingPtr(), sands->Size(), params);
 
   KIRI_CUCALL(cudaDeviceSynchronize());
