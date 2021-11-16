@@ -36,7 +36,7 @@ const UInt RunLiquidNumber = 0;
 const UInt TotalFrameNumber = 300;
 UInt SimCount = 0;
 float TotalFrameTime = 0.f;
-float RenderInterval = 1.f / 60.f;
+float RenderInterval = 1.f / 30.f;
 
 KiriTimer PerFrameTimer;
 CudaDemSystemPtr DEMSystem;
@@ -443,7 +443,7 @@ void NSDEM_SetupParams()
 
     CUDA_DEM_NS_PARAMS.damping = 0.4f;
     // CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
-    CUDA_DEM_NS_PARAMS.dt = 5e-4f;
+    CUDA_DEM_NS_PARAMS.dt = 5e-5f;
 
     // scene data
     CUDA_BOUNDARY_PARAMS.lowest_point = cuda_lowest_point;

@@ -2,10 +2,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-03 17:49:11
- * @LastEditTime: 2021-11-15 14:09:18
+ * @LastEditTime: 2021-11-16 16:23:50
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cu
+ * @FilePath:
  * \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cu
  */
 
@@ -25,8 +25,8 @@ void CudaNonSphericalSolver::ComputeNSDemLinearMomentum(
 
   ComputeNSDemLinearMomentum_CUDA<<<mCudaGridSize, KIRI_CUBLOCKSIZE>>>(
       sands->GetNSParticlesPtr(), sands->GetNSMappingPtr(), sands->GetPosPtr(),
-      sands->GetVelPtr(),sands->GetAngVelPtr(), sands->GetRadiusPtr(), young, poisson,
-      tanFrictionAngle, sands->Size(), lowestPoint, highestPoint, dt,
+      sands->GetVelPtr(), sands->GetAngVelPtr(), sands->GetRadiusPtr(), young,
+      poisson, tanFrictionAngle, sands->Size(), lowestPoint, highestPoint, dt,
       cellStart.Data(), gridSize,
       ThrustHelper::Pos2GridXY(lowestPoint, kernelRadius, gridSize),
       ThrustHelper::GridXY2GridHash(gridSize));
@@ -38,8 +38,8 @@ void CudaNonSphericalSolver::ComputeNSMomentum(
     CudaNonSphericalParticlesPtr &sands,
     const CudaDemNonSphericalParams params) {
 
-  ComputeNSMomentum_CUDA<<<mCudaGridGroupSize, 8>>>(sands->GetNSParticlesPtr(),
-                                                    params);
+  ComputeNSMomentum_CUDA<<<mCudaGridGroupSize, KIRI_CUBLOCKSIZE>>>(
+      sands->GetNSParticlesPtr(), params);
 
   KIRI_CUCALL(cudaDeviceSynchronize());
   KIRI_CUKERNAL();
@@ -50,8 +50,9 @@ void CudaNonSphericalSolver::NonSphericalParticlesTimeIntegration(
     const CudaDemNonSphericalParams params) {
 
   NSTimeIntegration_CUDA<<<mCudaGridSize, KIRI_CUBLOCKSIZE>>>(
-      sands->GetPosPtr(), sands->GetVelPtr(), sands->GetAngVelPtr(), sands->GetNSParticlesPtr(),
-      sands->GetNSMappingPtr(), sands->Size(), params);
+      sands->GetPosPtr(), sands->GetVelPtr(), sands->GetAngVelPtr(),
+      sands->GetNSParticlesPtr(), sands->GetNSMappingPtr(), sands->Size(),
+      params);
 
   KIRI_CUCALL(cudaDeviceSynchronize());
   KIRI_CUKERNAL();
