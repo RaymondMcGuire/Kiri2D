@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
- * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-08-02 17:17:36
+ * @Date: 2021-08-02 16:30:55
+ * @LastEditTime: 2021-11-17 14:36:50
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_group_site.h
  */
 
@@ -36,7 +36,7 @@ namespace KIRI
             : KiriVoroSite(x, y, weight) {}
 
         explicit KiriVoroGroupSite(Vector3F data)
-            : KiriVoroSite(data.x, data.y, data.z) {}
+            : KiriVoroSite(data) {}
 
         explicit KiriVoroGroupSite(float x, float y, float weight, float percent)
             : KiriVoroSite(x, y, weight, percent) {}

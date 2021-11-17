@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-10-05 00:08:58
- * @LastEditTime: 2021-10-31 02:07:56
+ * @Date: 2021-11-15 12:33:58
+ * @LastEditTime: 2021-11-17 16:32:19
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\power_diagram.h
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <kiri2d/geo/convex_hull3.h>
-#include <kiri2d/voronoi/voro_site.h>
+#include <kiri2d/voronoi/voro_group_site.h>
 
 namespace KIRI
 {

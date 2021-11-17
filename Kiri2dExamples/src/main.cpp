@@ -2024,7 +2024,122 @@ void DebugNSParticles()
     }
 }
 
-int main1()
+#include <kiri2d/voronoi/voro_ns_optimize.h>
+void VoronoiNSOptimize()
+{
+    // scene renderer config
+    float windowheight = 5000.f;
+    float windowwidth = 5000.f;
+
+    // voronoi
+    float width = 3000.f;
+    float height = 3000.f;
+    auto offsetVec2 = Vector2F(500.f, 500.f);
+
+    String boundaryFileName = "bunny";
+    String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
+
+    KIRI::Vector<Vector2F> bunny2d;
+    size_t bunnyNum;
+    load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
+
+    KIRI::Vector<Vector2F> boundary;
+    auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
+
+    for (size_t i = 0; i < bunny2d.size(); i++)
+    {
+        auto newPos = bunny2d[i] * 4000.f + offsetVec2;
+        boundary.emplace_back(newPos);
+        boundaryPoly->AddPolygonVertex2(newPos);
+    }
+
+    auto voro_data = LoadCSVFile2VoronoiSites("bunny_sites_3999.csv");
+    auto ns_opti = std::make_shared<KiriVoroNSOptimize>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
+
+    for (size_t i = 0; i < voro_data.size(); i++)
+    {
+        auto group_site = std::make_shared<KiriVoroGroupSite>(voro_data[i]);
+        group_site->SetGroupId(i);
+        group_site->SetGroupColor(Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine)));
+        ns_opti->AddSite(group_site);
+    }
+
+    ns_opti->SetBoundaryPolygon2(boundaryPoly);
+    ns_opti->Init();
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    KIRI::Vector<KiriPoint2> points;
+    KIRI::Vector<KiriLine2> lines;
+    KIRI::Vector<KiriCircle2> circles;
+
+    while (1)
+    {
+        lines.clear();
+        circles.clear();
+
+        auto sites = ns_opti->GetVoroSites();
+        KIRI_LOG_DEBUG("current num={0}", sites.size());
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            auto site_i = std::dynamic_pointer_cast<KiriVoroGroupSite>(sites[i]);
+            auto p = Vector2F(site_i->GetValue().x, site_i->GetValue().y);
+
+            auto point = KiriPoint2(p, Vector3F(1.f, 1.f, 1.f));
+            points.emplace_back(point);
+
+            auto poly = site_i->GetCellPolygon();
+            if (poly != NULL)
+            {
+                poly->ComputeVoroSitesList();
+                auto list = poly->GetVoroSitesList();
+                auto node = list->GetHead();
+                do
+                {
+                    auto start = Vector2F(node->value);
+
+                    node = node->next;
+                    auto end = Vector2F(node->value);
+                    auto line = KiriLine2(start, end);
+                    line.thick = 5.f;
+
+                    lines.emplace_back(line);
+                } while (node != list->GetHead());
+
+                if (poly->GetSkeletons().empty())
+                    poly->ComputeSSkel1998Convex();
+
+                auto mic = poly->ComputeMICByStraightSkeletonTest();
+                for (size_t idx = 0; idx < mic.size(); idx++)
+                {
+                    auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
+                    // maxCir2.fill = false;
+                    maxCir2.col = site_i->GetGroupColor();
+                    circles.emplace_back(maxCir2);
+                }
+            }
+        }
+
+        // scene->AddParticles(points);
+        scene->AddLines(lines);
+        scene->AddCircles(circles);
+
+        renderer->DrawCanvas();
+        renderer->SaveImages2File();
+
+        renderer->ClearCanvas();
+        scene->Clear();
+
+        ns_opti->ComputeIterate();
+    }
+}
+
+int main()
 {
     KIRI::KiriLog::Init();
     // VoronoiExample();
@@ -2055,7 +2170,9 @@ int main1()
 
     // LoadVoronoiExample();
 
-    DebugNSParticles();
+    // DebugNSParticles();
+
+    VoronoiNSOptimize();
 
     return 0;
 }

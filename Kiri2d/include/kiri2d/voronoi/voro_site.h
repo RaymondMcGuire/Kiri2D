@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
  * @LastEditTime: 2021-10-04 11:21:59
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_site.h
  */
 
@@ -32,6 +32,9 @@ namespace KIRI
 
         explicit KiriVoroSite(Vector2F pos, float percent)
             : KiriVoroSite(pos.x, pos.y, MEpsilon<float>(), percent) {}
+
+        explicit KiriVoroSite(Vector3F data)
+            : KiriVoroSite(data.x, data.y, data.z) {}
 
         explicit KiriVoroSite(float x, float y, float weight)
             : KiriVertex3(Vector3F(x, y, ProjectZ(x, y, weight)))
