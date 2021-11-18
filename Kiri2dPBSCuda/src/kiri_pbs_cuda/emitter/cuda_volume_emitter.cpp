@@ -307,4 +307,76 @@ namespace KIRI
         return;
     }
 
+    void CudaVolumeEmitter::BuildNsDemVolume(DemNSBoxVolumeData &data,
+                                             const std::vector<NSPack> &ns_data)
+    {
+
+        data.min_radius = Huge<float>();
+        data.max_radius = Tiny<float>();
+
+        for (size_t idx = 0; idx < ns_data.size(); idx++)
+        {
+            auto ns = ns_data[idx];
+
+            // for clump
+            non_spherical_particles ns_packs_data;
+            float ns_mass = 0.f;
+            float2 ns_moment = make_float2(0.f);
+            float inertia_tensor = 0.f;
+
+            int sub_num = ns.GetPack().size();
+            for (size_t i = 0; i < sub_num; i++)
+            {
+                auto cen = ns.GetPack()[i].center;
+                auto rad = ns.GetPack()[i].radius;
+                data.sphere_data.emplace_back(ns_sphere_data(cen, rad, ns.GetPack()[i].color, i));
+
+                float volume = (4.f / 3.f) * KIRI_PI * std::powf(rad, 3.f);
+
+                ns_mass += volume;
+                ns_moment += volume * cen;
+                inertia_tensor += 2.f / 5.f * volume * std::powf(rad, 2.f) + volume * dot(cen, cen);
+            }
+
+            ns_packs_data.ns_id = idx;
+            ns_packs_data.centroid = ns_moment / ns_mass;
+            ns_packs_data.mass = ns_mass * 2000.f;
+            ns_packs_data.vel = make_float2(0.f);
+            ns_packs_data.angle_vel = 0.f;
+            ns_packs_data.angle_acc = 0.f;
+            ns_packs_data.sub_num = sub_num;
+
+            auto pack_rot = make_rotation2(0.f);
+            ns_packs_data.rot = pack_rot.mat;
+            ns_packs_data.inertia = inertia_tensor - ns_mass * dot(ns_packs_data.centroid, ns_packs_data.centroid);
+
+            for (size_t i = 0; i < sub_num; i++)
+            {
+
+                auto cen = ns.GetPack()[i].center;
+                auto rad = ns.GetPack()[i].radius;
+
+                ns_packs_data.sub_color_list[i] = ns.GetPack()[i].color;
+                ns_packs_data.sub_radius_list[i] = rad;
+
+                data.min_radius = std::min(rad, data.min_radius);
+                data.max_radius = std::max(rad, data.max_radius);
+
+                ns_packs_data.sub_pos_list[i] = inverse_rot2(pack_rot).mat * (cen - ns_packs_data.centroid);
+                ns_packs_data.sub_rot_list[i] = inverse_rot2(pack_rot).mat * ns.GetPack()[i].rot.mat;
+
+                ns_packs_data.force_list[i] = make_float2(0.f);
+                ns_packs_data.torque_list[i] = 0.f;
+
+                ns_mapping map_data;
+                map_data.ns_id = idx;
+                map_data.sub_id = i;
+                map_data.rel_pos = ns_packs_data.sub_pos_list[i];
+                map_data.rel_rot = ns_packs_data.sub_rot_list[i];
+                data.map_data.emplace_back(map_data);
+            }
+
+            data.ns_data.emplace_back(ns_packs_data);
+        }
+    }
 } // namespace KIRI

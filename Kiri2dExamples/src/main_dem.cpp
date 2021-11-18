@@ -13,6 +13,69 @@
 using namespace KIRI;
 using namespace KIRI2D;
 
+String readFileIntoString1(const String &path)
+{
+    auto ss = std::ostringstream{};
+    std::ifstream input_file(path);
+    if (!input_file.is_open())
+        exit(EXIT_FAILURE);
+
+    ss << input_file.rdbuf();
+    return ss.str();
+}
+
+std::vector<std::string> split_str(const std::string &s, char delim)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(s);
+    std::string item;
+
+    while (getline(ss, item, delim))
+    {
+        result.push_back(item);
+    }
+
+    return result;
+}
+
+std::vector<NSPack> LoadCSVFile2NSPack(const String fileName)
+{
+    String filePath = String(EXPORT_PATH) + "csv/" + fileName;
+
+    char delimiter = ',';
+
+    auto file_contents = readFileIntoString1(filePath);
+    std::istringstream sstream(file_contents);
+    std::vector<String> row;
+    String record;
+
+    std::vector<NSPack> ns_packs;
+
+    while (std::getline(sstream, record))
+    {
+        std::istringstream line(record);
+        while (std::getline(line, record, delimiter))
+            row.push_back(record);
+
+        NSPack ns_pack;
+        auto pos_data = split_str(row[0], ';');
+        auto rad_data = split_str(row[1], ';');
+        auto col_data = split_str(row[2], ':');
+
+        for (size_t i = 0; i < pos_data.size(); i++)
+        {
+            auto pos_str = split_str(pos_data[i], ':');
+            ns_pack.AppendSubParticles(make_float2(std::stof(pos_str[0]), std::stof(pos_str[1])), std::stof(rad_data[0]));
+        }
+        ns_pack.SetColor(make_float3(std::stof(col_data[0]), std::stof(col_data[1]), std::stof(col_data[2])));
+        ns_packs.emplace_back(ns_pack);
+
+        row.clear();
+    }
+
+    return ns_packs;
+}
+
 // scene config
 // float windowheight = 1080.f;
 // float windowwidth = 800.f;
@@ -456,13 +519,19 @@ void NSDEM_SetupParams()
 
     DemNSBoxVolumeData volumeData;
     std::vector<NSPackPtr> pack_types;
-    pack_types.emplace_back(std::make_shared<NSPack>(MSM_L2, 10.f));
-    pack_types.emplace_back(std::make_shared<NSPack>(MSM_L3, 10.f));
 
-    volumeEmitter->BuildRndNSDemBoxVolume(volumeData, cuda_lowest_point + make_float2(200.f, 10.f),
-                                          cuda_highest_point - make_float2(200.f), 10.f, 0.f,
-                                          3000,
-                                          pack_types);
+    // test volume data
+    // pack_types.emplace_back(std::make_shared<NSPack>(MSM_L2, 10.f));
+    // pack_types.emplace_back(std::make_shared<NSPack>(MSM_L3, 10.f));
+
+    // volumeEmitter->BuildRndNSDemBoxVolume(volumeData, cuda_lowest_point + make_float2(200.f, 10.f),
+    //                                       cuda_highest_point - make_float2(200.f), 10.f, 0.f,
+    //                                       3000,
+    //                                       pack_types);
+
+    auto ns_packs_data = LoadCSVFile2NSPack("ns_data.csv");
+
+    volumeEmitter->BuildNsDemVolume(volumeData, ns_packs_data);
 
     KIRI_LOG_DEBUG("max radius={0}, min radius={1}", volumeData.max_radius, volumeData.min_radius);
     CUDA_DEM_NS_PARAMS.kernel_radius = 4.f * volumeData.max_radius;
@@ -523,6 +592,7 @@ void NSDEM_SetupParams()
 
     // group num
     CUDA_DEM_NS_PARAMS.group_num = volumeData.ns_data.size();
+    KIRI_LOG_DEBUG("group num size={0}", volumeData.ns_data.size());
 
     // debug group
     // KIRI_LOG_DEBUG("group num={0}", volumeData.ns_data.size());
@@ -642,8 +712,11 @@ void UpdateNSSystemRealTime()
 
     for (size_t i = 0; i < particles_num; i++)
     {
-        auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) + offsetvec2, Vector3F(particle_colors[i].x, particle_colors[i].y, particle_colors[i].z), particle_radius[i]);
+        auto pos = Vector2F(particle_positions[i].x, particle_positions[i].y) + offsetvec2;
+        auto p = KiriCircle2(pos, Vector3F(particle_colors[i].x, particle_colors[i].y, particle_colors[i].z), particle_radius[i]);
         circles.emplace_back(p);
+
+        // KIRI_LOG_DEBUG("pos={0},{1}", pos.x, pos.y);
     }
 
     UpdateScene(circles);

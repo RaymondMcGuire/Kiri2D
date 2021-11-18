@@ -36,6 +36,12 @@ namespace KIRI
         explicit KiriVoroSite(Vector3F data)
             : KiriVoroSite(data.x, data.y, data.z) {}
 
+        explicit KiriVoroSite(Vector4F data)
+            : KiriVoroSite(data.x, data.y, data.z)
+        {
+            mRadius = data.w;
+        }
+
         explicit KiriVoroSite(float x, float y, float weight)
             : KiriVertex3(Vector3F(x, y, ProjectZ(x, y, weight)))
         {

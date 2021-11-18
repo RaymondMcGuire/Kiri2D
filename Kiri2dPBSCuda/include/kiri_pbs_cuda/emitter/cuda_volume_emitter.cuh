@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-11-11 19:35:28
+ * @LastEditTime: 2021-11-18 16:52:57
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath:
@@ -77,6 +77,9 @@ public:
                               float2 upper, float coef_mean, float coef_fuzz,
                               int max_number,
                               const std::vector<NSPackPtr> &ns_types);
+
+  void BuildNsDemVolume(DemNSBoxVolumeData &data,
+                        const std::vector<NSPack> &ns_data);
 
   inline constexpr bool GetEmitterStatus() const { return bEnable; }
 

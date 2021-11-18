@@ -1,10 +1,9 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-05-28 10:09:23
- * @LastEditTime: 2021-10-20 00:28:59
+ * @Date: 2021-10-05 00:08:58
+ * @LastEditTime: 2021-11-18 19:39:06
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti.h
  */
 
 #ifndef _KIRI_VORO_POROPTI_H_
@@ -68,12 +67,12 @@ namespace KIRI
             return circles;
         }
 
-        Vector<Vector3F> GetVoronoiSitesData()
+        Vector<Vector4F> GetVoronoiSitesData()
         {
-            Vector<Vector3F> sites_data;
+            Vector<Vector4F> sites_data;
             auto sites = mRootCore->GetSites();
             for (size_t i = 0; i < sites.size(); i++)
-                sites_data.emplace_back(Vector3F(sites[i]->GetValue().x, sites[i]->GetValue().y, sites[i]->GetWeight()));
+                sites_data.emplace_back(Vector4F(sites[i]->GetValue().x, sites[i]->GetValue().y, sites[i]->GetWeight(), sites[i]->GetRadius()));
 
             return sites_data;
         }

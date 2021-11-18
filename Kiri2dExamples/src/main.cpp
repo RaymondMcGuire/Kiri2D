@@ -57,7 +57,7 @@ String readFileIntoString(const String &path)
     return ss.str();
 }
 
-Vector<Vector3F> LoadCSVFile2VoronoiSites(const String fileName)
+Vector<Vector3F> LoadCSVFile2VoronoiSitesV3(const String fileName)
 {
     String filePath = String(EXPORT_PATH) + "csv/" + fileName;
 
@@ -87,6 +87,79 @@ Vector<Vector3F> LoadCSVFile2VoronoiSites(const String fileName)
     }
 
     return voro_sites;
+}
+
+Vector<Vector4F> LoadCSVFile2VoronoiSites(const String fileName)
+{
+    String filePath = String(EXPORT_PATH) + "csv/" + fileName;
+
+    char delimiter = ',';
+
+    auto file_contents = readFileIntoString(filePath);
+    std::istringstream sstream(file_contents);
+    Vector<String> row;
+    String record;
+
+    Vector<Vector4F> voro_sites;
+
+    while (std::getline(sstream, record))
+    {
+        std::istringstream line(record);
+        while (std::getline(line, record, delimiter))
+            row.push_back(record);
+
+        // KIRI_LOG_DEBUG("{0},{1},{2}", std::stof(row[0]), std::stof(row[1]), std::stof(row[2]));
+
+        voro_sites.emplace_back(Vector4F(
+            std::stof(row[0]),
+            std::stof(row[1]),
+            std::stof(row[2]),
+            std::stof(row[3])));
+
+        row.clear();
+    }
+
+    return voro_sites;
+}
+
+struct NSDataStruct
+{
+    Vector<Vector2F> pos;
+    Vector<float> rad;
+    Vector3F col;
+};
+
+void ExportNSData2CSVFile(const String fileName, const Vector<NSDataStruct> &ns)
+{
+    String filePath = String(EXPORT_PATH) + "csv/" + fileName;
+    std::fstream file;
+    file.open(filePath.c_str(), std::ios_base::out);
+    for (int i = 0; i < ns.size(); i++)
+    {
+        String pos_data = "";
+        String rad_data = "";
+        String col_data = "";
+        auto n = ns[i];
+        for (size_t pidx = 0; pidx < n.pos.size(); pidx++)
+        {
+            if (pidx == n.pos.size() - 1)
+            {
+                pos_data += std::to_string(n.pos[pidx].x) + ":" + std::to_string(n.pos[pidx].y);
+                rad_data += std::to_string(n.rad[pidx]);
+            }
+
+            else
+            {
+                pos_data += std::to_string(n.pos[pidx].x) + ":" + std::to_string(n.pos[pidx].y) + ";";
+                rad_data += std::to_string(n.rad[pidx]) + ";";
+            }
+        }
+
+        col_data += std::to_string(n.col.x) + ":" + std::to_string(n.col.y) + ":" + std::to_string(n.col.z);
+        file << pos_data << "," << rad_data << "," << col_data << std::endl;
+    }
+
+    file.close();
 }
 
 void ExportSamplingData2CSVFile(const String fileName, const Vector<Vector2F> &center, const Vector<float> &radius)
@@ -137,15 +210,15 @@ void ExportEvaluationData2CSVFile(const String fileName, const String idx, const
     efile.close();
 }
 
-void ExportVoronoiData2CSVFile(const String fileName, const String idx, const Vector<Vector3F> &sites)
+void ExportVoronoiData2CSVFile(const String fileName, const String idx, const Vector<Vector4F> &sites)
 {
     String voronoiFile = String(EXPORT_PATH) + "csv/" + fileName + "_sites_" + idx + ".csv";
     std::fstream vfile;
     vfile.open(voronoiFile.c_str(), std::ios_base::out);
-    vfile << "sitex,sitey,weight"
+    vfile << "sitex,sitey,weight,radius"
           << std::endl;
     for (int i = 0; i < sites.size(); i++)
-        vfile << sites[i].x << "," << sites[i].y << "," << sites[i].z << std::endl;
+        vfile << sites[i].x << "," << sites[i].y << "," << sites[i].z << "," << sites[i].w << std::endl;
 
     vfile.close();
 }
@@ -1800,6 +1873,7 @@ void LoadVoronoiExample()
     Vector<KiriPoint2> points;
     Vector<KiriLine2> lines;
     Vector<KiriCircle2> circles;
+    Vector<NSDataStruct> ns_data;
 
     std::random_device seedGen;
     std::default_random_engine rndEngine(seedGen());
@@ -1844,13 +1918,20 @@ void LoadVoronoiExample()
             auto gcolor = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
             // KIRI_LOG_DEBUG("g size={0}", mic.size());
 
+            NSDataStruct ns;
             for (size_t idx = 0; idx < mic.size(); idx++)
             {
+                if (mic[idx].z == 0.f)
+                    continue;
                 auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
                 // maxCir2.fill = false;
                 maxCir2.col = gcolor;
                 circles.emplace_back(maxCir2);
+                ns.pos.emplace_back(Vector2F(mic[idx].x, mic[idx].y));
+                ns.rad.emplace_back(mic[idx].z);
             }
+            ns.col = gcolor;
+            ns_data.emplace_back(ns);
 
             // auto maxCir2 = KiriCircle2(Vector2F(mic.x, mic.y), Vector3F(1.f, 0.f, 1.f), mic.z);
             // if (site_i->GetIsGroup())
@@ -1869,6 +1950,8 @@ void LoadVoronoiExample()
 
     renderer->ClearCanvas();
     scene->Clear();
+
+    ExportNSData2CSVFile("ns_data.csv", ns_data);
 }
 
 #include <kiri2d/sampling/poisson_disk_sampling.h>
@@ -1976,6 +2059,59 @@ void UniPoissonDiskSampler()
 }
 
 #include <kiri_pbs_cuda/emitter/cuda_volume_emitter.cuh>
+
+std::vector<std::string> split_str1(const std::string &s, char delim)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(s);
+    std::string item;
+
+    while (getline(ss, item, delim))
+    {
+        result.push_back(item);
+    }
+
+    return result;
+}
+
+std::vector<NSPack> LoadCSVFile2NSPack1(const String fileName)
+{
+    String filePath = String(EXPORT_PATH) + "csv/" + fileName;
+
+    char delimiter = ',';
+
+    auto file_contents = readFileIntoString(filePath);
+    std::istringstream sstream(file_contents);
+    std::vector<String> row;
+    String record;
+
+    std::vector<NSPack> ns_packs;
+
+    while (std::getline(sstream, record))
+    {
+        std::istringstream line(record);
+        while (std::getline(line, record, delimiter))
+            row.push_back(record);
+
+        NSPack ns_pack;
+        auto pos_data = split_str1(row[0], ';');
+        auto rad_data = split_str1(row[1], ';');
+        auto col_data = split_str1(row[2], ':');
+
+        for (size_t i = 0; i < pos_data.size(); i++)
+        {
+            auto pos_str = split_str1(pos_data[i], ':');
+            ns_pack.AppendSubParticles(make_float2(std::stof(pos_str[0]), std::stof(pos_str[1])), std::stof(rad_data[0]));
+        }
+        ns_pack.SetColor(make_float3(std::stof(col_data[0]), std::stof(col_data[1]), std::stof(col_data[2])));
+        ns_packs.emplace_back(ns_pack);
+
+        row.clear();
+    }
+
+    return ns_packs;
+}
+
 void DebugNSParticles()
 {
 
@@ -1986,14 +2122,17 @@ void DebugNSParticles()
     auto emitter = std::make_shared<CudaVolumeEmitter>();
 
     DemNSBoxVolumeData data;
-    std::vector<NSPackPtr> pack_types;
-    pack_types.emplace_back(std::make_shared<NSPack>(MSM_L2, 10.f));
-    pack_types.emplace_back(std::make_shared<NSPack>(MSM_L3, 10.f));
+    // std::vector<NSPackPtr> pack_types;
+    // pack_types.emplace_back(std::make_shared<NSPack>(MSM_L2, 10.f));
+    // pack_types.emplace_back(std::make_shared<NSPack>(MSM_L3, 10.f));
 
-    emitter->BuildRndNSDemBoxVolume(data, make_float2(500.f, 200.f),
-                                    make_float2(1500.f, 800.f), 10.f, 0.f,
-                                    10000,
-                                    pack_types);
+    // emitter->BuildRndNSDemBoxVolume(data, make_float2(500.f, 200.f),
+    //                                 make_float2(1500.f, 800.f), 10.f, 0.f,
+    //                                 10000,
+    //                                 pack_types);
+
+    auto ns_packs = LoadCSVFile2NSPack1("ns_data.csv");
+    emitter->BuildNsDemVolume(data, ns_packs);
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
@@ -2053,7 +2192,7 @@ void VoronoiNSOptimize()
         boundaryPoly->AddPolygonVertex2(newPos);
     }
 
-    auto voro_data = LoadCSVFile2VoronoiSites("bunny_sites_3999.csv");
+    auto voro_data = LoadCSVFile2VoronoiSites("bunny_sites_3821.csv");
     auto ns_opti = std::make_shared<KiriVoroNSOptimize>();
 
     std::random_device seedGen;
@@ -2078,13 +2217,14 @@ void VoronoiNSOptimize()
     KIRI::Vector<KiriLine2> lines;
     KIRI::Vector<KiriCircle2> circles;
 
+    UInt iter_num = 0;
     while (1)
     {
         lines.clear();
         circles.clear();
 
         auto sites = ns_opti->GetVoroSites();
-        KIRI_LOG_DEBUG("current num={0}", sites.size());
+        // KIRI_LOG_DEBUG("current num={0}", sites.size());
         for (size_t i = 0; i < sites.size(); i++)
         {
             auto site_i = std::dynamic_pointer_cast<KiriVoroGroupSite>(sites[i]);
@@ -2135,7 +2275,8 @@ void VoronoiNSOptimize()
         renderer->ClearCanvas();
         scene->Clear();
 
-        ns_opti->ComputeIterate();
+        auto error = ns_opti->ComputeIterate();
+        KIRI_LOG_DEBUG("iter={0}, error={1}", iter_num++, error);
     }
 }
 

@@ -16,7 +16,7 @@
 
 namespace KIRI
 {
-#define MAX_SUB_SPHERICAL_NUM 10
+#define MAX_SUB_SPHERICAL_NUM 50
 
     struct CudaDemParams
     {

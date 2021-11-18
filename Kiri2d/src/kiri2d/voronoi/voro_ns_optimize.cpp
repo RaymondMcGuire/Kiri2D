@@ -129,9 +129,20 @@ namespace KIRI
         for (int i = 0; i < voroSite.size(); i++)
         {
             auto siteI = voroSite[i];
+            auto data = siteI->GetValue();
+
             auto polyI = siteI->GetCellPolygon();
             if (polyI != NULL)
             {
+                // check boundary
+                auto boundary_poly = mPowerDiagram->GetBoundaryPolygon2();
+                auto boundary_contain = boundary_poly->Contains(polyI->GetPolygonCentroid());
+                if (!boundary_contain)
+                {
+                    removeVoroIdxs.emplace_back(siteI->GetIdx());
+                    continue;
+                }
+
                 if (polyI->GetSkeletons().empty())
                     polyI->ComputeSSkel1998Convex();
 
@@ -165,8 +176,8 @@ namespace KIRI
         {
             // KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
             mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
-            AdaptPositionsWeights();
-            // mPowerDiagram->ComputeDiagram();
+            // AdaptPositionsWeights();
+            mPowerDiagram->ComputeDiagram();
         }
     }
 
@@ -317,8 +328,18 @@ namespace KIRI
         Vector<KiriVoroGroupSitePtr> new_sites;
         Vector<UInt> removeVoroIdxs;
 
-        // check if need split
         auto voroSite = mPowerDiagram->GetVoroSites();
+
+        // record avg radius
+        auto total_rad = 0.f;
+        for (int i = 0; i < voroSite.size(); i++)
+        {
+            total_rad += voroSite[i]->GetRadius();
+            // KIRI_LOG_DEBUG(" rad={0}", voroSite[i]->GetRadius());
+        }
+        total_rad /= voroSite.size();
+
+        // check if need split
         for (int i = 0; i < voroSite.size(); i++)
         {
             auto total_area = 0.f;
@@ -337,7 +358,11 @@ namespace KIRI
                 }
             }
 
-            if (polyi->GetPolygonArea() < total_area * coef)
+            // judgement 1
+            // if (polyi->GetPolygonArea() < total_area * coef)
+            //     continue;
+
+            if (siteI->GetRadius() < total_rad * 2.5f)
                 continue;
 
             // split event
@@ -358,12 +383,12 @@ namespace KIRI
             }
 
             auto nvs1 = std::make_shared<KiriVoroGroupSite>(new_vs1);
-            nvs1->SetWeight(siteI->GetWeight() / 1.5f);
+            nvs1->SetWeight(siteI->GetWeight() / 1.2f);
             nvs1->SetRadius(siteI->GetRadius() / std::sqrtf(2.f));
             nvs1->SetGroupColor(siteI->GetGroupColor());
             nvs1->SetGroupId(siteI->GetGroupId());
             auto nvs2 = std::make_shared<KiriVoroGroupSite>(new_vs2);
-            nvs2->SetWeight(siteI->GetWeight() / 1.5f);
+            nvs2->SetWeight(siteI->GetWeight() / 1.2f);
             nvs2->SetRadius(siteI->GetRadius() / std::sqrtf(2.f));
             nvs2->SetGroupColor(siteI->GetGroupColor());
             nvs2->SetGroupId(siteI->GetGroupId());
