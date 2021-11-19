@@ -358,11 +358,7 @@ namespace KIRI
                 }
             }
 
-            // judgement 1
-            // if (polyi->GetPolygonArea() < total_area * coef)
-            //     continue;
-
-            if (siteI->GetRadius() < total_rad * 2.5f)
+            if (polyi->GetPolygonArea() < total_area * coef && siteI->GetRadius() < total_rad * 2.5f)
                 continue;
 
             // split event
