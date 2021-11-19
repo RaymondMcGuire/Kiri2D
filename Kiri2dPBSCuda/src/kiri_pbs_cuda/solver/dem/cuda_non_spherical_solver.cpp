@@ -1,10 +1,9 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-11-17 11:15:51
- * @LastEditTime: 2021-11-19 16:45:09
+ * @Date: 2021-11-19 19:31:16
+ * @LastEditTime: 2021-11-19 20:06:48
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cpp
  */
 
 #include <kiri_pbs_cuda/solver/dem/cuda_non_spherical_solver.cuh>

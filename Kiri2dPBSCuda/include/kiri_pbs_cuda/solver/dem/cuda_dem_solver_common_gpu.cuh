@@ -1,10 +1,11 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-19 17:36:51
+ * @LastEditTime: 2021-11-19 20:47:03
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
+ * @FilePath:
+ * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  */
@@ -234,30 +235,30 @@ static __device__ void ComputeNSDemWorldBoundaryForces(
 
   if (posi.x > highestPoint.x - rij) {
     N = make_float2(-1.f, 0.f);
-    diff = abs(posi.x - highestPoint.x);
+    diff = abs(posi.x - (highestPoint.x - boundaryRadius));
     ComputeDemForcesAndTorque(f, torque, ang_veli, 0.f, N * diff, veli, radiusi,
-      ri2, kn, ks, tanFrictionAngle, dt);
+                              ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.x < lowestPoint.x + rij) {
     N = make_float2(1.f, 0.f);
-    diff = abs(posi.x - lowestPoint.x);
+    diff = abs(posi.x - (lowestPoint.x + boundaryRadius));
     ComputeDemForcesAndTorque(f, torque, ang_veli, 0.f, N * diff, veli, radiusi,
-      ri2, kn, ks, tanFrictionAngle, dt);
+                              ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.y > highestPoint.y - rij) {
     N = make_float2(0.f, -1.f);
-    diff = abs(posi.y - highestPoint.y);
+    diff = abs(posi.y - (highestPoint.y - boundaryRadius));
     ComputeDemForcesAndTorque(f, torque, ang_veli, 0.f, N * diff, veli, radiusi,
-      ri2, kn, ks, tanFrictionAngle, dt);
+                              ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.y < lowestPoint.y + rij) {
     N = make_float2(0.f, 1.f);
-    diff = abs(posi.y - lowestPoint.y);
+    diff = abs(posi.y - (lowestPoint.y + boundaryRadius));
     ComputeDemForcesAndTorque(f, torque, ang_veli, 0.f, N * diff, veli, radiusi,
-      ri2, kn, ks, tanFrictionAngle, dt);
+                              ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   return;
