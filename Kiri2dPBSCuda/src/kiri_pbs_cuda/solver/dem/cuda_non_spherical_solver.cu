@@ -2,10 +2,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-03 17:49:11
- * @LastEditTime: 2021-11-16 16:23:50
+ * @LastEditTime: 2021-11-19 17:43:19
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cu
  * \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cu
  */
 
@@ -19,13 +19,13 @@ namespace KIRI {
 
 void CudaNonSphericalSolver::ComputeNSDemLinearMomentum(
     CudaNonSphericalParticlesPtr &sands, const float young, const float poisson,
-    const float tanFrictionAngle, const float dt,
+    const float tanFrictionAngle, const float dt,const float boundaryRadius,
     const CudaArray<size_t> &cellStart, const float2 lowestPoint,
     const float2 highestPoint, const float kernelRadius, const int2 gridSize) {
 
   ComputeNSDemLinearMomentum_CUDA<<<mCudaGridSize, KIRI_CUBLOCKSIZE>>>(
       sands->GetNSParticlesPtr(), sands->GetNSMappingPtr(), sands->GetPosPtr(),
-      sands->GetVelPtr(), sands->GetAngVelPtr(), sands->GetRadiusPtr(), young,
+      sands->GetVelPtr(), sands->GetAngVelPtr(), sands->GetRadiusPtr(),boundaryRadius, young,
       poisson, tanFrictionAngle, sands->Size(), lowestPoint, highestPoint, dt,
       cellStart.Data(), gridSize,
       ThrustHelper::Pos2GridXY(lowestPoint, kernelRadius, gridSize),
@@ -47,11 +47,17 @@ void CudaNonSphericalSolver::ComputeNSMomentum(
 
 void CudaNonSphericalSolver::NonSphericalParticlesTimeIntegration(
     CudaNonSphericalParticlesPtr &sands,
-    const CudaDemNonSphericalParams params) {
+    const CudaDemNonSphericalParams params,
+    const float boundaryRadius,
+    const float2 lowestPoint,
+    const float2 highestPoint) {
 
   NSTimeIntegration_CUDA<<<mCudaGridSize, KIRI_CUBLOCKSIZE>>>(
       sands->GetPosPtr(), sands->GetVelPtr(), sands->GetAngVelPtr(),
       sands->GetNSParticlesPtr(), sands->GetNSMappingPtr(), sands->Size(),
+      sands->GetRadiusPtr(),
+      boundaryRadius,
+      lowestPoint,highestPoint,
       params);
 
   KIRI_CUCALL(cudaDeviceSynchronize());

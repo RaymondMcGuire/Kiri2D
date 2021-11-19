@@ -2,10 +2,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-03 17:49:11
- * @LastEditTime: 2021-11-10 01:42:28
+ * @LastEditTime: 2021-11-19 16:42:39
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_dem_solver.cu
  * \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_dem_solver.cu
  */
 
@@ -41,12 +41,12 @@ void CudaDemSolver::ExtraForces(CudaDemParticlesPtr &sands,
 void CudaDemSolver::ComputeDemLinearMomentum(
     CudaDemParticlesPtr &sands, const float radius, const float young,
     const float poisson, const float tanFrictionAngle, const float c0,
-    const float dt, const CudaArray<size_t> &cellStart,
+    const float dt,const float boundaryRadius, const CudaArray<size_t> &cellStart,
     const float2 lowestPoint, const float2 highestPoint,
     const float kernelRadius, const int2 gridSize) {
   ComputeDemLinearMomentum_CUDA<<<mCudaGridSize, KIRI_CUBLOCKSIZE>>>(
       sands->GetPosPtr(), sands->GetVelPtr(), sands->GetAccPtr(),
-      sands->GetMassPtr(), radius, young, poisson, tanFrictionAngle, 0.f,
+      sands->GetMassPtr(), radius,boundaryRadius, young, poisson, tanFrictionAngle, 0.f,
       sands->Size(), lowestPoint, highestPoint, dt, cellStart.Data(), gridSize,
       ThrustHelper::Pos2GridXY(lowestPoint, kernelRadius, gridSize),
       ThrustHelper::GridXY2GridHash(gridSize), LinearAttenCoeff(c0, 0.f));

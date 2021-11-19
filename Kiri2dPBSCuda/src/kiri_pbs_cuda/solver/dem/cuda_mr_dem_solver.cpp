@@ -1,10 +1,10 @@
-/*** 
+/***
  * @Author: Xu.WANG
- * @Date: 2021-03-15 22:37:26
- * @LastEditTime: 2021-04-02 14:23:24
+ * @Date: 2021-11-15 12:33:59
+ * @LastEditTime: 2021-11-19 16:45:17
  * @LastEditors: Xu.WANG
- * @Description: 
- * @FilePath: \Kiri\KiriPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_mr_dem_solver.cpp
+ * @Description:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_mr_dem_solver.cpp
  */
 
 #include <kiri_pbs_cuda/solver/dem/cuda_mr_dem_solver.cuh>
@@ -32,6 +32,7 @@ namespace KIRI
             params.tan_friction_angle,
             params.c0,
             params.dt,
+            bparams.min_radius,
             cellStart,
             bparams.lowest_point,
             bparams.highest_point,

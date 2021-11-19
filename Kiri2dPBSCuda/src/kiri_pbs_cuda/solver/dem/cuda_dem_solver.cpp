@@ -32,6 +32,7 @@ namespace KIRI
             params.tan_friction_angle,
             params.c0,
             params.dt,
+            bparams.min_radius,
             cellStart,
             bparams.lowest_point,
             bparams.highest_point,

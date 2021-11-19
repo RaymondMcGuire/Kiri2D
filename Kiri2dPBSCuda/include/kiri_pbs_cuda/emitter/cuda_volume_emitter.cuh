@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-11-18 16:52:57
+ * @LastEditTime: 2021-11-19 15:17:58
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\emitter\cuda_volume_emitter.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\emitter\cuda_volume_emitter.cuh
  */
 
@@ -79,7 +79,9 @@ public:
                               const std::vector<NSPackPtr> &ns_types);
 
   void BuildNsDemVolume(DemNSBoxVolumeData &data,
-                        const std::vector<NSPack> &ns_data);
+                        const std::vector<NSPack> &ns_data,
+                        const float scale = 1.f,
+                        const float2 offset = make_float2(0.f));
 
   inline constexpr bool GetEmitterStatus() const { return bEnable; }
 

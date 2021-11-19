@@ -308,7 +308,9 @@ namespace KIRI
     }
 
     void CudaVolumeEmitter::BuildNsDemVolume(DemNSBoxVolumeData &data,
-                                             const std::vector<NSPack> &ns_data)
+                                             const std::vector<NSPack> &ns_data,
+                                             const float scale,
+                                             const float2 offset)
     {
 
         data.min_radius = Huge<float>();
@@ -327,9 +329,9 @@ namespace KIRI
             int sub_num = ns.GetPack().size();
             for (size_t i = 0; i < sub_num; i++)
             {
-                auto cen = ns.GetPack()[i].center;
-                auto rad = ns.GetPack()[i].radius;
-                data.sphere_data.emplace_back(ns_sphere_data(cen, rad, ns.GetPack()[i].color, i));
+                auto cen = ns.GetPack()[i].center * scale + offset;
+                auto rad = ns.GetPack()[i].radius * scale;
+                data.sphere_data.emplace_back(ns_sphere_data(cen, rad, ns.GetPack()[i].color, idx));
 
                 float volume = (4.f / 3.f) * KIRI_PI * std::powf(rad, 3.f);
 
@@ -353,8 +355,8 @@ namespace KIRI
             for (size_t i = 0; i < sub_num; i++)
             {
 
-                auto cen = ns.GetPack()[i].center;
-                auto rad = ns.GetPack()[i].radius;
+                auto cen = ns.GetPack()[i].center * scale + offset;
+                auto rad = ns.GetPack()[i].radius * scale;
 
                 ns_packs_data.sub_color_list[i] = ns.GetPack()[i].color;
                 ns_packs_data.sub_radius_list[i] = rad;

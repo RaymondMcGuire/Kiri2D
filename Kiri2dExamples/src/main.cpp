@@ -1857,7 +1857,7 @@ void LoadVoronoiExample()
         boundaryPoly->AddPolygonVertex2(newPos);
     }
 
-    auto voro_data = LoadCSVFile2VoronoiSites("bunny_sites_3999.csv");
+    auto voro_data = LoadCSVFile2VoronoiSitesV3("bunny_sites_3999.csv");
 
     auto spliter = std::make_shared<KiriVoroSplit>();
 
@@ -1923,10 +1923,11 @@ void LoadVoronoiExample()
             {
                 if (mic[idx].z == 0.f)
                     continue;
-                auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
-                // maxCir2.fill = false;
-                maxCir2.col = gcolor;
-                circles.emplace_back(maxCir2);
+                // auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
+                // // maxCir2.fill = false;
+                // maxCir2.col = gcolor;
+                // circles.emplace_back(maxCir2);
+
                 ns.pos.emplace_back(Vector2F(mic[idx].x, mic[idx].y));
                 ns.rad.emplace_back(mic[idx].z);
             }
@@ -1938,6 +1939,19 @@ void LoadVoronoiExample()
             //     maxCir2.col = site_i->GetGroupColor();
 
             // circles.emplace_back(maxCir2);
+        }
+    }
+
+    for (size_t i = 0; i < ns_data.size(); i++)
+    {
+        auto ns = ns_data[i];
+
+        for (size_t j = 0; j < ns.pos.size(); j++)
+        {
+            auto maxCir2 = KiriCircle2(ns.pos[j], Vector3F(1.f, 0.f, 1.f), ns.rad[j]);
+            // maxCir2.fill = false;
+            maxCir2.col = ns.col;
+            circles.emplace_back(maxCir2);
         }
     }
 
@@ -2101,7 +2115,7 @@ std::vector<NSPack> LoadCSVFile2NSPack1(const String fileName)
         for (size_t i = 0; i < pos_data.size(); i++)
         {
             auto pos_str = split_str1(pos_data[i], ':');
-            ns_pack.AppendSubParticles(make_float2(std::stof(pos_str[0]), std::stof(pos_str[1])), std::stof(rad_data[0]));
+            ns_pack.AppendSubParticles(make_float2(std::stof(pos_str[0]), std::stof(pos_str[1])), std::stof(rad_data[i]));
         }
         ns_pack.SetColor(make_float3(std::stof(col_data[0]), std::stof(col_data[1]), std::stof(col_data[2])));
         ns_packs.emplace_back(ns_pack);
@@ -2116,8 +2130,8 @@ void DebugNSParticles()
 {
 
     // scene renderer config
-    float windowheight = 1080.f;
-    float windowwidth = 1920.f;
+    float windowheight = 5000.f;
+    float windowwidth = 5000.f;
 
     auto emitter = std::make_shared<CudaVolumeEmitter>();
 
@@ -2137,30 +2151,28 @@ void DebugNSParticles()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
     std::vector<KiriCircle2> circles;
-    while (1)
+
+    circles.clear();
+
+    for (size_t i = 0; i < data.sphere_data.size(); i++)
     {
-        circles.clear();
-
-        for (size_t i = 0; i < data.sphere_data.size(); i++)
-        {
-            auto sp = data.sphere_data[i];
-            circles.emplace_back(KiriCircle2(Vector2F(sp.center.x, sp.center.y), Vector3F(sp.color.x, sp.color.y, sp.color.z), sp.radius));
-        }
-
-        scene->AddCircles(circles);
-
-        renderer->DrawCanvas();
-        // renderer->SaveImages2File();
-
-        // KIRI_LOG_DEBUG("sampling iterate idx:{0}", counter);
-        // ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(counter), circles);
-
-        cv::imshow("KIRI2D", renderer->GetCanvas());
-        cv::waitKey(5);
-
-        renderer->ClearCanvas();
-        scene->Clear();
+        auto sp = data.sphere_data[i];
+        circles.emplace_back(KiriCircle2(Vector2F(sp.center.x, sp.center.y), Vector3F(sp.color.x, sp.color.y, sp.color.z), sp.radius));
     }
+
+    scene->AddCircles(circles);
+
+    renderer->DrawCanvas();
+    renderer->SaveImages2File();
+
+    // KIRI_LOG_DEBUG("sampling iterate idx:{0}", counter);
+    // ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(counter), circles);
+
+    // cv::imshow("KIRI2D", renderer->GetCanvas());
+    // cv::waitKey(5);
+
+    renderer->ClearCanvas();
+    scene->Clear();
 }
 
 #include <kiri2d/voronoi/voro_ns_optimize.h>
@@ -2280,7 +2292,7 @@ void VoronoiNSOptimize()
     }
 }
 
-int main()
+int main1()
 {
     KIRI::KiriLog::Init();
     // VoronoiExample();
@@ -2311,9 +2323,9 @@ int main()
 
     // LoadVoronoiExample();
 
-    // DebugNSParticles();
+    DebugNSParticles();
 
-    VoronoiNSOptimize();
+    // VoronoiNSOptimize();
 
     return 0;
 }

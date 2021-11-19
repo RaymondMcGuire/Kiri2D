@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-16 16:29:36
+ * @LastEditTime: 2021-11-19 17:36:51
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  */
@@ -180,6 +180,7 @@ static __device__ void ComputeDemWorldBoundaryForces(
     return;
 
   float rij = boundaryRadius + radiusi;
+  float ri2 = radiusi + radiusi;
   float kn = young * radiusi;
   float ks = kn * poisson;
 
@@ -189,25 +190,25 @@ static __device__ void ComputeDemWorldBoundaryForces(
   if (posi.x > highestPoint.x - rij) {
     N = make_float2(-1.f, 0.f);
     diff = abs(posi.x - highestPoint.x);
-    ComputeDemForces(f, N * diff, veli, rij, kn, ks, tanFrictionAngle, dt);
+    ComputeDemForces(f, N * diff, veli, ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.x < lowestPoint.x + rij) {
     N = make_float2(1.f, 0.f);
     diff = abs(posi.x - lowestPoint.x);
-    ComputeDemForces(f, N * diff, veli, rij, kn, ks, tanFrictionAngle, dt);
+    ComputeDemForces(f, N * diff, veli, ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.y > highestPoint.y - rij) {
     N = make_float2(0.f, -1.f);
     diff = abs(posi.y - highestPoint.y);
-    ComputeDemForces(f, N * diff, veli, rij, kn, ks, tanFrictionAngle, dt);
+    ComputeDemForces(f, N * diff, veli, ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.y < lowestPoint.y + rij) {
     N = make_float2(0.f, 1.f);
     diff = abs(posi.y - lowestPoint.y);
-    ComputeDemForces(f, N * diff, veli, rij, kn, ks, tanFrictionAngle, dt);
+    ComputeDemForces(f, N * diff, veli, ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   return;
@@ -224,6 +225,7 @@ static __device__ void ComputeNSDemWorldBoundaryForces(
     return;
 
   float rij = boundaryRadius + radiusi;
+  float ri2 = radiusi + radiusi;
   float kn = young * radiusi;
   float ks = kn * poisson;
 
@@ -234,28 +236,28 @@ static __device__ void ComputeNSDemWorldBoundaryForces(
     N = make_float2(-1.f, 0.f);
     diff = abs(posi.x - highestPoint.x);
     ComputeDemForcesAndTorque(f, torque, ang_veli, 0.f, N * diff, veli, radiusi,
-                              rij, kn, ks, tanFrictionAngle, dt);
+      ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.x < lowestPoint.x + rij) {
     N = make_float2(1.f, 0.f);
     diff = abs(posi.x - lowestPoint.x);
     ComputeDemForcesAndTorque(f, torque, ang_veli, 0.f, N * diff, veli, radiusi,
-                              rij, kn, ks, tanFrictionAngle, dt);
+      ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.y > highestPoint.y - rij) {
     N = make_float2(0.f, -1.f);
     diff = abs(posi.y - highestPoint.y);
     ComputeDemForcesAndTorque(f, torque, ang_veli, 0.f, N * diff, veli, radiusi,
-                              rij, kn, ks, tanFrictionAngle, dt);
+      ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.y < lowestPoint.y + rij) {
     N = make_float2(0.f, 1.f);
     diff = abs(posi.y - lowestPoint.y);
     ComputeDemForcesAndTorque(f, torque, ang_veli, 0.f, N * diff, veli, radiusi,
-                              rij, kn, ks, tanFrictionAngle, dt);
+      ri2, kn, ks, tanFrictionAngle, dt);
   }
 
   return;

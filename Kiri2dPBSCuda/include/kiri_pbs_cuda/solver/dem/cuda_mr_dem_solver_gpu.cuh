@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-10 01:53:28
+ * @LastEditTime: 2021-11-19 16:35:35
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_mr_dem_solver_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_mr_dem_solver_gpu.cuh
  */
 
@@ -68,7 +68,8 @@ ComputeMRDemCapillaryForces(float2 *f, const size_t i, const float2 *pos,
 template <typename Pos2GridXY, typename GridXY2GridHash, typename AttenuFunc>
 __global__ void ComputeMRDemLinearMomentum_CUDA(
     const float2 *pos, const float2 *vel, float2 *acc, const float *mass,
-    const float *radius, const float young, const float poisson,
+    const float *radius, const float boundaryRadius,
+    const float young, const float poisson,
     const float tanFrictionAngle, const float sr, const size_t num,
     const float2 lowestPoint, const float2 highestPoint, const float dt,
     size_t *cellStart, const int2 gridSize, Pos2GridXY p2xy,
@@ -95,7 +96,7 @@ __global__ void ComputeMRDemLinearMomentum_CUDA(
                                 G);
   }
 
-  ComputeDemWorldBoundaryForces(&f, pos[i], vel[i], radius[i], radius[i], young,
+  ComputeDemWorldBoundaryForces(&f, pos[i], vel[i], radius[i], boundaryRadius, young,
                                 poisson, tanFrictionAngle, num, lowestPoint,
                                 highestPoint, dt);
 

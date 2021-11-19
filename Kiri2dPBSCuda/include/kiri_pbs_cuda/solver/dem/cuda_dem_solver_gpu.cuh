@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-10 01:53:16
+ * @LastEditTime: 2021-11-19 16:34:29
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_gpu.cuh
  */
 
@@ -61,6 +61,7 @@ static __device__ void ComputeUniRadiusDemCapillaryForces(
 template <typename Pos2GridXY, typename GridXY2GridHash, typename AttenuFunc>
 __global__ void ComputeDemLinearMomentum_CUDA(
     float2 *pos, float2 *vel, float2 *acc, float *mass, const float radius,
+    const float boundaryRadius,
     const float young, const float poisson, const float tanFrictionAngle,
     const float sr, const size_t num, const float2 lowestPoint,
     const float2 highestPoint, const float dt, size_t *cellStart,
@@ -88,7 +89,7 @@ __global__ void ComputeDemLinearMomentum_CUDA(
                                        cellStart[hash_idx + 1], G);
   }
 
-  ComputeDemWorldBoundaryForces(&f, pos[i], -vel[i], radius, radius, young,
+  ComputeDemWorldBoundaryForces(&f, pos[i], -vel[i], radius, boundaryRadius, young,
                                 poisson, tanFrictionAngle, num, lowestPoint,
                                 highestPoint, dt);
 

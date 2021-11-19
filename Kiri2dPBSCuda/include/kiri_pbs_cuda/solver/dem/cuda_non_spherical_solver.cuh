@@ -2,10 +2,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-01 14:31:30
- * @LastEditTime: 2021-11-11 19:28:25
+ * @LastEditTime: 2021-11-19 17:43:55
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver.cuh
  */
 
@@ -38,7 +38,7 @@ public:
 protected:
   void ComputeNSDemLinearMomentum(
       CudaNonSphericalParticlesPtr &sands, const float young,
-      const float poisson, const float tanFrictionAngle, const float dt,
+      const float poisson, const float tanFrictionAngle, const float dt,const float boundaryRadius,
       const CudaArray<size_t> &cellStart, const float2 lowestPoint,
       const float2 highestPoint, const float kernelRadius, const int2 gridSize);
 
@@ -47,7 +47,10 @@ protected:
 
   void
   NonSphericalParticlesTimeIntegration(CudaNonSphericalParticlesPtr &sands,
-                                       const CudaDemNonSphericalParams params);
+                                       const CudaDemNonSphericalParams params,
+                                       const float boundaryRadius,
+                                       const float2 lowestPoint,
+                                       const float2 highestPoint);
 
   size_t mCudaGridGroupSize;
 };

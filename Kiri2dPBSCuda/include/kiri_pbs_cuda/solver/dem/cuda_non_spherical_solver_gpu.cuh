@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-16 16:27:17
+ * @LastEditTime: 2021-11-19 17:54:32
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_non_spherical_solver_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_mr_dem_solver_gpu.cuh
  */
@@ -51,7 +51,7 @@ template <typename Pos2GridXY, typename GridXY2GridHash>
 __global__ void ComputeNSDemLinearMomentum_CUDA(
     non_spherical_particles *nsParticles, const ns_mapping *map,
     const float2 *pos, const float2 *vel, const float *ang_vel,
-    const float *radius, const float young, const float poisson,
+    const float *radius, const float boundaryRadius, const float young, const float poisson,
     const float tanFrictionAngle, const size_t num, const float2 lowestPoint,
     const float2 highestPoint, const float dt, size_t *cellStart,
     const int2 gridSize, Pos2GridXY p2xy, GridXY2GridHash xy2hash) {
@@ -77,7 +77,7 @@ __global__ void ComputeNSDemLinearMomentum_CUDA(
   }
 
   ComputeNSDemWorldBoundaryForces(
-      &f, &torque, pos[i], vel[i], ang_vel[i], radius[i], radius[i], young,
+      &f, &torque, pos[i], vel[i], ang_vel[i], radius[i], boundaryRadius, young,
       poisson, tanFrictionAngle, num, lowestPoint, highestPoint, dt);
 
   if (f.x != f.x)
@@ -142,6 +142,10 @@ __global__ void
 NSTimeIntegration_CUDA(float2 *pos, float2 *vel, float *ang_vel,
                        const non_spherical_particles *nsParticles,
                        const ns_mapping *map, const size_t num,
+                       const float* radius,
+                       const float boundaryRadius,
+                       const float2 lowestPoint,
+                        const float2 highestPoint,
                        const CudaDemNonSphericalParams params) {
   int i = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
   if (i >= num)
@@ -161,7 +165,30 @@ NSTimeIntegration_CUDA(float2 *pos, float2 *vel, float *ang_vel,
   // vel[i] = ns.vel;
 
   ang_vel[i] = ns.angle_vel;
-}
+  
+  // float rij = radius[i] + boundaryRadius;
+  // if (pos[i].x > highestPoint.x - rij)
+  // {
+  //   pos[i].x = highestPoint.x - rij;
+  //   vel[i] = make_float2(0.f);
+  // }
+  
+  
+
+  // if (pos[i].x < lowestPoint.x + rij) 
+  // {pos[i].x = lowestPoint.x + rij;
+  //  vel[i] = make_float2(0.f);
+  // }
+
+  // if (pos[i].y > highestPoint.y - rij) 
+  // { pos[i].y = highestPoint.y - rij;
+  //   vel[i] = make_float2(0.f);
+  // }
+  // if (pos[i].y < lowestPoint.y + rij) 
+  // {pos[i].y = lowestPoint.y + rij;
+  // vel[i] = make_float2(0.f);
+  // }
+  }
 
 } // namespace KIRI
 

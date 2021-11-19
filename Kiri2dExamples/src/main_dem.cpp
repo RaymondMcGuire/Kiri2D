@@ -65,7 +65,7 @@ std::vector<NSPack> LoadCSVFile2NSPack(const String fileName)
         for (size_t i = 0; i < pos_data.size(); i++)
         {
             auto pos_str = split_str(pos_data[i], ':');
-            ns_pack.AppendSubParticles(make_float2(std::stof(pos_str[0]), std::stof(pos_str[1])), std::stof(rad_data[0]));
+            ns_pack.AppendSubParticles(make_float2(std::stof(pos_str[0]), std::stof(pos_str[1])), std::stof(rad_data[i]));
         }
         ns_pack.SetColor(make_float3(std::stof(col_data[0]), std::stof(col_data[1]), std::stof(col_data[2])));
         ns_packs.emplace_back(ns_pack);
@@ -300,7 +300,7 @@ void MRDEM_SetupParams()
 
     CUDA_DEM_PARAMS.gravity = make_float2(0.0f, -9.8f);
 
-    CUDA_DEM_PARAMS.damping = 0.4f;
+    CUDA_DEM_PARAMS.damping = 0.5f;
     // CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
     CUDA_DEM_PARAMS.dt = 5e-5f;
 
@@ -322,6 +322,7 @@ void MRDEM_SetupParams()
         make_float2(-0.1f, -0.1f));
 
     KIRI_LOG_DEBUG("max radius={0}, min radius={1}", volumeData.maxRadius, volumeData.minRadius);
+    CUDA_BOUNDARY_PARAMS.min_radius = volumeData.minRadius;
     CUDA_DEM_PARAMS.kernel_radius = 4.f * volumeData.maxRadius;
     CUDA_DEM_APP_PARAMS.max_num = volumeData.pos.size();
     CUDA_BOUNDARY_PARAMS.kernel_radius = CUDA_DEM_PARAMS.kernel_radius;
@@ -502,7 +503,7 @@ void NSDEM_SetupParams()
     CUDA_DEM_NS_PARAMS.poisson = 0.3f;
     CUDA_DEM_NS_PARAMS.tan_friction_angle = 0.5f;
 
-    CUDA_DEM_NS_PARAMS.gravity = make_float2(0.0f, -9.8f);
+    CUDA_DEM_NS_PARAMS.gravity = make_float2(0.0f, -98.f);
 
     CUDA_DEM_NS_PARAMS.damping = 0.4f;
     // CUDA_DEM_PARAMS.dt = 0.5f * CUDA_DEM_PARAMS.particle_radius / std::sqrtf(CUDA_DEM_PARAMS.young / CUDA_DEM_PARAMS.rest_density);
@@ -531,9 +532,10 @@ void NSDEM_SetupParams()
 
     auto ns_packs_data = LoadCSVFile2NSPack("ns_data.csv");
 
-    volumeEmitter->BuildNsDemVolume(volumeData, ns_packs_data);
+    volumeEmitter->BuildNsDemVolume(volumeData, ns_packs_data, 0.15f, make_float2(80.f, -50.f));
 
     KIRI_LOG_DEBUG("max radius={0}, min radius={1}", volumeData.max_radius, volumeData.min_radius);
+    CUDA_BOUNDARY_PARAMS.min_radius = volumeData.min_radius;
     CUDA_DEM_NS_PARAMS.kernel_radius = 4.f * volumeData.max_radius;
     CUDA_DEM_APP_PARAMS.max_num = volumeData.sphere_data.size();
     CUDA_BOUNDARY_PARAMS.kernel_radius = CUDA_DEM_NS_PARAMS.kernel_radius;
@@ -722,7 +724,7 @@ void UpdateNSSystemRealTime()
     UpdateScene(circles);
 }
 
-void main1()
+void main()
 {
     KiriLog::Init();
 
