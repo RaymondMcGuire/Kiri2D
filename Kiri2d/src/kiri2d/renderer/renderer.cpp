@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
  * @LastEditTime: 2021-09-21 17:56:18
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\renderer\renderer.cpp
  */
 
@@ -21,6 +21,11 @@ namespace KIRI2D
     void KiriRenderer2D::SaveImages2File()
     {
         cv::imwrite(String(EXPORT_PATH) + "images/" + UInt2Str4Digit(counter++) + ".png", mCanvas);
+    }
+
+    void KiriRenderer2D::SaveImages2FileWithPrefix(std::string prefix)
+    {
+        cv::imwrite(String(EXPORT_PATH) + "images/" + prefix + "_" + UInt2Str4Digit(counter) + ".png", mCanvas);
     }
 
     void KiriRenderer2D::ClearCanvas()

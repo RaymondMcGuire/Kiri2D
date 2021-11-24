@@ -45,6 +45,9 @@ namespace KIRI
         void UpdateBBox();
         void ComputeVoroSitesList();
 
+        void SetColor(Vector3F color) { mColor = color; }
+        Vector3F GetColor(){return mColor;}
+
         UInt GetLength() const { return mPolygonVertices2.size(); }
 
         void Reset()
@@ -99,6 +102,8 @@ namespace KIRI
 
         Vector<Vector2F> mBisectors;
         Vector<Vector4F> mShrinks, mSkeletons;
+
+        Vector3F mColor;
     };
 
     typedef SharedPtr<KiriVoroCellPolygon2> KiriVoroCellPolygon2Ptr;

@@ -117,6 +117,9 @@ namespace KIRI
         void Enable() { mEnable = true; }
         void Disable() { mEnable = false; }
 
+        void SetFreeze(bool freeze) { mIsFrozen = freeze; }
+        bool GetIsFrozen() { return mIsFrozen; }
+
         void PrintSite()
         {
             KIRI_LOG_DEBUG("site idx={0}", GetIdx());
@@ -129,6 +132,7 @@ namespace KIRI
         float mWeight, mPercentage, mRadius;
 
         bool mEnable = true;
+        bool mIsFrozen = false;
         bool mBoundarySite = false;
 
         Vector<SharedPtr<KiriVoroSite>> mNeighborSites;

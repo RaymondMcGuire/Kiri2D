@@ -41,7 +41,7 @@ bool PolyClip::PloygonOpration::DetectIntersection(Polygon &clip_poly, Polygon &
 
 				Vertex i1 = CreateVertex(p1, p2, alphaP);
 				Vertex i2 = CreateVertex(q1, q2, alphaQ);
-				//printf("Line1 (%f, %f)--(%f, %f) and Line2 (%f, %f)--(%f, %f) intersect at (%f, %f) on Line1 and (%f,%f) on Line2\n\n",
+				// printf("Line1 (%f, %f)--(%f, %f) and Line2 (%f, %f)--(%f, %f) intersect at (%f, %f) on Line1 and (%f,%f) on Line2\n\n",
 				//	p1.x_, p1.y_, p2.x_, p2.y_, q1.x_, q1.y_, q2.x_, q2.y_, i1.x_, i1.y_, i2.x_, i2.y_);
 				Vertex *I1 = new Vertex(i1);
 				Vertex *I2 = new Vertex(i2);
@@ -52,7 +52,7 @@ bool PolyClip::PloygonOpration::DetectIntersection(Polygon &clip_poly, Polygon &
 				sub_poly.Insert(I2, iter2.eval());
 
 				// Note: simply inserting the intersection vertex into father list will destory correct order.
-				//clip_poly.Insert(I1, iter1.eval());
+				// clip_poly.Insert(I1, iter1.eval());
 				float distance = (I1->x_ - (*iter1).x_) * (I1->x_ - (*iter1).x_) + (I1->y_ - (*iter1).y_) * (I1->y_ - (*iter1).y_); // calculate the distance between intersection point and edge start point
 				VertexPtrDistance vpt(I1, distance);
 				vertices_insert_poly1.push_back(vpt);
@@ -459,7 +459,7 @@ bool PolyClip::PloygonOpration::LineSegmentIntersection(
 	return false;
 }
 
-//bool PolyClip::PloygonOpration::LineSegmentIntersection(
+// bool PolyClip::PloygonOpration::LineSegmentIntersection(
 //	Point2d& p1, Point2d& p2,
 //	Point2d& q1, Point2d& q2,
 //	float& alphaP, float& alphaQ)
@@ -509,7 +509,7 @@ bool PolyClip::PloygonOpration::LineSegmentIntersection(
 //	}
 //
 //	return false;
-//}
+// }
 
 PolyClip::Vertex PolyClip::PloygonOpration::CreateVertex(const Point2d &p1, const Point2d &p2, float alpha)
 {

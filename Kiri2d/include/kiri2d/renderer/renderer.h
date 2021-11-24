@@ -1,10 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
- * @Date: 2021-02-22 18:26:52
- * @LastEditTime: 2021-06-03 00:13:42
+ * @Date: 2021-02-23 00:18:39
+ * @LastEditTime: 2021-11-23 18:29:38
  * @LastEditors: Xu.WANG
- * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\renderer\renderer.h
+ * @Description:
  */
 #ifndef _KIRI2D_RENDERER_H_
 #define _KIRI2D_RENDERER_H_
@@ -16,8 +15,6 @@
 
 namespace KIRI2D
 {
-
- 
 
     class KiriRenderer2D
     {
@@ -40,6 +37,7 @@ namespace KIRI2D
         void ClearCanvas();
         void DrawCanvas();
         void SaveImages2File();
+        void SaveImages2FileWithPrefix(std::string prefix);
         inline auto GetCanvas() { return mCanvas; }
 
         ~KiriRenderer2D() noexcept {}

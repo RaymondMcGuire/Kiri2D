@@ -1,10 +1,9 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-11-17 12:15:22
- * @LastEditTime: 2021-11-17 12:16:09
+ * @Date: 2021-11-18 16:03:39
+ * @LastEditTime: 2021-11-24 12:32:46
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_ns_optimize.h
  */
 
 #ifndef _KIRI_VORO_NS_OPTIMIZE_H_
@@ -54,6 +53,8 @@ namespace KIRI
 
         void SetMaxiumVorosite(UInt num) { mMaxiumNum = num; }
 
+        Vector<KiriVoroCellPolygon2Ptr> GetFrozenPolygon();
+
     private:
         void ComputeVoroSiteWeightError();
         void ComputeBoundaryPolygonArea();
@@ -62,8 +63,9 @@ namespace KIRI
         float GetGlobalAreaError();
         void Iterate();
 
+        void ComputeVoroSitePosConstrains();
         void CorrectVoroSitePos();
-        void CorrectWeights();
+
         void AdaptPositionsWeights();
         void AdaptWeights();
 
@@ -74,10 +76,13 @@ namespace KIRI
         KiriPowerDiagramPtr mPowerDiagram;
 
         float mCompleteArea;
-        float mCurGlobalWeightError, mCurGlobalPorosity = 0.f;
+        float mCurGlobalWeightError, mCurGlobalPosConstainWeightError, mCurGlobalPorosity = 0.f;
         Vector<float> mVoroSitesWeightError, mVoroSitesWeightAbsError;
+        Vector<float> mVoroPosConstainWeightError, mVoroPosConstainWeightAbsError;
 
         Vector<float> mGlobalErrorArray, mGlobalPorosityArray;
+
+        Vector<KiriVoroCellPolygon2Ptr> mUnionPolygonArray;
 
         float mErrorThreshold;
         UInt mMaxiumNum = 1000;

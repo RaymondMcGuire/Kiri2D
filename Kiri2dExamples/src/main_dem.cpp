@@ -724,7 +724,7 @@ void UpdateNSSystemRealTime()
     UpdateScene(circles);
 }
 
-void main()
+void main1()
 {
     KiriLog::Init();
 

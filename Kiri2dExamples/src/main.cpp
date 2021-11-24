@@ -2226,14 +2226,18 @@ void VoronoiNSOptimize()
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     KIRI::Vector<KiriPoint2> points;
-    KIRI::Vector<KiriLine2> lines;
-    KIRI::Vector<KiriCircle2> circles;
+
+    KIRI::Vector<KiriLine2> lines, glines;
+    KIRI::Vector<KiriCircle2> circles, gcircles;
 
     UInt iter_num = 0;
     while (1)
     {
         lines.clear();
         circles.clear();
+
+        glines.clear();
+        gcircles.clear();
 
         auto sites = ns_opti->GetVoroSites();
         // KIRI_LOG_DEBUG("current num={0}", sites.size());
@@ -2261,6 +2265,10 @@ void VoronoiNSOptimize()
                     line.thick = 5.f;
 
                     lines.emplace_back(line);
+
+                    // if (sites[i]->GetIsFrozen())
+                    //     glines.emplace_back(line);
+
                 } while (node != list->GetHead());
 
                 if (poly->GetSkeletons().empty())
@@ -2273,6 +2281,44 @@ void VoronoiNSOptimize()
                     // maxCir2.fill = false;
                     maxCir2.col = site_i->GetGroupColor();
                     circles.emplace_back(maxCir2);
+
+                    // if (sites[i]->GetIsFrozen())
+                    //     gcircles.emplace_back(maxCir2);
+                }
+            }
+        }
+
+        auto union_polygons = ns_opti->GetFrozenPolygon();
+        for (size_t i = 0; i < union_polygons.size(); i++)
+        {
+            auto poly_i = union_polygons[i];
+            if (poly_i != nullptr)
+            {
+                poly_i->ComputeVoroSitesList();
+                auto list = poly_i->GetVoroSitesList();
+                auto node = list->GetHead();
+                do
+                {
+                    auto start = Vector2F(node->value);
+
+                    node = node->next;
+                    auto end = Vector2F(node->value);
+                    auto line = KiriLine2(start, end);
+                    line.thick = 5.f;
+                    glines.emplace_back(line);
+
+                } while (node != list->GetHead());
+
+                if (poly_i->GetSkeletons().empty())
+                    poly_i->ComputeSSkel1998Convex();
+
+                auto mic = poly_i->ComputeMICByStraightSkeletonTest();
+                for (size_t idx = 0; idx < mic.size(); idx++)
+                {
+                    auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
+                    // maxCir2.fill = false;
+                    maxCir2.col = poly_i->GetColor();
+                    gcircles.emplace_back(maxCir2);
                 }
             }
         }
@@ -2287,12 +2333,89 @@ void VoronoiNSOptimize()
         renderer->ClearCanvas();
         scene->Clear();
 
+        // debug g
+        // scene->AddLines(glines);
+        scene->AddCircles(gcircles);
+
+        renderer->DrawCanvas();
+        renderer->SaveImages2FileWithPrefix("group");
+
+        renderer->ClearCanvas();
+        scene->Clear();
+
         auto error = ns_opti->ComputeIterate();
         KIRI_LOG_DEBUG("iter={0}, error={1}", iter_num++, error);
     }
 }
 
-int main1()
+#include <kiri2d/bop12/booleanop.h>
+// #include <kiri2d/poly/PolygonClipping.h>
+void TestPolygonUnion()
+{
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    Vector2F offset(500.f);
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    cbop::Polygon subj, clip;
+
+    cbop::Contour vert1, vert2;
+    vert1.add(cbop::Point_2(10.0, 10.0));
+    vert1.add(cbop::Point_2(10.0, 100.0));
+    vert1.add(cbop::Point_2(100.0, 100.0));
+    vert1.add(cbop::Point_2(100.0, 10.0));
+    subj.push_back(vert1);
+
+    vert2.add(cbop::Point_2(20.0, 50.0));
+    vert2.add(cbop::Point_2(20.0, 150.0));
+    vert2.add(cbop::Point_2(90.0, 150.0));
+    vert2.add(cbop::Point_2(90.0, 50.0));
+    clip.push_back(vert2);
+
+    cbop::BooleanOpType op = cbop::INTERSECTION;
+
+    cbop::Polygon result;
+    cbop::compute(subj, clip, result, op);
+    auto p = result.getContours()[0].getPoints();
+
+    KIRI::Vector<KiriLine2> precompute_lines;
+
+    for (size_t j = 0; j < p.size(); j++)
+    {
+        precompute_lines.emplace_back(KiriLine2(Vector2F(p[j].x(), p[j].y()) + offset, Vector2F(p[(j + 1) % p.size()].x(), p[(j + 1) % p.size()].y()) + offset));
+    }
+
+    while (1)
+    {
+        KIRI::Vector<KiriLine2> lines;
+
+        // for (auto i = 0; i < vertices1.size(); ++i)
+        // {
+        //     lines.emplace_back(KiriLine2(Vector2F(vertices1[i].x_,vertices1[i].y_)+offset,Vector2F(vertices1[(i+1)%vertices1.size()].x_,vertices1[(i+1)%vertices1.size()].y_)+offset));
+        //     lines.emplace_back(KiriLine2(Vector2F(vertices2[i].x_, vertices2[i].y_) + offset, Vector2F(vertices2[(i + 1) % vertices2.size()].x_, vertices2[(i + 1) % vertices2.size()].y_) + offset));
+        // }
+
+        for (auto i = 0; i < precompute_lines.size(); ++i)
+        {
+            lines.emplace_back(precompute_lines[i]);
+        }
+
+        scene->AddLines(lines);
+
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
+int main()
 {
     KIRI::KiriLog::Init();
     // VoronoiExample();
@@ -2317,15 +2440,17 @@ int main1()
     // VoroPorosityOptimizeConvexExample();
     // VoroPorosityOptimizeBunnyExample();
 
-    // VoroPorosityOptimizeScaleExample();
+    VoroPorosityOptimizeScaleExample();
 
     // UniPoissonDiskSampler();
 
     // LoadVoronoiExample();
 
-    DebugNSParticles();
+    // DebugNSParticles();
 
     // VoronoiNSOptimize();
+
+    // TestPolygonUnion();
 
     return 0;
 }

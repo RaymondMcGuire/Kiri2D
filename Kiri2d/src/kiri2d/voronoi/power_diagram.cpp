@@ -11,6 +11,7 @@
 #include <kiri2d/geo/geo_plane3.h>
 #include <kiri2d/poly/PolygonClipping.h>
 #include <random>
+#include <kiri2d/bop12/booleanop.h>
 
 namespace KIRI
 {
@@ -231,6 +232,10 @@ namespace KIRI
         // move sites to centroid
         for (size_t j = 0; j < mVoroSites.size(); j++)
         {
+            auto is_frozen = mVoroSites[j]->GetIsFrozen();
+            if (is_frozen)
+                continue;
+
             auto poly = mVoroSites[j]->GetCellPolygon();
             if (poly != NULL)
             {
@@ -261,6 +266,10 @@ namespace KIRI
         // move sites to centroid
         for (size_t j = 0; j < mVoroSites.size(); j++)
         {
+            auto is_frozen = mVoroSites[j]->GetIsFrozen();
+            if (is_frozen)
+                continue;
+
             auto poly = mVoroSites[j]->GetCellPolygon();
             if (poly != NULL)
             {
@@ -533,24 +542,44 @@ namespace KIRI
                                         mBoundaryPolygon2->ComputeVoroSitesList();
                                         cellPoly->ComputeVoroSitesList();
 
+                                        auto A = mBoundaryPolygon2->GetPolygonVertices();
+                                        auto B = cellPoly->GetPolygonVertices();
+
                                         std::vector<PolyClip::Point2d> polyA;
                                         std::vector<PolyClip::Point2d> polyB;
 
-                                        auto A = mBoundaryPolygon2->GetPolygonVertices();
-                                        auto B = cellPoly->GetPolygonVertices();
                                         for (size_t ai = 0; ai < A.size(); ai++)
                                             polyA.push_back(PolyClip::Point2d(A[ai].x, A[ai].y));
 
                                         for (size_t bi = 0; bi < B.size(); bi++)
                                             polyB.push_back(PolyClip::Point2d(B[bi].x, B[bi].y));
 
+                                        // cbop::Polygon polyA, polyB;
+
+                                        // cbop::Contour vert1, vert2;
+                                        // for (size_t ai = 0; ai < A.size(); ai++)
+                                        //     vert1.add(cbop::Point_2(A[ai].x, A[ai].y));
+                                        // polyA.push_back(vert1);
+
+                                        // for (size_t bi = 0; bi < B.size(); bi++)
+                                        //     vert2.add(cbop::Point_2(B[bi].x, B[bi].y));
+                                        // polyB.push_back(vert2);
+
+                                        // cbop::BooleanOpType op = cbop::INTERSECTION;
+                                        // cbop::Polygon result;
+                                        // auto compute_result = cbop::compute(polyA, polyB, result, op);
+
                                         PolyClip::Polygon polygon1(polyA);
                                         PolyClip::Polygon polygon2(polyB);
                                         auto bintersection = PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
                                         std::vector<std::vector<PolyClip::Point2d>> possible_result;
+
+                                        //                                         if (!result.getContours().empty() && compute_result == true)
+
                                         if (bintersection && PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
                                         {
                                             auto clipedPolygon = std::make_shared<KiriVoroCellPolygon2>();
+
                                             std::vector<std::vector<PolyClip::Point2d>> results = PolyClip::PloygonOpration::ExtractIntersectionResults(polygon1);
                                             for (int pp = 0; pp < results.size(); ++pp)
                                             {
@@ -561,6 +590,13 @@ namespace KIRI
                                                     clipedPolygon->AddPolygonVertex2(Vector2F(polyn.x_, polyn.y_));
                                                 }
                                             }
+
+                                            // auto p = result.getContours()[0].getPoints();
+                                            // for (int pp = 0; pp < p.size(); ++pp)
+                                            // {
+                                            //     clipedPolygon->AddPolygonVertex2(Vector2F(p[pp].x(), p[pp].y()));
+                                            // }
+
                                             clipedPolygon->PopPolygonVertex2();
                                             clipedPolygon->ReversePolygonVertex2();
 
