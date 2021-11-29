@@ -232,9 +232,9 @@ namespace KIRI
         // move sites to centroid
         for (size_t j = 0; j < mVoroSites.size(); j++)
         {
-            auto is_frozen = mVoroSites[j]->GetIsFrozen();
-            if (is_frozen)
-                continue;
+            // auto is_frozen = mVoroSites[j]->GetIsFrozen();
+            // if (is_frozen)
+            //     continue;
 
             auto poly = mVoroSites[j]->GetCellPolygon();
             if (poly != NULL)
@@ -266,9 +266,9 @@ namespace KIRI
         // move sites to centroid
         for (size_t j = 0; j < mVoroSites.size(); j++)
         {
-            auto is_frozen = mVoroSites[j]->GetIsFrozen();
-            if (is_frozen)
-                continue;
+            // auto is_frozen = mVoroSites[j]->GetIsFrozen();
+            // if (is_frozen)
+            //     continue;
 
             auto poly = mVoroSites[j]->GetCellPolygon();
             if (poly != NULL)

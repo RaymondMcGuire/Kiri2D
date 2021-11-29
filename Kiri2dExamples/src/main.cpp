@@ -2211,9 +2211,17 @@ void VoronoiNSOptimize()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
+    auto avg_radius = 0.f;
     for (size_t i = 0; i < voro_data.size(); i++)
     {
-        auto group_site = std::make_shared<KiriVoroGroupSite>(voro_data[i]);
+        avg_radius += voro_data[i].w;
+    }
+    avg_radius /= voro_data.size();
+
+    for (size_t i = 0; i < voro_data.size(); i++)
+    {
+        // auto group_site = std::make_shared<KiriVoroGroupSite>(voro_data[i]);
+        auto group_site = std::make_shared<KiriVoroGroupSite>(Vector4F(voro_data[i].x, voro_data[i].y, 0.f, avg_radius));
         group_site->SetGroupId(i);
         group_site->SetGroupColor(Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine)));
         ns_opti->AddSite(group_site);
@@ -2440,7 +2448,7 @@ int main()
     // VoroPorosityOptimizeConvexExample();
     // VoroPorosityOptimizeBunnyExample();
 
-    VoroPorosityOptimizeScaleExample();
+    // VoroPorosityOptimizeScaleExample();
 
     // UniPoissonDiskSampler();
 
@@ -2448,7 +2456,7 @@ int main()
 
     // DebugNSParticles();
 
-    // VoronoiNSOptimize();
+    VoronoiNSOptimize();
 
     // TestPolygonUnion();
 

@@ -56,8 +56,8 @@ namespace KIRI
 #pragma omp parallel for
             for (int i = 0; i < voroSite.size(); i++)
             {
-                if (voroSite[i]->GetIsFrozen())
-                    continue;
+                // if (voroSite[i]->GetIsFrozen())
+                //     continue;
 
                 auto pos = voroSite[i]->GetValue();
                 if (!boundary->Contains(Vector2F(pos.x, pos.y)))
@@ -185,8 +185,8 @@ namespace KIRI
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (int i = 0; i < voroSite.size(); i++)
         {
-            if (voroSite[i]->GetIsFrozen())
-                continue;
+            // if (voroSite[i]->GetIsFrozen())
+            //     continue;
 
             auto weight = voroSite[i]->GetWeight();
 
@@ -254,8 +254,8 @@ namespace KIRI
             auto cnt = 0;
             auto siteI = voroSite[i];
 
-            if (siteI->GetIsFrozen())
-                continue;
+            // if (siteI->GetIsFrozen())
+            //     continue;
 
             if (!siteI->GetNeighborSites().empty())
             {
@@ -408,8 +408,8 @@ namespace KIRI
         for (int i = 0; i < voroSite.size(); i++)
         {
             auto siteI = voroSite[i];
-            if (siteI->GetIsFrozen())
-                continue;
+            // if (siteI->GetIsFrozen())
+            //     continue;
 
             if (!siteI->GetNeighborSites().empty())
             {
@@ -417,16 +417,17 @@ namespace KIRI
                 for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
                 {
                     auto siteJ = siteI->GetNeighborSites()[j];
-                    if (siteJ->GetIsFrozen())
-                        continue;
+                    // if (siteJ->GetIsFrozen())
+                    //     continue;
 
                     auto real_disij = siteI->GetDistance2(siteJ);
                     auto idea_disij = (siteI->GetWeight() - siteJ->GetWeight()) / (siteI->GetRadius() - siteJ->GetRadius() + 1e-9f);
                     auto dis_weight = idea_disij != 0.f ? (real_disij / idea_disij - 1.f) : 0.f;
 
-                    if (std::abs(dis_weight) < 1e-3f && dis_weight != 0.f)
+                    // if (std::abs(dis_weight) < 1e-3f && dis_weight != 0.f && !siteI->GetIsFrozen() && !siteJ->GetIsFrozen())
+                    if (dis_weight != 0.f && !siteI->GetIsFrozen() && !siteJ->GetIsFrozen())
                     {
-                        KIRI_LOG_DEBUG("match");
+                        // KIRI_LOG_DEBUG("match");
                         auto gsite_i = std::dynamic_pointer_cast<KiriVoroGroupSite>(siteI);
                         auto gsite_j = std::dynamic_pointer_cast<KiriVoroGroupSite>(siteJ);
 
@@ -435,6 +436,7 @@ namespace KIRI
 
                         gsite_i->SetFreeze(true);
                         gsite_j->SetFreeze(true);
+                        // gsite_j->SetRadius(gsite_i->GetRadius());
                         break;
                     }
 
