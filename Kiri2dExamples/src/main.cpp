@@ -2221,7 +2221,7 @@ void VoronoiNSOptimize()
     for (size_t i = 0; i < voro_data.size(); i++)
     {
         // auto group_site = std::make_shared<KiriVoroGroupSite>(voro_data[i]);
-        auto group_site = std::make_shared<KiriVoroGroupSite>(Vector4F(voro_data[i].x, voro_data[i].y, 0.f, avg_radius));
+        auto group_site = std::make_shared<KiriVoroGroupSite>(Vector4F(voro_data[i].x, voro_data[i].y, voro_data[i].z, avg_radius));
         group_site->SetGroupId(i);
         group_site->SetGroupColor(Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine)));
         ns_opti->AddSite(group_site);
@@ -2456,6 +2456,7 @@ int main()
 
     // DebugNSParticles();
 
+    // KIRI_LOG_DEBUG("123");
     VoronoiNSOptimize();
 
     // TestPolygonUnion();

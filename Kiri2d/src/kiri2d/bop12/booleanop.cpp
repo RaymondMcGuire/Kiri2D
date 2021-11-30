@@ -162,10 +162,13 @@ bool BooleanOpImp::run()
 		{
 			// the line segment must be removed from sl
 			se = se->otherEvent; // we work with the left event
-			next = prev = it = se->posSL; // se->posSL; is equal than sl.find (se); but faster
-
+			//next = prev = it = se->posSL; // se->posSL; is equal than sl.find (se); but faster
+			next = prev = it = sl.find(se);
 			(prev != sl.begin()) ? --prev : prev = sl.end();
-			++next;
+
+			if(next!=sl.end())
+				++next;
+
 #ifdef __STEPBYSTEP
 			if (trace)
 			{
@@ -175,7 +178,9 @@ bool BooleanOpImp::run()
 			}
 #endif
 			// delete line segment associated to "se" from sl and check for intersection between the neighbors of "se" in sl
-			sl.erase(it);
+			if (next != sl.end())
+				sl.erase(it);
+			
 			if (next != sl.end() && prev != sl.end())
 			{
 				auto res = possibleIntersection(*prev, *next);
@@ -486,7 +491,11 @@ void BooleanOpImp::connectEdges()
 				resultEvents[pos]->otherEvent->resultInOut = true;
 				resultEvents[pos]->otherEvent->contourId = contourId;
 			}
-			processed[pos = resultEvents[pos]->pos] = true;
+			pos = resultEvents[pos]->pos;
+			if (pos >= resultEvents.size())
+				break;
+
+			processed[pos] = true;
 			contour.add(resultEvents[pos]->point);
 			pos = nextPos(pos, resultEvents, processed);
 #ifdef __STEPBYSTEP
@@ -498,11 +507,15 @@ void BooleanOpImp::connectEdges()
 		if (trace)
 			out.push_back(resultEvents[pos]->left ? resultEvents[pos] : resultEvents[pos]->otherEvent);
 #endif
-		processed[pos] = processed[resultEvents[pos]->pos] = true;
-		resultEvents[pos]->otherEvent->resultInOut = true;
-		resultEvents[pos]->otherEvent->contourId = contourId;
-		if (depth[contourId] & 1)
-			contour.changeOrientation();
+		if (pos < resultEvents.size())
+		{
+			processed[pos] = processed[resultEvents[pos]->pos] = true;
+			resultEvents[pos]->otherEvent->resultInOut = true;
+			resultEvents[pos]->otherEvent->contourId = contourId;
+			if (depth[contourId] & 1)
+				contour.changeOrientation();
+		}
+
 	}
 }
 
