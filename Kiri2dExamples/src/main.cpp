@@ -2422,6 +2422,28 @@ void TestPolygonUnion()
         scene->Clear();
     }
 }
+#include <kiri2d/hdv_toolkit/primitives/vertex2.h>
+#include <kiri2d/hdv_toolkit/primitives/simplex.h>
+#include <kiri2d/hdv_toolkit/hull/vertex_buffer.h>
+#include <kiri2d/hdv_toolkit/hull/simplex_warp.h>
+void VertexUnitTest()
+{
+    using namespace HDV;
+
+    auto a = std::make_shared<Primitives::Vertex2>(1.f, 1.f);
+    auto b = std::make_shared<Primitives::Vertex2>(2.f, 2.f);
+
+    KIRI_LOG_DEBUG("dis={0}", a->Distance(2.f, 2.f));
+
+    Hull::VertexBuffer<Primitives::Vertex2Ptr> vb2;
+    vb2.Add(a);
+    vb2.Add(b);
+    vb2.ToString();
+    vb2.GetItem(1)->Set(3.f, 4.f);
+    vb2.ToString();
+
+    Hull::SimplexWarp<Primitives::Vertex2Ptr> sw2;
+}
 
 int main()
 {
@@ -2457,9 +2479,11 @@ int main()
     // DebugNSParticles();
 
     // KIRI_LOG_DEBUG("123");
-    VoronoiNSOptimize();
+    // VoronoiNSOptimize();
 
     // TestPolygonUnion();
+
+    VertexUnitTest();
 
     return 0;
 }
