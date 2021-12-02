@@ -2425,7 +2425,8 @@ void TestPolygonUnion()
 #include <kiri2d/hdv_toolkit/primitives/vertex2.h>
 #include <kiri2d/hdv_toolkit/primitives/simplex.h>
 #include <kiri2d/hdv_toolkit/hull/vertex_buffer.h>
-#include <kiri2d/hdv_toolkit/hull/simplex_warp.h>
+#include <kiri2d/hdv_toolkit/hull/simplex_list.h>
+#include <kiri2d/hdv_toolkit/hull/object_buffer.h>
 void VertexUnitTest()
 {
     using namespace HDV;
@@ -2442,7 +2443,32 @@ void VertexUnitTest()
     vb2.GetItem(1)->Set(3.f, 4.f);
     vb2.ToString();
 
-    Hull::SimplexWarp<Primitives::Vertex2Ptr> sw2;
+    auto sw2_1 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
+    sw2_1->SetTag(5);
+    auto sw2_2 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
+    sw2_2->SetTag(7);
+    auto sw2_3 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
+    sw2_3->SetTag(45);
+
+    auto sw2_4 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
+    sw2_4->SetTag(345);
+
+    Hull::SimplexList<Primitives::Vertex2Ptr> sl2;
+    sl2.Add(sw2_2);
+    sl2.ToString();
+
+    sl2.Add(sw2_1);
+    sl2.Add(sw2_3);
+    sl2.ToString();
+
+    sl2.AddFirst(sw2_4);
+    sl2.ToString();
+
+    sl2.Remove(sw2_1);
+    sl2.ToString();
+    sw2_1->ToString();
+
+    auto ob2 = std::make_shared<Hull::ObjectBuffer<Primitives::Vertex2Ptr>>(2);
 }
 
 int main()
