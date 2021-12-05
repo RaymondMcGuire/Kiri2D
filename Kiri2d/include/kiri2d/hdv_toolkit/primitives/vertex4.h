@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-01 19:36:02
- * @LastEditTime: 2021-12-01 19:36:26
+ * @LastEditTime: 2021-12-05 20:48:17
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -59,6 +59,8 @@ namespace HDV::Primitives
             return x * x + y * y + z * z + w * w;
         }
     };
+
+    typedef std::shared_ptr<Vertex4> Vertex4Ptr;
 } // namespace HDV::Primitives
 
 #endif /* _HDV_Vertex4_H_ */

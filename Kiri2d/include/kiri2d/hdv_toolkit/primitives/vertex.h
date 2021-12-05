@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-01 18:20:37
- * @LastEditTime: 2021-12-01 18:46:01
+ * @LastEditTime: 2021-12-05 20:19:17
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -35,6 +35,8 @@ namespace HDV::Primitives
         float SqrMagnitude();
         float Distance(Vertex v);
         float SqrDistance(Vertex v);
+
+        const std::vector<float> &GetPosition() { return mPosition; }
 
         void ToString();
 

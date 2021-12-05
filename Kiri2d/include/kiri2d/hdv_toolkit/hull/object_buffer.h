@@ -37,6 +37,10 @@ namespace HDV::Hull
 
         virtual ~ObjectBuffer() noexcept {}
 
+        VERTEX CurrentVertex;
+        VERTEX FurthestVertex;
+        float MaxDistance = -std::numeric_limits<float>::max();
+
         void Clear()
         {
 
@@ -44,9 +48,9 @@ namespace HDV::Hull
             mUpdateIndices.assign(dimension, -1);
 
             mInputVertices.clear();
-            mCurrentVertex = nullptr;
-            mFurthestVertex = nullptr;
-            mMaxDistance = -std::numeric_limits<float>::max();
+            CurrentVertex = nullptr;
+            FurthestVertex = nullptr;
+            MaxDistance = -std::numeric_limits<float>::max();
 
             mConvexSimplexs.clear();
             mAffectedFaceBuffer.clear();
@@ -98,10 +102,6 @@ namespace HDV::Hull
         const int CONNECTOR_TABLE_SIZE = 2017;
 
         int mDimension = -1;
-        float mMaxDistance = -std::numeric_limits<float>::max();
-
-        VERTEX mCurrentVertex;
-        VERTEX mFurthestVertex;
 
         std::shared_ptr<SimplexList<VERTEX>> mUnprocessedFaces;
         std::shared_ptr<ObjectManager<VERTEX>> mObjectManager;

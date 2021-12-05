@@ -2423,10 +2423,9 @@ void TestPolygonUnion()
     }
 }
 #include <kiri2d/hdv_toolkit/primitives/vertex2.h>
-#include <kiri2d/hdv_toolkit/primitives/simplex.h>
-#include <kiri2d/hdv_toolkit/hull/vertex_buffer.h>
-#include <kiri2d/hdv_toolkit/hull/simplex_list.h>
-#include <kiri2d/hdv_toolkit/hull/object_buffer.h>
+#include <kiri2d/hdv_toolkit/primitives/vertex3.h>
+#include <kiri2d/hdv_toolkit/primitives/vertex4.h>
+#include <kiri2d/hdv_toolkit/hull/convex_hull.h>
 void VertexUnitTest()
 {
     using namespace HDV;
@@ -2436,39 +2435,73 @@ void VertexUnitTest()
 
     KIRI_LOG_DEBUG("dis={0}", a->Distance(2.f, 2.f));
 
-    Hull::VertexBuffer<Primitives::Vertex2Ptr> vb2;
-    vb2.Add(a);
-    vb2.Add(b);
-    vb2.ToString();
-    vb2.GetItem(1)->Set(3.f, 4.f);
-    vb2.ToString();
+    // Hull::VertexBuffer<Primitives::Vertex2Ptr> vb2;
+    // vb2.Add(a);
+    // vb2.Add(b);
+    // vb2.ToString();
+    // vb2.GetItem(1)->Set(3.f, 4.f);
+    // vb2.ToString();
 
-    auto sw2_1 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
-    sw2_1->SetTag(5);
-    auto sw2_2 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
-    sw2_2->SetTag(7);
-    auto sw2_3 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
-    sw2_3->SetTag(45);
+    // auto sw2_1 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
+    // sw2_1->SetTag(5);
+    // auto sw2_2 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
+    // sw2_2->SetTag(7);
+    // auto sw2_3 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
+    // sw2_3->SetTag(45);
 
-    auto sw2_4 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
-    sw2_4->SetTag(345);
+    // auto sw2_4 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
+    // sw2_4->SetTag(345);
 
-    Hull::SimplexList<Primitives::Vertex2Ptr> sl2;
-    sl2.Add(sw2_2);
-    sl2.ToString();
+    // Hull::SimplexList<Primitives::Vertex2Ptr> sl2;
+    // sl2.Add(sw2_2);
+    // sl2.ToString();
 
-    sl2.Add(sw2_1);
-    sl2.Add(sw2_3);
-    sl2.ToString();
+    // sl2.Add(sw2_1);
+    // sl2.Add(sw2_3);
+    // sl2.ToString();
 
-    sl2.AddFirst(sw2_4);
-    sl2.ToString();
+    // sl2.AddFirst(sw2_4);
+    // sl2.ToString();
 
-    sl2.Remove(sw2_1);
-    sl2.ToString();
-    sw2_1->ToString();
+    // sl2.Remove(sw2_1);
+    // sl2.ToString();
+    // sw2_1->ToString();
 
-    auto ob2 = std::make_shared<Hull::ObjectBuffer<Primitives::Vertex2Ptr>>(2);
+    // check math helper
+    std::vector<float> pv2, pv3, pv4;
+    pv2.emplace_back(2.f);
+    pv2.emplace_back(3.f);
+
+    pv3.emplace_back(2.f);
+    pv3.emplace_back(3.f);
+    pv3.emplace_back(4.f);
+
+    pv4.emplace_back(2.f);
+    pv4.emplace_back(3.f);
+    pv4.emplace_back(4.f);
+    pv4.emplace_back(5.f);
+
+    auto ls2_chk = Hull::MathHelper<Primitives::Vertex2Ptr>().LengthSquared(pv2);
+    auto ls3_chk = Hull::MathHelper<Primitives::Vertex3Ptr>().LengthSquared(pv3);
+    auto ls4_chk = Hull::MathHelper<Primitives::Vertex4Ptr>().LengthSquared(pv4);
+
+    KIRI_LOG_DEBUG("length squared 2={0}, 3={1}, 4={2}", ls2_chk, ls3_chk, ls4_chk);
+
+    std::vector<float> normal_data;
+    std::vector<Primitives::Vertex2Ptr> vertex_array2;
+    normal_data.assign(2, 0.f);
+
+    vertex_array2.emplace_back(a);
+    vertex_array2.emplace_back(b);
+
+    Hull::MathHelper<Primitives::Vertex2Ptr>().FindNormalVector2D(vertex_array2, normal_data);
+
+    for (size_t i = 0; i < normal_data.size(); i++)
+    {
+        KIRI_LOG_DEBUG("normal[{0}]={1}", i, normal_data[i]);
+    }
+
+    auto ob2 = std::make_shared<Hull::ConvexHull<Primitives::Vertex2Ptr>>(2);
 }
 
 int main()

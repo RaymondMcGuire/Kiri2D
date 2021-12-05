@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-02 00:36:23
- * @LastEditTime: 2021-12-02 17:50:29
+ * @LastEditTime: 2021-12-05 20:31:59
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -21,18 +21,23 @@ namespace HDV::Hull
         explicit SimplexWrap() : Next{nullptr}, Prev{} {}
         explicit SimplexWrap(
             int dimension,
-            const VertexBuffer<VERTEX> &beyondList)
+            const std::shared_ptr<VertexBuffer<VERTEX>> &beyondList)
             : Next{nullptr}, Prev{}
         {
             mNormals.assign(dimension, 0.f);
             mVertices.assign(dimension, VERTEX());
-            mAdjacentFaces.assign(dimension, SimplexWrap<VERTEX>());
+            mAdjacentFaces.assign(dimension, std::make_shared<SimplexWrap<VERTEX>>());
             mBeyondList = beyondList;
         }
         virtual ~SimplexWrap() noexcept {}
 
-        std::shared_ptr<SimplexWrap<VERTEX>> Next;
-        std::weak_ptr<SimplexWrap<VERTEX>> Prev;
+        std::shared_ptr<std::shared_ptr<SimplexWrap<VERTEX>>> Next;
+        std::weak_ptr<std::shared_ptr<SimplexWrap<VERTEX>>> Prev;
+
+        std::vector<float> Normals;
+        std::vector<VERTEX> Vertices;
+        float Offset = 0.f;
+        bool IsNormalFlipped = false;
 
         bool GetInList() const { return mInList; }
         void SetInList(bool il) { mInList = il; }
@@ -40,11 +45,9 @@ namespace HDV::Hull
         int GetTag() const { return mTag; }
         void SetTag(int tag) { mTag = tag; }
 
-        const VertexBuffer<VERTEX> &GetBeyondList() { return mBeyondList; }
-        const std::vector<float> &GetNormals() { return mNormals; }
-        const std::vector<VERTEX> &GetVertices() { return mVertices; }
-        const VertexBuffer<VERTEX> &GetVerticesBeyond() { return mVerticesBeyond; }
-        const std::vector<SimplexWrap<VERTEX>> &GetAdjacentFaces() { return mAdjacentFaces; }
+        const std::shared_ptr<VertexBuffer<VERTEX>> &GetBeyondList() { return mBeyondList; }
+        const std::shared_ptr<VertexBuffer<VERTEX>> &GetVerticesBeyond() { return mVerticesBeyond; }
+        const std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> &GetAdjacentFaces() { return mAdjacentFaces; }
 
         void ToString()
         {
@@ -56,17 +59,12 @@ namespace HDV::Hull
         }
 
     private:
-        bool mIsNormalFlipped = false;
-        float mOffset = 0.f;
         int mTag = -1;
         bool mInList = false;
         VERTEX mFurthestVertex;
-        VertexBuffer<VERTEX> mBeyondList;
-
-        std::vector<float> mNormals;
-        std::vector<VERTEX> mVertices;
-        VertexBuffer<VERTEX> mVerticesBeyond;
-        std::vector<SimplexWrap<VERTEX>> mAdjacentFaces;
+        std::shared_ptr<VertexBuffer<VERTEX>> mBeyondList;
+        std::shared_ptr<VertexBuffer<VERTEX>> mVerticesBeyond;
+        std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> mAdjacentFaces;
     };
 
 } // namespace HDV::Hull
