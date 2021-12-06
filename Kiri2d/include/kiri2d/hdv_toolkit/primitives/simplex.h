@@ -15,7 +15,7 @@
 
 namespace HDV::Primitives
 {
-    template <typename VERTEX = Vertex>
+    template <typename VERTEX = VertexPtr>
     class Simplex
     {
     public:
@@ -38,8 +38,9 @@ namespace HDV::Primitives
         float GetOffset() const { return mOffset; }
         bool GetNormalFlipped() const { return mIsNormalFlipped; }
 
+        std::vector<float> GetNormals() { return mNormal; }
         const std::vector<VERTEX> &GetVertices() { return mVertices; }
-        const std::vector<Simplex<>> &GetAdjacent() { return mAdjacent; }
+        const std::vector<std::shared_ptr<Simplex<VERTEX>>> &GetAdjacent() { return mAdjacent; }
 
         void SetTag(int tag) { mTag = tag; }
         void SetOffset(float offset) { mOffset = offset; }
@@ -54,12 +55,12 @@ namespace HDV::Primitives
             auto dp = 0.0f;
 
             for (auto i = 0; i < dim; i++)
-                dp += mNormal[i] * v.GetPosition()[i];
+                dp += mNormal[i] * v->GetPosition()[i];
 
             return dp;
         }
 
-        bool Remove(Simplex<VERTEX> simplex)
+        bool Remove(const std::shared_ptr<Simplex<VERTEX>> &simplex)
         {
             auto n = mAdjacent.size();
 
@@ -93,7 +94,7 @@ namespace HDV::Primitives
                 break;
 
             default:
-                throw std::invalid_argument("Invalid number of dimension for Simplex!", mDimension);
+                throw std::invalid_argument("Invalid number of dimension for Simplex!");
             }
         }
 
@@ -115,11 +116,11 @@ namespace HDV::Primitives
                 break;
 
             default:
-                throw std::invalid_argument("Invalid number of dimension for Simplex!", mDimension);
+                throw std::invalid_argument("Invalid number of dimension for Simplex!");
             }
         }
 
-        void UpdateAdjacency(Simplex<VERTEX> simplex)
+        void UpdateAdjacency(const std::shared_ptr<Simplex<VERTEX>> &simplex)
         {
 
             auto lv = mVertices;
@@ -223,9 +224,9 @@ namespace HDV::Primitives
         std::vector<VERTEX> mVertices;
         std::vector<float> mNormal;
         std::vector<float> mCentroid;
-        std::vector<Simplex<>> mAdjacent;
+        std::vector<std::shared_ptr<Simplex<VERTEX>>> mAdjacent;
 
-        const std::vector<float> &Subtract(std::vector<float> x, std::vector<float> y)
+        std::vector<float> Subtract(std::vector<float> x, std::vector<float> y)
         {
             std::vector<float> target;
             for (auto i = 0; i < mDimension; i++)
@@ -241,7 +242,7 @@ namespace HDV::Primitives
             if (mVertices.size() != 2)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
 
-            auto ntX = Subtract(mVertices[0].GetPosition(), mVertices[1].GetPosition());
+            auto ntX = Subtract(mVertices[0]->GetPosition(), mVertices[1]->GetPosition());
 
             auto nx = -ntX[1];
             auto ny = ntX[0];
@@ -258,8 +259,8 @@ namespace HDV::Primitives
             if (mVertices.size() != 3)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
 
-            auto ntX = Subtract(mVertices[1].GetPosition(), mVertices[0].GetPosition());
-            auto ntY = Subtract(mVertices[2].GetPosition(), mVertices[1].GetPosition());
+            auto ntX = Subtract(mVertices[1]->GetPosition(), mVertices[0]->GetPosition());
+            auto ntY = Subtract(mVertices[2]->GetPosition(), mVertices[1]->GetPosition());
 
             auto nx = ntX[1] * ntY[2] - ntX[2] * ntY[1];
             auto ny = ntX[2] * ntY[0] - ntX[0] * ntY[2];
@@ -278,9 +279,9 @@ namespace HDV::Primitives
             if (mVertices.size() != 4)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
 
-            auto ntX = Subtract(mVertices[1].GetPosition(), mVertices[0].GetPosition());
-            auto ntY = Subtract(mVertices[2].GetPosition(), mVertices[1].GetPosition());
-            auto ntZ = Subtract(mVertices[3].GetPosition(), mVertices[2].GetPosition());
+            auto ntX = Subtract(mVertices[1]->GetPosition(), mVertices[0]->GetPosition());
+            auto ntY = Subtract(mVertices[2]->GetPosition(), mVertices[1]->GetPosition());
+            auto ntZ = Subtract(mVertices[3]->GetPosition(), mVertices[2]->GetPosition());
 
             auto x = ntX;
             auto y = ntY;
@@ -305,27 +306,27 @@ namespace HDV::Primitives
         {
             if (mVertices.size() != 2)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
-            mCentroid[0] = (mVertices[0].GetPosition()[0] + mVertices[1].GetPosition()[0]) / 2.f;
-            mCentroid[1] = (mVertices[0].GetPosition()[1] + mVertices[1].GetPosition()[1]) / 2.f;
+            mCentroid[0] = (mVertices[0]->GetPosition()[0] + mVertices[1]->GetPosition()[0]) / 2.f;
+            mCentroid[1] = (mVertices[0]->GetPosition()[1] + mVertices[1]->GetPosition()[1]) / 2.f;
         }
 
         void CalculateCentroid3D()
         {
             if (mVertices.size() != 3)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
-            mCentroid[0] = (mVertices[0].GetPosition()[0] + mVertices[1].GetPosition()[0] + mVertices[2].GetPosition()[0]) / 3.f;
-            mCentroid[1] = (mVertices[0].GetPosition()[1] + mVertices[1].GetPosition()[1] + mVertices[2].GetPosition()[1]) / 3.f;
-            mCentroid[2] = (mVertices[0].GetPosition()[2] + mVertices[1].GetPosition()[2] + mVertices[2].GetPosition()[2]) / 3.f;
+            mCentroid[0] = (mVertices[0]->GetPosition()[0] + mVertices[1]->GetPosition()[0] + mVertices[2]->GetPosition()[0]) / 3.f;
+            mCentroid[1] = (mVertices[0]->GetPosition()[1] + mVertices[1]->GetPosition()[1] + mVertices[2]->GetPosition()[1]) / 3.f;
+            mCentroid[2] = (mVertices[0]->GetPosition()[2] + mVertices[1]->GetPosition()[2] + mVertices[2]->GetPosition()[2]) / 3.f;
         }
 
         void CalculateCentroid4D()
         {
             if (mVertices.size() != 4)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
-            mCentroid[0] = (mVertices[0].GetPosition()[0] + mVertices[1].GetPosition()[0] + mVertices[2].GetPosition()[0] + mVertices[3].GetPosition()[0]) / 4.f;
-            mCentroid[1] = (mVertices[0].GetPosition()[1] + mVertices[1].GetPosition()[1] + mVertices[2].GetPosition()[1] + mVertices[3].GetPosition()[1]) / 4.f;
-            mCentroid[2] = (mVertices[0].GetPosition()[2] + mVertices[1].GetPosition()[2] + mVertices[2].GetPosition()[2] + mVertices[3].GetPosition()[2]) / 4.f;
-            mCentroid[3] = (mVertices[0].GetPosition()[3] + mVertices[1].GetPosition()[3] + mVertices[2].GetPosition()[3] + mVertices[3].GetPosition()[3]) / 4.f;
+            mCentroid[0] = (mVertices[0]->GetPosition()[0] + mVertices[1]->GetPosition()[0] + mVertices[2]->GetPosition()[0] + mVertices[3]->GetPosition()[0]) / 4.f;
+            mCentroid[1] = (mVertices[0]->GetPosition()[1] + mVertices[1]->GetPosition()[1] + mVertices[2]->GetPosition()[1] + mVertices[3]->GetPosition()[1]) / 4.f;
+            mCentroid[2] = (mVertices[0]->GetPosition()[2] + mVertices[1]->GetPosition()[2] + mVertices[2]->GetPosition()[2] + mVertices[3]->GetPosition()[2]) / 4.f;
+            mCentroid[3] = (mVertices[0]->GetPosition()[3] + mVertices[1]->GetPosition()[3] + mVertices[2]->GetPosition()[3] + mVertices[3]->GetPosition()[3]) / 4.f;
         }
     };
 } // namespace HDV::Primitives

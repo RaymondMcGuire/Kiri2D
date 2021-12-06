@@ -118,9 +118,9 @@ namespace HDV::Hull
         /// <returns>The vertex is "over face" if the result is positive.</returns>
         static float GetVertexDistance(VERTEX v, const std::shared_ptr<SimplexWrap<VERTEX>> &f)
         {
-            auto normal = f->GetNormals();
+            auto normal = f->Normals;
             auto p = v->GetPosition();
-            auto distance = f->GetOffset();
+            auto distance = f->Offset;
             for (auto i = 0; i < v->GetDimension(); i++)
                 distance += normal[i] * p[i];
             return distance;

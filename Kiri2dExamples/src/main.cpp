@@ -2430,10 +2430,10 @@ void VertexUnitTest()
 {
     using namespace HDV;
 
-    auto a = std::make_shared<Primitives::Vertex2>(1.f, 1.f);
-    auto b = std::make_shared<Primitives::Vertex2>(2.f, 2.f);
+    // auto a = std::make_shared<Primitives::Vertex2>(1.f, 1.f);
+    // auto b = std::make_shared<Primitives::Vertex2>(2.f, 2.f);
 
-    KIRI_LOG_DEBUG("dis={0}", a->Distance(2.f, 2.f));
+    // KIRI_LOG_DEBUG("dis={0}", a->Distance(2.f, 2.f));
 
     // Hull::VertexBuffer<Primitives::Vertex2Ptr> vb2;
     // vb2.Add(a);
@@ -2468,40 +2468,58 @@ void VertexUnitTest()
     // sw2_1->ToString();
 
     // check math helper
-    std::vector<float> pv2, pv3, pv4;
-    pv2.emplace_back(2.f);
-    pv2.emplace_back(3.f);
+    // std::vector<float> pv2, pv3, pv4;
+    // pv2.emplace_back(2.f);
+    // pv2.emplace_back(3.f);
 
-    pv3.emplace_back(2.f);
-    pv3.emplace_back(3.f);
-    pv3.emplace_back(4.f);
+    // pv3.emplace_back(2.f);
+    // pv3.emplace_back(3.f);
+    // pv3.emplace_back(4.f);
 
-    pv4.emplace_back(2.f);
-    pv4.emplace_back(3.f);
-    pv4.emplace_back(4.f);
-    pv4.emplace_back(5.f);
+    // pv4.emplace_back(2.f);
+    // pv4.emplace_back(3.f);
+    // pv4.emplace_back(4.f);
+    // pv4.emplace_back(5.f);
 
-    auto ls2_chk = Hull::MathHelper<Primitives::Vertex2Ptr>().LengthSquared(pv2);
-    auto ls3_chk = Hull::MathHelper<Primitives::Vertex3Ptr>().LengthSquared(pv3);
-    auto ls4_chk = Hull::MathHelper<Primitives::Vertex4Ptr>().LengthSquared(pv4);
+    // auto ls2_chk = Hull::MathHelper<Primitives::Vertex2Ptr>().LengthSquared(pv2);
+    // auto ls3_chk = Hull::MathHelper<Primitives::Vertex3Ptr>().LengthSquared(pv3);
+    // auto ls4_chk = Hull::MathHelper<Primitives::Vertex4Ptr>().LengthSquared(pv4);
 
-    KIRI_LOG_DEBUG("length squared 2={0}, 3={1}, 4={2}", ls2_chk, ls3_chk, ls4_chk);
+    // KIRI_LOG_DEBUG("length squared 2={0}, 3={1}, 4={2}", ls2_chk, ls3_chk, ls4_chk);
 
-    std::vector<float> normal_data;
-    std::vector<Primitives::Vertex2Ptr> vertex_array2;
-    normal_data.assign(2, 0.f);
+    // std::vector<float> normal_data;
+    // std::vector<Primitives::Vertex2Ptr> vertex_array2;
+    // normal_data.assign(2, 0.f);
 
-    vertex_array2.emplace_back(a);
-    vertex_array2.emplace_back(b);
+    // vertex_array2.emplace_back(a);
+    // vertex_array2.emplace_back(b);
 
-    Hull::MathHelper<Primitives::Vertex2Ptr>().FindNormalVector2D(vertex_array2, normal_data);
+    // Hull::MathHelper<Primitives::Vertex2Ptr>().FindNormalVector2D(vertex_array2, normal_data);
 
-    for (size_t i = 0; i < normal_data.size(); i++)
+    // for (size_t i = 0; i < normal_data.size(); i++)
+    // {
+    //     KIRI_LOG_DEBUG("normal[{0}]={1}", i, normal_data[i]);
+    // }
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(-1.f, 1.f);
+
+    auto scale_size = 5.f;
+    auto sampler_num = 10;
+    std::vector<Primitives::Vertex2Ptr> vet2;
+
+    for (auto i = 0; i < sampler_num; i++)
     {
-        KIRI_LOG_DEBUG("normal[{0}]={1}", i, normal_data[i]);
+        auto x = dist(rndEngine) * scale_size;
+        auto y = dist(rndEngine) * scale_size;
+
+        auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
+        vet2.emplace_back(v2);
     }
 
-    auto ob2 = std::make_shared<Hull::ConvexHull<Primitives::Vertex2Ptr>>(2);
+    auto cv2 = std::make_shared<Hull::ConvexHull2>();
+    cv2->Generate(vet2);
 }
 
 int main()

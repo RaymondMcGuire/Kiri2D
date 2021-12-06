@@ -18,25 +18,28 @@ namespace HDV::Hull
     class ConnectorList
     {
     public:
-        explicit ConnectorList() : mFirst{nullptr}, mLast{nullptr} {}
+        explicit ConnectorList() : First{nullptr}, Last{nullptr} {}
 
         virtual ~ConnectorList() noexcept {}
 
+        std::shared_ptr<SimplexConnector<VERTEX>> First;
+        std::shared_ptr<SimplexConnector<VERTEX>> Last;
+
         void Clear()
         {
-            mFirst = nullptr;
-            mLast = nullptr;
+            First = nullptr;
+            Last = nullptr;
         }
 
         void AddFirst(const std::shared_ptr<SimplexConnector<VERTEX>> &connector)
         {
-            connector->Next = mFirst;
-            if (mFirst == nullptr)
-                mLast = connector;
+            connector->Next = First;
+            if (First == nullptr)
+                Last = connector;
             else
-                mFirst->Prev = connector;
+                First->Prev = connector;
 
-            mFirst = connector;
+            First = connector;
         }
 
         void Remove(const std::shared_ptr<SimplexConnector<VERTEX>> &connector)
@@ -49,7 +52,7 @@ namespace HDV::Hull
             }
             else if (connector->Prev.lock() == nullptr)
             {
-                mFirst = connector->Next;
+                First = connector->Next;
             }
 
             if (connector->Next != nullptr)
@@ -60,7 +63,7 @@ namespace HDV::Hull
             else if (connector->Next == nullptr)
             {
                 std::shared_ptr<SimplexConnector<VERTEX>> prev{connector->Prev};
-                mLast = prev;
+                Last = prev;
             }
 
             connector->Next = nullptr;
@@ -70,24 +73,24 @@ namespace HDV::Hull
         void Add(const std::shared_ptr<SimplexConnector<VERTEX>> &connector)
         {
 
-            if (mLast != nullptr)
+            if (Last != nullptr)
             {
-                mLast->Next = connector;
+                Last->Next = connector;
             }
 
-            connector->Prev = mLast;
-            mLast = connector;
+            connector->Prev = Last;
+            Last = connector;
 
-            if (mFirst == nullptr)
+            if (First == nullptr)
             {
-                mFirst = connector;
+                First = connector;
             }
         }
 
         void ToString()
         {
             KIRI_LOG_DEBUG("---Connector List Start---");
-            std::shared_ptr<SimplexConnector<VERTEX>> current{mFirst};
+            std::shared_ptr<SimplexConnector<VERTEX>> current{First};
             while (current != nullptr)
             {
                 current->ToString();
@@ -95,10 +98,6 @@ namespace HDV::Hull
             }
             KIRI_LOG_DEBUG("---Connector List End---");
         }
-
-    private:
-        std::shared_ptr<SimplexConnector<VERTEX>> mFirst;
-        std::shared_ptr<SimplexConnector<VERTEX>> mLast;
     };
 
 } // namespace HDV::Hull

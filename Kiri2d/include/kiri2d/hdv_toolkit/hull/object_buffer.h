@@ -25,57 +25,75 @@ namespace HDV::Hull
         {
             mDimension = dimension;
 
-            mUpdateBuffer.assign(dimension, SimplexWrap<VERTEX>());
-            mUpdateIndices.assign(dimension, -1);
+            UpdateBuffer.assign(dimension, std::make_shared<SimplexWrap<VERTEX>>());
+            UpdateIndices.assign(dimension, -1);
 
-            mObjectManager = std::make_shared<ObjectManager<VERTEX>>(dimension);
-            mEmptyBuffer = std::make_shared<VertexBuffer<VERTEX>>();
-            mBeyondBuffer = std::make_shared<VertexBuffer<VERTEX>>();
+           ObjManager = std::make_shared<ObjectManager<VERTEX>>(dimension);
+            EmptyBuffer = std::make_shared<VertexBuffer<VERTEX>>();
+            BeyondBuffer = std::make_shared<VertexBuffer<VERTEX>>();
 
-            mConnectorTable.assign(CONNECTOR_TABLE_SIZE, ConnectorList<VERTEX>());
+            ConnectorTable.assign(CONNECTOR_TABLE_SIZE, std::make_shared <ConnectorList<VERTEX>>());
         }
 
         virtual ~ObjectBuffer() noexcept {}
+
+        const int CONNECTOR_TABLE_SIZE = 2017;
 
         VERTEX CurrentVertex;
         VERTEX FurthestVertex;
         float MaxDistance = -std::numeric_limits<float>::max();
 
+        std::shared_ptr<SimplexList<VERTEX>> UnprocessedFaces;
+        std::shared_ptr<ObjectManager<VERTEX>> ObjManager;
+
+        std::shared_ptr<VertexBuffer<VERTEX>> EmptyBuffer;
+        std::shared_ptr<VertexBuffer<VERTEX>> BeyondBuffer;
+
+        std::vector<VERTEX> InputVertices;
+        std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> ConvexSimplexs;
+        std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> AffectedFaceBuffer;
+        std::stack<std::shared_ptr<SimplexWrap<VERTEX>>> TraverseStack;
+        std::unordered_set<VERTEX> SingularVertices;
+        std::vector<std::shared_ptr<DeferredSimplex<VERTEX>>> ConeFaceBuffer;
+        std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> UpdateBuffer;
+        std::vector<int> UpdateIndices;
+        std::vector<std::shared_ptr<ConnectorList<VERTEX>>> ConnectorTable;
+
         void Clear()
         {
 
-            mUpdateBuffer.assign(dimension, SimplexWrap<VERTEX>());
-            mUpdateIndices.assign(dimension, -1);
+            UpdateBuffer.assign(mDimension, std::make_shared<SimplexWrap<VERTEX>>());
+            UpdateIndices.assign(mDimension, -1);
 
-            mInputVertices.clear();
+            InputVertices.clear();
             CurrentVertex = nullptr;
             FurthestVertex = nullptr;
             MaxDistance = -std::numeric_limits<float>::max();
 
-            mConvexSimplexs.clear();
-            mAffectedFaceBuffer.clear();
-            mTraverseStack.clear();
-            mSingularVertices.clear();
-            mConeFaceBuffer.clear();
+            ConvexSimplexs.clear();
+            AffectedFaceBuffer.clear();
+            TraverseStack = std::stack<std::shared_ptr<SimplexWrap<VERTEX>>>();
+            SingularVertices.clear();
+            ConeFaceBuffer.clear();
 
-            mObjectManager->Clear();
-            mUnprocessedFaces->Clear();
-            mEmptyBuffer->Clear();
-            mBeyondBuffer->Clear();
+            ObjManager->Clear();
+            UnprocessedFaces->Clear();
+            EmptyBuffer->Clear();
+            BeyondBuffer->Clear();
 
             for (auto i = 0; i < CONNECTOR_TABLE_SIZE; i++)
-                mConnectorTable[i]->Clear();
+                ConnectorTable[i]->Clear();
         }
 
         void AddInput(const std::vector<VERTEX> &input, bool assignIds, bool checkInput)
         {
             auto count = input.size();
-            mInputVertices = input;
+            InputVertices = input;
 
             if (assignIds)
             {
                 for (auto i = 0; i < count; i++)
-                    mInputVertices[i]->SetId(i);
+                    InputVertices[i]->SetId(i);
             }
 
             if (checkInput)
@@ -88,10 +106,10 @@ namespace HDV::Hull
                         throw std::invalid_argument("Input has a null vertex!");
 
                     if (input[i]->GetDimension() != mDimension)
-                        throw std::invalid_argument("Input vertex is not the correct dimension!", std::to_string(input[i]->GetDimension()));
+                        throw std::invalid_argument("Input vertex is not the correct dimension!");
 
                     if (set.count(input[i]->GetId()))
-                        throw std::invalid_argument("Input vertex id is not unique!", std::to_string(input[i]->GetId()));
+                        throw std::invalid_argument("Input vertex id is not unique!");
                     else
                         set.insert(input[i]->GetId());
                 }
@@ -99,25 +117,7 @@ namespace HDV::Hull
         }
 
     private:
-        const int CONNECTOR_TABLE_SIZE = 2017;
-
         int mDimension = -1;
-
-        std::shared_ptr<SimplexList<VERTEX>> mUnprocessedFaces;
-        std::shared_ptr<ObjectManager<VERTEX>> mObjectManager;
-
-        std::shared_ptr<VertexBuffer<VERTEX>> mEmptyBuffer;
-        std::shared_ptr<VertexBuffer<VERTEX>> mBeyondBuffer;
-
-        std::vector<VERTEX> mInputVertices;
-        std::vector<SimplexWrap<VERTEX>> mConvexSimplexs;
-        std::vector<SimplexWrap<VERTEX>> mAffectedFaceBuffer;
-        std::vector<SimplexWrap<VERTEX>> mTraverseStack;
-        std::unordered_set<VERTEX> mSingularVertices;
-        std::vector<DeferredSimplex<VERTEX>> mConeFaceBuffer;
-        std::vector<SimplexWrap<VERTEX>> mUpdateBuffer;
-        std::vector<int> mUpdateIndices;
-        std::vector<ConnectorList<VERTEX>> mConnectorTable;
     };
 
 } // namespace HDV::Hull

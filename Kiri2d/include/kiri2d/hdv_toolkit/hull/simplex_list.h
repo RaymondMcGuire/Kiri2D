@@ -18,26 +18,29 @@ namespace HDV::Hull
     class SimplexList
     {
     public:
-        explicit SimplexList() : mFirst{nullptr}, mLast{nullptr} {}
+        explicit SimplexList() : First{nullptr}, Last{nullptr} {}
 
         virtual ~SimplexList() noexcept {}
 
+        std::shared_ptr<SimplexWrap<VERTEX>> First;
+        std::shared_ptr<SimplexWrap<VERTEX>> Last;
+
         void Clear()
         {
-            mFirst = nullptr;
-            mLast = nullptr;
+            First = nullptr;
+            Last = nullptr;
         }
 
         void AddFirst(const std::shared_ptr<SimplexWrap<VERTEX>> &face)
         {
             face->SetInList(true);
-            face->Next = mFirst;
-            if (mFirst == nullptr)
-                mLast = face;
+            face->Next = First;
+            if (First == nullptr)
+                Last = face;
             else
-                mFirst->Prev = face;
+                First->Prev = face;
 
-            mFirst = face;
+            First = face;
         }
 
         void Remove(const std::shared_ptr<SimplexWrap<VERTEX>> &face)
@@ -54,7 +57,7 @@ namespace HDV::Hull
             }
             else if (face->Prev.lock() == nullptr)
             {
-                mFirst = face->Next;
+                First = face->Next;
             }
 
             if (face->Next != nullptr)
@@ -65,7 +68,7 @@ namespace HDV::Hull
             else if (face->Next == nullptr)
             {
                 std::shared_ptr<SimplexWrap<VERTEX>> prev{face->Prev};
-                mLast = prev;
+                Last = prev;
             }
 
             face->Next = nullptr;
@@ -76,7 +79,7 @@ namespace HDV::Hull
         {
             if (face->GetInList())
             {
-                if (mFirst->GetVerticesBeyond().GetCount() < face->GetVerticesBeyond().GetCount())
+                if (First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount())
                 {
                     Remove(face);
                     AddFirst(face);
@@ -86,25 +89,25 @@ namespace HDV::Hull
 
             face->SetInList(true);
 
-            if (mFirst != nullptr && mFirst->GetVerticesBeyond().GetCount() < face->GetVerticesBeyond().GetCount())
+            if (First != nullptr && First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount())
             {
-                mFirst->Prev = face;
-                face->Next = mFirst;
-                mFirst = face;
+                First->Prev = face;
+                face->Next = First;
+                First = face;
             }
             else
             {
-                if (mLast != nullptr)
+                if (Last != nullptr)
                 {
-                    mLast->Next = face;
+                    Last->Next = face;
                 }
 
-                face->Prev = mLast;
-                mLast = face;
+                face->Prev = Last;
+                Last = face;
 
-                if (mFirst == nullptr)
+                if (First == nullptr)
                 {
-                    mFirst = face;
+                    First = face;
                 }
             }
         }
@@ -112,7 +115,7 @@ namespace HDV::Hull
         void ToString()
         {
             KIRI_LOG_DEBUG("---Simplex List Start---");
-            std::shared_ptr<SimplexWrap<VERTEX>> current{mFirst};
+            std::shared_ptr<SimplexWrap<VERTEX>> current{First};
             while (current != nullptr)
             {
                 current->ToString();
@@ -120,10 +123,6 @@ namespace HDV::Hull
             }
             KIRI_LOG_DEBUG("---Simplex List End---");
         }
-
-    private:
-        std::shared_ptr<SimplexWrap<VERTEX>> mFirst;
-        std::shared_ptr<SimplexWrap<VERTEX>> mLast;
     };
 
 } // namespace HDV::Hull

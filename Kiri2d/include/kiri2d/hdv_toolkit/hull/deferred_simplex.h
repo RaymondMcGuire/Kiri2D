@@ -18,7 +18,7 @@ namespace HDV::Hull
     class DeferredSimplex
     {
     public:
-        explicit DeferredSimplex() : {}
+        explicit DeferredSimplex() {}
 
         virtual ~DeferredSimplex() noexcept {}
 

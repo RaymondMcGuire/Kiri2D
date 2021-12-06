@@ -22,7 +22,7 @@ namespace HDV::Hull
         explicit SimplexConnector() : Next{nullptr}, Prev{} {}
         explicit SimplexConnector(int dimension) : Next{nullptr}, Prev{}
         {
-            VerticeIndexes.assign(dimension - 1, 0);
+            mVerticeIndexes.assign(dimension - 1, 0);
         }
         virtual ~SimplexConnector() noexcept {}
 
@@ -36,12 +36,12 @@ namespace HDV::Hull
 
             uint hashCode = 31;
 
-            auto vs = face->GetVertices();
+            auto vs = face->Vertices;
             for (auto i = 0, c = 0; i < dim; i++)
             {
                 if (i != edgeIndex)
                 {
-                    int v = vs[i].GetId();
+                    int v = vs[i]->GetId();
                     mVerticeIndexes[c++] = v;
                     hashCode += 23 * hashCode + (uint)v;
                 }
@@ -74,8 +74,8 @@ namespace HDV::Hull
             const std::shared_ptr<SimplexConnector<VERTEX>> &a,
             const std::shared_ptr<SimplexConnector<VERTEX>> &b)
         {
-            a->GetFace()->GetAdjacentFaces()[a->GetEdgeIndex()] = b->GetFace();
-            b->GetFace()->GetAdjacentFaces()[b->GetEdgeIndex()] = a->GetFace();
+            a->GetFace()->AdjacentFaces[a->GetEdgeIndex()] = b->GetFace();
+            b->GetFace()->AdjacentFaces[b->GetEdgeIndex()] = a->GetFace();
         }
 
         void ToString()
