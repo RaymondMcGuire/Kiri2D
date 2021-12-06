@@ -28,11 +28,13 @@ namespace HDV::Hull
             UpdateBuffer.assign(dimension, std::make_shared<SimplexWrap<VERTEX>>());
             UpdateIndices.assign(dimension, -1);
 
-           ObjManager = std::make_shared<ObjectManager<VERTEX>>(dimension);
+            ObjManager = std::make_shared<ObjectManager<VERTEX>>(dimension);
             EmptyBuffer = std::make_shared<VertexBuffer<VERTEX>>();
             BeyondBuffer = std::make_shared<VertexBuffer<VERTEX>>();
 
-            ConnectorTable.assign(CONNECTOR_TABLE_SIZE, std::make_shared <ConnectorList<VERTEX>>());
+            UnprocessedFaces = std::make_shared<SimplexList<VERTEX>>();
+
+            ConnectorTable.assign(CONNECTOR_TABLE_SIZE, std::make_shared<ConnectorList<VERTEX>>());
         }
 
         virtual ~ObjectBuffer() noexcept {}

@@ -39,7 +39,7 @@ namespace HDV::Primitives
         bool GetNormalFlipped() const { return mIsNormalFlipped; }
 
         std::vector<float> GetNormals() { return mNormal; }
-        const std::vector<VERTEX> &GetVertices() { return mVertices; }
+        const std::vector<VERTEX> &Vertices { return mVertices; }
         const std::vector<std::shared_ptr<Simplex<VERTEX>>> &GetAdjacent() { return mAdjacent; }
 
         void SetTag(int tag) { mTag = tag; }
@@ -124,7 +124,7 @@ namespace HDV::Primitives
         {
 
             auto lv = mVertices;
-            auto rv = simplex.GetVertices();
+            auto rv = simplex.Vertices;
 
             auto i = 0;
             auto dim = mDimension;

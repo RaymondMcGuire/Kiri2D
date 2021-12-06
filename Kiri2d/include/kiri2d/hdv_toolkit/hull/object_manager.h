@@ -59,8 +59,7 @@ namespace HDV::Hull
 
         void DepositConnector(const std::shared_ptr<SimplexConnector<VERTEX>> &connector)
         {
-            auto faces = connector->GetFace();
-            faces = nullptr;
+            connector->Face = nullptr;
             connector->Prev.reset();
             connector->Next = nullptr;
             mConnectorStack.push(connector);

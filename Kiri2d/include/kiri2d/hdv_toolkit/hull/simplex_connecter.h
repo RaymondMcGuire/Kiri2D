@@ -22,16 +22,19 @@ namespace HDV::Hull
         explicit SimplexConnector() : Next{nullptr}, Prev{} {}
         explicit SimplexConnector(int dimension) : Next{nullptr}, Prev{}
         {
-            mVerticeIndexes.assign(dimension - 1, 0);
+            VerticeIndexes.assign(dimension - 1, 0);
         }
         virtual ~SimplexConnector() noexcept {}
 
         std::shared_ptr<SimplexConnector<VERTEX>> Next;
         std::weak_ptr<SimplexConnector<VERTEX>> Prev;
 
+        std::shared_ptr<SimplexWrap<VERTEX>> Face;
+        std::vector<int> VerticeIndexes;
+
         void Update(const std::shared_ptr<SimplexWrap<VERTEX>> &face, int edgeIndex, int dim)
         {
-            mFace = face;
+            Face = face;
             mEdgeIndex = edgeIndex;
 
             uint hashCode = 31;
@@ -42,7 +45,7 @@ namespace HDV::Hull
                 if (i != edgeIndex)
                 {
                     int v = vs[i]->GetId();
-                    mVerticeIndexes[c++] = v;
+                    VerticeIndexes[c++] = v;
                     hashCode += 23 * hashCode + (uint)v;
                 }
             }
@@ -59,11 +62,9 @@ namespace HDV::Hull
                 return false;
 
             auto n = dim - 1;
-            auto av = a->GetVerticeIndexes();
-            auto bv = b->GetVerticeIndexes();
             for (auto i = 0; i < n; i++)
             {
-                if (av[i] != bv[i])
+                if (a->VerticeIndexes[i] != b->VerticeIndexes[i])
                     return false;
             }
 
@@ -74,8 +75,8 @@ namespace HDV::Hull
             const std::shared_ptr<SimplexConnector<VERTEX>> &a,
             const std::shared_ptr<SimplexConnector<VERTEX>> &b)
         {
-            a->GetFace()->AdjacentFaces[a->GetEdgeIndex()] = b->GetFace();
-            b->GetFace()->AdjacentFaces[b->GetEdgeIndex()] = a->GetFace();
+            a->Face->AdjacentFaces[a->GetEdgeIndex()] = b->Face;
+            b->Face->AdjacentFaces[b->GetEdgeIndex()] = a->Face;
         }
 
         void ToString()
@@ -89,14 +90,10 @@ namespace HDV::Hull
 
         uint GetHashCode() const { return mHashCode; }
         int GetEdgeIndex() const { return mEdgeIndex; }
-        const std::shared_ptr<SimplexWrap<VERTEX>> &GetFace() { return mFace; }
-        const std::vector<int> &GetVerticeIndexes() { return mVerticeIndexes; }
 
     private:
         uint mHashCode = -1;
         int mEdgeIndex = -1;
-        std::shared_ptr<SimplexWrap<VERTEX>> mFace;
-        std::vector<int> mVerticeIndexes;
     };
 
 } // namespace HDV::Hull

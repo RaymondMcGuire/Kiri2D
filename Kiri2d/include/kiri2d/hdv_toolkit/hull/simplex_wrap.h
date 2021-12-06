@@ -28,6 +28,7 @@ namespace HDV::Hull
             Vertices.assign(dimension, VERTEX());
             AdjacentFaces.assign(dimension, std::make_shared<SimplexWrap<VERTEX>>());
             BeyondList = beyondList;
+            VerticesBeyond = std::make_shared<VertexBuffer<VERTEX>>();
         }
         virtual ~SimplexWrap() noexcept {}
 
@@ -37,18 +38,18 @@ namespace HDV::Hull
         float Offset = 0.f;
         bool IsNormalFlipped = false;
 
+        bool GetInList() const { return mInList; }
+        void SetInList(bool il) { mInList = il; }
+
+        int GetTag() const { return mTag; }
+        void SetTag(int tag) { mTag = tag; }
+
         std::vector<float> Normals;
         std::vector<VERTEX> Vertices;
         VERTEX FurthestVertex;
         std::shared_ptr<VertexBuffer<VERTEX>> BeyondList;
         std::shared_ptr<VertexBuffer<VERTEX>> VerticesBeyond;
         std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> AdjacentFaces;
-
-        bool GetInList() const { return mInList; }
-        void SetInList(bool il) { mInList = il; }
-
-        int GetTag() const { return mTag; }
-        void SetTag(int tag) { mTag = tag; }
 
         void ToString()
         {

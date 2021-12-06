@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-01 18:54:58
- * @LastEditTime: 2021-12-01 18:54:59
+ * @LastEditTime: 2021-12-06 21:16:10
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -57,6 +57,6 @@ namespace HDV::Primitives
                 data += ",";
         }
 
-        KIRI_LOG_DEBUG("[Vertex: Dimension={0},  Data={1}]", dim, data);
+        KIRI_LOG_DEBUG("[Vertex: Id={0}, Dimension={1},  Data={2}]", mId, dim, data);
     }
 }

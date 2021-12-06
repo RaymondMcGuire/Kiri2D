@@ -48,6 +48,8 @@ namespace HDV::Hull
             if (!face->GetInList())
                 return;
 
+            face->ToString();
+
             face->SetInList(false);
 
             if (face->Prev.lock() != nullptr)
@@ -89,11 +91,14 @@ namespace HDV::Hull
 
             face->SetInList(true);
 
-            if (First != nullptr && First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount())
+            if (First != nullptr)
             {
-                First->Prev = face;
-                face->Next = First;
-                First = face;
+                if (First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount())
+                {
+                    First->Prev = face;
+                    face->Next = First;
+                    First = face;
+                }
             }
             else
             {
