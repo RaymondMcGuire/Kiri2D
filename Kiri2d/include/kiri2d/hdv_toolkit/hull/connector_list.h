@@ -45,6 +45,8 @@ namespace HDV::Hull
         void Remove(const std::shared_ptr<SimplexConnector<VERTEX>> &connector)
         {
 
+            // KIRI_LOG_DEBUG("Connector list prev={0}; next={1}", connector->Prev.lock() == nullptr ? "null" : "has value", connector->Next == nullptr ? "null" : "has value");
+
             if (connector->Prev.lock() != nullptr)
             {
                 std::shared_ptr<SimplexConnector<VERTEX>> prev{connector->Prev};
@@ -62,8 +64,14 @@ namespace HDV::Hull
             }
             else if (connector->Next == nullptr)
             {
-                std::shared_ptr<SimplexConnector<VERTEX>> prev{connector->Prev};
-                Last = prev;
+
+                if (connector->Prev.lock() == nullptr)
+                    Last = nullptr;
+                else
+                {
+                    std::shared_ptr<SimplexConnector<VERTEX>> prev{connector->Prev};
+                    Last = prev;
+                }
             }
 
             connector->Next = nullptr;

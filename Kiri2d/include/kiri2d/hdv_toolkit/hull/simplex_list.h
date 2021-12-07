@@ -48,7 +48,7 @@ namespace HDV::Hull
             if (!face->GetInList())
                 return;
 
-            face->ToString();
+            // face->ToString();
 
             face->SetInList(false);
 
@@ -69,8 +69,13 @@ namespace HDV::Hull
             }
             else if (face->Next == nullptr)
             {
-                std::shared_ptr<SimplexWrap<VERTEX>> prev{face->Prev};
-                Last = prev;
+                if (face->Prev.lock() == nullptr)
+                    Last = nullptr;
+                else
+                {
+                    std::shared_ptr<SimplexWrap<VERTEX>> prev{face->Prev};
+                    Last = prev;
+                }
             }
 
             face->Next = nullptr;
@@ -91,14 +96,13 @@ namespace HDV::Hull
 
             face->SetInList(true);
 
-            if (First != nullptr)
+            if (First != nullptr && (First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount()))
             {
-                if (First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount())
-                {
+     
                     First->Prev = face;
                     face->Next = First;
                     First = face;
-                }
+                
             }
             else
             {

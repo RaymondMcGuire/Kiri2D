@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-01 18:20:37
- * @LastEditTime: 2021-12-05 20:19:17
+ * @LastEditTime: 2021-12-07 17:39:25
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -39,10 +39,24 @@ namespace HDV::Primitives
         const std::vector<float> &GetPosition() { return mPosition; }
 
         void ToString();
+        std::string GetString()
+        {
+
+            auto dim = GetDimension();
+            std::string data = "";
+            for (auto i = 0; i < dim; i++)
+            {
+                data += std::to_string(mPosition[i]);
+                if (i != dim - 1)
+                    data += ",";
+            }
+
+            return "[Vertex: Id=" + std::to_string(mId) + ",Tag=" + std::to_string(mTag) + ", Dimension=" + std::to_string(dim) + ",Data=" + data + "]";
+        }
 
     protected:
         int mId = -1;
-        int mTag = -1;
+        int mTag = 0;
         std::vector<float> mPosition;
     };
     typedef std::shared_ptr<Vertex> VertexPtr;

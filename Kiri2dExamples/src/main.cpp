@@ -2506,33 +2506,40 @@ void VertexUnitTest()
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     auto scale_size = 5.f;
-    auto sampler_num = 10;
+    auto sampler_num = 100;
     std::vector<Primitives::Vertex2Ptr> vet2;
 
-    // for (auto i = 0; i < sampler_num; i++)
-    // {
-    //     auto x = dist(rndEngine) * scale_size;
-    //     auto y = dist(rndEngine) * scale_size;
+    for (auto i = 0; i < sampler_num; i++)
+    {
+        auto x = dist(rndEngine) * scale_size;
+        auto y = dist(rndEngine) * scale_size;
 
-    //     auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
-    //     vet2.emplace_back(v2);
+        auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
+        vet2.emplace_back(v2);
 
-    //     KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
-    // }
+        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
+    }
 
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(4.6715307, 2.5505395, 0));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-4.9892583, -1.5255227, 1));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(1.4531809, -4.9331055, 2));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(0.4634899, -1.3972437, 3));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-3.0476081, -4.6106977, 4));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-3.6189432, 0.12869358, 5));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(1.9193274, 1.04132, 6));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(0.77592254, -2.669198, 7));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(3.280847, 3.6487885, 8));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-1.3492205, 2.2913957, 9));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(4.6715307, 2.5505395, 0));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-4.9892583, -1.5255227, 1));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(1.4531809, -4.9331055, 2));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(0.4634899, -1.3972437, 3));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-3.0476081, -4.6106977, 4));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-3.6189432, 0.12869358, 5));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(1.9193274, 1.04132, 6));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(0.77592254, -2.669198, 7));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(3.280847, 3.6487885, 8));
+    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-1.3492205, 2.2913957, 9));
 
     auto cv2 = std::make_shared<Hull::ConvexHull2>();
     cv2->Generate(vet2);
+
+    auto res2 = cv2->GetSimplexs();
+
+    for (size_t i = 0; i < res2.size(); i++)
+    {
+        KIRI_LOG_DEBUG("({0},{1})-({2},{3})", res2[i]->Vertices[0]->X(), res2[i]->Vertices[0]->Y(), res2[i]->Vertices[1]->X(), res2[i]->Vertices[1]->Y());
+    }
 }
 
 int main()

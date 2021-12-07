@@ -75,6 +75,7 @@ namespace HDV::Hull
             const std::shared_ptr<SimplexConnector<VERTEX>> &a,
             const std::shared_ptr<SimplexConnector<VERTEX>> &b)
         {
+            // KIRI_LOG_DEBUG("a edge index={0}; b edge index={1}", a->GetEdgeIndex(), b->GetEdgeIndex());
             a->Face->AdjacentFaces[a->GetEdgeIndex()] = b->Face;
             b->Face->AdjacentFaces[b->GetEdgeIndex()] = a->Face;
         }
@@ -86,6 +87,8 @@ namespace HDV::Hull
                            mEdgeIndex,
                            Prev.lock() == nullptr ? "null" : std::to_string(Prev.lock()->GetHashCode()),
                            Next == nullptr ? "null" : std::to_string(Next->GetHashCode()));
+
+            Face->ToString();
         }
 
         uint GetHashCode() const { return mHashCode; }

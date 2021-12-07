@@ -64,64 +64,67 @@ namespace HDV::Hull
 
             InitConvexHull();
 
-            // // Expand the convex hull and faces.
-            // while (mBuffer->UnprocessedFaces->First != nullptr)
-            // {
-            //     mBuffer->CurrentVertex = mBuffer->UnprocessedFaces->First->FurthestVertex;
+            // Expand the convex hull and faces.
+            while (mBuffer->UnprocessedFaces->First != nullptr)
+            {
+                mBuffer->CurrentVertex = mBuffer->UnprocessedFaces->First->FurthestVertex;
 
-            //     UpdateCenter();
+                // mBuffer->UnprocessedFaces->ToString();
 
-            //     // The affected faces get tagged
-            //     TagAffectedFaces(mBuffer->UnprocessedFaces->First);
+                // mBuffer->CurrentVertex->ToString();
 
-            //     // Create the cone from the currentVertex and the affected faces horizon.
-            //     if ((mBuffer->SingularVertices.find(mBuffer->CurrentVertex) == mBuffer->SingularVertices.end()) && CreateCone())
-            //         CommitCone();
-            //     else
-            //         HandleSingular();
+                UpdateCenter();
 
-            //     // Need to reset the tags
-            //     auto count = mBuffer->AffectedFaceBuffer.size();
-            //     for (auto i = 0; i < count; i++)
-            //         mBuffer->AffectedFaceBuffer[i]->SetTag(0);
-            // }
+                // KIRI_LOG_DEBUG("centroid={0},{1}", mCentroid[0], mCentroid[1]);
 
-            // for (auto i = 0; i < mBuffer->ConvexSimplexs.size(); i++)
-            // {
-            //     auto wrap = mBuffer->ConvexSimplexs[i];
-            //     wrap->SetTag(i);
+                // The affected faces get tagged
+                TagAffectedFaces(mBuffer->UnprocessedFaces->First);
 
-            //     mSimplexs.emplace_back(std::make_shared<HDV::Primitives::Simplex<VERTEX>>(i, mDimension));
-            // }
+                // mBuffer->UnprocessedFaces->First->ToString();
 
-            // for (auto i = 0; i < mBuffer->ConvexSimplexs.size(); i++)
-            // {
+                // Create the cone from the currentVertex and the affected faces horizon.
+                if ((mBuffer->SingularVertices.find(mBuffer->CurrentVertex) == mBuffer->SingularVertices.end()) && CreateCone())
+                    CommitCone();
+                else
+                    HandleSingular();
 
-            //     auto wrap = mBuffer->ConvexSimplexs[i];
-            //     auto simplex = mSimplexs[i];
+                // Need to reset the tags
+                auto count = mBuffer->AffectedFaceBuffer.size();
 
-            //     simplex->SetNormalFlipped(wrap->IsNormalFlipped);
-            //     simplex->SetOffset(wrap->Offset);
+                for (auto i = 0; i < count; i++)
+                    mBuffer->AffectedFaceBuffer[i]->SetTag(0);
+            }
 
-            //     for (auto j = 0; j < mDimension; j++)
-            //     {
-            //         auto normals = simplex->Normals;
-            //         auto vertices = simplex->Vertices;
-            //         normals[j] = wrap->Normals[j];
-            //         vertices[j] = wrap->Vertices[j];
+            for (auto i = 0; i < mBuffer->ConvexSimplexs.size(); i++)
+            {
+                mBuffer->ConvexSimplexs[i]->SetTag(i);
+                mSimplexs.emplace_back(std::make_shared<HDV::Primitives::Simplex<VERTEX>>(i, mDimension));
+            }
 
-            //         auto adjacent_faces = simplex->GetAdjacent();
-            //         if (wrap->AdjacentFaces[j] != nullptr)
-            //             adjacent_faces[j] = mSimplexs[wrap->AdjacentFaces[j]->GetTag()];
-            //         else
-            //             adjacent_faces[j] = nullptr;
-            //     }
+            for (auto i = 0; i < mBuffer->ConvexSimplexs.size(); i++)
+            {
 
-            //     simplex->CalculateCentroid();
-            // }
+                auto wrap = mBuffer->ConvexSimplexs[i];
 
-            // mBuffer->Clear();
-            // mBuffer = nullptr;
+                mSimplexs[i]->SetNormalFlipped(wrap->IsNormalFlipped);
+                mSimplexs[i]->SetOffset(wrap->Offset);
+
+                for (auto j = 0; j < mDimension; j++)
+                {
+                    mSimplexs[i]->Normals[j] = wrap->Normals[j];
+                    mSimplexs[i]->Vertices[j] = wrap->Vertices[j];
+
+                    if (wrap->AdjacentFaces[j] != nullptr)
+                        mSimplexs[i]->Adjacent[j] = mSimplexs[wrap->AdjacentFaces[j]->GetTag()];
+                    else
+                        mSimplexs[i]->Adjacent[j] = nullptr;
+                }
+
+                mSimplexs[i]->CalculateCentroid();
+            }
+
+            mBuffer->Clear();
+            mBuffer = nullptr;
         }
 
         /// <summary>
@@ -137,6 +140,8 @@ namespace HDV::Hull
                 {
                     mBuffer->MaxDistance = distance;
                     mBuffer->FurthestVertex = v;
+                    // mBuffer->FurthestVertex->ToString();
+                    // KIRI_LOG_DEBUG("-------IsBeyond Finish-------");
                 }
 
                 beyondVertices->Add(v);
@@ -401,7 +406,7 @@ namespace HDV::Hull
             if (centerDistance > 0)
             {
                 for (auto i = 0; i < mDimension; i++)
-                    normal[i] = -normal[i];
+                    face->Normals[i] = -face->Normals[i];
 
                 face->Offset = offset;
                 face->IsNormalFlipped = true;
@@ -463,17 +468,18 @@ namespace HDV::Hull
         /// </summary>
         void FindBeyondVertices(const std::shared_ptr<SimplexWrap<VERTEX>> &face)
         {
-            auto beyondVertices = face->VerticesBeyond;
-
             mBuffer->MaxDistance = -std::numeric_limits<float>::infinity();
             mBuffer->FurthestVertex = nullptr;
 
             auto count = mBuffer->InputVertices.size();
 
             for (auto i = 0; i < count; i++)
-                IsBeyond(face, beyondVertices, mBuffer->InputVertices[i]);
+                IsBeyond(face, face->VerticesBeyond, mBuffer->InputVertices[i]);
 
             face->FurthestVertex = mBuffer->FurthestVertex;
+
+            // if (face->FurthestVertex != nullptr)
+            //     face->FurthestVertex->ToString();
         }
 
         /// <summary>
@@ -483,13 +489,6 @@ namespace HDV::Hull
         {
             auto extremes = FindExtremes();
             auto initialPoints = FindInitialPoints(extremes);
-
-            KIRI_LOG_DEBUG("extreme size={0}", extremes.size());
-            for (size_t i = 0; i < extremes.size(); i++)
-            {
-                extremes[i]->ToString();
-            }
-
             auto numPoints = initialPoints.size();
 
             // Add the initial points to the convex hull.
@@ -505,7 +504,6 @@ namespace HDV::Hull
                                                             [=](const VERTEX &v)
                                                             { return (initialPoints[i]->GetId() == v->GetId()); }),
                                              mBuffer->InputVertices.end());
-                // mBuffer->InputVertices.remove(initialPoints[i]);
 
                 // Because of the AklTou heuristic.
                 //! TODO need check
@@ -521,15 +519,26 @@ namespace HDV::Hull
 
             auto numFaces = faces.size();
 
+            // for (size_t idx = 0; idx < numFaces; idx++)
+            // {
+            //     faces[idx]->ToString();
+            // }
+            // KIRI_LOG_DEBUG("----");
+
             // Init the vertex beyond buffers.
             for (auto i = 0; i < numFaces; i++)
             {
                 FindBeyondVertices(faces[i]);
+
                 if (faces[i]->VerticesBeyond->GetCount() == 0)
                     mBuffer->ConvexSimplexs.emplace_back(faces[i]); // The face is on the hull
                 else
                     mBuffer->UnprocessedFaces->Add(faces[i]);
+
+                // faces[i]->ToString();
             }
+
+            // mBuffer->UnprocessedFaces->ToString();
         }
 
 #pragma endregion Initilization
@@ -556,6 +565,8 @@ namespace HDV::Hull
             mBuffer->TraverseStack.push(currentFace);
             currentFace->SetTag(1);
 
+            // KIRI_LOG_DEBUG("travse top tag={0}", mBuffer->TraverseStack.top()->GetTag());
+
             while (mBuffer->TraverseStack.size() > 0)
             {
                 auto top = mBuffer->TraverseStack.top();
@@ -577,7 +588,7 @@ namespace HDV::Hull
                     }
                 }
 
-                KIRI_LOG_DEBUG("adjFace-----: traverse size={0}", mBuffer->TraverseStack.size());
+                // KIRI_LOG_DEBUG("adjFace-----: traverse size={0}", mBuffer->TraverseStack.size());
             }
         }
 
@@ -604,7 +615,7 @@ namespace HDV::Hull
 
                     if (af->GetTag() == 0) // Tag == 0 when oldFaces does not contain af
                     {
-                        mBuffer->UpdateBuffer[updateCount] = oldFace->AdjacentFaces[i];
+                        mBuffer->UpdateBuffer[updateCount] = mBuffer->AffectedFaceBuffer[fIndex]->AdjacentFaces[i];
                         mBuffer->UpdateIndices[updateCount] = i;
                         ++updateCount;
                     }
@@ -612,15 +623,15 @@ namespace HDV::Hull
 
                 for (auto i = 0; i < updateCount; i++)
                 {
-                    auto adjacentFace = mBuffer->UpdateBuffer[i];
+                    // auto adjacentFace = mBuffer->UpdateBuffer[i];
 
                     auto oldFaceAdjacentIndex = 0;
-                    auto adjFaceAdjacency = adjacentFace->AdjacentFaces;
+                    // auto adjFaceAdjacency = adjacentFace->AdjacentFaces;
 
                     for (auto j = 0; j < mDimension; j++)
                     {
                         //! TODO
-                        if (oldFace == adjFaceAdjacency[j])
+                        if (mBuffer->AffectedFaceBuffer[fIndex] == mBuffer->UpdateBuffer[i]->AdjacentFaces[j])
                         {
                             oldFaceAdjacentIndex = j;
                             break;
@@ -634,7 +645,7 @@ namespace HDV::Hull
                     auto vertices = newFace->Vertices;
 
                     for (auto j = 0; j < mDimension; j++)
-                        vertices[j] = oldFace->Vertices[j];
+                        vertices[j] = mBuffer->AffectedFaceBuffer[fIndex]->Vertices[j];
 
                     auto oldVertexIndex = vertices[forbidden]->GetId();
 
@@ -678,9 +689,16 @@ namespace HDV::Hull
                         return false;
                     }
 
-                    mBuffer->ConeFaceBuffer.emplace_back(MakeDeferredFace(newFace, orderedPivotIndex, adjacentFace, oldFaceAdjacentIndex, oldFace));
+                    mBuffer->ConeFaceBuffer.emplace_back(MakeDeferredFace(newFace, orderedPivotIndex, mBuffer->UpdateBuffer[i], oldFaceAdjacentIndex, mBuffer->AffectedFaceBuffer[fIndex]));
                 }
             }
+
+            // KIRI_LOG_DEBUG("----Create Cone----");
+            // for (size_t i = 0; i < mBuffer->ConeFaceBuffer.size(); i++)
+            // {
+            //     KIRI_LOG_DEBUG("----First SimplexWrap----");
+            //     mBuffer->ConeFaceBuffer[i]->Face->ToString();
+            // }
 
             return true;
         }
@@ -713,55 +731,73 @@ namespace HDV::Hull
 
         void CommitCone()
         {
-            // Add the current vertex.
+
+            // KIRI_LOG_DEBUG("---CommitCone--");
+            //  Add the current vertex.
             mVertices.emplace_back(mBuffer->CurrentVertex);
 
             // Fill the adjacency.
             for (auto i = 0; i < mBuffer->ConeFaceBuffer.size(); i++)
             {
-                auto face = mBuffer->ConeFaceBuffer[i];
+                // auto face = mBuffer->ConeFaceBuffer[i];
 
-                auto newFace = face->Face;
-                auto adjacentFace = face->Pivot;
-                auto oldFace = face->OldFace;
-                auto orderedPivotIndex = face->FaceIndex;
+                // auto newFace = face->Face;
+                // auto adjacentFace = face->Pivot;
+                // auto oldFace = face->OldFace;
+                auto orderedPivotIndex = mBuffer->ConeFaceBuffer[i]->FaceIndex;
 
                 mBuffer->ConeFaceBuffer[i]->Face->AdjacentFaces[orderedPivotIndex] = mBuffer->ConeFaceBuffer[i]->Pivot;
 
-                mBuffer->ConeFaceBuffer[i]->Pivot->AdjacentFaces[face->PivotIndex] = mBuffer->ConeFaceBuffer[i]->Face;
+                mBuffer->ConeFaceBuffer[i]->Pivot->AdjacentFaces[mBuffer->ConeFaceBuffer[i]->PivotIndex] = mBuffer->ConeFaceBuffer[i]->Face;
 
-                // let there be a connection.
+                // KIRI_LOG_DEBUG("---Face->AdjacentFaces[orderedPivotIndex]---");
+                // mBuffer->ConeFaceBuffer[i]->Face->AdjacentFaces[orderedPivotIndex]->ToString();
+
+                // KIRI_LOG_DEBUG("---orderedPivotIndex={0}---", orderedPivotIndex);
+                //  let there be a connection.
                 for (auto j = 0; j < mDimension; j++)
                 {
                     if (j == orderedPivotIndex)
                         continue;
                     auto connector = mBuffer->ObjManager->GetConnector();
-                    connector->Update(newFace, j, mDimension);
+                    connector->Update(mBuffer->ConeFaceBuffer[i]->Face, j, mDimension);
+                    // connector->ToString();
+
                     ConnectFace(connector);
                 }
 
-                // This could slightly help...
-                if (adjacentFace->VerticesBeyond->GetCount() < oldFace->VerticesBeyond->GetCount())
+                // KIRI_LOG_DEBUG("(1)newFace->VerticesBeyond->GetCount()={0}", mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond->GetCount());
+                //  KIRI_LOG_DEBUG("adjacentFace->VerticesBeyond->GetCount() < oldFace->VerticesBeyond->GetCount()={0}", adjacentFace->VerticesBeyond->GetCount() < oldFace->VerticesBeyond->GetCount());
+                //   This could slightly help...
+                if (mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond->GetCount() < mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond->GetCount())
                 {
-                    FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, adjacentFace->VerticesBeyond, oldFace->VerticesBeyond);
+                    FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond, mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond);
                 }
                 else
                 {
-                    FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, oldFace->VerticesBeyond, adjacentFace->VerticesBeyond);
+                    FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond, mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond);
                 }
 
+                // KIRI_LOG_DEBUG("(xxx)newFace->VerticesBeyond->GetCount()={0}", mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond->GetCount());
+
+                // mBuffer->UnprocessedFaces->ToString();
+
                 // This face will definitely lie on the hull
-                if (newFace->VerticesBeyond->GetCount() == 0)
+                if (mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond->GetCount() == 0)
                 {
                     mBuffer->ConvexSimplexs.emplace_back(mBuffer->ConeFaceBuffer[i]->Face);
                     mBuffer->UnprocessedFaces->Remove(mBuffer->ConeFaceBuffer[i]->Face);
-                    mBuffer->ObjManager->DepositVertexBuffer(newFace->VerticesBeyond);
+                    mBuffer->ObjManager->DepositVertexBuffer(mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond);
 
                     mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond = mBuffer->EmptyBuffer;
                 }
                 else // Add the face to the list
                 {
+                    // KIRI_LOG_DEBUG("unprocessed face add!!!!!");
+                    // mBuffer->ConeFaceBuffer[i]->Face->ToString();
                     mBuffer->UnprocessedFaces->Add(mBuffer->ConeFaceBuffer[i]->Face);
+
+                    // mBuffer->UnprocessedFaces->ToString();
                 }
 
                 // recycle the object.
@@ -827,7 +863,7 @@ namespace HDV::Hull
                 v = beyond->GetItem(i);
 
                 //! TODO
-                if (v == mBuffer->CurrentVertex)
+                if (v->GetId() == mBuffer->CurrentVertex->GetId())
                     continue;
 
                 v->SetTag(0);
@@ -846,7 +882,7 @@ namespace HDV::Hull
 
             // Pull the old switch a roo
             auto temp = face->VerticesBeyond;
-            temp = beyondVertices;
+            face->VerticesBeyond = beyondVertices;
             if (temp->GetCount() > 0)
                 temp->Clear();
             mBuffer->BeyondBuffer = temp;
@@ -858,29 +894,33 @@ namespace HDV::Hull
 
         void HandleSingular()
         {
+            KIRI_LOG_DEBUG("---HandleSingular--");
+
             RollbackCenter();
             mBuffer->SingularVertices.insert(mBuffer->CurrentVertex);
 
             // This means that all the affected faces must be on the hull and that all their "vertices beyond" are singular.
             for (auto fIndex = 0; fIndex < mBuffer->AffectedFaceBuffer.size(); fIndex++)
             {
-                auto face = mBuffer->AffectedFaceBuffer[fIndex];
-                auto vb = face->VerticesBeyond;
-                for (auto i = 0; i < vb->GetCount(); i++)
+                for (auto i = 0; i < mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond->GetCount(); i++)
                 {
-                    mBuffer->SingularVertices.insert(vb->GetItem(i));
+                    mBuffer->SingularVertices.insert(mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond->GetItem(i));
                 }
 
-                mBuffer->ConvexSimplexs.emplace_back(face);
-                mBuffer->UnprocessedFaces->Remove(face);
-                mBuffer->ObjManager->DepositVertexBuffer(face->VerticesBeyond);
+                mBuffer->ConvexSimplexs.emplace_back(mBuffer->AffectedFaceBuffer[fIndex]);
+                mBuffer->UnprocessedFaces->Remove(mBuffer->AffectedFaceBuffer[fIndex]);
+                mBuffer->ObjManager->DepositVertexBuffer(mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond);
 
-                auto vb2 = face->VerticesBeyond;
-                vb2 = mBuffer->EmptyBuffer;
+                mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond = mBuffer->EmptyBuffer;
             }
         }
 
 #pragma endregion Process
+
+        std::vector<std::shared_ptr<HDV::Primitives::Simplex<VERTEX>>> GetSimplexs()
+        {
+            return mSimplexs;
+        }
 
     private:
         const float PLANE_DISTANCE_TOLERANCE = 1e-7f;

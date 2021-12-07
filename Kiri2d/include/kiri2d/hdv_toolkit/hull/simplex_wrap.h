@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-02 00:36:23
- * @LastEditTime: 2021-12-06 12:49:19
+ * @LastEditTime: 2021-12-07 17:13:30
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -53,15 +53,25 @@ namespace HDV::Hull
 
         void ToString()
         {
-            KIRI_LOG_DEBUG("Tag = {0}, InList = {1}, Prev tag = {2}, Next tag = {3}",
+            std::string vert_data = "";
+            for (size_t i = 0; i < Vertices.size(); i++)
+            {
+                vert_data += Vertices[i]->GetString();
+                // vert_data += std::to_string(Vertices[i]->GetId()) + ":(" + std::to_string(Vertices[i]->GetPosition()[0]) + "," + std::to_string(Vertices[i]->GetPosition()[1]) + "); ";
+            }
+
+            KIRI_LOG_DEBUG("Tag = {0}, InList = {1}, Prev tag = {2}, Next tag = {3}; Verts={4}; Normal={5},{6}; Offset={7}; IsNormalFlipped={8}, FurthestVertex={9}",
                            mTag,
                            mInList,
                            Prev.lock() == nullptr ? "null" : std::to_string(Prev.lock()->GetTag()),
-                           Next == nullptr ? "null" : std::to_string(Next->GetTag()));
+                           Next == nullptr ? "null" : std::to_string(Next->GetTag()),
+                           vert_data,
+                           Normals[0], Normals[1], Offset, IsNormalFlipped,
+                           FurthestVertex == nullptr ? "null" : FurthestVertex->GetString());
         }
 
     private:
-        int mTag = -1;
+        int mTag = 0;
         bool mInList = false;
     };
 

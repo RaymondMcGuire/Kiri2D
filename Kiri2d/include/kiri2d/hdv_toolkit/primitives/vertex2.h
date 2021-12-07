@@ -1,11 +1,10 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-01 19:04:56
- * @LastEditTime: 2021-12-01 19:05:44
+ * @LastEditTime: 2021-12-08 04:30:29
  * @LastEditors: Xu.WANG
  * @Description:
  */
-
 #ifndef _HDV_VERTEX2_H_
 #define _HDV_VERTEX2_H_
 
@@ -50,6 +49,9 @@ namespace HDV::Primitives
 
             return x * x + y * y;
         }
+
+        float X() const { return mPosition[0]; }
+        float Y() const { return mPosition[1]; }
     };
     typedef std::shared_ptr<Vertex2> Vertex2Ptr;
 } // namespace HDV::Primitives

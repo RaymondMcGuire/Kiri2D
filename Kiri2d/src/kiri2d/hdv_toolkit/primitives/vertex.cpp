@@ -57,6 +57,6 @@ namespace HDV::Primitives
                 data += ",";
         }
 
-        KIRI_LOG_DEBUG("[Vertex: Id={0}, Dimension={1},  Data={2}]", mId, dim, data);
+        KIRI_LOG_DEBUG("[Vertex: Id={0}, Dimension={1},  Data={2}, Tag={3}]", mId, dim, data, std::to_string(mTag));
     }
 }
