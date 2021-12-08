@@ -15,7 +15,7 @@
 
 namespace HDV::Voronoi
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class VoronoiMesh
     {
     public:
@@ -32,7 +32,7 @@ namespace HDV::Voronoi
             Regions.clear();
         }
 
-        virtual void Generate(std::vector<VERTEX> input, const std::shared_ptr<DelaunayTriangulation<VERTEX>> &delaunay, bool assignIds = true, bool checkInput = false)
+        virtual void Generate(std::vector<VERTEXPTR> input, const std::shared_ptr<DelaunayTriangulation<VERTEXPTR>> &delaunay, bool assignIds = true, bool checkInput = false)
         {
             Clear();
 
@@ -50,19 +50,19 @@ namespace HDV::Voronoi
             //     Cells.Add(delaunay->Cells[i]);
             // }
 
-            // List<DelaunayCell<VERTEX>> cells = new List<DelaunayCell<VERTEX>>();
-            // Dictionary<int, DelaunayCell<VERTEX>> neighbourCell = new Dictionary<int, DelaunayCell<VERTEX>>();
+            // List<DelaunayCell<VERTEXPTR>> cells = new List<DelaunayCell<VERTEXPTR>>();
+            // Dictionary<int, DelaunayCell<VERTEXPTR>> neighbourCell = new Dictionary<int, DelaunayCell<VERTEXPTR>>();
 
             // for (int i = 0; i < delaunay.Vertices.Count; i++)
             // {
 
             //     cells.Clear();
 
-            //     VERTEX vertex = delaunay.Vertices[i];
+            //     VERTEXPTR vertex = delaunay.Vertices[i];
 
             //     for (int j = 0; j < delaunay->Vertices.size(); j++)
             //     {
-            //         Simplex<VERTEX> simplex = delaunay->Cells[j].Simplex;
+            //         Simplex<VERTEXPTR> simplex = delaunay->Cells[j].Simplex;
 
             //         for (int k = 0; k < simplex.Vertices.Length; k++)
             //         {
@@ -76,7 +76,7 @@ namespace HDV::Voronoi
 
             //     if (cells.Count > 0)
             //     {
-            //         VoronoiRegion<VERTEX> region = new VoronoiRegion<VERTEX>();
+            //         VoronoiRegion<VERTEXPTR> region = new VoronoiRegion<VERTEXPTR>();
 
             //         for (int j = 0; j < cells.Count; j++)
             //         {
@@ -92,7 +92,7 @@ namespace HDV::Voronoi
 
             //         for (int j = 0; j < cells.Count; j++)
             //         {
-            //             Simplex<VERTEX> simplex = cells[j].Simplex;
+            //             Simplex<VERTEXPTR> simplex = cells[j].Simplex;
 
             //             for (int k = 0; k < simplex.Adjacent.Length; k++)
             //             {
@@ -103,7 +103,7 @@ namespace HDV::Voronoi
 
             //                 if (neighbourCell.ContainsKey(tag))
             //                 {
-            //                     VoronoiEdge<VERTEX> edge = new VoronoiEdge<VERTEX>(cells[j], neighbourCell[tag]);
+            //                     VoronoiEdge<VERTEXPTR> edge = new VoronoiEdge<VERTEXPTR>(cells[j], neighbourCell[tag]);
             //                     region.Edges.Add(edge);
             //                 }
             //             }

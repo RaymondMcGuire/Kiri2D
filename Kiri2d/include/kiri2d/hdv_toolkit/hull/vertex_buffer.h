@@ -14,21 +14,21 @@
 #include <kiri2d/hdv_toolkit/primitives/vertex.h>
 namespace HDV::Hull
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class VertexBuffer
     {
     public:
         explicit VertexBuffer() {}
         explicit VertexBuffer(int capacity)
         {
-            mItems.assign(capacity, VERTEX());
+            mItems.assign(capacity, VERTEXPTR());
             mCapacity = capacity;
         }
         virtual ~VertexBuffer() noexcept {}
 
         int GetCount() const { return mCount; }
         int GetCapacity() const { return mCapacity; }
-        const VERTEX &GetItem(int idx) { return mItems[idx]; }
+        const VERTEXPTR &GetItem(int idx) { return mItems[idx]; }
 
         void EnsureCapacity()
         {
@@ -38,11 +38,11 @@ namespace HDV::Hull
                     mCapacity = 4;
                 else
                     mCapacity = 2 * mCapacity;
-                mItems.resize(mCapacity, VERTEX());
+                mItems.resize(mCapacity, VERTEXPTR());
             };
         }
 
-        void Add(const VERTEX &item)
+        void Add(const VERTEXPTR &item)
         {
             EnsureCapacity();
             mItems[mCount++] = item;
@@ -66,7 +66,7 @@ namespace HDV::Hull
     private:
         int mCount = 0;
         int mCapacity = 0;
-        std::vector<VERTEX> mItems;
+        std::vector<VERTEXPTR> mItems;
     };
 } // namespace HDV::Hull
 

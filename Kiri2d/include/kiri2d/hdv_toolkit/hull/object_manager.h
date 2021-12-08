@@ -16,7 +16,7 @@
 #include <stack>
 namespace HDV::Hull
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class ObjectManager
     {
     public:
@@ -27,13 +27,13 @@ namespace HDV::Hull
 
         void Clear()
         {
-            mRecycledFaceStack = std::stack<std::shared_ptr<SimplexWrap<VERTEX>>>();
-            mConnectorStack = std::stack<std::shared_ptr<SimplexConnector<VERTEX>>>();
-            mEmptyBufferStack = std::stack<std::shared_ptr<VertexBuffer<VERTEX>>>();
-            mDeferredSimplexStack = std::stack<std::shared_ptr<DeferredSimplex<VERTEX>>>();
+            mRecycledFaceStack = std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>>();
+            mConnectorStack = std::stack<std::shared_ptr<SimplexConnector<VERTEXPTR>>>();
+            mEmptyBufferStack = std::stack<std::shared_ptr<VertexBuffer<VERTEXPTR>>>();
+            mDeferredSimplexStack = std::stack<std::shared_ptr<DeferredSimplex<VERTEXPTR>>>();
         }
 
-        void DepositFace(const std::shared_ptr<SimplexWrap<VERTEX>> &face)
+        void DepositFace(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)
         {
             face->Prev.reset();
             face->Next = nullptr;
@@ -45,7 +45,7 @@ namespace HDV::Hull
             mRecycledFaceStack.push(face);
         }
 
-        std::shared_ptr<SimplexWrap<VERTEX>> GetFace()
+        std::shared_ptr<SimplexWrap<VERTEXPTR>> GetFace()
         {
             if (mRecycledFaceStack.size() != 0)
             {
@@ -54,10 +54,10 @@ namespace HDV::Hull
                 return val;
             }
             else
-                return std::make_shared<SimplexWrap<VERTEX>>(mDimension, GetVertexBuffer());
+                return std::make_shared<SimplexWrap<VERTEXPTR>>(mDimension, GetVertexBuffer());
         }
 
-        void DepositConnector(const std::shared_ptr<SimplexConnector<VERTEX>> &connector)
+        void DepositConnector(const std::shared_ptr<SimplexConnector<VERTEXPTR>> &connector)
         {
             connector->Face = nullptr;
             connector->Prev.reset();
@@ -65,7 +65,7 @@ namespace HDV::Hull
             mConnectorStack.push(connector);
         }
 
-        std::shared_ptr<SimplexConnector<VERTEX>> GetConnector()
+        std::shared_ptr<SimplexConnector<VERTEXPTR>> GetConnector()
         {
 
             if (mConnectorStack.size() != 0)
@@ -75,16 +75,16 @@ namespace HDV::Hull
                 return val;
             }
             else
-                return std::make_shared<SimplexConnector<VERTEX>>(mDimension);
+                return std::make_shared<SimplexConnector<VERTEXPTR>>(mDimension);
         }
 
-        void DepositVertexBuffer(const std::shared_ptr<VertexBuffer<VERTEX>> &buffer)
+        void DepositVertexBuffer(const std::shared_ptr<VertexBuffer<VERTEXPTR>> &buffer)
         {
             buffer->Clear();
             mEmptyBufferStack.push(buffer);
         }
 
-        std::shared_ptr<VertexBuffer<VERTEX>> GetVertexBuffer()
+        std::shared_ptr<VertexBuffer<VERTEXPTR>> GetVertexBuffer()
         {
             if (mEmptyBufferStack.size() != 0)
             {
@@ -93,10 +93,10 @@ namespace HDV::Hull
                 return val;
             }
             else
-                return std::make_shared<VertexBuffer<VERTEX>>();
+                return std::make_shared<VertexBuffer<VERTEXPTR>>();
         }
 
-        void DepositDeferredSimplex(const std::shared_ptr<DeferredSimplex<VERTEX>> &face)
+        void DepositDeferredSimplex(const std::shared_ptr<DeferredSimplex<VERTEXPTR>> &face)
         {
             face->Face = nullptr;
             face->Pivot = nullptr;
@@ -104,7 +104,7 @@ namespace HDV::Hull
             mDeferredSimplexStack.push(face);
         }
 
-        std::shared_ptr<DeferredSimplex<VERTEX>> GetDeferredSimplex()
+        std::shared_ptr<DeferredSimplex<VERTEXPTR>> GetDeferredSimplex()
         {
             if (mDeferredSimplexStack.size() != 0)
             {
@@ -113,16 +113,16 @@ namespace HDV::Hull
                 return val;
             }
             else
-                return std::make_shared<DeferredSimplex<VERTEX>>();
+                return std::make_shared<DeferredSimplex<VERTEXPTR>>();
         }
 
     private:
         int mDimension = -1;
 
-        std::stack<std::shared_ptr<SimplexWrap<VERTEX>>> mRecycledFaceStack;
-        std::stack<std::shared_ptr<SimplexConnector<VERTEX>>> mConnectorStack;
-        std::stack<std::shared_ptr<VertexBuffer<VERTEX>>> mEmptyBufferStack;
-        std::stack<std::shared_ptr<DeferredSimplex<VERTEX>>> mDeferredSimplexStack;
+        std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>> mRecycledFaceStack;
+        std::stack<std::shared_ptr<SimplexConnector<VERTEXPTR>>> mConnectorStack;
+        std::stack<std::shared_ptr<VertexBuffer<VERTEXPTR>>> mEmptyBufferStack;
+        std::stack<std::shared_ptr<DeferredSimplex<VERTEXPTR>>> mDeferredSimplexStack;
     };
 } // namespace HDV::Hull
 

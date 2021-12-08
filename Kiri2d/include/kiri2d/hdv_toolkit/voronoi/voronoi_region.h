@@ -15,7 +15,7 @@
 
 namespace HDV::Voronoi
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class VoronoiRegion
     {
     public:

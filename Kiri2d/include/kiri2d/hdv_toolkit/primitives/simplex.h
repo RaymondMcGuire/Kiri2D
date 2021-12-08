@@ -15,7 +15,7 @@
 
 namespace HDV::Primitives
 {
-    template <typename VERTEX = Vertex>
+    template <typename VERTEXPTR = Vertex>
     class Simplex
     {
     public:
@@ -27,16 +27,16 @@ namespace HDV::Primitives
 
             mId = id;
             mDimension = dimension;
-            Vertices.assign(dimension, VERTEX());
+            Vertices.assign(dimension, VERTEXPTR());
             Normals.assign(dimension, 0.f);
             mCentroid.assign(dimension, 0.f);
-            Adjacent.assign(dimension, std::make_shared<Simplex<VERTEX>>());
+            Adjacent.assign(dimension, std::make_shared<Simplex<VERTEXPTR>>());
         }
         virtual ~Simplex() noexcept {}
 
-        std::vector<VERTEX> Vertices;
+        std::vector<VERTEXPTR> Vertices;
         std::vector<float> Normals;
-        std::vector<std::shared_ptr<Simplex<VERTEX>>> Adjacent;
+        std::vector<std::shared_ptr<Simplex<VERTEXPTR>>> Adjacent;
 
         int GetId() const { return mId; }
         int GetTag() const { return mTag; }
@@ -48,7 +48,7 @@ namespace HDV::Primitives
         void SetOffset(float offset) { mOffset = offset; }
         void SetNormalFlipped(int normal_flipped) { mIsNormalFlipped = normal_flipped; }
 
-        float Dot(VERTEX v)
+        float Dot(VERTEXPTR v)
         {
             auto dim = mDimension;
             if (v.GetDimension() != dim)
@@ -62,7 +62,7 @@ namespace HDV::Primitives
             return dp;
         }
 
-        bool Remove(const std::shared_ptr<Simplex<VERTEX>> &simplex)
+        bool Remove(const std::shared_ptr<Simplex<VERTEXPTR>> &simplex)
         {
             auto n = Adjacent.size();
 
@@ -122,7 +122,7 @@ namespace HDV::Primitives
             }
         }
 
-        void UpdateAdjacency(const std::shared_ptr<Simplex<VERTEX>> &simplex)
+        void UpdateAdjacency(const std::shared_ptr<Simplex<VERTEXPTR>> &simplex)
         {
 
             auto lv = Vertices;

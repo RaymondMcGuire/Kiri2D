@@ -14,7 +14,7 @@
 #include <kiri2d/hdv_toolkit/hull/simplex_wrap.h>
 namespace HDV::Hull
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class MathHelper
     {
     public:
@@ -44,7 +44,7 @@ namespace HDV::Hull
             return target;
         }
 
-        static void FindNormalVector4D(const std::vector<VERTEX> &vertices, std::vector<float> &normal)
+        static void FindNormalVector4D(const std::vector<VERTEXPTR> &vertices, std::vector<float> &normal)
         {
             auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
             auto y = SubtractFast(vertices[2]->GetPosition(), vertices[1]->GetPosition());
@@ -64,7 +64,7 @@ namespace HDV::Hull
             normal[3] = f * nw;
         }
 
-        static void FindNormalVector3D(const std::vector<VERTEX> &vertices, std::vector<float> &normal)
+        static void FindNormalVector3D(const std::vector<VERTEXPTR> &vertices, std::vector<float> &normal)
         {
             auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
             auto y = SubtractFast(vertices[2]->GetPosition(), vertices[1]->GetPosition());
@@ -81,7 +81,7 @@ namespace HDV::Hull
             normal[2] = f * nz;
         }
 
-        static void FindNormalVector2D(const std::vector<VERTEX> &vertices, std::vector<float> &normal)
+        static void FindNormalVector2D(const std::vector<VERTEXPTR> &vertices, std::vector<float> &normal)
         {
             auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
 
@@ -95,7 +95,7 @@ namespace HDV::Hull
             normal[1] = f * ny;
         }
 
-        static void FindNormalVector(const std::vector<VERTEX> &vertices, std::vector<float> &normalData)
+        static void FindNormalVector(const std::vector<VERTEXPTR> &vertices, std::vector<float> &normalData)
         {
             switch (vertices[0]->GetDimension())
             {
@@ -116,7 +116,7 @@ namespace HDV::Hull
         /// The vertex is "over face" if the return value is > Constants.PlaneDistanceTolerance.
         /// </summary>
         /// <returns>The vertex is "over face" if the result is positive.</returns>
-        static float GetVertexDistance(const VERTEX &v, const std::shared_ptr<SimplexWrap<VERTEX>> &f)
+        static float GetVertexDistance(const VERTEXPTR &v, const std::shared_ptr<SimplexWrap<VERTEXPTR>> &f)
         {
             auto normal = f->Normals;
             auto p = v->GetPosition();

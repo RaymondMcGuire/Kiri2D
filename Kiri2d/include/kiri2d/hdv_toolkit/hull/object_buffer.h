@@ -16,7 +16,7 @@
 #include <kiri2d/hdv_toolkit/hull/object_manager.h>
 namespace HDV::Hull
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class ObjectBuffer
     {
     public:
@@ -25,46 +25,46 @@ namespace HDV::Hull
         {
             mDimension = dimension;
 
-            UpdateBuffer.assign(dimension, std::make_shared<SimplexWrap<VERTEX>>());
+            UpdateBuffer.assign(dimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
             UpdateIndices.assign(dimension, -1);
 
-            ObjManager = std::make_shared<ObjectManager<VERTEX>>(dimension);
-            EmptyBuffer = std::make_shared<VertexBuffer<VERTEX>>();
-            BeyondBuffer = std::make_shared<VertexBuffer<VERTEX>>();
+            ObjManager = std::make_shared<ObjectManager<VERTEXPTR>>(dimension);
+            EmptyBuffer = std::make_shared<VertexBuffer<VERTEXPTR>>();
+            BeyondBuffer = std::make_shared<VertexBuffer<VERTEXPTR>>();
 
-            UnprocessedFaces = std::make_shared<SimplexList<VERTEX>>();
+            UnprocessedFaces = std::make_shared<SimplexList<VERTEXPTR>>();
 
-            ConnectorTable.assign(CONNECTOR_TABLE_SIZE, std::make_shared<ConnectorList<VERTEX>>());
+            ConnectorTable.assign(CONNECTOR_TABLE_SIZE, std::make_shared<ConnectorList<VERTEXPTR>>());
         }
 
         virtual ~ObjectBuffer() noexcept {}
 
         const int CONNECTOR_TABLE_SIZE = 2017;
 
-        VERTEX CurrentVertex;
-        VERTEX FurthestVertex;
+        VERTEXPTR CurrentVertex;
+        VERTEXPTR FurthestVertex;
         float MaxDistance = -std::numeric_limits<float>::max();
 
-        std::shared_ptr<SimplexList<VERTEX>> UnprocessedFaces;
-        std::shared_ptr<ObjectManager<VERTEX>> ObjManager;
+        std::shared_ptr<SimplexList<VERTEXPTR>> UnprocessedFaces;
+        std::shared_ptr<ObjectManager<VERTEXPTR>> ObjManager;
 
-        std::shared_ptr<VertexBuffer<VERTEX>> EmptyBuffer;
-        std::shared_ptr<VertexBuffer<VERTEX>> BeyondBuffer;
+        std::shared_ptr<VertexBuffer<VERTEXPTR>> EmptyBuffer;
+        std::shared_ptr<VertexBuffer<VERTEXPTR>> BeyondBuffer;
 
-        std::vector<VERTEX> InputVertices;
-        std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> ConvexSimplexs;
-        std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> AffectedFaceBuffer;
-        std::stack<std::shared_ptr<SimplexWrap<VERTEX>>> TraverseStack;
-        std::unordered_set<VERTEX> SingularVertices;
-        std::vector<std::shared_ptr<DeferredSimplex<VERTEX>>> ConeFaceBuffer;
-        std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> UpdateBuffer;
+        std::vector<VERTEXPTR> InputVertices;
+        std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> ConvexSimplexs;
+        std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> AffectedFaceBuffer;
+        std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>> TraverseStack;
+        std::unordered_set<VERTEXPTR> SingularVertices;
+        std::vector<std::shared_ptr<DeferredSimplex<VERTEXPTR>>> ConeFaceBuffer;
+        std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> UpdateBuffer;
         std::vector<int> UpdateIndices;
-        std::vector<std::shared_ptr<ConnectorList<VERTEX>>> ConnectorTable;
+        std::vector<std::shared_ptr<ConnectorList<VERTEXPTR>>> ConnectorTable;
 
         void Clear()
         {
 
-            UpdateBuffer.assign(mDimension, std::make_shared<SimplexWrap<VERTEX>>());
+            UpdateBuffer.assign(mDimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
             UpdateIndices.assign(mDimension, -1);
 
             InputVertices.clear();
@@ -74,7 +74,7 @@ namespace HDV::Hull
 
             ConvexSimplexs.clear();
             AffectedFaceBuffer.clear();
-            TraverseStack = std::stack<std::shared_ptr<SimplexWrap<VERTEX>>>();
+            TraverseStack = std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>>();
             SingularVertices.clear();
             ConeFaceBuffer.clear();
 
@@ -87,7 +87,7 @@ namespace HDV::Hull
                 ConnectorTable[i]->Clear();
         }
 
-        void AddInput(const std::vector<VERTEX> &input, bool assignIds, bool checkInput)
+        void AddInput(const std::vector<VERTEXPTR> &input, bool assignIds, bool checkInput)
         {
             auto count = input.size();
             InputVertices = input;

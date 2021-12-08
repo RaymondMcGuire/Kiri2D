@@ -14,7 +14,7 @@
 #include <kiri2d/hdv_toolkit/hull/simplex_wrap.h>
 namespace HDV::Hull
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class DeferredSimplex
     {
     public:
@@ -22,11 +22,11 @@ namespace HDV::Hull
 
         virtual ~DeferredSimplex() noexcept {}
 
-        std::shared_ptr<SimplexWrap<VERTEX>> Face;
+        std::shared_ptr<SimplexWrap<VERTEXPTR>> Face;
 
-        std::shared_ptr<SimplexWrap<VERTEX>> Pivot;
+        std::shared_ptr<SimplexWrap<VERTEXPTR>> Pivot;
 
-        std::shared_ptr<SimplexWrap<VERTEX>> OldFace;
+        std::shared_ptr<SimplexWrap<VERTEXPTR>> OldFace;
 
         int FaceIndex;
 

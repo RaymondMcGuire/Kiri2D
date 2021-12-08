@@ -14,8 +14,8 @@
 #include <kiri2d/hdv_toolkit/hull/convex_hull.h>
 namespace HDV::Delaunay
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
-    class DelaunayTriangulation2D : public DelaunayTriangulation<VERTEX>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
+    class DelaunayTriangulation2D : public DelaunayTriangulation<VERTEXPTR, VERTEX>
     {
     public:
         explicit DelaunayTriangulation2D() : DelaunayTriangulation(2)
@@ -28,7 +28,7 @@ namespace HDV::Delaunay
         }
         virtual ~DelaunayTriangulation2D() noexcept {}
 
-        void Generate(const std::vector<VERTEX> &input, bool assignIds = true, bool checkInput = false) override
+        void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
         {
             Clear();
 
@@ -45,7 +45,7 @@ namespace HDV::Delaunay
                 input[i]->mPosition = v;
             }
 
-            auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEX>>(Dimension + 1);
+            auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension + 1);
             hull->Generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)
@@ -56,8 +56,8 @@ namespace HDV::Delaunay
             }
 
             Vertices = hull->GetVertices();
-            Centroid[0] = hull->GetCentroid()[0];
-            Centroid[1] = hull->GetCentroid()[1];
+            Centroid->mPosition[0] = hull->GetCentroid()[0];
+            Centroid->mPosition[1] = hull->GetCentroid()[1];
 
             count = hull->GetSimplexs().size();
 
@@ -99,7 +99,7 @@ namespace HDV::Delaunay
             return fDet;
         }
 
-        std::shared_ptr<DelaunayCell<VERTEX>> CreateCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEX>> &simplex)
+        std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>> CreateCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex)
         {
             // From MathWorld: http://mathworld.wolfram.com/Circumcircle.html
 
@@ -147,11 +147,11 @@ namespace HDV::Delaunay
 
             auto radius = std::abs(s) * std::sqrtf(dx * dx + dy * dy - 4.f * a * c);
 
-            return std::make_shared<DelaunayCell<VERTEX>>(simplex, circumCenter, radius);
+            return std::make_shared<DelaunayCell<VERTEXPTR, VERTEX>>(simplex, circumCenter, radius);
         }
     };
 
-    typedef DelaunayTriangulation2D<HDV::Primitives::Vertex2Ptr> DelaunayTriangulation2;
+    typedef DelaunayTriangulation2D<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2> DelaunayTriangulation2;
 
 } // namespace HDV::Delaunay
 

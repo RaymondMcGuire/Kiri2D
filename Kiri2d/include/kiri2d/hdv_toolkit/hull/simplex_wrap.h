@@ -14,26 +14,26 @@
 #include <kiri2d/hdv_toolkit/hull/vertex_buffer.h>
 namespace HDV::Hull
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class SimplexWrap
     {
     public:
         explicit SimplexWrap() : Next{nullptr}, Prev{} {}
         explicit SimplexWrap(
             int dimension,
-            const std::shared_ptr<VertexBuffer<VERTEX>> &beyondList)
+            const std::shared_ptr<VertexBuffer<VERTEXPTR>> &beyondList)
             : Next{nullptr}, Prev{}
         {
             Normals.assign(dimension, 0.f);
-            Vertices.assign(dimension, VERTEX());
-            AdjacentFaces.assign(dimension, std::make_shared<SimplexWrap<VERTEX>>());
+            Vertices.assign(dimension, VERTEXPTR());
+            AdjacentFaces.assign(dimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
             BeyondList = beyondList;
-            VerticesBeyond = std::make_shared<VertexBuffer<VERTEX>>();
+            VerticesBeyond = std::make_shared<VertexBuffer<VERTEXPTR>>();
         }
         virtual ~SimplexWrap() noexcept {}
 
-        std::shared_ptr<SimplexWrap<VERTEX>> Next;
-        std::weak_ptr<SimplexWrap<VERTEX>> Prev;
+        std::shared_ptr<SimplexWrap<VERTEXPTR>> Next;
+        std::weak_ptr<SimplexWrap<VERTEXPTR>> Prev;
 
         float Offset = 0.f;
         bool IsNormalFlipped = false;
@@ -45,11 +45,11 @@ namespace HDV::Hull
         void SetTag(int tag) { mTag = tag; }
 
         std::vector<float> Normals;
-        std::vector<VERTEX> Vertices;
-        VERTEX FurthestVertex;
-        std::shared_ptr<VertexBuffer<VERTEX>> BeyondList;
-        std::shared_ptr<VertexBuffer<VERTEX>> VerticesBeyond;
-        std::vector<std::shared_ptr<SimplexWrap<VERTEX>>> AdjacentFaces;
+        std::vector<VERTEXPTR> Vertices;
+        VERTEXPTR FurthestVertex;
+        std::shared_ptr<VertexBuffer<VERTEXPTR>> BeyondList;
+        std::shared_ptr<VertexBuffer<VERTEXPTR>> VerticesBeyond;
+        std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> AdjacentFaces;
 
         void ToString()
         {

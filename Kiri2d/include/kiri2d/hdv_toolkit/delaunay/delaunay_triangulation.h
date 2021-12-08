@@ -14,7 +14,7 @@
 
 namespace HDV::Delaunay
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
     class DelaunayTriangulation
     {
     public:
@@ -22,26 +22,26 @@ namespace HDV::Delaunay
         explicit DelaunayTriangulation(int dimension)
         {
             Dimension = dimension;
-            Centroid.assign(dimension, 0.f);
+            Centroid = std::make_shared<VERTEX>();
         }
         virtual ~DelaunayTriangulation() noexcept {}
 
         int Dimension;
 
-        std::vector<VERTEX> Vertices;
+        std::vector<VERTEXPTR> Vertices;
 
-        std::vector<std::shared_ptr<DelaunayCell<VERTEX>>> Cells;
+        std::vector<std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
 
-        std::vector<float> Centroid;
+        VERTEXPTR Centroid;
 
         virtual void Clear()
         {
             Cells.clear();
             Vertices.clear();
-            Centroid.assign(Dimension, 0.f);
+            Centroid = std::make_shared<VERTEX>();
         }
 
-        virtual void Generate(const std::vector<VERTEX> &input, bool assignIds = true, bool checkInput = false) = 0;
+        virtual void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) = 0;
     };
 
 } // namespace HDV::Delaunay

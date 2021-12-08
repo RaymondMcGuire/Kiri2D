@@ -15,24 +15,25 @@
 
 namespace HDV::Delaunay
 {
-    template <typename VERTEX = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
     class DelaunayCell
     {
     public:
         explicit DelaunayCell() {}
-        explicit DelaunayCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEX>> &simplex, std::vector<float> circumCenter, float radius)
+        explicit DelaunayCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex, std::vector<float> circumCenter, float radius)
         {
             mSimplex = simplex;
 
-            CircumCenter = circumCenter;
+            CircumCenter = std::make_shared<VERTEX>();
+            CircumCenter->mPosition = circumCenter;
 
             Radius = radius;
         }
         virtual ~DelaunayCell() noexcept {}
 
-        std::shared_ptr<HDV::Primitives::Simplex<VERTEX>> mSimplex;
+        std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> mSimplex;
 
-        std::vector<float> CircumCenter;
+        VERTEXPTR CircumCenter;
 
         float Radius;
     };
