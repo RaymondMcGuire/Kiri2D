@@ -31,14 +31,8 @@ namespace HDV::Primitives
         void SetId(int id) { mId = id; }
         void SetTag(int tag) { mTag = tag; }
 
-        float Magnitude();
-        float SqrMagnitude();
-        float Distance(Vertex v);
-        float SqrDistance(Vertex v);
-
         const std::vector<float> &GetPosition() { return mPosition; }
 
-        void ToString();
         std::string GetString()
         {
 
@@ -55,6 +49,56 @@ namespace HDV::Primitives
         }
 
         std::vector<float> mPosition;
+
+        float Magnitude()
+        {
+            return std::sqrtf(SqrMagnitude());
+        }
+
+        float SqrMagnitude()
+        {
+
+            auto sum = 0.f;
+            auto dim = GetDimension();
+
+            for (auto i = 0; i < dim; i++)
+                sum += mPosition[i] * mPosition[i];
+
+            return sum;
+        }
+
+        float Distance(Vertex v)
+        {
+            return std::sqrtf(SqrDistance(v));
+        }
+
+        float SqrDistance(Vertex v)
+        {
+            auto dim = std::min(GetDimension(), v.GetDimension());
+            auto sum = 0.f;
+
+            for (auto i = 0; i < dim; i++)
+            {
+                float x = mPosition[i] - v.GetPosition()[i];
+                sum += x * x;
+            }
+
+            return sum;
+        }
+
+        void ToString()
+        {
+            auto dim = GetDimension();
+            std::string data = "";
+            for (auto i = 0; i < dim; i++)
+            {
+                data += std::to_string(mPosition[i]);
+                if (i != dim - 1)
+                    data += ",";
+            }
+
+            KIRI_LOG_DEBUG("[Vertex: Id={0}, Dimension={1},  Data={2}, Tag={3}]", mId, dim, data, std::to_string(mTag));
+        }
 
     protected:
         int mId = -1;
