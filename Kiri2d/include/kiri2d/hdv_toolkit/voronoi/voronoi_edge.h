@@ -14,20 +14,20 @@
 
 namespace HDV::Voronoi
 {
-    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
     class VoronoiEdge
     {
     public:
         explicit VoronoiEdge() {}
-        explicit VoronoiEdge(const std::shared_ptr<HDV::Delaunay::DelaunayCell> &from, const std::shared_ptr<HDV::Delaunay::DelaunayCell> &to)
+        explicit VoronoiEdge(const std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> &from, const std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> &to)
         {
             From = from;
             To = to;
         }
         virtual ~VoronoiEdge() noexcept {}
 
-        std::shared_ptr<HDV::Delaunay::DelaunayCell> From;
-        std::shared_ptr<HDV::Delaunay::DelaunayCell> To;
+        std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> From;
+        std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> To;
     };
 
 } // namespace HDV::Voronoi

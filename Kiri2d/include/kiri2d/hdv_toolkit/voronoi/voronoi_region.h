@@ -15,7 +15,7 @@
 
 namespace HDV::Voronoi
 {
-    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
     class VoronoiRegion
     {
     public:
@@ -23,8 +23,8 @@ namespace HDV::Voronoi
         virtual ~VoronoiRegion() noexcept {}
 
         int Id;
-        std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell>> Cells;
-        std::vector<std::shared_ptr<VoronoiEdge>> Edges;
+        std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
+        std::vector<std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>>> Edges;
     };
 
 } // namespace HDV::Voronoi

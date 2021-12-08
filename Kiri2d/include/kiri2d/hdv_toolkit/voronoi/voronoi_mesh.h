@@ -12,10 +12,11 @@
 #pragma once
 
 #include <kiri2d/hdv_toolkit/voronoi/voronoi_region.h>
-
+#include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation2.h>
+#include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation3.h>
 namespace HDV::Voronoi
 {
-    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
     class VoronoiMesh
     {
     public:
@@ -23,8 +24,8 @@ namespace HDV::Voronoi
         virtual ~VoronoiMesh() noexcept {}
 
         int Dimension;
-        std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell>> Cells;
-        std::vector<std::shared_ptr<VoronoiRegion>> Regions;
+        std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
+        std::vector<std::shared_ptr<VoronoiRegion<VERTEXPTR, VERTEX>>> Regions;
 
         virtual void Clear()
         {
@@ -32,7 +33,10 @@ namespace HDV::Voronoi
             Regions.clear();
         }
 
-        virtual void Generate(std::vector<VERTEXPTR> input, const std::shared_ptr<DelaunayTriangulation<VERTEXPTR>> &delaunay, bool assignIds = true, bool checkInput = false)
+        virtual void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) = 0;
+
+    protected:
+        void GenerateVoronoi(std::vector<VERTEXPTR> input, const std::shared_ptr<HDV::Delaunay::DelaunayTriangulation<VERTEXPTR, VERTEX>> &delaunay, bool assignIds = true, bool checkInput = false)
         {
             Clear();
 
@@ -41,80 +45,116 @@ namespace HDV::Voronoi
             for (auto i = 0; i < delaunay->Vertices.size(); i++)
             {
                 delaunay->Vertices[i]->SetTag(i);
+                // KIRI_LOG_DEBUG("Vertices={0},{1}", delaunay->Vertices[i]->mPosition[0], delaunay->Vertices[i]->mPosition[1]);
             }
 
-            // for (auto i = 0; i < delaunay->Vertices.size(); i++)
-            // {
-            //     delaunay->Cells[i]->CircumCenter.Id = i;
-            //     delaunay->Cells[i].Simplex.Tag = i;
-            //     Cells.Add(delaunay->Cells[i]);
-            // }
+            for (auto i = 0; i < delaunay->Cells.size(); i++)
+            {
+                delaunay->Cells[i]->CircumCenter->SetId(i);
+                delaunay->Cells[i]->mSimplex->SetTag(i);
+                Cells.emplace_back(delaunay->Cells[i]);
+            }
 
-            // List<DelaunayCell<VERTEXPTR>> cells = new List<DelaunayCell<VERTEXPTR>>();
-            // Dictionary<int, DelaunayCell<VERTEXPTR>> neighbourCell = new Dictionary<int, DelaunayCell<VERTEXPTR>>();
+            std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> cells;
+            std::map<int, std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> neighbourCell;
 
-            // for (int i = 0; i < delaunay.Vertices.Count; i++)
-            // {
+            for (auto i = 0; i < delaunay->Vertices.size(); i++)
+            {
 
-            //     cells.Clear();
+                cells.clear();
 
-            //     VERTEXPTR vertex = delaunay.Vertices[i];
+                auto vertex = delaunay->Vertices[i];
 
-            //     for (int j = 0; j < delaunay->Vertices.size(); j++)
-            //     {
-            //         Simplex<VERTEXPTR> simplex = delaunay->Cells[j].Simplex;
+                for (auto j = 0; j < delaunay->Cells.size(); j++)
+                {
+                    auto simplex = delaunay->Cells[j]->mSimplex;
 
-            //         for (int k = 0; k < simplex.Vertices.Length; k++)
-            //         {
-            //             if (simplex.Vertices[k].Tag == vertex.Tag)
-            //             {
-            //                 cells.Add(delaunay->Cells[j]);
-            //                 break;
-            //             }
-            //         }
-            //     }
+                    for (auto k = 0; k < simplex->Vertices.size(); k++)
+                    {
+                        // KIRI_LOG_DEBUG("simplex tag={0}, vertex tag={1}", simplex->Vertices[k]->GetTag(), vertex->GetTag());
+                        if (simplex->Vertices[k]->GetTag() == vertex->GetTag())
+                        {
 
-            //     if (cells.Count > 0)
-            //     {
-            //         VoronoiRegion<VERTEXPTR> region = new VoronoiRegion<VERTEXPTR>();
+                            cells.emplace_back(delaunay->Cells[j]);
+                            break;
+                        }
+                    }
+                }
 
-            //         for (int j = 0; j < cells.Count; j++)
-            //         {
-            //             region->Cells.Add(cells[j]);
-            //         }
+                // KIRI_LOG_DEBUG("cell size={0}", cells.size());
 
-            //         neighbourCell.Clear();
+                if (cells.size() > 0)
+                {
+                    auto region = std::make_shared<VoronoiRegion<VERTEXPTR, VERTEX>>();
 
-            //         for (int j = 0; j < cells.Count; j++)
-            //         {
-            //             neighbourCell.Add(cells[j]->CircumCenter.Id, cells[j]);
-            //         }
+                    for (auto j = 0; j < cells.size(); j++)
+                    {
+                        region->Cells.emplace_back(cells[j]);
+                    }
 
-            //         for (int j = 0; j < cells.Count; j++)
-            //         {
-            //             Simplex<VERTEXPTR> simplex = cells[j].Simplex;
+                    neighbourCell.clear();
 
-            //             for (int k = 0; k < simplex.Adjacent.Length; k++)
-            //             {
-            //                 if (simplex.Adjacent[k] == null)
-            //                     continue;
+                    for (auto j = 0; j < cells.size(); j++)
+                    {
+                        neighbourCell.insert(std::pair<int, std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>>(cells[j]->CircumCenter->GetId(), cells[j]));
+                    }
 
-            //                 int tag = simplex.Adjacent[k].Tag;
+                    for (auto j = 0; j < cells.size(); j++)
+                    {
+                        auto simplex = cells[j]->mSimplex;
 
-            //                 if (neighbourCell.ContainsKey(tag))
-            //                 {
-            //                     VoronoiEdge<VERTEXPTR> edge = new VoronoiEdge<VERTEXPTR>(cells[j], neighbourCell[tag]);
-            //                     region.Edges.Add(edge);
-            //                 }
-            //             }
-            //         }
+                        for (auto k = 0; k < simplex->Adjacent.size(); k++)
+                        {
+                            if (simplex->Adjacent[k] == nullptr)
+                                continue;
 
-            //         region.Id = Regions.Count;
-            //         Regions.Add(region);
-            //     }
-            // }
+                            auto tag = simplex->Adjacent[k]->GetTag();
+
+                            if (neighbourCell.find(tag) != neighbourCell.end())
+                            {
+                                auto edge = std::make_shared<VoronoiEdge<VERTEXPTR, VERTEX>>(cells[j], neighbourCell[tag]);
+                                region->Edges.emplace_back(edge);
+                            }
+                        }
+                    }
+
+                    region->Id = Regions.size();
+                    Regions.emplace_back(region);
+                }
+            }
         }
     };
+
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
+    class VoronoiMesh2D : public VoronoiMesh<VERTEXPTR, VERTEX>
+    {
+    public:
+        explicit VoronoiMesh2D() : VoronoiMesh(2) {}
+        virtual ~VoronoiMesh2D() noexcept {}
+
+        void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
+        {
+            auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation2>();
+            GenerateVoronoi(input, delaunay, assignIds, checkInput);
+        }
+    };
+
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
+    class VoronoiMesh3D : public VoronoiMesh<VERTEXPTR, VERTEX>
+    {
+    public:
+        explicit VoronoiMesh3D() : VoronoiMesh(3) {}
+        virtual ~VoronoiMesh3D() noexcept {}
+
+        void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
+        {
+            auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation3>();
+            GenerateVoronoi(input, delaunay, assignIds, checkInput);
+        }
+    };
+
+    typedef VoronoiMesh2D<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2> VoronoiMesh2;
+    typedef VoronoiMesh3D<HDV::Primitives::Vertex3Ptr, HDV::Primitives::Vertex3> VoronoiMesh3;
 
 } // namespace HDV::Voronoi
 

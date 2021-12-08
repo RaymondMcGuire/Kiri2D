@@ -2508,7 +2508,7 @@ void QuickHullDelaunayTriangulation2d()
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     auto scale_size = 200.f;
-    auto sampler_num = 100;
+    auto sampler_num = 1000;
     std::vector<Primitives::Vertex2Ptr> vet2;
 
     for (auto i = 0; i < sampler_num; i++)
@@ -2584,6 +2584,93 @@ void QuickHullDelaunayTriangulation2d()
     }
 }
 
+#include <kiri2d/hdv_toolkit/voronoi/voronoi_mesh.h>
+void QuickHullVoronoi2d()
+{
+    using namespace HDV;
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(-1.f, 1.f);
+
+    auto scale_size = 200.f;
+    auto sampler_num = 1000;
+    std::vector<Primitives::Vertex2Ptr> vet2;
+
+    for (auto i = 0; i < sampler_num; i++)
+    {
+        auto x = dist(rndEngine) * scale_size;
+        auto y = dist(rndEngine) * scale_size;
+
+        auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
+        vet2.emplace_back(v2);
+
+        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
+    }
+
+    auto vm2 = std::make_shared<HDV::Voronoi::VoronoiMesh2>();
+    vm2->Generate(vet2);
+    auto res2 = vm2->Regions;
+
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    KIRI::Vector<KiriLine2> precompute_lines;
+
+    for (size_t i = 0; i < res2.size(); i++)
+    {
+        auto edge = res2[i]->Edges;
+
+        // KIRI_LOG_DEBUG("-------edge info------");
+        for (size_t j = 0; j < edge.size(); j++)
+        {
+            auto from = edge[j]->From->CircumCenter;
+            auto to = edge[j]->To->CircumCenter;
+
+            auto sv = Vector2F(from->X(), from->Y()) + offset;
+            auto ev = Vector2F(to->X(), to->Y()) + offset;
+
+            auto line = KiriLine2(sv, ev);
+            line.thick = 1.f;
+            precompute_lines.emplace_back(line);
+
+            // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", from->X(), from->Y(), to->X(), to->Y());
+        }
+    }
+
+    while (1)
+    {
+        KIRI::Vector<KiriLine2> lines;
+        KIRI::Vector<KiriPoint2> points;
+
+        for (size_t i = 0; i < vet2.size(); i++)
+        {
+            points.emplace_back(KiriPoint2(Vector2F(vet2[i]->X(), vet2[i]->Y()) + offset, Vector3F(1.f, 0.f, 0.f)));
+        }
+
+        for (auto i = 0; i < precompute_lines.size(); ++i)
+        {
+            lines.emplace_back(precompute_lines[i]);
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
 int main()
 {
     KIRI::KiriLog::Init();
@@ -2625,6 +2712,8 @@ int main()
     // QuickHullConvexHull2d();
 
     QuickHullDelaunayTriangulation2d();
+
+    // QuickHullVoronoi2d();
 
     return 0;
 }
