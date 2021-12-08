@@ -15,11 +15,11 @@
 
 namespace HDV::Primitives
 {
-    template <typename VERTEX = VertexPtr>
+    template <typename VERTEX = Vertex>
     class Simplex
     {
     public:
-        explicit Simplex(){}
+        explicit Simplex() {}
         explicit Simplex(int id, int dimension)
         {
             if (dimension < 2 || dimension > 4)
@@ -68,7 +68,7 @@ namespace HDV::Primitives
 
             for (auto i = 0; i < n; i++)
             {
-                if (Adjacent[i].GetId() == simplex.GetId())
+                if (Adjacent[i]->GetId() == simplex->GetId())
                 {
                     Adjacent.erase(Adjacent.begin() + i);
                     return true;

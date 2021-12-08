@@ -12,6 +12,8 @@
 #pragma once
 
 #include <kiri2d/hdv_toolkit/primitives/vertex2.h>
+#include <kiri2d/hdv_toolkit/primitives/vertex3.h>
+#include <kiri2d/hdv_toolkit/primitives/vertex4.h>
 #include <kiri2d/hdv_toolkit/primitives/simplex.h>
 #include <kiri2d/hdv_toolkit/hull/math_helper.h>
 #include <kiri2d/hdv_toolkit/hull/object_buffer.h>
@@ -37,7 +39,7 @@ namespace HDV::Hull
             mVertices.clear();
         }
 
-        bool Contains(VERTEX vertex)
+        bool Contains(const VERTEX &vertex)
         {
             auto count = mSimplexs.size();
             for (auto i = 0; i < count; i++)
@@ -920,6 +922,16 @@ namespace HDV::Hull
         std::vector<std::shared_ptr<HDV::Primitives::Simplex<VERTEX>>> GetSimplexs()
         {
             return mSimplexs;
+        }
+
+        std::vector<VERTEX> GetVertices()
+        {
+            return mVertices;
+        }
+
+        std::vector<float> GetCentroid()
+        {
+            return mCentroid;
         }
 
     private:

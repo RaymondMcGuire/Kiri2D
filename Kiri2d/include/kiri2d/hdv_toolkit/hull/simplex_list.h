@@ -98,11 +98,10 @@ namespace HDV::Hull
 
             if (First != nullptr && (First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount()))
             {
-     
-                    First->Prev = face;
-                    face->Next = First;
-                    First = face;
-                
+
+                First->Prev = face;
+                face->Next = First;
+                First = face;
             }
             else
             {

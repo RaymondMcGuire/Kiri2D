@@ -2426,86 +2426,88 @@ void TestPolygonUnion()
 #include <kiri2d/hdv_toolkit/primitives/vertex3.h>
 #include <kiri2d/hdv_toolkit/primitives/vertex4.h>
 #include <kiri2d/hdv_toolkit/hull/convex_hull.h>
-void VertexUnitTest()
+void QuickHullConvexHull2d()
 {
     using namespace HDV;
-
-    // auto a = std::make_shared<Primitives::Vertex2>(1.f, 1.f);
-    // auto b = std::make_shared<Primitives::Vertex2>(2.f, 2.f);
-
-    // KIRI_LOG_DEBUG("dis={0}", a->Distance(2.f, 2.f));
-
-    // Hull::VertexBuffer<Primitives::Vertex2Ptr> vb2;
-    // vb2.Add(a);
-    // vb2.Add(b);
-    // vb2.ToString();
-    // vb2.GetItem(1)->Set(3.f, 4.f);
-    // vb2.ToString();
-
-    // auto sw2_1 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
-    // sw2_1->SetTag(5);
-    // auto sw2_2 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
-    // sw2_2->SetTag(7);
-    // auto sw2_3 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
-    // sw2_3->SetTag(45);
-
-    // auto sw2_4 = std::make_shared<Hull::SimplexWrap<Primitives::Vertex2Ptr>>();
-    // sw2_4->SetTag(345);
-
-    // Hull::SimplexList<Primitives::Vertex2Ptr> sl2;
-    // sl2.Add(sw2_2);
-    // sl2.ToString();
-
-    // sl2.Add(sw2_1);
-    // sl2.Add(sw2_3);
-    // sl2.ToString();
-
-    // sl2.AddFirst(sw2_4);
-    // sl2.ToString();
-
-    // sl2.Remove(sw2_1);
-    // sl2.ToString();
-    // sw2_1->ToString();
-
-    // check math helper
-    // std::vector<float> pv2, pv3, pv4;
-    // pv2.emplace_back(2.f);
-    // pv2.emplace_back(3.f);
-
-    // pv3.emplace_back(2.f);
-    // pv3.emplace_back(3.f);
-    // pv3.emplace_back(4.f);
-
-    // pv4.emplace_back(2.f);
-    // pv4.emplace_back(3.f);
-    // pv4.emplace_back(4.f);
-    // pv4.emplace_back(5.f);
-
-    // auto ls2_chk = Hull::MathHelper<Primitives::Vertex2Ptr>().LengthSquared(pv2);
-    // auto ls3_chk = Hull::MathHelper<Primitives::Vertex3Ptr>().LengthSquared(pv3);
-    // auto ls4_chk = Hull::MathHelper<Primitives::Vertex4Ptr>().LengthSquared(pv4);
-
-    // KIRI_LOG_DEBUG("length squared 2={0}, 3={1}, 4={2}", ls2_chk, ls3_chk, ls4_chk);
-
-    // std::vector<float> normal_data;
-    // std::vector<Primitives::Vertex2Ptr> vertex_array2;
-    // normal_data.assign(2, 0.f);
-
-    // vertex_array2.emplace_back(a);
-    // vertex_array2.emplace_back(b);
-
-    // Hull::MathHelper<Primitives::Vertex2Ptr>().FindNormalVector2D(vertex_array2, normal_data);
-
-    // for (size_t i = 0; i < normal_data.size(); i++)
-    // {
-    //     KIRI_LOG_DEBUG("normal[{0}]={1}", i, normal_data[i]);
-    // }
 
     std::random_device seedGen;
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
-    auto scale_size = 5.f;
+    auto scale_size = 200.f;
+    auto sampler_num = 1000;
+    std::vector<Primitives::Vertex2Ptr> vet2;
+
+    for (auto i = 0; i < sampler_num; i++)
+    {
+        auto x = dist(rndEngine) * scale_size;
+        auto y = dist(rndEngine) * scale_size;
+
+        auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
+        vet2.emplace_back(v2);
+
+        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
+    }
+
+    auto cv2 = std::make_shared<Hull::ConvexHull2>();
+    cv2->Generate(vet2);
+    auto res2 = cv2->GetSimplexs();
+
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    KIRI::Vector<KiriLine2> precompute_lines;
+
+    for (size_t i = 0; i < res2.size(); i++)
+    {
+        auto line = KiriLine2(Vector2F(res2[i]->Vertices[0]->X(), res2[i]->Vertices[0]->Y()) + offset, Vector2F(res2[i]->Vertices[1]->X(), res2[i]->Vertices[1]->Y()) + offset);
+        line.thick = 1.f;
+        precompute_lines.emplace_back(line);
+    }
+
+    while (1)
+    {
+        KIRI::Vector<KiriLine2> lines;
+        KIRI::Vector<KiriPoint2> points;
+
+        for (size_t i = 0; i < vet2.size(); i++)
+        {
+            points.emplace_back(KiriPoint2(Vector2F(vet2[i]->X(), vet2[i]->Y()) + offset, Vector3F(1.f, 0.f, 0.f)));
+        }
+
+        for (auto i = 0; i < precompute_lines.size(); ++i)
+        {
+            lines.emplace_back(precompute_lines[i]);
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
+#include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation2.h>
+void QuickHullDelaunayTriangulation2d()
+{
+    using namespace HDV;
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(-1.f, 1.f);
+
+    auto scale_size = 200.f;
     auto sampler_num = 100;
     std::vector<Primitives::Vertex2Ptr> vet2;
 
@@ -2520,25 +2522,65 @@ void VertexUnitTest()
         // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
     }
 
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(4.6715307, 2.5505395, 0));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-4.9892583, -1.5255227, 1));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(1.4531809, -4.9331055, 2));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(0.4634899, -1.3972437, 3));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-3.0476081, -4.6106977, 4));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-3.6189432, 0.12869358, 5));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(1.9193274, 1.04132, 6));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(0.77592254, -2.669198, 7));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(3.280847, 3.6487885, 8));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-1.3492205, 2.2913957, 9));
+    auto dt2 = std::make_shared<Delaunay::DelaunayTriangulation2>();
+    dt2->Generate(vet2);
+    auto res2 = dt2->Cells;
 
-    auto cv2 = std::make_shared<Hull::ConvexHull2>();
-    cv2->Generate(vet2);
+    /*  for (size_t i = 0; i < vet2.size(); i++)
+     {
+         vet2[i]->ToString();
+     }*/
 
-    auto res2 = cv2->GetSimplexs();
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    KIRI::Vector<KiriLine2> precompute_lines;
 
     for (size_t i = 0; i < res2.size(); i++)
     {
-        KIRI_LOG_DEBUG("({0},{1})-({2},{3})", res2[i]->Vertices[0]->X(), res2[i]->Vertices[0]->Y(), res2[i]->Vertices[1]->X(), res2[i]->Vertices[1]->Y());
+        auto simplex = res2[i]->mSimplex;
+        auto line1 = KiriLine2(Vector2F(simplex->Vertices[0]->X(), simplex->Vertices[0]->Y()) + offset, Vector2F(simplex->Vertices[1]->X(), simplex->Vertices[1]->Y()) + offset);
+        auto line2 = KiriLine2(Vector2F(simplex->Vertices[0]->X(), simplex->Vertices[0]->Y()) + offset, Vector2F(simplex->Vertices[2]->X(), simplex->Vertices[2]->Y()) + offset);
+        auto line3 = KiriLine2(Vector2F(simplex->Vertices[1]->X(), simplex->Vertices[1]->Y()) + offset, Vector2F(simplex->Vertices[2]->X(), simplex->Vertices[2]->Y()) + offset);
+
+        line1.thick = 1.f;
+        line2.thick = 1.f;
+        line3.thick = 1.f;
+        precompute_lines.emplace_back(line1);
+        precompute_lines.emplace_back(line2);
+        precompute_lines.emplace_back(line3);
+    }
+
+    while (1)
+    {
+        KIRI::Vector<KiriLine2> lines;
+        KIRI::Vector<KiriPoint2> points;
+
+        for (size_t i = 0; i < vet2.size(); i++)
+        {
+            points.emplace_back(KiriPoint2(Vector2F(vet2[i]->X(), vet2[i]->Y()) + offset, Vector3F(1.f, 0.f, 0.f)));
+        }
+
+        for (auto i = 0; i < precompute_lines.size(); ++i)
+        {
+            lines.emplace_back(precompute_lines[i]);
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
     }
 }
 
@@ -2580,7 +2622,9 @@ int main()
 
     // TestPolygonUnion();
 
-    VertexUnitTest();
+    // QuickHullConvexHull2d();
+
+    QuickHullDelaunayTriangulation2d();
 
     return 0;
 }

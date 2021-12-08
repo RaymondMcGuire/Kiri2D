@@ -1,11 +1,10 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-01 19:36:02
- * @LastEditTime: 2021-12-05 20:48:17
+ * @LastEditTime: 2021-12-08 16:11:17
  * @LastEditors: Xu.WANG
  * @Description:
  */
-
 #ifndef _HDV_Vertex4_H_
 #define _HDV_Vertex4_H_
 
@@ -58,6 +57,11 @@ namespace HDV::Primitives
 
             return x * x + y * y + z * z + w * w;
         }
+
+        float X() const { return mPosition[0]; }
+        float Y() const { return mPosition[1]; }
+        float Z() const { return mPosition[2]; }
+        float W() const { return mPosition[3]; }
     };
 
     typedef std::shared_ptr<Vertex4> Vertex4Ptr;
