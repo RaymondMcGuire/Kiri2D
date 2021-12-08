@@ -113,9 +113,9 @@ namespace HDV::Delaunay
             // x, y, z, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][0] = verts[i]->Position[0];
-                mMatrixBuffer[i][1] = verts[i]->Position[1];
-                mMatrixBuffer[i][2] = verts[i]->Position[2];
+                mMatrixBuffer[i][0] = verts[i]->mPosition[0];
+                mMatrixBuffer[i][1] = verts[i]->mPosition[1];
+                mMatrixBuffer[i][2] = verts[i]->mPosition[2];
                 mMatrixBuffer[i][3] = 1;
             }
             auto a = Determinant();
@@ -123,28 +123,28 @@ namespace HDV::Delaunay
             // size, y, z, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][0] = verts[i]->SqrMagnitude;
+                mMatrixBuffer[i][0] = verts[i]->SqrMagnitude();
             }
             auto dx = Determinant();
 
             // size, x, z, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][1] = verts[i]->Position[0];
+                mMatrixBuffer[i][1] = verts[i]->mPosition[0];
             }
             auto dy = -Determinant();
 
             // size, x, y, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][2] = verts[i]->Position[1];
+                mMatrixBuffer[i][2] = verts[i]->mPosition[1];
             }
             auto dz = Determinant();
 
             // size, x, y, z
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][3] = verts[i]->Position[2];
+                mMatrixBuffer[i][3] = verts[i]->mPosition[2];
             }
             auto c = Determinant();
 
