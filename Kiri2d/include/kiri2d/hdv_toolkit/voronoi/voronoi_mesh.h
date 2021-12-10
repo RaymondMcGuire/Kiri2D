@@ -14,6 +14,8 @@
 #include <kiri2d/hdv_toolkit/voronoi/voronoi_region.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation2.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation3.h>
+
+#include <kiri2d/poly/PolygonClipping.h>
 namespace HDV::Voronoi
 {
     template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
@@ -136,6 +138,10 @@ namespace HDV::Voronoi
         {
             auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation2>();
             GenerateVoronoi(input, delaunay, assignIds, checkInput);
+        }
+
+        void ClipWithBoundary(std::vector<PolyClip::Point2d> polyA)
+        {
         }
     };
 
