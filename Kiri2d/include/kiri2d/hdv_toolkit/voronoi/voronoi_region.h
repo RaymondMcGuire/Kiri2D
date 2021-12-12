@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-08 19:59:56
- * @LastEditTime: 2021-12-08 20:01:35
+ * @Date: 2021-12-09 00:10:54
+ * @LastEditTime: 2021-12-12 14:57:15
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -25,6 +25,19 @@ namespace HDV::Voronoi
         int Id;
         std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
         std::vector<std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>>> Edges;
+
+        BoundingBox2F GetBBox()
+        {
+            BoundingBox2F bbox;
+            for (size_t i = 0; i < Edges.size(); i++)
+            {
+                auto from = Edges[i]->From->CircumCenter;
+                auto to = Edges[if]->To->CircumCenter;
+                bbox.merge(Vector2F(from->X(), from->Y()));
+                bbox.merge(Vector2F(to->X(), to->Y()));
+            }
+            return bbox;
+        }
     };
 
 } // namespace HDV::Voronoi

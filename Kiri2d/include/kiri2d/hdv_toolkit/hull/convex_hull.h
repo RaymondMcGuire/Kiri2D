@@ -238,6 +238,8 @@ namespace HDV::Hull
             for (auto i = 0; i < initPtsNum; i++)
             {
                 auto initPt = initialPoints[i];
+                if (initPt == nullptr)
+                    continue;
 
                 for (auto j = 0; j < mDimension; j++)
                 {

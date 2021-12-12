@@ -2453,6 +2453,47 @@ void QuickHullConvexHull2d()
     cv2->Generate(vet2);
     auto res2 = cv2->GetSimplexs();
 
+    std::vector<Vector4F> unprocessed_simplexs, simplexs;
+    for (auto i = 0; i < res2.size(); i++)
+    {
+        auto from_i = res2[i]->Vertices[0];
+        auto to_i = res2[i]->Vertices[1];
+        unprocessed_simplexs.emplace_back(Vector4F(from_i->X(), from_i->Y(), to_i->X(), to_i->Y()));
+    }
+
+    auto current = unprocessed_simplexs.back();
+    simplexs.emplace_back(current);
+    unprocessed_simplexs.pop_back();
+
+    while (!unprocessed_simplexs.empty())
+    {
+        auto back = unprocessed_simplexs.back();
+
+        for (auto j = 0; j < unprocessed_simplexs.size(); j++)
+        {
+            auto simplex = unprocessed_simplexs[j];
+            if (current.z == simplex.x && current.w == simplex.y)
+            {
+                unprocessed_simplexs[unprocessed_simplexs.size() - 1] = Vector4F(simplex.x, simplex.y, simplex.z, simplex.w);
+                if (j != unprocessed_simplexs.size() - 1)
+                    unprocessed_simplexs[j] = back;
+                break;
+            }
+
+            if (current.z == simplex.z && current.w == simplex.w)
+            {
+                unprocessed_simplexs[unprocessed_simplexs.size() - 1] = Vector4F(simplex.z, simplex.w, simplex.x, simplex.y);
+                if (j != unprocessed_simplexs.size() - 1)
+                    unprocessed_simplexs[j] = back;
+                break;
+            }
+        }
+
+        current = unprocessed_simplexs.back();
+        simplexs.emplace_back(current);
+        unprocessed_simplexs.pop_back();
+    }
+
     // scene renderer config
     float windowheight = 1080.f;
     float windowwidth = 1920.f;
@@ -2464,11 +2505,13 @@ void QuickHullConvexHull2d()
 
     KIRI::Vector<KiriLine2> precompute_lines;
 
-    for (size_t i = 0; i < res2.size(); i++)
+    for (size_t i = 0; i < simplexs.size(); i++)
     {
-        auto line = KiriLine2(Vector2F(res2[i]->Vertices[0]->X(), res2[i]->Vertices[0]->Y()) + offset, Vector2F(res2[i]->Vertices[1]->X(), res2[i]->Vertices[1]->Y()) + offset);
+        // auto line = KiriLine2(Vector2F(res2[i]->Vertices[0]->X(), res2[i]->Vertices[0]->Y()) + offset, Vector2F(res2[i]->Vertices[1]->X(), res2[i]->Vertices[1]->Y()) + offset);
+        auto line = KiriLine2(Vector2F(simplexs[i].x, simplexs[i].y) + offset, Vector2F(simplexs[i].z, simplexs[i].w) + offset);
         line.thick = 1.f;
         precompute_lines.emplace_back(line);
+        KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", line.start.x, line.start.y, line.end.x, line.end.y);
     }
 
     while (1)
@@ -2623,25 +2666,35 @@ void QuickHullVoronoi2d()
 
     KIRI::Vector<KiriLine2> precompute_lines;
 
-    for (size_t i = 0; i < res2.size(); i++)
+    // for (size_t i = 0; i < res2.size(); i++)
+    // {
+    //     auto edge = res2[i]->Edges;
+
+    //     // KIRI_LOG_DEBUG("-------edge info------");
+    //     for (size_t j = 0; j < edge.size(); j++)
+    //     {
+    //         auto from = edge[j]->From->CircumCenter;
+    //         auto to = edge[j]->To->CircumCenter;
+
+    //         auto sv = Vector2F(from->X(), from->Y()) + offset;
+    //         auto ev = Vector2F(to->X(), to->Y()) + offset;
+
+    //         auto line = KiriLine2(sv, ev);
+    //         line.thick = 1.f;
+    //         precompute_lines.emplace_back(line);
+
+    //         // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", from->X(), from->Y(), to->X(), to->Y());
+    //     }
+    // }
+
+    for (size_t i = 0; i < vm2->Polygons.size(); i++)
     {
-        auto edge = res2[i]->Edges;
+        auto polygon = vm2->Polygons[i];
+        auto line = KiriLine2(Vector2F(polygon.x, polygon.y) + offset, Vector2F(polygon.z, polygon.w) + offset);
+        line.thick = 1.f;
+        precompute_lines.emplace_back(line);
 
-        // KIRI_LOG_DEBUG("-------edge info------");
-        for (size_t j = 0; j < edge.size(); j++)
-        {
-            auto from = edge[j]->From->CircumCenter;
-            auto to = edge[j]->To->CircumCenter;
-
-            auto sv = Vector2F(from->X(), from->Y()) + offset;
-            auto ev = Vector2F(to->X(), to->Y()) + offset;
-
-            auto line = KiriLine2(sv, ev);
-            line.thick = 1.f;
-            precompute_lines.emplace_back(line);
-
-            // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", from->X(), from->Y(), to->X(), to->Y());
-        }
+        // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", line.start.x, line.start.y, line.end.x, line.end.y);
     }
 
     while (1)
@@ -2709,9 +2762,9 @@ int main()
 
     // TestPolygonUnion();
 
-    // QuickHullConvexHull2d();
+    QuickHullConvexHull2d();
 
-    QuickHullDelaunayTriangulation2d();
+    // QuickHullDelaunayTriangulation2d();
 
     // QuickHullVoronoi2d();
 

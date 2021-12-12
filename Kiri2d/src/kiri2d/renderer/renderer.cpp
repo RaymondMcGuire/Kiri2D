@@ -53,7 +53,7 @@ namespace KIRI2D
                 continue;
             auto col = particles[i].col * 255.f;
 
-            cv::circle(mCanvas, cv::Point(cx, cy), 3, cv::Scalar(col.z, col.y, col.x, -1), -1);
+            cv::circle(mCanvas, cv::Point(cx, cy), particles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), -1);
         }
 
         auto circles = mScene->GetCircles();

@@ -574,7 +574,7 @@ namespace KIRI
                                         auto bintersection = PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
                                         std::vector<std::vector<PolyClip::Point2d>> possible_result;
 
-                                        //                                         if (!result.getContours().empty() && compute_result == true)
+                                        // if (!result.getContours().empty() && compute_result == true)
 
                                         if (bintersection && PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
                                         {

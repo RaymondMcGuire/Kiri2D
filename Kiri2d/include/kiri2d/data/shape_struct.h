@@ -1,10 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
- * @Date: 2021-03-27 01:49:01
- * @LastEditTime: 2021-08-02 17:22:43
+ * @Date: 2021-08-23 18:20:43
+ * @LastEditTime: 2021-12-12 17:15:08
  * @LastEditors: Xu.WANG
- * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\shape_struct.h
+ * @Description:
  */
 
 #ifndef _KIRI2D_SHAPE_STRUCT_H_
@@ -20,6 +19,7 @@ namespace KIRI2D
     {
         Vector2F pos;
         Vector3F col;
+        float radius = 1.f;
 
         KiriPoint2(
             Vector2F _pos,
