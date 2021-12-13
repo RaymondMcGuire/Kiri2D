@@ -51,6 +51,52 @@ namespace HDV::Hull
             return true;
         }
 
+        std::vector<Vector4F> GetSortSimplexsList()
+        {
+            std::vector<Vector4F> unprocessed_simplexs, simplexs;
+            for (auto i = 0; i < mSimplexs.size(); i++)
+            {
+                auto from_i = mSimplexs[i]->Vertices[0];
+                auto to_i = mSimplexs[i]->Vertices[1];
+                unprocessed_simplexs.emplace_back(Vector4F(from_i->X(), from_i->Y(), to_i->X(), to_i->Y()));
+            }
+
+            auto current = unprocessed_simplexs.back();
+            simplexs.emplace_back(current);
+            unprocessed_simplexs.pop_back();
+
+            while (!unprocessed_simplexs.empty())
+            {
+                auto back = unprocessed_simplexs.back();
+
+                for (auto j = 0; j < unprocessed_simplexs.size(); j++)
+                {
+                    auto simplex = unprocessed_simplexs[j];
+                    if (current.z == simplex.x && current.w == simplex.y)
+                    {
+                        unprocessed_simplexs[unprocessed_simplexs.size() - 1] = Vector4F(simplex.x, simplex.y, simplex.z, simplex.w);
+                        if (j != unprocessed_simplexs.size() - 1)
+                            unprocessed_simplexs[j] = back;
+                        break;
+                    }
+
+                    if (current.z == simplex.z && current.w == simplex.w)
+                    {
+                        unprocessed_simplexs[unprocessed_simplexs.size() - 1] = Vector4F(simplex.z, simplex.w, simplex.x, simplex.y);
+                        if (j != unprocessed_simplexs.size() - 1)
+                            unprocessed_simplexs[j] = back;
+                        break;
+                    }
+                }
+
+                current = unprocessed_simplexs.back();
+                simplexs.emplace_back(current);
+                unprocessed_simplexs.pop_back();
+            }
+
+            return simplexs;
+        }
+
         void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false)
         {
 
@@ -193,10 +239,12 @@ namespace HDV::Hull
             // extremes.assign(2 * mDimension, VERTEXPTR());
 
             auto vCount = mBuffer->InputVertices.size();
+            // KIRI_LOG_DEBUG("vCOunt={0}", vCount);
 
             for (auto i = 0; i < mDimension; i++)
             {
-                auto min = std::numeric_limits<float>::max(), max = std::numeric_limits<float>::min();
+                auto min = std::numeric_limits<float>::max();
+                auto max = std::numeric_limits<float>::lowest();
                 auto minInd = 0, maxInd = 0;
 
                 for (auto j = 0; j < vCount; j++)
@@ -208,12 +256,16 @@ namespace HDV::Hull
                         min = v;
                         minInd = j;
                     }
+
+                    // KIRI_LOG_DEBUG("v={0},max={1},v>max={2}", v, max, v > max);
                     if (v > max)
                     {
                         max = v;
                         maxInd = j;
                     }
                 }
+
+                // KIRI_LOG_DEBUG("min={0}, max={1}, minidx={2}, maxidx={3}", min, max, minInd, maxInd);
 
                 if (minInd != maxInd)
                 {
@@ -492,6 +544,13 @@ namespace HDV::Hull
         void InitConvexHull()
         {
             auto extremes = FindExtremes();
+
+            // for (size_t i = 0; i < extremes.size(); i++)
+            // {
+            //     KIRI_LOG_DEBUG("data={0}", extremes[i]->GetString());
+            // }
+            // KIRI_LOG_DEBUG("---extremes.size={0}", extremes.size());
+
             auto initialPoints = FindInitialPoints(extremes);
             auto numPoints = initialPoints.size();
 
@@ -898,7 +957,7 @@ namespace HDV::Hull
 
         void HandleSingular()
         {
-            KIRI_LOG_DEBUG("---HandleSingular--");
+            // KIRI_LOG_DEBUG("---HandleSingular--");
 
             RollbackCenter();
             mBuffer->SingularVertices.insert(mBuffer->CurrentVertex);

@@ -2438,61 +2438,37 @@ void QuickHullConvexHull2d()
     auto sampler_num = 1000;
     std::vector<Primitives::Vertex2Ptr> vet2;
 
-    for (auto i = 0; i < sampler_num; i++)
-    {
-        auto x = dist(rndEngine) * scale_size;
-        auto y = dist(rndEngine) * scale_size;
+    // for (auto i = 0; i < sampler_num; i++)
+    // {
+    //     auto x = dist(rndEngine) * scale_size;
+    //     auto y = dist(rndEngine) * scale_size;
 
-        auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
-        vet2.emplace_back(v2);
+    //     auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
+    //     vet2.emplace_back(v2);
 
-        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
-    }
+    //     // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
+    // }
+
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433, -39.99463, 0));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056, -29.6595, 8));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433, -39.99463, 1));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175, -31.668158, 9));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175, -31.668158, 2));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534, -25.1881, 10));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175, -31.668158, 3));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433, -39.99463, 11));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056, -29.6595, 4));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534, -25.1881, 12));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056, -29.6595, 5));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433, -39.99463, 13));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534, -25.1881, 6));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056, -29.6595, 14));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534, -25.1881, 7));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175, -31.668158, 15));
 
     auto cv2 = std::make_shared<Hull::ConvexHull2>();
     cv2->Generate(vet2);
-    auto res2 = cv2->GetSimplexs();
-
-    std::vector<Vector4F> unprocessed_simplexs, simplexs;
-    for (auto i = 0; i < res2.size(); i++)
-    {
-        auto from_i = res2[i]->Vertices[0];
-        auto to_i = res2[i]->Vertices[1];
-        unprocessed_simplexs.emplace_back(Vector4F(from_i->X(), from_i->Y(), to_i->X(), to_i->Y()));
-    }
-
-    auto current = unprocessed_simplexs.back();
-    simplexs.emplace_back(current);
-    unprocessed_simplexs.pop_back();
-
-    while (!unprocessed_simplexs.empty())
-    {
-        auto back = unprocessed_simplexs.back();
-
-        for (auto j = 0; j < unprocessed_simplexs.size(); j++)
-        {
-            auto simplex = unprocessed_simplexs[j];
-            if (current.z == simplex.x && current.w == simplex.y)
-            {
-                unprocessed_simplexs[unprocessed_simplexs.size() - 1] = Vector4F(simplex.x, simplex.y, simplex.z, simplex.w);
-                if (j != unprocessed_simplexs.size() - 1)
-                    unprocessed_simplexs[j] = back;
-                break;
-            }
-
-            if (current.z == simplex.z && current.w == simplex.w)
-            {
-                unprocessed_simplexs[unprocessed_simplexs.size() - 1] = Vector4F(simplex.z, simplex.w, simplex.x, simplex.y);
-                if (j != unprocessed_simplexs.size() - 1)
-                    unprocessed_simplexs[j] = back;
-                break;
-            }
-        }
-
-        current = unprocessed_simplexs.back();
-        simplexs.emplace_back(current);
-        unprocessed_simplexs.pop_back();
-    }
+    auto simplexs = cv2->GetSortSimplexsList();
 
     // scene renderer config
     float windowheight = 1080.f;
@@ -2511,7 +2487,7 @@ void QuickHullConvexHull2d()
         auto line = KiriLine2(Vector2F(simplexs[i].x, simplexs[i].y) + offset, Vector2F(simplexs[i].z, simplexs[i].w) + offset);
         line.thick = 1.f;
         precompute_lines.emplace_back(line);
-        KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", line.start.x, line.start.y, line.end.x, line.end.y);
+        KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0},{1};vet2.emplace_back(std::make_shared<Primitives::Vertex2>({2},{3}", line.start.x, line.start.y, line.end.x, line.end.y);
     }
 
     while (1)
@@ -2683,7 +2659,7 @@ void QuickHullVoronoi2d()
     //         line.thick = 1.f;
     //         precompute_lines.emplace_back(line);
 
-    //         // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", from->X(), from->Y(), to->X(), to->Y());
+    //         // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0},{1};vet2.emplace_back(std::make_shared<Primitives::Vertex2>({2},{3}", from->X(), from->Y(), to->X(), to->Y());
     //     }
     // }
 
@@ -2694,7 +2670,7 @@ void QuickHullVoronoi2d()
         line.thick = 1.f;
         precompute_lines.emplace_back(line);
 
-        // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", line.start.x, line.start.y, line.end.x, line.end.y);
+        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0},{1};vet2.emplace_back(std::make_shared<Primitives::Vertex2>({2},{3}", line.start.x, line.start.y, line.end.x, line.end.y);
     }
 
     while (1)
@@ -2762,11 +2738,11 @@ int main()
 
     // TestPolygonUnion();
 
-    QuickHullConvexHull2d();
+    // QuickHullConvexHull2d();
 
     // QuickHullDelaunayTriangulation2d();
 
-    // QuickHullVoronoi2d();
+    QuickHullVoronoi2d();
 
     return 0;
 }

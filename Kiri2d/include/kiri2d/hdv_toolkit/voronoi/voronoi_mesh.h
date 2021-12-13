@@ -130,95 +130,34 @@ namespace HDV::Voronoi
             Region2Polygon();
         }
 
-        bool EdgeApprox(const std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>> &l, const std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>> &r)
-        {
-            auto l_from = l->From->CircumCenter;
-            auto l_to = l->To->CircumCenter;
-            auto r_from = r->From->CircumCenter;
-            auto r_to = r->To->CircumCenter;
-
-            auto dim = l_from->GetDimension();
-
-            // check l from == r to case
-            auto edge_chk_flag = true;
-            for (auto i = 0; i < dim; i++)
-            {
-                if (std::abs(l_from->mPosition[i] - r_to->mPosition[i]) > std::numeric_limits<float>::epsilon())
-                {
-                    edge_chk_flag = false;
-                    break;
-                }
-
-                if (std::abs(l_to->mPosition[i] - r_from->mPosition[i]) > std::numeric_limits<float>::epsilon())
-                {
-                    edge_chk_flag = false;
-                    break;
-                }
-            }
-
-            if (edge_chk_flag)
-                return true;
-
-            for (auto i = 0; i < dim; i++)
-            {
-                if (std::abs(l_from->mPosition[i] - r_from->mPosition[i]) > std::numeric_limits<float>::epsilon())
-                    return false;
-
-                if (std::abs(l_to->mPosition[i] - r_to->mPosition[i]) > std::numeric_limits<float>::epsilon())
-                    return false;
-            }
-
-            return true;
-        }
-
         void Region2Polygon()
         {
-
             for (auto i = 0; i < Regions.size(); i++)
             {
+                std::vector<VERTEXPTR> verts;
+                auto count = 0;
                 auto region = Regions[i];
-                // std::vector<std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>>> edges;
-
-                // for (auto j = 0; j < region->Edges.size() - 1; j++)
-                // {
-                //     bool flag = true;
-                //     for (auto k = j + 1; k < region->Edges.size(); k++)
-                //     {
-                //         if (EdgeApprox(region->Edges[j], region->Edges[k]))
-                //         {
-                //             flag = false;
-                //             break;
-                //         }
-                //     }
-
-                //     if (flag)
-                //         edges.emplace_back(region->Edges[j]);
-                // }
-
                 for (auto j = 0; j < region->Edges.size(); j++)
                 {
                     auto edge = region->Edges[j];
                     auto from = edge->From->CircumCenter;
                     auto to = edge->To->CircumCenter;
-                    Polygons.emplace_back(Vector4F(from->X(), from->Y(), to->X(), to->Y()));
-                    // verts.emplace_back(std::make_shared<Primitives::Vertex2>(from->X(), from->Y(), count++));
-                    // verts.emplace_back(std::make_shared<Primitives::Vertex2>(to->X(), to->Y(), count++));
+                    // Polygons.emplace_back(Vector4F(from->X(), from->Y(), to->X(), to->Y()));
+                    verts.emplace_back(std::make_shared<Primitives::Vertex2>(from->X(), from->Y(), count++));
+                    verts.emplace_back(std::make_shared<Primitives::Vertex2>(to->X(), to->Y(), count++));
                     // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", from->X(), from->Y(), to->X(), to->Y());
                 }
 
                 // KIRI_LOG_DEBUG("------verts size={0}------", verts.size());
-                // auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
-                // hull->Generate(verts);
+                auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
+                hull->Generate(verts);
 
-                // auto simplexs = hull->GetSimplexs();
+                auto simplexs = hull->GetSortSimplexsList();
 
-                // for (auto j = 0; j < simplexs.size(); j++)
-                // {
-                //     auto from = Vector2F(simplexs[j]->Vertices[0]->X(), simplexs[j]->Vertices[0]->Y());
-                //     auto to = Vector2F(simplexs[j]->Vertices[1]->X(), simplexs[j]->Vertices[1]->Y());
-                //     // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", from.x, from.y, to.x, to.y);
-                //     Polygons.emplace_back(Vector4F(from.x, from.y, to.x, to.y));
-                // }
+                for (auto j = 0; j < simplexs.size(); j++)
+                {
+                    Polygons.emplace_back(simplexs[j]);
+                }
                 // KIRI_LOG_DEBUG("-------------------------");
             }
         }
