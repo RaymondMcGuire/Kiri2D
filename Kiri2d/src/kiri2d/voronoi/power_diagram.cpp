@@ -530,7 +530,6 @@ namespace KIRI
 
                             if (cellPoly->GetLength() > 2)
                             {
-
                                 if (mBoundaryPolygon2->GetBBox().overlaps(cellPoly->GetBBox()))
                                 {
                                     if (mBoundaryPolygon2->GetBBox().contains(cellPoly->GetBBox()))

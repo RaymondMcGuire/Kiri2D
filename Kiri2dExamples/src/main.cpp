@@ -2613,7 +2613,7 @@ void QuickHullVoronoi2d()
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     auto scale_size = 200.f;
-    auto sampler_num = 1000;
+    auto sampler_num = 500;
     std::vector<Primitives::Vertex2Ptr> vet2;
 
     for (auto i = 0; i < sampler_num; i++)
@@ -2642,35 +2642,24 @@ void QuickHullVoronoi2d()
 
     KIRI::Vector<KiriLine2> precompute_lines;
 
-    // for (size_t i = 0; i < res2.size(); i++)
-    // {
-    //     auto edge = res2[i]->Edges;
-
-    //     // KIRI_LOG_DEBUG("-------edge info------");
-    //     for (size_t j = 0; j < edge.size(); j++)
-    //     {
-    //         auto from = edge[j]->From->CircumCenter;
-    //         auto to = edge[j]->To->CircumCenter;
-
-    //         auto sv = Vector2F(from->X(), from->Y()) + offset;
-    //         auto ev = Vector2F(to->X(), to->Y()) + offset;
-
-    //         auto line = KiriLine2(sv, ev);
-    //         line.thick = 1.f;
-    //         precompute_lines.emplace_back(line);
-
-    //         // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0},{1};vet2.emplace_back(std::make_shared<Primitives::Vertex2>({2},{3}", from->X(), from->Y(), to->X(), to->Y());
-    //     }
-    // }
-
-    for (size_t i = 0; i < vm2->Polygons.size(); i++)
+    // for (size_t i = 0; i < vm2->CellPolygons.size(); i++)
+    // for (size_t i = 0; i < vm2->Polygons.size(); i++)
+    for (size_t i = 0; i < vm2->CellPolygons.size(); i++)
     {
-        auto polygon = vm2->Polygons[i];
-        auto line = KiriLine2(Vector2F(polygon.x, polygon.y) + offset, Vector2F(polygon.z, polygon.w) + offset);
-        line.thick = 1.f;
-        precompute_lines.emplace_back(line);
+        auto cellpolygon = vm2->CellPolygons[i];
+        for (size_t j = 0; j < cellpolygon->Verts.size() - 1; j++)
+        {
+            auto vert = cellpolygon->Verts[j];
+            auto vert1 = cellpolygon->Verts[(j + 1) % (cellpolygon->Verts.size())];
+            auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
+            line.thick = 1.f;
+            precompute_lines.emplace_back(line);
+        }
 
-        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0},{1};vet2.emplace_back(std::make_shared<Primitives::Vertex2>({2},{3}", line.start.x, line.start.y, line.end.x, line.end.y);
+        // auto polygon = vm2->Polygons[i];
+        // auto line = KiriLine2(Vector2F(polygon.x, polygon.y) + offset, Vector2F(polygon.z, polygon.w) + offset);
+        // line.thick = 1.f;
+        // precompute_lines.emplace_back(line);
     }
 
     while (1)
@@ -2692,7 +2681,7 @@ void QuickHullVoronoi2d()
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
-        // renderer->SaveImages2File();
+        renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
