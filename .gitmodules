@@ -1,6 +1,6 @@
 [submodule "KiriExtlib"]
 	path = KiriExtlib
-	url = git@github.com:RaymondMcGuire/KiriExtlib.git
+	url = https://github.com/RaymondMcGuire/KiriExtlib.git
 [submodule "KiriMathMini"]
 	path = KiriMathMini
-	url = git@github.com:RaymondMcGuire/KiriMathMini.git
+	url = https://github.com/RaymondMcGuire/KiriMathMini.git
