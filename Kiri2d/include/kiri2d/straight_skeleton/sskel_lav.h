@@ -40,7 +40,7 @@ namespace KIRI2D::SSKEL
                     x->SetLAVId(id);
                     //KIRI_LOG_DEBUG("vertex={0},{1};head={0},{1}", x->GetPoint().x, x->GetPoint().y, mHead->GetPoint().x, mHead->GetPoint().y);
                     x = x->next.lock();
-                } while ((x->GetPoint() - head_point).length() > MEpsilon<float>());
+                } while ((x->GetPoint() - head_point).length() > std::numeric_limits<float>::epsilon());
             }
         }
 

@@ -59,10 +59,10 @@ namespace KIRI
 
         inline const bool CheckConflict(const Vector3F &v) const
         {
-            return (mNormal.dot(v) > (mNormal.dot(mVertices[0]->GetValue()) + MEpsilon<float>()));
+            return (mNormal.dot(v) > (mNormal.dot(mVertices[0]->GetValue()) + std::numeric_limits<float>::epsilon()));
         }
 
-        inline constexpr bool IsVisibleFromBelow() const { return (mNormal.z < -MEpsilon<float>()); }
+        inline constexpr bool IsVisibleFromBelow() const { return (mNormal.z < -std::numeric_limits<float>::epsilon()); }
 
         //const KiriEdge3Ptr &GetEdge(const KiriVertex3Ptr &a, const KiriVertex3Ptr &b);
 

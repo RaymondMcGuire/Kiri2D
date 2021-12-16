@@ -197,13 +197,13 @@ namespace KIRI
 
             auto areaErrorTransform = (-(gAreaError - 1.f) * (gAreaError - 1.f) + 1.f);
             auto areaStep = areaErrorTransform * gammaArea;
-            if (pArea < (1.f - MEpsilon<float>()) && weight > 0.f)
+            if (pArea < (1.f - std::numeric_limits<float>::epsilon()) && weight > 0.f)
                 areaWeight -= areaStep;
-            else if (pArea > (1.f + MEpsilon<float>()))
+            else if (pArea > (1.f + std::numeric_limits<float>::epsilon()))
                 areaWeight += areaStep;
             //}
 
-            // auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + MEpsilon<float>());
+            // auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + std::numeric_limits<float>::epsilon());
             // auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
 
             // auto step = errorTransform * gammaBC;

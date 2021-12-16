@@ -15,9 +15,9 @@ namespace KIRI
     Int KiriConvexClip2::GetSignedAreasOfTriangle2(const Vector2F &v1, const Vector2F &v2, const Vector2F &v3)
     {
         auto area = (v2.x - v1.x) * (v3.y - v1.y) - (v3.x - v1.x) * (v2.y - v1.y);
-        if (area > MEpsilon<float>())
+        if (area > std::numeric_limits<float>::epsilon())
             return 1;
-        else if (area < -MEpsilon<float>())
+        else if (area < -std::numeric_limits<float>::epsilon())
             return -1;
         else
             return 0;

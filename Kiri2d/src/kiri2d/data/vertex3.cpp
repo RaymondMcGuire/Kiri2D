@@ -14,7 +14,7 @@ namespace KIRI
     const bool KiriVertex3::LinearDependent(const Vector3F &v)
     {
         //KIRI_LOG_DEBUG("check linearly dependent, a={0},{1},{2}, b={3},{4},{5}", mValue.x, mValue.y, mValue.z, v.x, v.y, v.z);
-        auto epsilon = MEpsilon<float>();
+        auto epsilon = std::numeric_limits<float>::epsilon();
         if (mValue.x == 0 && v.x == 0)
         {
             if (mValue.y == 0 && v.y == 0)

@@ -18,7 +18,7 @@ namespace HDV::Delaunay
     class DelaunayTriangulation3D : public DelaunayTriangulation<VERTEXPTR, VERTEX>
     {
     public:
-        explicit DelaunayTriangulation3D() : DelaunayTriangulation(3)
+        explicit DelaunayTriangulation3D() : DelaunayTriangulation<VERTEXPTR, VERTEX>(3)
         {
             mMatrixBuffer.assign(4, std::vector<float>());
             for (size_t i = 0; i < mMatrixBuffer.size(); i++)
@@ -30,35 +30,36 @@ namespace HDV::Delaunay
 
         void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
         {
-            Clear();
+            this->Clear();
 
-            if (input.size() <= Dimension + 1)
+   auto dim = this->Dimension;
+            if (input.size() <= dim + 1)
                 return;
 
             auto count = input.size();
             for (auto i = 0; i < count; i++)
             {
                 auto v = input[i]->GetPosition();
-                v.resize(Dimension + 1);
-                v[Dimension] = input[i]->SqrMagnitude();
+                v.resize(dim + 1);
+                v[dim] = input[i]->SqrMagnitude();
 
                 input[i]->mPosition = v;
             }
 
-            auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension + 1);
+            auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
             hull->Generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)
             {
                 auto v = input[i]->GetPosition();
-                v.resize(Dimension);
+                v.resize(dim);
                 input[i]->mPosition = v;
             }
 
-            Vertices = hull->GetVertices();
-            Centroid->mPosition[0] = hull->GetCentroid()[0];
-            Centroid->mPosition[1] = hull->GetCentroid()[1];
-            Centroid->mPosition[2] = hull->GetCentroid()[2];
+            this->Vertices = hull->GetVertices();
+            this->Centroid->mPosition[0] = hull->GetCentroid()[0];
+            this->Centroid->mPosition[1] = hull->GetCentroid()[1];
+            this->Centroid->mPosition[2] = hull->GetCentroid()[2];
 
             count = hull->GetSimplexs().size();
 
@@ -67,7 +68,7 @@ namespace HDV::Delaunay
 
                 auto simplex = hull->GetSimplexs()[i];
 
-                if (simplex->Normals[Dimension] >= 0.0f)
+                if (simplex->Normals[dim] >= 0.0f)
                 {
                     for (auto j = 0; j < simplex->Adjacent.size(); j++)
                     {
@@ -81,7 +82,7 @@ namespace HDV::Delaunay
                 {
                     auto cell = CreateCell(simplex);
                     // cell.CircumCenter.Id = i;
-                    Cells.emplace_back(cell);
+                    this->Cells.emplace_back(cell);
                 }
             }
         }

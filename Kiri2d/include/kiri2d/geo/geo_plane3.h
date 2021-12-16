@@ -20,7 +20,7 @@ namespace KIRI
     class KiriGeoPlane3
     {
     public:
-        explicit KiriGeoPlane3::KiriGeoPlane3(const Vector3F &v1, const Vector3F &v2, const Vector3F &v3)
+        explicit KiriGeoPlane3(const Vector3F &v1, const Vector3F &v2, const Vector3F &v3)
         {
             mCoefA = v1.y * (v2.z - v3.z) + v2.y * (v3.z - v1.z) + v3.y * (v1.z - v2.z);
             mCoefB = v1.z * (v2.x - v3.x) + v2.z * (v3.x - v1.x) + v3.z * (v1.x - v2.x);

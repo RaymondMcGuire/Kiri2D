@@ -125,8 +125,8 @@ namespace KIRI2D::SSKEL
                 {
                     auto left_bi_norm = Vector2F(left_vertex->GetBisector().z, left_vertex->GetBisector().w).normalized();
                     auto right_bi_norm = Vector2F(right_vertex->GetBisector().z, right_vertex->GetBisector().w).normalized();
-                    auto x_left = left_bi_norm.cross((splitEvent->GetIntersectPoint() - left_vertex->GetPoint()).normalized()) > -MEpsilon<float>();
-                    auto x_right = right_bi_norm.cross((splitEvent->GetIntersectPoint() - right_vertex->GetPoint()).normalized()) < MEpsilon<float>();
+                    auto x_left = left_bi_norm.cross((splitEvent->GetIntersectPoint() - left_vertex->GetPoint()).normalized()) > -std::numeric_limits<float>::epsilon();
+                    auto x_right = right_bi_norm.cross((splitEvent->GetIntersectPoint() - right_vertex->GetPoint()).normalized()) < std::numeric_limits<float>::epsilon();
 
                     if (x_left && x_right)
                         break;
@@ -167,8 +167,8 @@ namespace KIRI2D::SSKEL
             //         {
             //             auto left_bi_norm = Vector2F(left_vertex->GetBisector().z, left_vertex->GetBisector().w).normalized();
             //             auto right_bi_norm = Vector2F(right_vertex->GetBisector().z, right_vertex->GetBisector().w).normalized();
-            //             auto x_left = left_bi_norm.cross((splitEvent->GetIntersectPoint() - left_vertex->GetPoint()).normalized()) > -MEpsilon<float>();
-            //             auto x_right = right_bi_norm.cross((splitEvent->GetIntersectPoint() - right_vertex->GetPoint()).normalized()) < MEpsilon<float>();
+            //             auto x_left = left_bi_norm.cross((splitEvent->GetIntersectPoint() - left_vertex->GetPoint()).normalized()) > -std::numeric_limits<float>::epsilon();
+            //             auto x_right = right_bi_norm.cross((splitEvent->GetIntersectPoint() - right_vertex->GetPoint()).normalized()) < std::numeric_limits<float>::epsilon();
 
             //             if (x_left && x_right)
             //                 break;

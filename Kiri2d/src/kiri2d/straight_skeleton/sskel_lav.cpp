@@ -183,9 +183,9 @@ namespace KIRI2D::SSKEL
                     continue;
 
                 auto b2 = Vector2F(b.x, b.y);
-                auto x_left = Vector2F(left_bisector.z, left_bisector.w).cross((b2 - Vector2F(left_bisector.x, left_bisector.y)).normalized()) > -MEpsilon<float>();
-                auto x_right = Vector2F(right_bisector.z, right_bisector.w).cross((b2 - Vector2F(right_bisector.x, right_bisector.y)).normalized()) < MEpsilon<float>();
-                auto x_edge = edge_dir.cross((b2 - Vector2F(edge.x, edge.y)).normalized()) < MEpsilon<float>();
+                auto x_left = Vector2F(left_bisector.z, left_bisector.w).cross((b2 - Vector2F(left_bisector.x, left_bisector.y)).normalized()) > -std::numeric_limits<float>::epsilon();
+                auto x_right = Vector2F(right_bisector.z, right_bisector.w).cross((b2 - Vector2F(right_bisector.x, right_bisector.y)).normalized()) < std::numeric_limits<float>::epsilon();
+                auto x_edge = edge_dir.cross((b2 - Vector2F(edge.x, edge.y)).normalized()) < std::numeric_limits<float>::epsilon();
 
                 if (!(x_left && x_right && x_edge))
                     continue;

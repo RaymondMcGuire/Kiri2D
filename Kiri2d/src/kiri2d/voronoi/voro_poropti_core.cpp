@@ -9,7 +9,9 @@
 
 #include <kiri2d/voronoi/voro_poropti_core.h>
 #include <random>
+#ifdef KIRI_WINDOWS
 #include <omp.h>
+#endif
 
 namespace KIRI
 {
@@ -30,8 +32,8 @@ namespace KIRI
 
         float tmp = data.size() * A - B * B;
 
-        float k = (data.size() * C - B * D) / (tmp + MEpsilon<float>());
-        float b = (A * D - B * C) / (tmp + MEpsilon<float>());
+        float k = (data.size() * C - B * D) / (tmp + std::numeric_limits<float>::epsilon());
+        float b = (A * D - B * C) / (tmp + std::numeric_limits<float>::epsilon());
 
         return Vector2F(k, b);
     }
@@ -382,13 +384,13 @@ namespace KIRI
 
                 auto areaErrorTransform = (-(gAreaError - 1.f) * (gAreaError - 1.f) + 1.f);
                 auto areaStep = gAvgDistance * areaErrorTransform * gammaArea;
-                if (pArea < (1.f - MEpsilon<float>()) && weight > 0.f)
+                if (pArea < (1.f - std::numeric_limits<float>::epsilon()) && weight > 0.f)
                     areaWeight -= areaStep;
-                else if (pArea > (1.f + MEpsilon<float>()))
+                else if (pArea > (1.f + std::numeric_limits<float>::epsilon()))
                     areaWeight += areaStep;
             }
 
-            auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + MEpsilon<float>());
+            auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + std::numeric_limits<float>::epsilon());
             auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
 
             auto step = errorTransform * gammaBC;

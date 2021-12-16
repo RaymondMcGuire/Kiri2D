@@ -25,13 +25,13 @@ namespace KIRI
             : KiriVoroSite(0.f, 0.f, 0.f) {}
 
         explicit KiriVoroSite(float x, float y)
-            : KiriVoroSite(x, y, MEpsilon<float>()) {}
+            : KiriVoroSite(x, y, std::numeric_limits<float>::epsilon()) {}
 
         explicit KiriVoroSite(Vector2F pos)
-            : KiriVoroSite(pos.x, pos.y, MEpsilon<float>()) {}
+            : KiriVoroSite(pos.x, pos.y, std::numeric_limits<float>::epsilon()) {}
 
         explicit KiriVoroSite(Vector2F pos, float percent)
-            : KiriVoroSite(pos.x, pos.y, MEpsilon<float>(), percent) {}
+            : KiriVoroSite(pos.x, pos.y, std::numeric_limits<float>::epsilon(), percent) {}
 
         explicit KiriVoroSite(Vector3F data)
             : KiriVoroSite(data.x, data.y, data.z) {}
@@ -46,8 +46,8 @@ namespace KIRI
             : KiriVertex3(Vector3F(x, y, ProjectZ(x, y, weight)))
         {
             mWeight = weight;
-            mPercentage = MEpsilon<float>();
-            mRadius = MEpsilon<float>();
+            mPercentage = std::numeric_limits<float>::epsilon();
+            mRadius = std::numeric_limits<float>::epsilon();
         }
 
         explicit KiriVoroSite(float x, float y, float weight, float percent)
@@ -55,7 +55,7 @@ namespace KIRI
         {
             mWeight = weight;
             mPercentage = percent;
-            mRadius = MEpsilon<float>();
+            mRadius = std::numeric_limits<float>::epsilon();
         }
 
         virtual ~KiriVoroSite() noexcept {}

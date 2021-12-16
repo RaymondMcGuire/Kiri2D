@@ -28,6 +28,14 @@ if(WIN32)
     endif()
 endif()
 
+if(APPLE)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+set(OpenCV_DIR "/Users/raymondmg/Project/opencv/build")
+    find_package(OpenCV REQUIRED)
+endif()
+
 # Project Config
 file(GLOB_RECURSE SOURCES  "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE HEADERS  "include/*.hpp" "include/*.h")
@@ -55,8 +63,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${PBS2D_CUDA_INCLUDE}
 )
 
+if(WIN32)
 target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio kiri2d kiri2d_pbs_cuda)
-
+elseif(APPLE)
+target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui kiri2d)
+endif()
 
 # WorkSpace
 set(WD_DEBUG_FILE_PATH ${CMAKE_BINARY_DIR}/bin/Debug/)

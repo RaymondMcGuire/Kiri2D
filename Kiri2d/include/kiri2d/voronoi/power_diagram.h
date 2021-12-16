@@ -21,7 +21,7 @@ namespace KIRI
     class KiriPowerDiagram : public KiriVertex3
     {
     public:
-        explicit KiriPowerDiagram::KiriPowerDiagram()
+        explicit KiriPowerDiagram()
         {
             mConvexHull = std::make_unique<KiriConvexHull3>();
             mConvexClip = std::make_shared<KiriConvexClip2>();

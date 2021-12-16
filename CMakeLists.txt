@@ -2,9 +2,17 @@
 cmake_minimum_required(VERSION 3.18.0)
 
 # Project Name
+if(WIN32)
 project(kiri2d LANGUAGES C CXX CUDA)
+else()
+project(kiri2d LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+endif()
 
 # Get CUDA INFO
+if(NOT APPLE)
 find_package(CUDA)
 if (CUDA_FOUND)
   set(CUDA_ARCH_DYNAMIC "TRUE")
@@ -37,6 +45,7 @@ if (CUDA_FOUND)
     message(WARNING ${ARCH})
   endif()
 endif()
+endif()
 
 # For Visual Studio
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -51,4 +60,7 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 # Sub Projects
 add_subdirectory(Kiri2d)
 add_subdirectory(Kiri2dExamples)
+
+if(NOT APPLE)
 add_subdirectory(kiri2dPBSCuda)
+endif()

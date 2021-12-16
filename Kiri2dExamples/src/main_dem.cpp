@@ -7,6 +7,8 @@
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
  */
 
+#ifdef KIRI_WINDOWS
+
 #include <kiri_utils.h>
 #include <kiri2d/renderer/renderer.h>
 
@@ -92,7 +94,7 @@ auto offsetvec2 = Vector2F(windowwidth - world_size.x * particle_scale, windowhe
 auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
 auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-KIRI::Vector<KiriCircle2> boundaries;
+std::vector<KiriCircle2> boundaries;
 
 // global params
 const UInt RunLiquidNumber = 0;
@@ -129,7 +131,7 @@ Vec_Float3 LoadCSVFile2ShapeSamplers(const String fileName)
 
     auto file_contents = ReadFileIntoString(filePath);
     std::istringstream sstream(file_contents);
-    KIRI::Vector<String> row;
+    std::vector<String> row;
     String record;
 
     Vec_Float3 samplers;
@@ -376,7 +378,7 @@ void MRDEM_SetupParams()
         boundary_searcher);
 }
 
-void UpdateScene(const KIRI::Vector<KiriCircle2> &circles)
+void UpdateScene(const std::vector<KiriCircle2> &circles)
 {
 
     scene->AddCircles(boundaries);
@@ -425,7 +427,7 @@ void Update()
         else
         {
 
-            KIRI::Vector<KiriCircle2> circles;
+            std::vector<KiriCircle2> circles;
             DEMSystem->UpdateSystem(RenderInterval);
             auto particles = std::dynamic_pointer_cast<CudaMRDemParticles>(DEMSystem->GetParticles());
             auto particles_num = particles->Size();
@@ -457,7 +459,7 @@ void UpdateRealTime()
 
     auto particles = DEMSystem->GetParticles();
 
-    KIRI::Vector<KiriCircle2> circles;
+    std::vector<KiriCircle2> circles;
 
     auto particles_num = particles->Size();
     size_t f2bytes = particles_num * sizeof(float2);
@@ -652,7 +654,7 @@ void UpdateNSSystem()
         else
         {
 
-            KIRI::Vector<KiriCircle2> circles;
+            std::vector<KiriCircle2> circles;
             auto particles_num = particles->Size();
             size_t fbytes = particles_num * sizeof(float);
             size_t f2bytes = particles_num * sizeof(float2);
@@ -698,7 +700,7 @@ void UpdateNSSystemRealTime()
     TotalFrameTime += PerFrameTimer.Elapsed();
     auto particles = DEMNSSystem->GetParticles();
 
-    KIRI::Vector<KiriCircle2> circles;
+    std::vector<KiriCircle2> circles;
     auto particles_num = particles->Size();
     size_t fbytes = particles_num * sizeof(float);
     size_t f2bytes = particles_num * sizeof(float2);
@@ -741,3 +743,5 @@ void main1()
 
     return;
 }
+
+#endif

@@ -762,7 +762,7 @@ void LloydRelaxationExample()
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
             auto radius = 10.f;
-            // auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y, MEpsilon<float>(), radius);
+            // auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y, std::numeric_limits<float>::epsilon(), radius);
             pd->AddVoroSite(sitePos2);
             cnt++;
         }
@@ -2072,6 +2072,8 @@ void UniPoissonDiskSampler()
     }
 }
 
+#ifdef KIRI_WINDOWS
+
 #include <kiri_pbs_cuda/emitter/cuda_volume_emitter.cuh>
 
 std::vector<std::string> split_str1(const std::string &s, char delim)
@@ -2175,6 +2177,8 @@ void DebugNSParticles()
     scene->Clear();
 }
 
+#endif
+
 #include <kiri2d/voronoi/voro_ns_optimize.h>
 void VoronoiNSOptimize()
 {
@@ -2190,11 +2194,11 @@ void VoronoiNSOptimize()
     String boundaryFileName = "bunny";
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
 
-    KIRI::Vector<Vector2F> bunny2d;
+    std::vector<Vector2F> bunny2d;
     size_t bunnyNum;
     load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
 
-    KIRI::Vector<Vector2F> boundary;
+    std::vector<Vector2F> boundary;
     auto boundaryPoly = std::make_shared<KiriVoroCellPolygon2>();
 
     for (size_t i = 0; i < bunny2d.size(); i++)
@@ -2233,10 +2237,10 @@ void VoronoiNSOptimize()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    KIRI::Vector<KiriPoint2> points;
+    std::vector<KiriPoint2> points;
 
-    KIRI::Vector<KiriLine2> lines, glines;
-    KIRI::Vector<KiriCircle2> circles, gcircles;
+    std::vector<KiriLine2> lines, glines;
+    std::vector<KiriCircle2> circles, gcircles;
 
     UInt iter_num = 0;
     while (1)
@@ -2390,7 +2394,7 @@ void TestPolygonUnion()
     cbop::compute(subj, clip, result, op);
     auto p = result.getContours()[0].getPoints();
 
-    KIRI::Vector<KiriLine2> precompute_lines;
+    std::vector<KiriLine2> precompute_lines;
 
     for (size_t j = 0; j < p.size(); j++)
     {
@@ -2399,7 +2403,7 @@ void TestPolygonUnion()
 
     while (1)
     {
-        KIRI::Vector<KiriLine2> lines;
+        std::vector<KiriLine2> lines;
 
         // for (auto i = 0; i < vertices1.size(); ++i)
         // {
@@ -2479,7 +2483,7 @@ void QuickHullConvexHull2d()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    KIRI::Vector<KiriLine2> precompute_lines;
+    std::vector<KiriLine2> precompute_lines;
 
     for (size_t i = 0; i < simplexs.size(); i++)
     {
@@ -2492,8 +2496,8 @@ void QuickHullConvexHull2d()
 
     while (1)
     {
-        KIRI::Vector<KiriLine2> lines;
-        KIRI::Vector<KiriPoint2> points;
+        std::vector<KiriLine2> lines;
+        std::vector<KiriPoint2> points;
 
         for (size_t i = 0; i < vet2.size(); i++)
         {
@@ -2559,7 +2563,7 @@ void QuickHullDelaunayTriangulation2d()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    KIRI::Vector<KiriLine2> precompute_lines;
+    std::vector<KiriLine2> precompute_lines;
 
     for (size_t i = 0; i < res2.size(); i++)
     {
@@ -2578,8 +2582,8 @@ void QuickHullDelaunayTriangulation2d()
 
     while (1)
     {
-        KIRI::Vector<KiriLine2> lines;
-        KIRI::Vector<KiriPoint2> points;
+        std::vector<KiriLine2> lines;
+        std::vector<KiriPoint2> points;
 
         for (size_t i = 0; i < vet2.size(); i++)
         {
@@ -2624,7 +2628,7 @@ void QuickHullVoronoi2d()
         auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
         vet2.emplace_back(v2);
 
-        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
+        //KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
     }
 
     auto vm2 = std::make_shared<HDV::Voronoi::VoronoiMesh2>();
@@ -2640,7 +2644,7 @@ void QuickHullVoronoi2d()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    KIRI::Vector<KiriLine2> precompute_lines;
+    std::vector<KiriLine2> precompute_lines;
 
     // for (size_t i = 0; i < vm2->CellPolygons.size(); i++)
     // for (size_t i = 0; i < vm2->Polygons.size(); i++)
@@ -2664,8 +2668,8 @@ void QuickHullVoronoi2d()
 
     while (1)
     {
-        KIRI::Vector<KiriLine2> lines;
-        KIRI::Vector<KiriPoint2> points;
+        std::vector<KiriLine2> lines;
+        std::vector<KiriPoint2> points;
 
         for (size_t i = 0; i < vet2.size(); i++)
         {
@@ -2681,7 +2685,7 @@ void QuickHullVoronoi2d()
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
-        renderer->SaveImages2File();
+        //renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
@@ -2703,7 +2707,7 @@ int main()
     // NOCAJ12Example();
     // NOCAJ12Example1();
 
-    // VoroTestExample();
+    //VoroTestExample();
 
     // VoroPorosityTreemapOptiExample();
 
@@ -2731,7 +2735,38 @@ int main()
 
     // QuickHullDelaunayTriangulation2d();
 
-    QuickHullVoronoi2d();
+    //QuickHullVoronoi2d();
 
+using namespace cv;
+ // white background
+    Mat image(500, 500, CV_8UC3,
+              Scalar(255, 255, 0));
+  
+    // Check if the image is created
+    // successfully or not
+    if (!image.data) {
+        std::cout << "Could not open or "
+                  << "find the image\n";
+  
+        return 0;
+    }
+  
+    // Top Left Corner
+    Point p1(30, 30);
+  
+    // Bottom Right Corner
+    Point p2(255, 255);
+  
+    int thickness = 2;
+  
+  
+     
+          // Drawing the Rectangle
+    rectangle(image, p1, p2,
+              Scalar(255, 255, 0),
+              thickness, LINE_8);
+
+  imwrite("/Users/raymondmg/Project/Kiri2D/build/bin/test.jpg", image);
+   
     return 0;
 }

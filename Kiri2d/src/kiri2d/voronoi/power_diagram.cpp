@@ -514,7 +514,7 @@ namespace KIRI
                                 if (dy < 0.f)
                                     dy = -dy;
                             }
-                            if (dx > MEpsilon<float>() || dy > MEpsilon<float>())
+                            if (dx > std::numeric_limits<float>::epsilon() || dy > std::numeric_limits<float>::epsilon())
                             {
                                 // KIRI_LOG_DEBUG("dual={0},{1}", dual.x, dual.y);
                                 cellPoly->AddPolygonVertex2(dual);

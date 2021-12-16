@@ -23,13 +23,13 @@ namespace KIRI
             : KiriVoroSite(0.f, 0.f, 0.f) {}
 
         explicit KiriVoroGroupSite(float x, float y)
-            : KiriVoroSite(x, y, MEpsilon<float>()) {}
+            : KiriVoroSite(x, y, std::numeric_limits<float>::epsilon()) {}
 
         explicit KiriVoroGroupSite(Vector2F pos)
-            : KiriVoroSite(pos.x, pos.y, MEpsilon<float>()) {}
+            : KiriVoroSite(pos.x, pos.y, std::numeric_limits<float>::epsilon()) {}
 
         explicit KiriVoroGroupSite(Vector2F pos, float percent)
-            : KiriVoroSite(pos.x, pos.y, MEpsilon<float>(), percent) {}
+            : KiriVoroSite(pos.x, pos.y, std::numeric_limits<float>::epsilon(), percent) {}
 
         explicit KiriVoroGroupSite(float x, float y, float weight)
             : KiriVoroSite(x, y, weight) {}

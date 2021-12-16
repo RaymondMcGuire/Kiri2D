@@ -237,13 +237,13 @@ namespace HDV::Voronoi
     class VoronoiMesh2D : public VoronoiMesh<VERTEXPTR, VERTEX>
     {
     public:
-        explicit VoronoiMesh2D() : VoronoiMesh(2) {}
+        explicit VoronoiMesh2D() : VoronoiMesh<VERTEXPTR, VERTEX>(2) {}
         virtual ~VoronoiMesh2D() noexcept {}
 
         void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
         {
             auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation2>();
-            GenerateVoronoi(input, delaunay, assignIds, checkInput);
+            this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
         }
 
         void ClipWithBoundary(std::vector<PolyClip::Point2d> polyA)
@@ -255,13 +255,13 @@ namespace HDV::Voronoi
     class VoronoiMesh3D : public VoronoiMesh<VERTEXPTR, VERTEX>
     {
     public:
-        explicit VoronoiMesh3D() : VoronoiMesh(3) {}
+        explicit VoronoiMesh3D() : VoronoiMesh<VERTEXPTR, VERTEX>(3) {}
         virtual ~VoronoiMesh3D() noexcept {}
 
         void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
         {
             auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation3>();
-            GenerateVoronoi(input, delaunay, assignIds, checkInput);
+            this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
         }
     };
 

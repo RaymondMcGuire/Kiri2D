@@ -9,8 +9,11 @@ if(WIN32)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     endif()
+elseif(APPLE)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
 endif()
-
 # KIRI Math Library
 set(KIRI_MATH_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/KiriMathMini/include)
 
