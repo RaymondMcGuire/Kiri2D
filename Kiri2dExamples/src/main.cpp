@@ -2453,22 +2453,22 @@ void QuickHullConvexHull2d()
     //     // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
     // }
 
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433, -39.99463, 0));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056, -29.6595, 8));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433, -39.99463, 1));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175, -31.668158, 9));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175, -31.668158, 2));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534, -25.1881, 10));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175, -31.668158, 3));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433, -39.99463, 11));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056, -29.6595, 4));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534, -25.1881, 12));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056, -29.6595, 5));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433, -39.99463, 13));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534, -25.1881, 6));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056, -29.6595, 14));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534, -25.1881, 7));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175, -31.668158, 15));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433f, -39.99463f, 0));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056f, -29.6595f, 8));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433f, -39.99463f, 1));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 9));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 2));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 10));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 3));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433f, -39.99463f, 11));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056f, -29.6595f, 4));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 12));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056f, -29.6595f, 5));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433f, -39.99463f, 13));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 6));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056f, -29.6595f, 14));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 7));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 15));
 
     auto cv2 = std::make_shared<Hull::ConvexHull2>();
     cv2->Generate(vet2);
@@ -2628,7 +2628,7 @@ void QuickHullVoronoi2d()
         auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
         vet2.emplace_back(v2);
 
-        //KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
+        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
     }
 
     auto vm2 = std::make_shared<HDV::Voronoi::VoronoiMesh2>();
@@ -2685,7 +2685,7 @@ void QuickHullVoronoi2d()
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
-        //renderer->SaveImages2File();
+        // renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
@@ -2707,7 +2707,7 @@ int main()
     // NOCAJ12Example();
     // NOCAJ12Example1();
 
-    //VoroTestExample();
+    // VoroTestExample();
 
     // VoroPorosityTreemapOptiExample();
 
@@ -2735,38 +2735,7 @@ int main()
 
     // QuickHullDelaunayTriangulation2d();
 
-    //QuickHullVoronoi2d();
+    QuickHullVoronoi2d();
 
-using namespace cv;
- // white background
-    Mat image(500, 500, CV_8UC3,
-              Scalar(255, 255, 0));
-  
-    // Check if the image is created
-    // successfully or not
-    if (!image.data) {
-        std::cout << "Could not open or "
-                  << "find the image\n";
-  
-        return 0;
-    }
-  
-    // Top Left Corner
-    Point p1(30, 30);
-  
-    // Bottom Right Corner
-    Point p2(255, 255);
-  
-    int thickness = 2;
-  
-  
-     
-          // Drawing the Rectangle
-    rectangle(image, p1, p2,
-              Scalar(255, 255, 0),
-              thickness, LINE_8);
-
-  imwrite("/Users/raymondmg/Project/Kiri2D/build/bin/test.jpg", image);
-   
     return 0;
 }
