@@ -2661,10 +2661,10 @@ void QuickHullVoronoi2d()
     vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-81.71843f, 29.558516f, 8));
     vet2.emplace_back(std::make_shared<Primitives::Vertex2>(105.82991f, 65.12127f, 9));
 
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-200.f, -200.f, 10));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-200.f, 200.f, 11));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(200.f, 200.f, 12));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(200.f, -200.f, 13));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-400.f, -400.f, 10));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-400.f, 400.f, 11));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(400.f, 400.f, 12));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(400.f, -400.f, 13));
 
     auto vm2 = std::make_shared<HDV::Voronoi::VoronoiMesh2>();
     vm2->Generate(vet2);
@@ -2713,6 +2713,19 @@ void QuickHullVoronoi2d()
         // line.thick = 1.f;
         // precompute_lines.emplace_back(line);
     }
+    // for (size_t i = 0; i < res2.size(); i++)
+    // {
+    //     auto region = res2[i];
+    //     for (size_t j = 0; j < region->Edges.size(); j++)
+    //     {
+    //         auto edge = region->Edges[j];
+    //         auto from = edge->From->CircumCenter;
+    //         auto to = edge->To->CircumCenter;
+    //         auto line = KiriLine2(Vector2F(from->mPosition[0], from->mPosition[1]) + offset, Vector2F(to->mPosition[0], to->mPosition[1]) + offset);
+    //         line.thick = 1.f;
+    //         precompute_lines.emplace_back(line);
+    //     }
+    // }
 
     while (1)
     {
