@@ -43,7 +43,8 @@ float ComputeRMSPE(const Vec_Float &predict, const Vec_Float &real)
 
 Vector2F Transform2Original(const Vector2F &v, float h)
 {
-    return Vector2F(v.x, h - v.y);
+    return Vector2F(v.x, v.y);
+    // return Vector2F(v.x, h - v.y);
 }
 
 String readFileIntoString(const String &path)
@@ -426,10 +427,17 @@ void VoronoiExample1()
 
     // boundary polygon
     KiriSDFPoly2D boundary;
-    auto bp1 = Vector2F(0, 0);
-    auto bp2 = Vector2F(width, 0);
-    auto bp3 = Vector2F(width, height);
-    auto bp4 = Vector2F(0, height);
+    // auto bp1 = Vector2F(0, 0);
+    // auto bp2 = Vector2F(width, 0);
+    // auto bp3 = Vector2F(width, height);
+    // auto bp4 = Vector2F(0, height);
+
+    auto bp1 = Vector2F(-200, -200);
+    auto bp2 = Vector2F(-200, 200);
+    auto bp3 = Vector2F(200, 200);
+    auto bp4 = Vector2F(200, -200);
+
+    offsetVec2 = Vector2F(windowwidth, windowheight) / 2.f;
 
     boundary.Append(bp1);
     boundary.Append(bp2);
@@ -447,16 +455,27 @@ void VoronoiExample1()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-    auto cnt = 0, maxcnt = 100;
-    while (cnt < maxcnt)
-    {
-        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
-        if (boundary.FindRegion(sitePos2) < 0.f)
-        {
-            pd->AddPowerSite(sitePos2, 0.f);
-            cnt++;
-        }
-    }
+    // auto cnt = 0, maxcnt = 100;
+    // while (cnt < maxcnt)
+    // {
+    //     auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+    //     if (boundary.FindRegion(sitePos2) < 0.f)
+    //     {
+    //         pd->AddPowerSite(sitePos2, 0.f);
+    //         cnt++;
+    //     }
+    // }
+
+    pd->AddPowerSite(Vector2F(-128.66962f, 103.96347f), 0.f);
+    pd->AddPowerSite(Vector2F(-33.590614f, -164.7944f), 0.f);
+    pd->AddPowerSite(Vector2F(71.96047f, -43.68138f), 0.f);
+    pd->AddPowerSite(Vector2F(-41.80409f, -109.197426f), 0.f);
+    pd->AddPowerSite(Vector2F(-138.16716f, -33.35321f), 0.f);
+    pd->AddPowerSite(Vector2F(187.9643f, 128.24672f), 0.f);
+    pd->AddPowerSite(Vector2F(138.98251f, 87.095856f), 0.f);
+    pd->AddPowerSite(Vector2F(-65.154396f, -116.48123f), 0.f);
+    pd->AddPowerSite(Vector2F(-81.71843f, 29.558516f), 0.f);
+    pd->AddPowerSite(Vector2F(105.82991f, 65.12127f), 0.f);
 
     pd->SetBoundaryPolygon2(boundaryPoly);
     pd->ComputeDiagram();
@@ -503,15 +522,15 @@ void VoronoiExample1()
             }
         }
 
-        for (size_t i = 0; i < del_tri.size(); i++)
-        {
-            auto start = Transform2Original(Vector2F(del_tri[i].x, del_tri[i].y), height) + offsetVec2;
-            auto end = Transform2Original(Vector2F(del_tri[i].z, del_tri[i].w), height) + offsetVec2;
-            auto line = KiriLine2(start, end);
-            line.col = Vector3F(0, 0, 0) / 255.f;
-            line.thick = 2.f;
-            lines.emplace_back(line);
-        }
+        // for (size_t i = 0; i < del_tri.size(); i++)
+        // {
+        //     auto start = Transform2Original(Vector2F(del_tri[i].x, del_tri[i].y), height) + offsetVec2;
+        //     auto end = Transform2Original(Vector2F(del_tri[i].z, del_tri[i].w), height) + offsetVec2;
+        //     auto line = KiriLine2(start, end);
+        //     line.col = Vector3F(0, 0, 0) / 255.f;
+        //     line.thick = 2.f;
+        //     lines.emplace_back(line);
+        // }
 
         scene->AddLines(lines);
         scene->AddParticles(points);
@@ -2617,19 +2636,35 @@ void QuickHullVoronoi2d()
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     auto scale_size = 200.f;
-    auto sampler_num = 500;
+    auto sampler_num = 10;
     std::vector<Primitives::Vertex2Ptr> vet2;
 
-    for (auto i = 0; i < sampler_num; i++)
-    {
-        auto x = dist(rndEngine) * scale_size;
-        auto y = dist(rndEngine) * scale_size;
+    // for (auto i = 0; i < sampler_num; i++)
+    // {
+    //     auto x = dist(rndEngine) * scale_size;
+    //     auto y = dist(rndEngine) * scale_size;
 
-        auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
-        vet2.emplace_back(v2);
+    //     auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
+    //     vet2.emplace_back(v2);
 
-        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
-    }
+    //     KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}f, {1}f, {2}));", x, y, i);
+    // }
+
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-128.66962f, 103.96347f, 0));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-33.590614f, -164.7944f, 1));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(71.96047f, -43.68138f, 2));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-41.80409f, -109.197426f, 3));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-138.16716f, -33.35321f, 4));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(187.9643f, 128.24672f, 5));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(138.98251f, 87.095856f, 6));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-65.154396f, -116.48123f, 7));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-81.71843f, 29.558516f, 8));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(105.82991f, 65.12127f, 9));
+
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-200.f, -200.f, 10));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-200.f, 200.f, 11));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(200.f, 200.f, 12));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(200.f, -200.f, 13));
 
     auto vm2 = std::make_shared<HDV::Voronoi::VoronoiMesh2>();
     vm2->Generate(vet2);
@@ -2645,6 +2680,19 @@ void QuickHullVoronoi2d()
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     std::vector<KiriLine2> precompute_lines;
+
+    auto linea = KiriLine2(Vector2F(-200.f, -200.f) + offset, Vector2F(-200.f, 200.f) + offset);
+    linea.thick = 1.f;
+    auto lineb = KiriLine2(Vector2F(-200.f, 200.f) + offset, Vector2F(200.f, 200.f) + offset);
+    lineb.thick = 1.f;
+    auto linec = KiriLine2(Vector2F(200.f, 200.f) + offset, Vector2F(200.f, -200.f) + offset);
+    linec.thick = 1.f;
+    auto lined = KiriLine2(Vector2F(200.f, -200.f) + offset, Vector2F(-200.f, -200.f) + offset);
+    lined.thick = 1.f;
+    precompute_lines.emplace_back(linea);
+    precompute_lines.emplace_back(lineb);
+    precompute_lines.emplace_back(linec);
+    precompute_lines.emplace_back(lined);
 
     // for (size_t i = 0; i < vm2->CellPolygons.size(); i++)
     // for (size_t i = 0; i < vm2->Polygons.size(); i++)
@@ -2736,6 +2784,7 @@ int main()
     // QuickHullDelaunayTriangulation2d();
 
     QuickHullVoronoi2d();
+    // VoronoiExample1();
 
     return 0;
 }
