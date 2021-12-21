@@ -1,10 +1,11 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-08 19:55:11
- * @LastEditTime: 2021-12-08 19:58:38
+ * @Date: 2021-12-21 21:10:15
+ * @LastEditTime: 2021-12-21 21:13:35
  * @LastEditors: Xu.WANG
  * @Description:
  */
+
 #ifndef _HDV_POWER_DIAGRAM_H_
 #define _HDV_POWER_DIAGRAM_H_
 
@@ -30,15 +31,17 @@ namespace HDV::Voronoi
 
         void LloydIteration()
         {
+            Reset();
             Move2Centroid();
             Compute();
         }
+
+        VoronoiMesh2Ptr mMesh;
 
     private:
         bool mAssignIds = true;
         bool mCheckInput = false;
 
-        VoronoiMesh2Ptr mMesh;
         std::vector<HDV::Primitives::Vertex2Ptr> mSites;
 
         void Move2Centroid()
@@ -51,6 +54,15 @@ namespace HDV::Voronoi
 
                 auto centroid = site->CellPolygon->GetCentroid();
                 site->Set(centroid.x, centroid.y);
+            }
+        }
+
+        void Reset()
+        {
+            for (size_t i = 0; i < mSites.size(); i++)
+            {
+                auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
+                site->Reset();
             }
         }
     };

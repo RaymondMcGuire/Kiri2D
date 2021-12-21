@@ -45,12 +45,19 @@ namespace HDV::Voronoi
         {
             Clear();
 
+            // KIRI_LOG_DEBUG("-----check inpit-----");
+            // for (auto i = 0; i < input.size(); i++)
+            // {
+            //     KIRI_LOG_DEBUG("input Vertices={0},{1}", input[i]->mPosition[0], input[i]->mPosition[1]);
+            // }
+            // KIRI_LOG_DEBUG("------check inpit-----");
+
             delaunay->Generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < delaunay->Vertices.size(); i++)
             {
                 delaunay->Vertices[i]->SetTag(i);
-                // KIRI_LOG_DEBUG("Vertices={0},{1}", delaunay->Vertices[i]->mPosition[0], delaunay->Vertices[i]->mPosition[1]);
+                // KIRI_LOG_DEBUG("*******Vertices={0},{1}", delaunay->Vertices[i]->mPosition[0], delaunay->Vertices[i]->mPosition[1]);
             }
 
             for (auto i = 0; i < delaunay->Cells.size(); i++)
@@ -144,89 +151,149 @@ namespace HDV::Voronoi
             // KIRI_LOG_DEBUG("Regions={0}", Regions.size());
             for (auto i = 0; i < Regions.size(); i++)
             {
+
                 std::vector<VERTEXPTR> verts;
-                auto count = 0;
+                auto count = 0, c1 = 0;
                 auto region = Regions[i];
+
+                if (region->site->GetIsBoundaryVertex())
+                    continue;
+
+                KIRI_LOG_DEBUG("----------------edge points------------------");
                 for (auto j = 0; j < region->Edges.size(); j++)
                 {
                     auto edge = region->Edges[j];
                     auto from = edge->From->CircumCenter;
                     auto to = edge->To->CircumCenter;
-                    // Polygons.emplace_back(Vector4F(from->X(), from->Y(), to->X(), to->Y()));
+
                     verts.emplace_back(std::make_shared<Primitives::Vertex2>(from->X(), from->Y(), count++));
                     verts.emplace_back(std::make_shared<Primitives::Vertex2>(to->X(), to->Y(), count++));
-                    // KIRI_LOG_DEBUG("start={0},{1}; end={2},{3}", from->X(), from->Y(), to->X(), to->Y());
+
+                    // KIRI_LOG_DEBUG("from={0},{1}; to={2},{3}", from->X(), from->Y(), to->X(), to->Y());
+                    KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}f, {1}f, {2}));vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}f, {1}f, {2}));",
+                                   from->X(), from->Y(), c1++,
+                                   to->X(), to->Y(), c1++);
                 }
 
-                // KIRI_LOG_DEBUG("------verts size={0}------", verts.size());
                 auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
                 hull->Generate(verts);
 
                 auto simplexs = hull->GetSortSimplexsList();
 
+                KIRI_LOG_DEBUG("----------------convex hull------------------");
+                auto test = hull->GetSimplexs();
+                for (size_t j = 0; j < test.size(); j++)
+                {
+                    auto from = test[j]->Vertices[0];
+                    auto to = test[j]->Vertices[1];
+                    KIRI_LOG_DEBUG("from={0},{1} --- to={2},{3}", from->mPosition[0], from->mPosition[1], to->mPosition[0], to->mPosition[1]);
+                }
+                KIRI_LOG_DEBUG("----------------------------------");
+
+                KIRI_LOG_DEBUG("------simplexs size={0}------", simplexs.size());
                 auto cell_polygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
                 for (auto j = 0; j < simplexs.size(); j++)
                 {
-                    cell_polygon->AddVert2(Vector2F(simplexs[j].x, simplexs[j].y));
-                    cell_polygon->AddVert2(Vector2F(simplexs[j].z, simplexs[j].w));
-                    // KIRI_LOG_DEBUG("simplexs = ({0},{1})-({2},{3})", simplexs[j].x, simplexs[j].y, simplexs[j].z, simplexs[j].w);
+                    if (j == 0)
+                        cell_polygon->AddVert2(Vector2F(simplexs[j].x, simplexs[j].y));
+
+                    if (j != simplexs.size() - 1)
+                        cell_polygon->AddVert2(Vector2F(simplexs[j].z, simplexs[j].w));
+
+                    KIRI_LOG_DEBUG("simplexs = ({0},{1})-({2},{3})", simplexs[j].x, simplexs[j].y, simplexs[j].z, simplexs[j].w);
                 }
 
-                if (region->site->GetIsBoundaryVertex())
-                    continue;
+                KIRI_LOG_DEBUG("----------------cell_polygon------------------");
+                for (size_t j = 0; j < cell_polygon->Verts.size(); j++)
+                {
+                    KIRI_LOG_DEBUG("vert={0},{1}", cell_polygon->Verts[j].x, cell_polygon->Verts[j].y);
+                }
+
+                // remove unecessary vert data
+                // auto equalLambda = [](const Vector2F &lhs, const Vector2F &rhs)
+                // {
+                //     return ((lhs - rhs).lengthSquared() < 1e-9f);
+                // };
+
+                // cell_polygon->Verts.erase(std::unique(cell_polygon->Verts.begin(), cell_polygon->Verts.end(), equalLambda), cell_polygon->Verts.end());
+                // cell_polygon->Verts.erase(cell_polygon->Verts.end() - 1);
+
+                // KIRI_LOG_DEBUG("new cell polugon");
+                // for (size_t i = 0; i < cell_polygon->Verts.size(); i++)
+                // {
+                //     KIRI_LOG_DEBUG("vert={0},{1}", cell_polygon->Verts[i].x, cell_polygon->Verts[i].y);
+                // }
+                // KIRI_LOG_DEBUG("-------");
 
                 // clip voronoi cell polygon
-                if (cell_polygon->Verts.size() > 2)
-                {
-                    if (BoundaryPolygon->BBox.overlaps(cell_polygon->BBox))
-                    {
-                        if (BoundaryPolygon->BBox.contains(cell_polygon->BBox))
-                        {
-                        }
-                        else
-                        {
-                            auto A = BoundaryPolygon->Verts;
-                            auto B = cell_polygon->Verts;
+                // if (cell_polygon->Verts.size() > 2)
+                // {
+                //     if (BoundaryPolygon->BBox.overlaps(cell_polygon->BBox))
+                //     {
+                //         if (BoundaryPolygon->BBox.contains(cell_polygon->BBox))
+                //         {
+                //         }
+                //         else
+                //         {
+                //             auto A = BoundaryPolygon->Verts;
+                //             auto B = cell_polygon->Verts;
 
-                            std::vector<PolyClip::Point2d> polyA;
-                            std::vector<PolyClip::Point2d> polyB;
+                //             std::vector<PolyClip::Point2d> polyA;
+                //             std::vector<PolyClip::Point2d> polyB;
 
-                            for (size_t ai = 0; ai < A.size(); ai++)
-                                polyA.push_back(PolyClip::Point2d(A[ai].x, A[ai].y));
+                //             for (size_t ai = 0; ai < A.size(); ai++)
+                //                 polyA.push_back(PolyClip::Point2d(A[ai].x, A[ai].y));
 
-                            for (size_t bi = 0; bi < B.size(); bi++)
-                                polyB.push_back(PolyClip::Point2d(B[bi].x, B[bi].y));
+                //             for (size_t bi = 0; bi < B.size(); bi++)
+                //                 polyB.push_back(PolyClip::Point2d(B[bi].x, B[bi].y));
 
-                            PolyClip::Polygon polygon1(polyA);
-                            PolyClip::Polygon polygon2(polyB);
-                            auto bintersection = PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
-                            std::vector<std::vector<PolyClip::Point2d>> possible_result;
+                //             PolyClip::Polygon polygon1(polyA);
+                //             PolyClip::Polygon polygon2(polyB);
+                //             auto bintersection = PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
+                //             std::vector<std::vector<PolyClip::Point2d>> possible_result;
 
-                            // if (!result.getContours().empty() && compute_result == true)
+                //             // if (!result.getContours().empty() && compute_result == true)
 
-                            if (bintersection && PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
-                            {
-                                auto clipedPolygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
+                //             if (bintersection && PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
+                //             {
+                //                 auto clipedPolygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
 
-                                std::vector<std::vector<PolyClip::Point2d>> results = PolyClip::PloygonOpration::ExtractIntersectionResults(polygon1);
-                                for (int pp = 0; pp < results.size(); ++pp)
-                                {
+                //                 std::vector<std::vector<PolyClip::Point2d>> results = PolyClip::PloygonOpration::ExtractIntersectionResults(polygon1);
+                //                 for (int pp = 0; pp < results.size(); ++pp)
+                //                 {
 
-                                    for (size_t ppp = 0; ppp < results[pp].size(); ppp++)
-                                    {
-                                        auto polyn = results[pp][ppp];
-                                        clipedPolygon->AddVert2(Vector2F(polyn.x_, polyn.y_));
-                                    }
-                                }
+                //                     for (size_t ppp = 0; ppp < results[pp].size(); ppp++)
+                //                     {
+                //                         auto polyn = results[pp][ppp];
+                //                         clipedPolygon->AddVert2(Vector2F(polyn.x_, polyn.y_));
+                //                     }
+                //                 }
 
-                                cell_polygon = clipedPolygon;
-                            }
-                            else
-                            {
-                            }
-                        }
-                    }
-                }
+                //                 // remove unecessary vert data
+                //                 // auto equalLambda = [](const Vector2F &lhs, const Vector2F &rhs)
+                //                 // {
+                //                 //     return ((lhs - rhs).lengthSquared() < 1e-9f);
+                //                 // };
+
+                //                 // clipedPolygon->Verts.erase(std::unique(clipedPolygon->Verts.begin(), clipedPolygon->Verts.end(), equalLambda), clipedPolygon->Verts.end());
+                //                 clipedPolygon->Verts.pop_back();
+                //                 std::reverse(clipedPolygon->Verts.begin(), clipedPolygon->Verts.end());
+
+                //                 // KIRI_LOG_DEBUG("new clipped cell polugon,id={0}", Regions[i]->site->GetId());
+                //                 // for (size_t q = 0; q < clipedPolygon->Verts.size(); q++)
+                //                 // {
+                //                 //     KIRI_LOG_DEBUG("vert={0},{1}", clipedPolygon->Verts[q].x, clipedPolygon->Verts[q].y);
+                //                 // }
+                //                 // KIRI_LOG_DEBUG("-------");
+
+                //                 cell_polygon = clipedPolygon;
+                //             }
+                //             else
+                //             {
+                //             }
+                //         }
+                //     }
+                // }
 
                 auto site = std::dynamic_pointer_cast<VoronoiSite2>(Regions[i]->site);
                 site->CellPolygon = cell_polygon;

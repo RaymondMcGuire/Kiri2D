@@ -1,10 +1,9 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-21 12:34:39
- * @LastEditTime: 2021-12-21 16:55:24
+ * @Date: 2021-12-21 21:10:15
+ * @LastEditTime: 2021-12-21 21:18:39
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\hdv_toolkit\voronoi\voronoi_cell_polygon.h
  */
 
 #ifndef _HDV_VORONOI_CELL_POLYGON_H_
@@ -31,12 +30,6 @@ namespace HDV::Voronoi
 
         Vector2F GetCentroid()
         {
-            for (size_t i = 0; i < Verts.size(); i++)
-            {
-                KIRI_LOG_DEBUG("vert={0},{1}", Verts[i].x, Verts[i].y);
-            }
-            KIRI_LOG_DEBUG("-------");
-
             std::vector<Vector2F> tmpPolygonVertices(Verts);
 
             auto first = tmpPolygonVertices[0], last = tmpPolygonVertices[tmpPolygonVertices.size() - 1];
@@ -58,6 +51,13 @@ namespace HDV::Voronoi
                 y += (p1.y + p2.y) * f;
             }
             f = twicearea * 3.f;
+
+            // KIRI_LOG_DEBUG("GetCentroid -------");
+            // for (size_t i = 0; i < tmpPolygonVertices.size(); i++)
+            // {
+            //     KIRI_LOG_DEBUG("vert={0},{1}", tmpPolygonVertices[i].x, tmpPolygonVertices[i].y);
+            // }
+            // KIRI_LOG_DEBUG("GetCentroid -------,f={0}", f);
 
             return Vector2F(x / f, y / f);
         }

@@ -105,6 +105,8 @@ namespace HDV::Primitives
             KIRI_LOG_DEBUG("[Vertex: Id={0}, Dimension={1},  Data={2}, Tag={3}]", mId, dim, data, std::to_string(mTag));
         }
 
+        void Reset() { mTag = 0; }
+
     protected:
         int mId = -1;
         int mTag = 0;

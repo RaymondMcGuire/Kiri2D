@@ -62,6 +62,15 @@ namespace HDV::Delaunay
 
             count = hull->GetSimplexs().size();
 
+            // for (size_t i = 0; i < hull->GetSimplexs().size(); i++)
+            // {
+            //     auto sim = hull->GetSimplexs()[i];
+            //     KIRI_LOG_DEBUG("vert1={0},{1};vert2={2},{3};vert3={4},{5};",
+            //                    sim->Vertices[0]->mPosition[0], sim->Vertices[0]->mPosition[1],
+            //                    sim->Vertices[1]->mPosition[0], sim->Vertices[1]->mPosition[1],
+            //                    sim->Vertices[2]->mPosition[0], sim->Vertices[2]->mPosition[1]);
+            // }
+
             for (auto i = 0; i < count; i++)
             {
 

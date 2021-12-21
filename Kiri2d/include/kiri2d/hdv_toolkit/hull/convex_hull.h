@@ -957,7 +957,7 @@ namespace HDV::Hull
 
         void HandleSingular()
         {
-            // KIRI_LOG_DEBUG("---HandleSingular--");
+            KIRI_LOG_DEBUG("---HandleSingular--");
 
             RollbackCenter();
             mBuffer->SingularVertices.insert(mBuffer->CurrentVertex);
