@@ -41,8 +41,8 @@ namespace HDV::Delaunay
             {
                 auto v = input[i]->GetPosition();
                 v.resize(dim + 1);
-                v[dim] = input[i]->SqrMagnitude();
-
+                v[dim] = input[i]->SqrMagnitude() - input[i]->GetWeight();
+                // KIRI_LOG_DEBUG("weight={0}", input[i]->GetWeight());
                 input[i]->mPosition = v;
             }
 
@@ -119,7 +119,7 @@ namespace HDV::Delaunay
             // size, y, 1
             for (auto i = 0; i < 3; i++)
             {
-                mMatrixBuffer[i][0] = verts[i]->SqrMagnitude();
+                mMatrixBuffer[i][0] = verts[i]->SqrMagnitude() - verts[i]->GetWeight();
             }
 
             auto dx = -Determinant();

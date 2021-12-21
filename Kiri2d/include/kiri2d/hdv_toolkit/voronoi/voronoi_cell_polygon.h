@@ -1,9 +1,10 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-14 10:22:02
- * @LastEditTime: 2021-12-14 10:22:21
+ * @Date: 2021-12-21 12:34:39
+ * @LastEditTime: 2021-12-21 16:55:24
  * @LastEditors: Xu.WANG
  * @Description:
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\hdv_toolkit\voronoi\voronoi_cell_polygon.h
  */
 
 #ifndef _HDV_VORONOI_CELL_POLYGON_H_
@@ -26,6 +27,39 @@ namespace HDV::Voronoi
         {
             Verts.emplace_back(vert);
             BBox.merge(vert);
+        }
+
+        Vector2F GetCentroid()
+        {
+            for (size_t i = 0; i < Verts.size(); i++)
+            {
+                KIRI_LOG_DEBUG("vert={0},{1}", Verts[i].x, Verts[i].y);
+            }
+            KIRI_LOG_DEBUG("-------");
+
+            std::vector<Vector2F> tmpPolygonVertices(Verts);
+
+            auto first = tmpPolygonVertices[0], last = tmpPolygonVertices[tmpPolygonVertices.size() - 1];
+            if (first.x != last.x || first.y != last.y)
+                tmpPolygonVertices.emplace_back(first);
+
+            auto twicearea = 0.f,
+                 x = 0.f, y = 0.f, f = 0.f;
+            auto nPts = tmpPolygonVertices.size();
+            Vector2F p1, p2;
+
+            for (size_t i = 0, j = nPts - 1; i < nPts; j = i++)
+            {
+                p1 = tmpPolygonVertices[i];
+                p2 = tmpPolygonVertices[j];
+                f = p1.x * p2.y - p2.x * p1.y;
+                twicearea += f;
+                x += (p1.x + p2.x) * f;
+                y += (p1.y + p2.y) * f;
+            }
+            f = twicearea * 3.f;
+
+            return Vector2F(x / f, y / f);
         }
 
         BoundingBox2F BBox;

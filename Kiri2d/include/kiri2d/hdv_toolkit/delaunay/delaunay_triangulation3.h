@@ -32,7 +32,7 @@ namespace HDV::Delaunay
         {
             this->Clear();
 
-   auto dim = this->Dimension;
+            auto dim = this->Dimension;
             if (input.size() <= dim + 1)
                 return;
 
@@ -124,7 +124,7 @@ namespace HDV::Delaunay
             // size, y, z, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][0] = verts[i]->SqrMagnitude();
+                mMatrixBuffer[i][0] = verts[i]->SqrMagnitude() - verts[i]->GetWeight();
             }
             auto dx = Determinant();
 

@@ -12,7 +12,7 @@
 #pragma once
 
 #include <kiri2d/hdv_toolkit/voronoi/voronoi_region.h>
-#include <kiri2d/hdv_toolkit/voronoi/voronoi_cell_polygon.h>
+#include <kiri2d/hdv_toolkit/voronoi/voronoi_site.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation2.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation3.h>
 #include <kiri2d/poly/PolygonClipping.h>
@@ -29,17 +29,16 @@ namespace HDV::Voronoi
         int Dimension;
         std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
         std::vector<std::shared_ptr<VoronoiRegion<VERTEXPTR, VERTEX>>> Regions;
-        std::vector<std::shared_ptr<VoronoiCellPolygon<VERTEXPTR, VERTEX>>> CellPolygons;
-        std::vector<Vector4F> Polygons;
 
         virtual void Clear()
         {
             Cells.clear();
             Regions.clear();
-            Polygons.clear();
         }
 
         virtual void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) = 0;
+
+        virtual void LloydIteration(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) = 0;
 
     protected:
         void GenerateVoronoi(std::vector<VERTEXPTR> input, const std::shared_ptr<HDV::Delaunay::DelaunayTriangulation<VERTEXPTR, VERTEX>> &delaunay, bool assignIds = true, bool checkInput = false)
@@ -125,6 +124,7 @@ namespace HDV::Voronoi
                     }
 
                     region->Id = Regions.size();
+                    region->site = delaunay->Vertices[i];
                     Regions.emplace_back(region);
                 }
             }
@@ -134,6 +134,14 @@ namespace HDV::Voronoi
 
         void Region2Polygon()
         {
+
+            // clip boundary
+            auto BoundaryPolygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
+            BoundaryPolygon->AddVert2(Vector2F(-200.f, -200.f));
+            BoundaryPolygon->AddVert2(Vector2F(-200.f, 200.f));
+            BoundaryPolygon->AddVert2(Vector2F(200.f, 200.f));
+            BoundaryPolygon->AddVert2(Vector2F(200.f, -200.f));
+            // KIRI_LOG_DEBUG("Regions={0}", Regions.size());
             for (auto i = 0; i < Regions.size(); i++)
             {
                 std::vector<VERTEXPTR> verts;
@@ -159,77 +167,72 @@ namespace HDV::Voronoi
                 auto cell_polygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
                 for (auto j = 0; j < simplexs.size(); j++)
                 {
-                    Polygons.emplace_back(simplexs[j]);
                     cell_polygon->AddVert2(Vector2F(simplexs[j].x, simplexs[j].y));
                     cell_polygon->AddVert2(Vector2F(simplexs[j].z, simplexs[j].w));
                     // KIRI_LOG_DEBUG("simplexs = ({0},{1})-({2},{3})", simplexs[j].x, simplexs[j].y, simplexs[j].z, simplexs[j].w);
                 }
-                CellPolygons.emplace_back(cell_polygon);
-                // KIRI_LOG_DEBUG("-------------------------");
+
+                if (region->site->GetIsBoundaryVertex())
+                    continue;
+
+                // clip voronoi cell polygon
+                if (cell_polygon->Verts.size() > 2)
+                {
+                    if (BoundaryPolygon->BBox.overlaps(cell_polygon->BBox))
+                    {
+                        if (BoundaryPolygon->BBox.contains(cell_polygon->BBox))
+                        {
+                        }
+                        else
+                        {
+                            auto A = BoundaryPolygon->Verts;
+                            auto B = cell_polygon->Verts;
+
+                            std::vector<PolyClip::Point2d> polyA;
+                            std::vector<PolyClip::Point2d> polyB;
+
+                            for (size_t ai = 0; ai < A.size(); ai++)
+                                polyA.push_back(PolyClip::Point2d(A[ai].x, A[ai].y));
+
+                            for (size_t bi = 0; bi < B.size(); bi++)
+                                polyB.push_back(PolyClip::Point2d(B[bi].x, B[bi].y));
+
+                            PolyClip::Polygon polygon1(polyA);
+                            PolyClip::Polygon polygon2(polyB);
+                            auto bintersection = PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
+                            std::vector<std::vector<PolyClip::Point2d>> possible_result;
+
+                            // if (!result.getContours().empty() && compute_result == true)
+
+                            if (bintersection && PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
+                            {
+                                auto clipedPolygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
+
+                                std::vector<std::vector<PolyClip::Point2d>> results = PolyClip::PloygonOpration::ExtractIntersectionResults(polygon1);
+                                for (int pp = 0; pp < results.size(); ++pp)
+                                {
+
+                                    for (size_t ppp = 0; ppp < results[pp].size(); ppp++)
+                                    {
+                                        auto polyn = results[pp][ppp];
+                                        clipedPolygon->AddVert2(Vector2F(polyn.x_, polyn.y_));
+                                    }
+                                }
+
+                                cell_polygon = clipedPolygon;
+                            }
+                            else
+                            {
+                            }
+                        }
+                    }
+                }
+
+                auto site = std::dynamic_pointer_cast<VoronoiSite2>(Regions[i]->site);
+                site->CellPolygon = cell_polygon;
+
+                // KIRI_LOG_DEBUG("site verts={0}", site->CellPolygon->Verts.size());
             }
-
-            // clip boundary
-            // auto BoundaryPolygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
-            // BoundaryPolygon->AddVert2(Vector2F(-200.f, -200.f));
-            // BoundaryPolygon->AddVert2(Vector2F(-200.f, 200.f));
-            // BoundaryPolygon->AddVert2(Vector2F(200.f, 200.f));
-            // BoundaryPolygon->AddVert2(Vector2F(200.f, -200.f));
-
-            // for (size_t i = 0; i < CellPolygons.size(); i++)
-            // {
-            //     auto cellPoly = CellPolygons[i];
-            //     if (cellPoly->Verts.size() > 2)
-            //     {
-            //         if (BoundaryPolygon->BBox.overlaps(cellPoly->BBox))
-            //         {
-            //             if (BoundaryPolygon->BBox.contains(cellPoly->BBox))
-            //             {
-            //             }
-            //             else
-            //             {
-            //                 auto A = BoundaryPolygon->Verts;
-            //                 auto B = cellPoly->Verts;
-
-            //                 std::vector<PolyClip::Point2d> polyA;
-            //                 std::vector<PolyClip::Point2d> polyB;
-
-            //                 for (size_t ai = 0; ai < A.size(); ai++)
-            //                     polyA.push_back(PolyClip::Point2d(A[ai].x, A[ai].y));
-
-            //                 for (size_t bi = 0; bi < B.size(); bi++)
-            //                     polyB.push_back(PolyClip::Point2d(B[bi].x, B[bi].y));
-
-            //                 PolyClip::Polygon polygon1(polyA);
-            //                 PolyClip::Polygon polygon2(polyB);
-            //                 auto bintersection = PolyClip::PloygonOpration::DetectIntersection(polygon1, polygon2);
-            //                 std::vector<std::vector<PolyClip::Point2d>> possible_result;
-
-            //                 // if (!result.getContours().empty() && compute_result == true)
-
-            //                 if (bintersection && PolyClip::PloygonOpration::Mark(polygon1, polygon2, possible_result, PolyClip::MarkIntersection))
-            //                 {
-            //                     auto clipedPolygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
-
-            //                     std::vector<std::vector<PolyClip::Point2d>> results = PolyClip::PloygonOpration::ExtractIntersectionResults(polygon1);
-            //                     for (int pp = 0; pp < results.size(); ++pp)
-            //                     {
-
-            //                         for (size_t ppp = 0; ppp < results[pp].size(); ppp++)
-            //                         {
-            //                             auto polyn = results[pp][ppp];
-            //                             clipedPolygon->AddVert2(Vector2F(polyn.x_, polyn.y_));
-            //                         }
-            //                     }
-
-            //                     CellPolygons[i] = clipedPolygon;
-            //                 }
-            //                 else
-            //                 {
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
         }
     };
 
@@ -246,8 +249,9 @@ namespace HDV::Voronoi
             this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
         }
 
-        void ClipWithBoundary(std::vector<PolyClip::Point2d> polyA)
+        void LloydIteration(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
         {
+            this->Generate(input, assignIds, checkInput);
         }
     };
 
@@ -263,10 +267,18 @@ namespace HDV::Voronoi
             auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation3>();
             this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
         }
+
+        void LloydIteration(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
+        {
+            this->Generate(input, assignIds, checkInput);
+        }
     };
 
     typedef VoronoiMesh2D<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2> VoronoiMesh2;
     typedef VoronoiMesh3D<HDV::Primitives::Vertex3Ptr, HDV::Primitives::Vertex3> VoronoiMesh3;
+
+    typedef std::shared_ptr<VoronoiMesh2D<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> VoronoiMesh2Ptr;
+    typedef std::shared_ptr<VoronoiMesh3D<HDV::Primitives::Vertex3Ptr, HDV::Primitives::Vertex3>> VoronoiMesh3Ptr;
 
 } // namespace HDV::Voronoi
 

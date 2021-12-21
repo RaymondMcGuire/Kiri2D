@@ -26,10 +26,12 @@ namespace HDV::Primitives
         int GetId() const { return mId; }
         int GetTag() const { return mTag; }
         int GetDimension() { return (mPosition.empty()) ? 0 : mPosition.size(); }
+        float GetWeight() { return mWeight; }
         const std::vector<float> &GetPosition() const { return mPosition; }
 
         void SetId(int id) { mId = id; }
         void SetTag(int tag) { mTag = tag; }
+        void SetWeight(float weight) { mWeight = weight; }
 
         const std::vector<float> &GetPosition() { return mPosition; }
 
@@ -49,6 +51,9 @@ namespace HDV::Primitives
         }
 
         std::vector<float> mPosition;
+
+        void SetAsBoundaryVertex() { mIsBoundaryVertex = true; }
+        bool GetIsBoundaryVertex() { return mIsBoundaryVertex; }
 
         float Magnitude()
         {
@@ -103,6 +108,8 @@ namespace HDV::Primitives
     protected:
         int mId = -1;
         int mTag = 0;
+        float mWeight = 0.f;
+        bool mIsBoundaryVertex = false;
     };
     typedef std::shared_ptr<Vertex> VertexPtr;
 } // namespace HDV::Primitives

@@ -1,9 +1,10 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-09 00:10:54
- * @LastEditTime: 2021-12-12 14:57:15
+ * @Date: 2021-12-21 12:34:39
+ * @LastEditTime: 2021-12-21 13:05:51
  * @LastEditors: Xu.WANG
  * @Description:
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\hdv_toolkit\voronoi\voronoi_region.h
  */
 
 #ifndef _HDV_VORONOI_REGION_H_
@@ -25,6 +26,7 @@ namespace HDV::Voronoi
         int Id;
         std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
         std::vector<std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>>> Edges;
+        VERTEXPTR site;
 
         BoundingBox2F GetBBox()
         {
