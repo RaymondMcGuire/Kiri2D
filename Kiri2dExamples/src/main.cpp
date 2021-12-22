@@ -2489,30 +2489,18 @@ void QuickHullConvexHull2d()
     // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 7));
     // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 15));
 
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-568.2084f, 0.0f, 1));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-568.2084f, 0.0f, 1));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-568.2084f, 0.0f, 3));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-568.2084f, 0.0f, 3));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-56.799572f, 0.09637456f, 5));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-56.799572f, 0.09637456f, 5));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-56.799572f, 0.09637456f, 7));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-56.799572f, 0.09637456f, 7));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-480.71063f, -58.10183f, 9));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-480.71063f, -58.10183f, 9));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-480.71063f, -58.10183f, 11));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-480.71063f, -58.10183f, 11));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-83.78211f, -67.561584f, 13));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-83.78211f, -67.561584f, 13));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-83.78211f, -67.561584f, 15));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-83.78211f, -67.561584f, 15));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-469.61334f, 65.52253f, 17));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-469.61334f, 65.52253f, 17));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-469.61334f, 65.52253f, 19));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-469.61334f, 65.52253f, 19));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-82.9986f, 66.80544f, 21));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-82.9986f, 66.80544f, 21));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-82.9986f, 66.80544f, 23));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-82.9986f, 66.80544f, 23));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-538.35144f, 28.29749f, 1));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-75.84004f, 452.02176f, 0));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-538.35144f, 28.29749f, 3));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-114.87718f, 71.43241f, 2));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-75.84004f, 452.02176f, 5));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-538.35144f, 28.29749f, 4));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-75.84004f, 452.02176f, 7));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-114.87718f, 71.43241f, 6));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-114.87718f, 71.43241f, 9));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-75.84004f, 452.02176f, 8));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-114.87718f, 71.43241f, 11));
+    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-538.35144f, 28.29749f, 10));
 
     auto cv2 = std::make_shared<Hull::ConvexHull2>();
     cv2->Generate(vet2);
@@ -2673,42 +2661,38 @@ void QuickHullVoronoi2d()
 {
     using namespace HDV;
 
+    auto pd2 = std::make_shared<Voronoi::PowerDiagram2D>();
+
     std::random_device seedGen;
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
     auto scale_size = 200.f;
-    auto sampler_num = 10;
+    auto sampler_num = 100;
 
-    // for (auto i = 0; i < sampler_num; i++)
-    // {
-    //     auto x = dist(rndEngine) * scale_size;
-    //     auto y = dist(rndEngine) * scale_size;
+    for (auto i = 0; i < sampler_num; i++)
+    {
+        auto x = dist(rndEngine) * scale_size;
+        auto y = dist(rndEngine) * scale_size;
 
-    //     auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
-    //     vet2.emplace_back(v2);
-
-    //     KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}f, {1}f, {2}));", x, y, i);
-    // }
-
-    auto pd2 = std::make_shared<Voronoi::PowerDiagram2D>();
-
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-134.72092f, 133.11143f, 0));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-2.3260376f, -153.14186f, 1));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(134.69754f, -133.12962f, 2));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-0.5413166f, -53.178318f, 3));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-134.27975f, 0.15768485f, 4));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(134.6346f, 133.1898f, 5));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(134.8886f, 0.08968643f, 6));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-137.44841f, -132.7984f, 7));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-0.06846472f, 52.867256f, 8));
-    pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-0.08238092f, 153.2265f, 9));
+        pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(x, y, i));
+    }
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-142.5951f, 2.208386f, 0));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-110.01088f, -98.637115f, 1));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-61.99737f, 124.00593f, 2));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(143.61653f, 94.56824f, 3));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-11.002484f, -0.20290521f, 4));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-79.095505f, -168.48323f, 5));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-155.98325f, 133.64607f, 6));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(80.90461f, -55.281227f, 7));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(41.342674f, 143.00504f, 8));
+    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(132.29279f, -136.51772f, 9));
 
     // boundary
-    auto b1 = std::make_shared<Voronoi::VoronoiSite2>(-400.f, -400.f, 10);
-    auto b2 = std::make_shared<Voronoi::VoronoiSite2>(-400.f, 400.f, 11);
-    auto b3 = std::make_shared<Voronoi::VoronoiSite2>(400.f, 400.f, 12);
-    auto b4 = std::make_shared<Voronoi::VoronoiSite2>(400.f, -400.f, 13);
+    auto b1 = std::make_shared<Voronoi::VoronoiSite2>(-400.f, -400.f, sampler_num);
+    auto b2 = std::make_shared<Voronoi::VoronoiSite2>(-400.f, 400.f, sampler_num + 1);
+    auto b3 = std::make_shared<Voronoi::VoronoiSite2>(400.f, 400.f, sampler_num + 2);
+    auto b4 = std::make_shared<Voronoi::VoronoiSite2>(400.f, -400.f, sampler_num + 3);
     b1->SetAsBoundaryVertex();
     b2->SetAsBoundaryVertex();
     b3->SetAsBoundaryVertex();
@@ -2729,51 +2713,80 @@ void QuickHullVoronoi2d()
 
     pd2->Compute();
 
-    std::vector<KiriLine2> precompute_lines;
-    std::vector<Vector2F> precompute_points;
-
-    auto linea = KiriLine2(Vector2F(-200.f, -200.f) + offset, Vector2F(-200.f, 200.f) + offset);
-    linea.thick = 1.f;
-    auto lineb = KiriLine2(Vector2F(-200.f, 200.f) + offset, Vector2F(200.f, 200.f) + offset);
-    lineb.thick = 1.f;
-    auto linec = KiriLine2(Vector2F(200.f, 200.f) + offset, Vector2F(200.f, -200.f) + offset);
-    linec.thick = 1.f;
-    auto lined = KiriLine2(Vector2F(200.f, -200.f) + offset, Vector2F(-200.f, -200.f) + offset);
-    lined.thick = 1.f;
+    // auto linea = KiriLine2(Vector2F(-200.f, -200.f) + offset, Vector2F(-200.f, 200.f) + offset);
+    // linea.thick = 1.f;
+    // auto lineb = KiriLine2(Vector2F(-200.f, 200.f) + offset, Vector2F(200.f, 200.f) + offset);
+    // lineb.thick = 1.f;
+    // auto linec = KiriLine2(Vector2F(200.f, 200.f) + offset, Vector2F(200.f, -200.f) + offset);
+    // linec.thick = 1.f;
+    // auto lined = KiriLine2(Vector2F(200.f, -200.f) + offset, Vector2F(-200.f, -200.f) + offset);
+    // lined.thick = 1.f;
     // precompute_lines.emplace_back(linea);
     // precompute_lines.emplace_back(lineb);
     // precompute_lines.emplace_back(linec);
     // precompute_lines.emplace_back(lined);
 
-    auto sites = pd2->GetSites();
+    // std::vector<KiriLine2> precompute_lines;
+    // std::vector<Vector2F> precompute_points;
 
-    for (size_t i = 0; i < sites.size(); i++)
-    {
-        auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-        if (site->GetIsBoundaryVertex())
-            continue;
+    // auto sites = pd2->GetSites();
 
-        auto cellpolygon = site->CellPolygon;
-        for (size_t j = 0; j < cellpolygon->Verts.size(); j++)
-        {
-            auto vert = cellpolygon->Verts[j];
-            auto vert1 = cellpolygon->Verts[(j + 1) % (cellpolygon->Verts.size())];
-            auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
-            line.thick = 1.f;
-            precompute_lines.emplace_back(line);
+    // for (size_t i = 0; i < sites.size(); i++)
+    // {
+    //     auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
+    //     if (site->GetIsBoundaryVertex())
+    //         continue;
 
-            // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
-        }
-        // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Verts.size());
-        precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+    //     auto cellpolygon = site->CellPolygon;
+    //     for (size_t j = 0; j < cellpolygon->Verts.size(); j++)
+    //     {
+    //         auto vert = cellpolygon->Verts[j];
+    //         auto vert1 = cellpolygon->Verts[(j + 1) % (cellpolygon->Verts.size())];
+    //         auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
+    //         line.thick = 1.f;
+    //         precompute_lines.emplace_back(line);
 
-        // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
-    }
+    //         // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
+    //     }
+    //     // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Verts.size());
+    //     precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+
+    //     // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+    // }
 
     while (1)
     {
         // KIRI_LOG_DEBUG("-----------------new----------------------------------");
-        // pd2->LloydIteration();
+
+        std::vector<KiriLine2> precompute_lines;
+        std::vector<Vector2F> precompute_points;
+
+        pd2->LloydIteration();
+
+        auto sites = pd2->GetSites();
+
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
+            if (site->GetIsBoundaryVertex())
+                continue;
+
+            auto cellpolygon = site->CellPolygon;
+            for (size_t j = 0; j < cellpolygon->Verts.size(); j++)
+            {
+                auto vert = cellpolygon->Verts[j];
+                auto vert1 = cellpolygon->Verts[(j + 1) % (cellpolygon->Verts.size())];
+                auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
+                line.thick = 1.f;
+                precompute_lines.emplace_back(line);
+
+                // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
+            }
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Verts.size());
+            precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+
+            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+        }
 
         std::vector<KiriLine2> lines;
         std::vector<KiriPoint2> points;
@@ -2838,11 +2851,11 @@ int main()
 
     // TestPolygonUnion();
 
-    QuickHullConvexHull2d();
+    // QuickHullConvexHull2d();
 
     // QuickHullDelaunayTriangulation2d();
 
-    // QuickHullVoronoi2d();
+    QuickHullVoronoi2d();
     //   VoronoiExample1();
 
     return 0;

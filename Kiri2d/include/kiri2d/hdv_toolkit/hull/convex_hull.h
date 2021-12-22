@@ -53,13 +53,47 @@ namespace HDV::Hull
 
         std::vector<Vector4F> GetSortSimplexsList()
         {
-            std::vector<Vector4F> unprocessed_simplexs, simplexs;
+            std::vector<Vector4F> pre_simplexs, unprocessed_simplexs, simplexs;
             for (auto i = 0; i < mSimplexs.size(); i++)
             {
                 auto from_i = mSimplexs[i]->Vertices[0];
                 auto to_i = mSimplexs[i]->Vertices[1];
-                unprocessed_simplexs.emplace_back(Vector4F(from_i->X(), from_i->Y(), to_i->X(), to_i->Y()));
+                pre_simplexs.emplace_back(Vector4F(from_i->X(), from_i->Y(), to_i->X(), to_i->Y()));
             }
+
+            std::vector<int> remove_idx;
+            // preprocess
+            for (auto i = 0; i < pre_simplexs.size() - 1; i++)
+            {
+                auto usi = pre_simplexs[i];
+                for (auto j = i + 1; j < pre_simplexs.size(); j++)
+                {
+                    auto usj = pre_simplexs[j];
+                    if (usi.x == usj.z && usi.y == usj.w && usi.z == usj.x && usi.w == usj.y)
+                    {
+                        remove_idx.emplace_back(i);
+                        break;
+                    }
+                }
+            }
+
+            for (auto i = 0; i < pre_simplexs.size(); i++)
+            {
+                auto flag = true;
+                for (auto j = 0; j < remove_idx.size(); j++)
+                {
+                    if (i == remove_idx[j])
+                    {
+                        flag = false;
+                        break;
+                    }
+                }
+
+                if (flag)
+                    unprocessed_simplexs.emplace_back(pre_simplexs[i]);
+            }
+
+            // remove idx
 
             auto current = unprocessed_simplexs.back();
             simplexs.emplace_back(current);
@@ -180,7 +214,9 @@ namespace HDV::Hull
         /// </summary>
         void IsBeyond(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face, const std::shared_ptr<VertexBuffer<VERTEXPTR>> &beyondVertices, const VERTEXPTR &v)
         {
+            // KIRI_LOG_DEBUG("-------GetVertexDistance Start-------");
             auto distance = MathHelper<VERTEXPTR>().GetVertexDistance(v, face);
+            // KIRI_LOG_DEBUG("-------distance={0}", distance);
 
             if (distance >= PLANE_DISTANCE_TOLERANCE)
             {
@@ -189,7 +225,7 @@ namespace HDV::Hull
                     mBuffer->MaxDistance = distance;
                     mBuffer->FurthestVertex = v;
                     // mBuffer->FurthestVertex->ToString();
-                    // KIRI_LOG_DEBUG("-------IsBeyond Finish-------");
+                    //  KIRI_LOG_DEBUG("-------IsBeyond Finish-------");
                 }
 
                 beyondVertices->Add(v);
@@ -245,6 +281,7 @@ namespace HDV::Hull
             {
                 auto min = std::numeric_limits<float>::max();
                 auto max = std::numeric_limits<float>::lowest();
+                // KIRI_LOG_DEBUG(max);
                 auto minInd = 0, maxInd = 0;
 
                 for (auto j = 0; j < vCount; j++)
@@ -524,7 +561,7 @@ namespace HDV::Hull
         /// </summary>
         void FindBeyondVertices(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)
         {
-            mBuffer->MaxDistance = -std::numeric_limits<float>::infinity();
+            mBuffer->MaxDistance = std::numeric_limits<float>::lowest();
             mBuffer->FurthestVertex = nullptr;
 
             auto count = mBuffer->InputVertices.size();
@@ -908,7 +945,7 @@ namespace HDV::Hull
         {
             auto beyondVertices = mBuffer->BeyondBuffer;
 
-            mBuffer->MaxDistance = -std::numeric_limits<float>::infinity();
+            mBuffer->MaxDistance = std::numeric_limits<float>::lowest();
             mBuffer->FurthestVertex = nullptr;
 
             VERTEXPTR v;
@@ -957,7 +994,7 @@ namespace HDV::Hull
 
         void HandleSingular()
         {
-            KIRI_LOG_DEBUG("---HandleSingular--");
+            // KIRI_LOG_DEBUG("---HandleSingular--");
 
             RollbackCenter();
             mBuffer->SingularVertices.insert(mBuffer->CurrentVertex);

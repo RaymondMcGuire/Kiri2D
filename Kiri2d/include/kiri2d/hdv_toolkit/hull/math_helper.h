@@ -123,6 +123,8 @@ namespace HDV::Hull
             auto distance = f->Offset;
             for (auto i = 0; i < v->GetDimension(); i++)
                 distance += normal[i] * p[i];
+
+            // KIRI_LOG_DEBUG("dim={0}; normal={1},{2}; p={3},{4};offset={5}, dis={6}", v->GetDimension(), normal[0], normal[1], p[0], p[1], f->Offset, distance);
             return distance;
         }
     };
