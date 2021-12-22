@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-02 00:36:23
- * @LastEditTime: 2021-12-08 20:32:33
+ * @Date: 2021-12-09 00:10:54
+ * @LastEditTime: 2021-12-22 17:41:13
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -30,7 +30,20 @@ namespace HDV::Hull
             BeyondList = beyondList;
             VerticesBeyond = std::make_shared<VertexBuffer<VERTEXPTR>>();
         }
-        virtual ~SimplexWrap() noexcept {}
+        virtual ~SimplexWrap() noexcept
+        {
+        }
+
+        void Clear()
+        {
+            Next = nullptr;
+            Prev.reset();
+            FurthestVertex = nullptr;
+            BeyondList = nullptr;
+            VerticesBeyond = nullptr;
+            Vertices.clear();
+            AdjacentFaces.clear();
+        }
 
         std::shared_ptr<SimplexWrap<VERTEXPTR>> Next;
         std::weak_ptr<SimplexWrap<VERTEXPTR>> Prev;

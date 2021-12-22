@@ -34,6 +34,9 @@ namespace HDV::Hull
 
         void Clear()
         {
+            for (size_t i = 0; i < mSimplexs.size(); i++)
+                mSimplexs[i]->Clear();
+
             mCentroid.assign(mDimension, 0.f);
             mSimplexs.clear();
             mVertices.clear();
@@ -151,10 +154,6 @@ namespace HDV::Hull
             {
                 mBuffer->CurrentVertex = mBuffer->UnprocessedFaces->First->FurthestVertex;
 
-                // mBuffer->UnprocessedFaces->ToString();
-
-                // mBuffer->CurrentVertex->ToString();
-
                 UpdateCenter();
 
                 // KIRI_LOG_DEBUG("centroid={0},{1}", mCentroid[0], mCentroid[1]);
@@ -205,6 +204,7 @@ namespace HDV::Hull
                 mSimplexs[i]->CalculateCentroid();
             }
 
+            // release memory
             mBuffer->Clear();
             mBuffer = nullptr;
         }
@@ -619,12 +619,6 @@ namespace HDV::Hull
 
             auto numFaces = faces.size();
 
-            // for (size_t idx = 0; idx < numFaces; idx++)
-            // {
-            //     faces[idx]->ToString();
-            // }
-            // KIRI_LOG_DEBUG("----");
-
             // Init the vertex beyond buffers.
             for (auto i = 0; i < numFaces; i++)
             {
@@ -637,8 +631,6 @@ namespace HDV::Hull
 
                 // faces[i]->ToString();
             }
-
-            // mBuffer->UnprocessedFaces->ToString();
         }
 
 #pragma endregion Initilization
@@ -793,13 +785,6 @@ namespace HDV::Hull
                 }
             }
 
-            // KIRI_LOG_DEBUG("----Create Cone----");
-            // for (size_t i = 0; i < mBuffer->ConeFaceBuffer.size(); i++)
-            // {
-            //     KIRI_LOG_DEBUG("----First SimplexWrap----");
-            //     mBuffer->ConeFaceBuffer[i]->Face->ToString();
-            // }
-
             return true;
         }
 
@@ -832,7 +817,6 @@ namespace HDV::Hull
         void CommitCone()
         {
 
-            // KIRI_LOG_DEBUG("---CommitCone--");
             //  Add the current vertex.
             mVertices.emplace_back(mBuffer->CurrentVertex);
 

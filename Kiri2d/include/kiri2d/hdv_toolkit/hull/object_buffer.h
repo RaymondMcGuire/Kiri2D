@@ -64,17 +64,40 @@ namespace HDV::Hull
         void Clear()
         {
 
-            UpdateBuffer.assign(mDimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
-            UpdateIndices.assign(mDimension, -1);
+            // UpdateBuffer.assign(mDimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
+            // UpdateIndices.assign(mDimension, -1);
+
+            for (auto i = 0; i < UpdateBuffer.size(); i++)
+                UpdateBuffer[i]->Clear();
+
+            for (auto i = 0; i < ConeFaceBuffer.size(); i++)
+                ConeFaceBuffer[i]->Clear();
+
+            for (auto i = 0; i < AffectedFaceBuffer.size(); i++)
+                AffectedFaceBuffer[i]->Clear();
+
+            for (auto i = 0; i < ConvexSimplexs.size(); i++)
+                ConvexSimplexs[i]->Clear();
+
+            for (auto i = 0; i < CONNECTOR_TABLE_SIZE; i++)
+                ConnectorTable[i]->Clear();
+
+            for (auto i = 0; i < TraverseStack.size(); i++)
+            {
+                TraverseStack.top()->Clear();
+                TraverseStack.pop();
+            }
+
+            TraverseStack = std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>>();
+
+            UpdateBuffer.clear();
+            UpdateIndices.clear();
 
             InputVertices.clear();
-            CurrentVertex = nullptr;
-            FurthestVertex = nullptr;
             MaxDistance = -std::numeric_limits<float>::max();
 
             ConvexSimplexs.clear();
             AffectedFaceBuffer.clear();
-            TraverseStack = std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>>();
             SingularVertices.clear();
             ConeFaceBuffer.clear();
 
@@ -83,8 +106,13 @@ namespace HDV::Hull
             EmptyBuffer->Clear();
             BeyondBuffer->Clear();
 
-            for (auto i = 0; i < CONNECTOR_TABLE_SIZE; i++)
-                ConnectorTable[i]->Clear();
+            CurrentVertex = nullptr;
+            FurthestVertex = nullptr;
+
+            ObjManager = nullptr;
+            UnprocessedFaces = nullptr;
+            EmptyBuffer = nullptr;
+            BeyondBuffer = nullptr;
         }
 
         void AddInput(const std::vector<VERTEXPTR> &input, bool assignIds, bool checkInput)

@@ -27,8 +27,24 @@ namespace HDV::Hull
 
         void Clear()
         {
+
+            RemoveAll();
             First = nullptr;
             Last = nullptr;
+        }
+
+        void RemoveAll()
+        {
+            std::shared_ptr<SimplexConnector<VERTEXPTR>> tmp;
+            while (First != nullptr)
+            {
+                tmp = First;
+                First = First->Next;
+                tmp->Clear();
+                tmp->Next = nullptr;
+                tmp->Prev.reset();
+                tmp = nullptr;
+            }
         }
 
         void AddFirst(const std::shared_ptr<SimplexConnector<VERTEXPTR>> &connector)

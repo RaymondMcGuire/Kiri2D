@@ -1,10 +1,9 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-21 12:34:39
- * @LastEditTime: 2021-12-21 13:05:51
+ * @Date: 2021-12-21 21:10:15
+ * @LastEditTime: 2021-12-22 19:06:14
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\hdv_toolkit\voronoi\voronoi_region.h
  */
 
 #ifndef _HDV_VORONOI_REGION_H_
@@ -22,6 +21,19 @@ namespace HDV::Voronoi
     public:
         explicit VoronoiRegion() {}
         virtual ~VoronoiRegion() noexcept {}
+
+        void Clear()
+        {
+            // for (auto i = 0; i < Cells.size(); i++)
+            //     Cells[i]->Clear();
+
+            // for (auto i = 0; i < Edges.size(); i++)
+            //     Edges[i]->Clear();
+
+            Cells.clear();
+            Edges.clear();
+            // site = nullptr;
+        }
 
         int Id;
         std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;

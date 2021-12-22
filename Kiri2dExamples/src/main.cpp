@@ -2461,50 +2461,19 @@ void QuickHullConvexHull2d()
     auto sampler_num = 1000;
     std::vector<Primitives::Vertex2Ptr> vet2;
 
-    // for (auto i = 0; i < sampler_num; i++)
-    // {
-    //     auto x = dist(rndEngine) * scale_size;
-    //     auto y = dist(rndEngine) * scale_size;
+    for (auto i = 0; i < sampler_num; i++)
+    {
+        auto x = dist(rndEngine) * scale_size;
+        auto y = dist(rndEngine) * scale_size;
 
-    //     auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
-    //     vet2.emplace_back(v2);
+        auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
+        vet2.emplace_back(v2);
 
-    //     // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
-    // }
-
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433f, -39.99463f, 0));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056f, -29.6595f, 8));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433f, -39.99463f, 1));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 9));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 2));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 10));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 3));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433f, -39.99463f, 11));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056f, -29.6595f, 4));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 12));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056f, -29.6595f, 5));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.4433f, -39.99463f, 13));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 6));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-140.09056f, -29.6595f, 14));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-130.45534f, -25.1881f, 7));
-    // vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-126.96175f, -31.668158f, 15));
-
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-538.35144f, 28.29749f, 1));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-75.84004f, 452.02176f, 0));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-538.35144f, 28.29749f, 3));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-114.87718f, 71.43241f, 2));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-75.84004f, 452.02176f, 5));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-538.35144f, 28.29749f, 4));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-75.84004f, 452.02176f, 7));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-114.87718f, 71.43241f, 6));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-114.87718f, 71.43241f, 9));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-75.84004f, 452.02176f, 8));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-114.87718f, 71.43241f, 11));
-    vet2.emplace_back(std::make_shared<Primitives::Vertex2>(-538.35144f, 28.29749f, 10));
+        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
+    }
 
     auto cv2 = std::make_shared<Hull::ConvexHull2>();
     cv2->Generate(vet2);
-    auto simplexs = cv2->GetSortSimplexsList();
 
     // scene renderer config
     float windowheight = 1080.f;
@@ -2517,17 +2486,20 @@ void QuickHullConvexHull2d()
 
     std::vector<KiriLine2> precompute_lines;
 
+    auto simplexs = cv2->GetSortSimplexsList();
     for (size_t i = 0; i < simplexs.size(); i++)
     {
         // auto line = KiriLine2(Vector2F(res2[i]->Vertices[0]->X(), res2[i]->Vertices[0]->Y()) + offset, Vector2F(res2[i]->Vertices[1]->X(), res2[i]->Vertices[1]->Y()) + offset);
         auto line = KiriLine2(Vector2F(simplexs[i].x, simplexs[i].y) + offset, Vector2F(simplexs[i].z, simplexs[i].w) + offset);
         line.thick = 1.f;
         precompute_lines.emplace_back(line);
-        KIRI_LOG_DEBUG("from={0},{1}----to={2},{3}", simplexs[i].x, simplexs[i].y, simplexs[i].z, simplexs[i].w);
+        // KIRI_LOG_DEBUG("from={0},{1}----to={2},{3}", simplexs[i].x, simplexs[i].y, simplexs[i].z, simplexs[i].w);
     }
 
     while (1)
     {
+        cv2->Generate(vet2);
+
         std::vector<KiriLine2> lines;
         std::vector<KiriPoint2> points;
 

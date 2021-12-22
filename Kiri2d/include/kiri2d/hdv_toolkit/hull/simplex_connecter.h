@@ -32,6 +32,13 @@ namespace HDV::Hull
         std::shared_ptr<SimplexWrap<VERTEXPTR>> Face;
         std::vector<int> VerticeIndexes;
 
+        void Clear()
+        {
+            Next = nullptr;
+            Prev.reset();
+            Face = nullptr;
+        }
+
         void Update(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face, int edgeIndex, int dim)
         {
             Face = face;

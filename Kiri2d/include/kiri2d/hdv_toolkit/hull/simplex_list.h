@@ -27,6 +27,8 @@ namespace HDV::Hull
 
         void Clear()
         {
+            RemoveAll();
+
             First = nullptr;
             Last = nullptr;
         }
@@ -41,6 +43,20 @@ namespace HDV::Hull
                 First->Prev = face;
 
             First = face;
+        }
+
+        void RemoveAll()
+        {
+            std::shared_ptr<SimplexWrap<VERTEXPTR>> tmp;
+            while (First != nullptr)
+            {
+                tmp = First;
+                First = First->Next;
+                tmp->Clear();
+                tmp->Next = nullptr;
+                tmp->Prev.reset();
+                tmp = nullptr;
+            }
         }
 
         void Remove(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)

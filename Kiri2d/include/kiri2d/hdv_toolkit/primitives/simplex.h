@@ -34,6 +34,13 @@ namespace HDV::Primitives
         }
         virtual ~Simplex() noexcept {}
 
+        void Clear()
+        {
+            Vertices.clear();
+            Normals.clear();
+            Adjacent.clear();
+        }
+
         std::vector<VERTEXPTR> Vertices;
         std::vector<float> Normals;
         std::vector<std::shared_ptr<Simplex<VERTEXPTR>>> Adjacent;

@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-02 17:26:15
- * @LastEditTime: 2021-12-02 17:27:49
+ * @Date: 2021-12-09 00:10:54
+ * @LastEditTime: 2021-12-22 18:27:04
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -21,6 +21,13 @@ namespace HDV::Hull
         explicit DeferredSimplex() {}
 
         virtual ~DeferredSimplex() noexcept {}
+
+        void Clear()
+        {
+            Face = nullptr;
+            Pivot = nullptr;
+            OldFace = nullptr;
+        }
 
         std::shared_ptr<SimplexWrap<VERTEXPTR>> Face;
 

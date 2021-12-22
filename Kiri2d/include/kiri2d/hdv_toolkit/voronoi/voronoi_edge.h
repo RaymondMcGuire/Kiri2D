@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-08 19:55:11
- * @LastEditTime: 2021-12-08 19:58:38
+ * @Date: 2021-12-09 00:10:54
+ * @LastEditTime: 2021-12-22 19:04:48
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -25,6 +25,14 @@ namespace HDV::Voronoi
             To = to;
         }
         virtual ~VoronoiEdge() noexcept {}
+
+        void Clear()
+        {
+            From->Clear();
+            To->Clear();
+            From = nullptr;
+            To = nullptr;
+        }
 
         std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> From;
         std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> To;

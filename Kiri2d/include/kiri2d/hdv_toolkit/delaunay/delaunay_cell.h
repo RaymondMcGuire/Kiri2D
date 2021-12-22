@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-08 23:18:30
- * @LastEditTime: 2021-12-08 23:21:55
+ * @Date: 2021-12-09 00:10:54
+ * @LastEditTime: 2021-12-22 19:02:15
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -30,6 +30,12 @@ namespace HDV::Delaunay
             Radius = radius;
         }
         virtual ~DelaunayCell() noexcept {}
+
+        void Clear()
+        {
+            // CircumCenter = nullptr;
+            // mSimplex = nullptr;
+        }
 
         std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> mSimplex;
 

@@ -30,6 +30,7 @@ namespace HDV::Delaunay
 
         void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
         {
+
             this->Clear();
             auto dim = this->Dimension;
 
@@ -46,8 +47,8 @@ namespace HDV::Delaunay
                 input[i]->mPosition = v;
             }
 
-            auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
-            hull->Generate(input, assignIds, checkInput);
+            Hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
+            Hull->Generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)
             {
@@ -56,25 +57,16 @@ namespace HDV::Delaunay
                 input[i]->mPosition = v;
             }
 
-            this->Vertices = hull->GetVertices();
-            this->Centroid->mPosition[0] = hull->GetCentroid()[0];
-            this->Centroid->mPosition[1] = hull->GetCentroid()[1];
+            this->Vertices = Hull->GetVertices();
+            this->Centroid->mPosition[0] = Hull->GetCentroid()[0];
+            this->Centroid->mPosition[1] = Hull->GetCentroid()[1];
 
-            count = hull->GetSimplexs().size();
-
-            // for (size_t i = 0; i < hull->GetSimplexs().size(); i++)
-            // {
-            //     auto sim = hull->GetSimplexs()[i];
-            //     KIRI_LOG_DEBUG("vert1={0},{1};vert2={2},{3};vert3={4},{5};",
-            //                    sim->Vertices[0]->mPosition[0], sim->Vertices[0]->mPosition[1],
-            //                    sim->Vertices[1]->mPosition[0], sim->Vertices[1]->mPosition[1],
-            //                    sim->Vertices[2]->mPosition[0], sim->Vertices[2]->mPosition[1]);
-            // }
+            count = Hull->GetSimplexs().size();
 
             for (auto i = 0; i < count; i++)
             {
 
-                auto simplex = hull->GetSimplexs()[i];
+                auto simplex = Hull->GetSimplexs()[i];
 
                 if (simplex->Normals[dim] >= 0.0f)
                 {

@@ -1,10 +1,9 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-09 15:36:21
- * @LastEditTime: 2021-12-21 17:59:20
+ * @Date: 2021-12-21 21:10:15
+ * @LastEditTime: 2021-12-22 19:03:19
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\hdv_toolkit\delaunay\delaunay_triangulation.h
  */
 
 #ifndef _HDV_DELAUNAY_TRIANGULATION_H_
@@ -36,11 +35,21 @@ namespace HDV::Delaunay
 
         VERTEXPTR Centroid;
 
+        std::shared_ptr<HDV::Hull::ConvexHull<VERTEXPTR>> Hull;
+
         virtual void Clear()
         {
+            for (auto i = 0; i < Cells.size(); i++)
+            {
+                Cells[i]->Clear();
+            }
+
             Cells.clear();
             Vertices.clear();
             Centroid = std::make_shared<VERTEX>();
+
+            if (Hull != nullptr)
+                Hull->Clear();
         }
 
         virtual void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) = 0;
