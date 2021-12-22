@@ -32,11 +32,11 @@ namespace HDV::Voronoi
 
         virtual void Clear()
         {
-            // for (auto i = 0; i < Cells.size(); i++)
-            //     Cells[i]->Clear();
+            for (auto i = 0; i < Cells.size(); i++)
+                Cells[i]->Clear();
 
-            // for (auto i = 0; i < Regions.size(); i++)
-            //     Regions[i]->Clear();
+            for (auto i = 0; i < Regions.size(); i++)
+                Regions[i]->Clear();
 
             Cells.clear();
             Regions.clear();
@@ -44,7 +44,7 @@ namespace HDV::Voronoi
 
         virtual void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) = 0;
 
-        virtual void LloydIteration(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) = 0;
+        virtual void Region2Polygon() = 0;
 
     protected:
         void GenerateVoronoi(std::vector<VERTEXPTR> input, const std::shared_ptr<HDV::Delaunay::DelaunayTriangulation<VERTEXPTR, VERTEX>> &delaunay, bool assignIds = true, bool checkInput = false)
@@ -138,20 +138,32 @@ namespace HDV::Voronoi
 
             delaunay->Clear();
         }
+    };
 
-        void Region2Polygon()
+    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
+    class VoronoiMesh2D : public VoronoiMesh<VERTEXPTR, VERTEX>
+    {
+    public:
+        explicit VoronoiMesh2D() : VoronoiMesh<VERTEXPTR, VERTEX>(2) {}
+        virtual ~VoronoiMesh2D() noexcept {}
+
+        std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> mBoundaryPolygon;
+
+        void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
         {
+            auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation2>();
+            this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
+        }
 
-            // clip boundary
-            auto BoundaryPolygon = std::make_shared<VoronoiCellPolygon<VERTEXPTR, VERTEX>>();
-            BoundaryPolygon->AddVert2(Vector2F(-200.f, -200.f));
-            BoundaryPolygon->AddVert2(Vector2F(-200.f, 200.f));
-            BoundaryPolygon->AddVert2(Vector2F(200.f, 200.f));
-            BoundaryPolygon->AddVert2(Vector2F(200.f, -200.f));
-            // KIRI_LOG_DEBUG("Regions={0}", Regions.size());
+        void SetBoundaryPolygon(const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
+        {
+            mBoundaryPolygon = boundary;
+        }
+
+        void Region2Polygon() override
+        {
             for (auto i = 0; i < Regions.size(); i++)
             {
-
                 std::vector<VERTEXPTR> verts;
                 auto count = 0, c1 = 0;
                 auto region = Regions[i];
@@ -218,11 +230,11 @@ namespace HDV::Voronoi
                 // clip voronoi cell polygon
                 if (cell_polygon->Verts.size() > 2)
                 {
-                    if (BoundaryPolygon->BBox.overlaps(cell_polygon->BBox))
+                    if (mBoundaryPolygon->BBox.overlaps(cell_polygon->BBox))
                     {
-                        if (!BoundaryPolygon->BBox.contains(cell_polygon->BBox))
+                        if (!mBoundaryPolygon->BBox.contains(cell_polygon->BBox))
                         {
-                            auto A = BoundaryPolygon->Verts;
+                            auto A = mBoundaryPolygon->Verts;
                             auto B = cell_polygon->Verts;
 
                             std::vector<PolyClip::Point2d> polyA;
@@ -273,25 +285,6 @@ namespace HDV::Voronoi
     };
 
     template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
-    class VoronoiMesh2D : public VoronoiMesh<VERTEXPTR, VERTEX>
-    {
-    public:
-        explicit VoronoiMesh2D() : VoronoiMesh<VERTEXPTR, VERTEX>(2) {}
-        virtual ~VoronoiMesh2D() noexcept {}
-
-        void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
-        {
-            auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation2>();
-            this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
-        }
-
-        void LloydIteration(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
-        {
-            this->Generate(input, assignIds, checkInput);
-        }
-    };
-
-    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
     class VoronoiMesh3D : public VoronoiMesh<VERTEXPTR, VERTEX>
     {
     public:
@@ -304,9 +297,8 @@ namespace HDV::Voronoi
             this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
         }
 
-        void LloydIteration(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
+        void Region2Polygon() override
         {
-            this->Generate(input, assignIds, checkInput);
         }
     };
 

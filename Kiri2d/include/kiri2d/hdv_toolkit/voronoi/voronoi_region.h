@@ -24,15 +24,15 @@ namespace HDV::Voronoi
 
         void Clear()
         {
-            // for (auto i = 0; i < Cells.size(); i++)
-            //     Cells[i]->Clear();
+            for (auto i = 0; i < Cells.size(); i++)
+                Cells[i]->Clear();
 
-            // for (auto i = 0; i < Edges.size(); i++)
-            //     Edges[i]->Clear();
+            for (auto i = 0; i < Edges.size(); i++)
+                Edges[i]->Clear();
 
             Cells.clear();
             Edges.clear();
-            // site = nullptr;
+            site = nullptr;
         }
 
         int Id;

@@ -2649,30 +2649,14 @@ void QuickHullVoronoi2d()
 
         pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(x, y, i));
     }
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-142.5951f, 2.208386f, 0));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-110.01088f, -98.637115f, 1));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-61.99737f, 124.00593f, 2));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(143.61653f, 94.56824f, 3));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-11.002484f, -0.20290521f, 4));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-79.095505f, -168.48323f, 5));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(-155.98325f, 133.64607f, 6));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(80.90461f, -55.281227f, 7));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(41.342674f, 143.00504f, 8));
-    // pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(132.29279f, -136.51772f, 9));
 
-    // boundary
-    auto b1 = std::make_shared<Voronoi::VoronoiSite2>(-400.f, -400.f, sampler_num);
-    auto b2 = std::make_shared<Voronoi::VoronoiSite2>(-400.f, 400.f, sampler_num + 1);
-    auto b3 = std::make_shared<Voronoi::VoronoiSite2>(400.f, 400.f, sampler_num + 2);
-    auto b4 = std::make_shared<Voronoi::VoronoiSite2>(400.f, -400.f, sampler_num + 3);
-    b1->SetAsBoundaryVertex();
-    b2->SetAsBoundaryVertex();
-    b3->SetAsBoundaryVertex();
-    b4->SetAsBoundaryVertex();
-    pd2->AddSite(b1);
-    pd2->AddSite(b2);
-    pd2->AddSite(b3);
-    pd2->AddSite(b4);
+    // clip boundary
+    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
+    BoundaryPolygon->AddVert2(Vector2F(-scale_size, -scale_size));
+    BoundaryPolygon->AddVert2(Vector2F(-scale_size, scale_size));
+    BoundaryPolygon->AddVert2(Vector2F(scale_size, scale_size));
+    BoundaryPolygon->AddVert2(Vector2F(scale_size, -scale_size));
+    pd2->SetBoundaryPolygon(BoundaryPolygon);
 
     // scene renderer config
     float windowheight = 1080.f;
