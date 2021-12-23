@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-21 21:10:15
- * @LastEditTime: 2021-12-21 21:18:39
+ * @Date: 2021-12-22 20:20:35
+ * @LastEditTime: 2021-12-23 15:59:25
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -64,6 +64,25 @@ namespace HDV::Voronoi
 
         BoundingBox2F BBox;
         std::vector<Vector2F> Verts;
+    };
+
+    class VoronoiPolygon3
+    {
+    public:
+        explicit VoronoiPolygon3() {}
+        virtual ~VoronoiPolygon3() noexcept {}
+
+        void UpdateBBox()
+        {
+            BBox.reset();
+            for (auto i = 0; i < Positions.size(); i++)
+                BBox.merge(Positions[i]);
+        }
+
+        BoundingBox3F BBox;
+        std::vector<Vector3F> Positions;
+        std::vector<Vector3F> Normals;
+        std::vector<int> Indices;
     };
 
 } // namespace HDV::Voronoi

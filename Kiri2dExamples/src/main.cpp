@@ -2769,6 +2769,73 @@ void QuickHullVoronoi2d()
     }
 }
 
+void QuickHullVoronoi3d()
+{
+    using namespace HDV;
+
+    auto voro3 = std::make_shared<Voronoi::VoronoiMesh3>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<float> dist(-1.f, 1.f);
+
+    auto scale_size = 200.f;
+    auto sampler_num = 1000;
+    std::vector<Primitives::Vertex3Ptr> vet3;
+
+    for (auto i = 0; i < sampler_num; i++)
+    {
+        auto x = dist(rndEngine) * scale_size;
+        auto y = dist(rndEngine) * scale_size;
+        auto z = dist(rndEngine) * scale_size;
+
+        vet3.emplace_back(std::make_shared<Voronoi::VoronoiSite3>(x, y, z, i));
+    }
+
+    voro3->Generate(vet3);
+    KIRI_LOG_DEBUG("resgion size={0}", voro3->Regions.size());
+
+    // // scene renderer config
+    // float windowheight = 1080.f;
+    // float windowwidth = 1920.f;
+
+    // Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+
+    // auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    // auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    // while (1)
+    // {
+    //     // KIRI_LOG_DEBUG("-----------------new----------------------------------");
+
+    //     std::vector<KiriLine2> precompute_lines;
+    //     std::vector<Vector2F> precompute_points;
+
+    //     std::vector<KiriLine2> lines;
+    //     std::vector<KiriPoint2> points;
+
+    //     for (size_t i = 0; i < precompute_points.size(); i++)
+    //     {
+    //         points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
+    //     }
+
+    //     for (auto i = 0; i < precompute_lines.size(); ++i)
+    //     {
+    //         lines.emplace_back(precompute_lines[i]);
+    //     }
+
+    //     scene->AddLines(lines);
+    //     scene->AddParticles(points);
+
+    //     renderer->DrawCanvas();
+    //     // renderer->SaveImages2File();
+    //     cv::imshow("KIRI2D", renderer->GetCanvas());
+    //     cv::waitKey(5);
+    //     renderer->ClearCanvas();
+    //     scene->Clear();
+    // }
+}
+
 int main()
 {
     KIRI::KiriLog::Init();
@@ -2811,8 +2878,10 @@ int main()
 
     // QuickHullDelaunayTriangulation2d();
 
-    QuickHullVoronoi2d();
-    //   VoronoiExample1();
+    // QuickHullVoronoi2d();
+    //    VoronoiExample1();
+
+    QuickHullVoronoi3d();
 
     return 0;
 }

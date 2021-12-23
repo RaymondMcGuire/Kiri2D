@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-21 21:10:15
- * @LastEditTime: 2021-12-22 19:03:19
+ * @Date: 2021-12-22 20:20:35
+ * @LastEditTime: 2021-12-23 16:20:54
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -12,6 +12,7 @@
 #pragma once
 
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_cell.h>
+#include <kiri2d/hdv_toolkit/hull/convex_hull.h>
 
 namespace HDV::Delaunay
 {

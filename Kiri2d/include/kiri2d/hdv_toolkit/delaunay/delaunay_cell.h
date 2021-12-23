@@ -1,11 +1,10 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-09 00:10:54
- * @LastEditTime: 2021-12-22 19:02:15
+ * @Date: 2021-12-22 20:20:35
+ * @LastEditTime: 2021-12-22 20:21:10
  * @LastEditors: Xu.WANG
  * @Description:
  */
-
 #ifndef _HDV_DELAUNAY_CELL_H_
 #define _HDV_DELAUNAY_CELL_H_
 

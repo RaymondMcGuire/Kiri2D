@@ -31,6 +31,20 @@ namespace HDV::Voronoi
         std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> CellPolygon;
     };
     typedef std::shared_ptr<VoronoiSite2> VoronoiSite2Ptr;
+
+    class VoronoiSite3 : public HDV::Primitives::Vertex3
+    {
+    public:
+        explicit VoronoiSite3() : HDV::Primitives::Vertex3() {}
+        explicit VoronoiSite3(int id) : HDV::Primitives::Vertex3(id) {}
+        explicit VoronoiSite3(float x, float y, float z) : HDV::Primitives::Vertex3(x, y, z) {}
+        explicit VoronoiSite3(float x, float y, float z, int id) : HDV::Primitives::Vertex3(x, y, z, id) {}
+
+        virtual ~VoronoiSite3() noexcept {}
+
+        std::shared_ptr<VoronoiPolygon3> Polygon;
+    };
+    typedef std::shared_ptr<VoronoiSite3> VoronoiSite3Ptr;
 } // namespace HDV::Voronoi
 
 #endif /* _HDV_VORONOI_SITE_H_ */

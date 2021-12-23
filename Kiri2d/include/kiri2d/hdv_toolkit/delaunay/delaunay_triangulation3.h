@@ -46,8 +46,8 @@ namespace HDV::Delaunay
                 input[i]->mPosition = v;
             }
 
-            auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
-            hull->Generate(input, assignIds, checkInput);
+            Hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
+            Hull->Generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)
             {
@@ -56,17 +56,17 @@ namespace HDV::Delaunay
                 input[i]->mPosition = v;
             }
 
-            this->Vertices = hull->GetVertices();
-            this->Centroid->mPosition[0] = hull->GetCentroid()[0];
-            this->Centroid->mPosition[1] = hull->GetCentroid()[1];
-            this->Centroid->mPosition[2] = hull->GetCentroid()[2];
+            this->Vertices = Hull->GetVertices();
+            this->Centroid->mPosition[0] = Hull->GetCentroid()[0];
+            this->Centroid->mPosition[1] = Hull->GetCentroid()[1];
+            this->Centroid->mPosition[2] = Hull->GetCentroid()[2];
 
-            count = hull->GetSimplexs().size();
+            count = Hull->GetSimplexs().size();
 
             for (auto i = 0; i < count; i++)
             {
 
-                auto simplex = hull->GetSimplexs()[i];
+                auto simplex = Hull->GetSimplexs()[i];
 
                 if (simplex->Normals[dim] >= 0.0f)
                 {

@@ -53,6 +53,8 @@ namespace HDV::Voronoi
 
             delaunay->Generate(input, assignIds, checkInput);
 
+            // KIRI_LOG_DEBUG("input size={0}, delaunay triangle size={1}", input.size(), delaunay->Vertices.size());
+
             for (auto i = 0; i < delaunay->Vertices.size(); i++)
             {
                 delaunay->Vertices[i]->SetTag(i);
@@ -133,6 +135,8 @@ namespace HDV::Voronoi
                     Regions.emplace_back(region);
                 }
             }
+
+            // KIRI_LOG_DEBUG("Regions size={0}", Regions.size());
 
             Region2Polygon();
 
@@ -299,6 +303,86 @@ namespace HDV::Voronoi
 
         void Region2Polygon() override
         {
+            for (auto i = 0; i < Regions.size(); i++)
+            {
+                std::vector<VERTEXPTR> verts;
+                auto count = 0, c1 = 0;
+                auto region = Regions[i];
+
+                if (region->site->GetIsBoundaryVertex())
+                    continue;
+
+                for (auto j = 0; j < region->Cells.size(); j++)
+                {
+                    auto vert = region->Cells[j]->CircumCenter;
+                    verts.emplace_back(std::make_shared<Primitives::Vertex3>(vert->X(), vert->Y(), vert->Z(), count++));
+                }
+
+                // if (!record)
+                //     continue;
+
+                //! TODO (convex hull input must insure dont have same points) remove same points
+                // auto lessThanLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
+                // {
+                //     return lhs->SqrMagnitude() < rhs->SqrMagnitude();
+                // };
+
+                // std::sort(verts.begin(), verts.end(), lessThanLambda);
+
+                // auto equalLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
+                // {
+                //     auto dim = lhs->GetDimension();
+                //     for (auto d = 0; d < dim; d++)
+                //     {
+                //         if (lhs->mPosition[d] != rhs->mPosition[d])
+                //             return false;
+                //     }
+
+                //     return true;
+                // };
+
+                // verts.erase(unique(verts.begin(), verts.end(), equalLambda), verts.end());
+
+                auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
+                hull->Generate(verts);
+
+                auto simplexs = hull->GetSimplexs();
+
+                auto polygon = std::make_shared<VoronoiPolygon3>();
+                for (auto j = 0; j < simplexs.size(); j++)
+                {
+                    for (auto k = 0; k < 3; k++)
+                    {
+                        auto vertk = simplexs[j]->Vertices[k];
+                        auto vec3 = Vector3F(vertk->X(), vertk->Y(), vertk->Z());
+                        polygon->Positions.emplace_back(vec3);
+                    }
+
+                    auto normal3 = Vector3F(simplexs[j]->Normals[0], simplexs[j]->Normals[1], simplexs[j]->Normals[2]);
+                    polygon->Normals.emplace_back(normal3);
+                    polygon->Normals.emplace_back(normal3);
+                    polygon->Normals.emplace_back(normal3);
+
+                    if (simplexs[j]->GetNormalFlipped())
+                    {
+                        polygon->Indices.emplace_back(j * 3 + 2);
+                        polygon->Indices.emplace_back(j * 3 + 1);
+                        polygon->Indices.emplace_back(j * 3 + 0);
+                    }
+                    else
+                    {
+                        polygon->Indices.emplace_back(j * 3 + 0);
+                        polygon->Indices.emplace_back(j * 3 + 1);
+                        polygon->Indices.emplace_back(j * 3 + 2);
+                    }
+                }
+                polygon->UpdateBBox();
+
+                auto site = std::dynamic_pointer_cast<VoronoiSite3>(Regions[i]->site);
+                site->Polygon = polygon;
+
+                hull->Clear();
+            }
         }
     };
 
