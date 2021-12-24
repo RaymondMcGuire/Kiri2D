@@ -6,4 +6,5 @@ build
 /export/**/*.jpg
 /export/**/*.csv
 /export/**/*.bgeo
+/export/**/*.voro
 /**/*.pyc

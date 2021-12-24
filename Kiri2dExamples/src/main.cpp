@@ -21,6 +21,18 @@
 using namespace KIRI;
 using namespace KIRI2D;
 
+bool InBound(Vector3F v, float size)
+{
+    if (v.x < -size || v.x > size)
+        return false;
+    if (v.y < -size || v.y > size)
+        return false;
+    if (v.z < -size || v.z > size)
+        return false;
+
+    return true;
+}
+
 float ComputeRMSE(const Vec_Float &predict, const Vec_Float &real)
 {
     auto sum = 0.f;
@@ -2620,7 +2632,7 @@ void QuickHullDelaunayTriangulation2d()
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
-        // renderer->SaveImages2File();
+        renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
@@ -2769,6 +2781,31 @@ void QuickHullVoronoi2d()
     }
 }
 
+static void ExportVoroFile(
+    const std::vector<Vector3F> &position,
+    const std::vector<Vector3F> &normal,
+    const std::vector<int> &indices,
+    const String fileName)
+{
+    String exportPath = String(EXPORT_PATH) + "voro/" + fileName + ".voro";
+
+    std::fstream file;
+    file.open(exportPath.c_str(), std::ios_base::out);
+
+    file << position.size() << "  " << normal.size() << "  " << indices.size() << std::endl;
+
+    for (auto i = 0; i < position.size(); i++)
+        file << position[i].x << "  " << position[i].y << "  " << position[i].z << std::endl;
+
+    for (auto i = 0; i < normal.size(); i++)
+        file << normal[i].x << "  " << normal[i].y << "  " << normal[i].z << std::endl;
+
+    for (auto i = 0; i < indices.size(); i++)
+        file << indices[i] << std::endl;
+
+    file.close();
+}
+
 void QuickHullVoronoi3d()
 {
     using namespace HDV;
@@ -2779,8 +2816,8 @@ void QuickHullVoronoi3d()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
-    auto scale_size = 200.f;
-    auto sampler_num = 1000;
+    auto scale_size = 3.f;
+    auto sampler_num = 100;
     std::vector<Primitives::Vertex3Ptr> vet3;
 
     for (auto i = 0; i < sampler_num; i++)
@@ -2789,51 +2826,74 @@ void QuickHullVoronoi3d()
         auto y = dist(rndEngine) * scale_size;
         auto z = dist(rndEngine) * scale_size;
 
-        vet3.emplace_back(std::make_shared<Voronoi::VoronoiSite3>(x, y, z, i));
+        auto v3 = std::make_shared<HDV::Voronoi::VoronoiSite3>(x, y, z, i);
+        vet3.emplace_back(v3);
+
+        // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
     }
+
+    // boundary
+    auto v3b1 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, -scale_size * 2.f, -scale_size * 2.f, sampler_num + 1);
+    auto v3b2 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, scale_size * 2.f, scale_size * 2.f, sampler_num + 2);
+
+    auto v3b3 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, -scale_size * 2.f, scale_size * 2.f, sampler_num + 3);
+    auto v3b4 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, scale_size * 2.f, scale_size * 2.f, sampler_num + 4);
+    auto v3b5 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, scale_size * 2.f, -scale_size * 2.f, sampler_num + 5);
+
+    auto v3b6 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, -scale_size * 2.f, -scale_size * 2.f, sampler_num + 6);
+    auto v3b7 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, -scale_size * 2.f, scale_size * 2.f, sampler_num + 7);
+    auto v3b8 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, scale_size * 2.f, -scale_size * 2.f, sampler_num + 8);
+
+    v3b1->SetAsBoundaryVertex();
+    v3b2->SetAsBoundaryVertex();
+    v3b3->SetAsBoundaryVertex();
+    v3b4->SetAsBoundaryVertex();
+    v3b5->SetAsBoundaryVertex();
+    v3b6->SetAsBoundaryVertex();
+    v3b7->SetAsBoundaryVertex();
+    v3b8->SetAsBoundaryVertex();
+
+    vet3.emplace_back(v3b1);
+    vet3.emplace_back(v3b2);
+    vet3.emplace_back(v3b3);
+    vet3.emplace_back(v3b4);
+    vet3.emplace_back(v3b5);
+    vet3.emplace_back(v3b6);
+    vet3.emplace_back(v3b7);
+    vet3.emplace_back(v3b8);
 
     voro3->Generate(vet3);
     KIRI_LOG_DEBUG("resgion size={0}", voro3->Regions.size());
 
-    // // scene renderer config
-    // float windowheight = 1080.f;
-    // float windowwidth = 1920.f;
+    auto counter = 0;
+    for (auto i = 0; i < voro3->Regions.size(); i++)
+    {
+        auto voronoi_site = std::dynamic_pointer_cast<HDV::Voronoi::VoronoiSite3>(voro3->Regions[i]->site);
+        if (voronoi_site->GetIsBoundaryVertex())
+            continue;
 
-    // Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+        auto cells = voro3->Regions[i]->Cells;
+        auto draw = true;
+        for (size_t j = 0; j < cells.size(); j++)
+        {
+            auto cc = cells[j]->CircumCenter;
+            auto v3 = Vector3F(cc->mPosition[0], cc->mPosition[1], cc->mPosition[2]);
+            if (!InBound(v3, scale_size))
+            {
+                draw = false;
+                break;
+            }
+        }
 
-    // auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    // auto renderer = std::make_shared<KiriRenderer2D>(scene);
+        if (!draw)
+            continue;
 
-    // while (1)
-    // {
-    //     // KIRI_LOG_DEBUG("-----------------new----------------------------------");
-
-    //     std::vector<KiriLine2> precompute_lines;
-    //     std::vector<Vector2F> precompute_points;
-
-    //     std::vector<KiriLine2> lines;
-    //     std::vector<KiriPoint2> points;
-
-    //     for (size_t i = 0; i < precompute_points.size(); i++)
-    //     {
-    //         points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
-    //     }
-
-    //     for (auto i = 0; i < precompute_lines.size(); ++i)
-    //     {
-    //         lines.emplace_back(precompute_lines[i]);
-    //     }
-
-    //     scene->AddLines(lines);
-    //     scene->AddParticles(points);
-
-    //     renderer->DrawCanvas();
-    //     // renderer->SaveImages2File();
-    //     cv::imshow("KIRI2D", renderer->GetCanvas());
-    //     cv::waitKey(5);
-    //     renderer->ClearCanvas();
-    //     scene->Clear();
-    // }
+        ExportVoroFile(
+            voronoi_site->Polygon->Positions,
+            voronoi_site->Polygon->Normals,
+            voronoi_site->Polygon->Indices,
+            UInt2Str4Digit(counter++));
+    }
 }
 
 int main()
