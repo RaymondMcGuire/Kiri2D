@@ -2806,6 +2806,189 @@ static void ExportVoroFile(
     file.close();
 }
 
+#include <tiny_obj_loader.h>
+#define TINYOBJLOADER_IMPLEMENTATION
+
+bool WriteMat(const std::string &filename, const std::vector<tinyobj::material_t> &materials)
+{
+    FILE *fp = fopen(filename.c_str(), "w");
+    if (!fp)
+    {
+        fprintf(stderr, "Failed to open file [ %s ] for write.\n", filename.c_str());
+        return false;
+    }
+
+    for (size_t i = 0; i < materials.size(); i++)
+    {
+
+        tinyobj::material_t mat = materials[i];
+
+        fprintf(fp, "newmtl %s\n", mat.name.c_str());
+        fprintf(fp, "Ka %f %f %f\n", mat.ambient[0], mat.ambient[1], mat.ambient[2]);
+        fprintf(fp, "Kd %f %f %f\n", mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]);
+        fprintf(fp, "Ks %f %f %f\n", mat.specular[0], mat.specular[1], mat.specular[2]);
+        fprintf(fp, "Kt %f %f %f\n", mat.transmittance[0], mat.specular[1], mat.specular[2]);
+        fprintf(fp, "Ke %f %f %f\n", mat.emission[0], mat.emission[1], mat.emission[2]);
+        fprintf(fp, "Ns %f\n", mat.shininess);
+        fprintf(fp, "Ni %f\n", mat.ior);
+        fprintf(fp, "illum %d\n", mat.illum);
+        fprintf(fp, "\n");
+        // @todo { texture }
+    }
+
+    fclose(fp);
+
+    return true;
+}
+
+bool TinyObjWriter(const String &filename, const tinyobj::attrib_t &attributes, const std::vector<tinyobj::shape_t> &shapes, const std::vector<tinyobj::material_t> &materials, bool coordTransform = false)
+{
+    String exportPath = String(EXPORT_PATH) + "voro/" + filename + ".obj";
+
+    FILE *fp = fopen(exportPath.c_str(), "w");
+    if (!fp)
+    {
+        fprintf(stderr, "Failed to open file [ %s ] for write.\n", exportPath.c_str());
+        return false;
+    }
+
+    std::string basename = filename;
+    std::string material_filename = basename + ".mtl";
+
+    int prev_material_id = -1;
+
+    fprintf(fp, "mtllib %s\n\n", material_filename.c_str());
+
+    // facevarying vtx
+    for (size_t k = 0; k < attributes.vertices.size(); k += 3)
+    {
+        if (coordTransform)
+        {
+            fprintf(fp, "v %f %f %f\n",
+                    attributes.vertices[k + 0],
+                    attributes.vertices[k + 2],
+                    -attributes.vertices[k + 1]);
+        }
+        else
+        {
+            fprintf(fp, "v %f %f %f\n",
+                    attributes.vertices[k + 0],
+                    attributes.vertices[k + 1],
+                    attributes.vertices[k + 2]);
+        }
+    }
+
+    fprintf(fp, "\n");
+
+    // facevarying normal
+    for (size_t k = 0; k < attributes.normals.size(); k += 3)
+    {
+        if (coordTransform)
+        {
+            fprintf(fp, "vn %f %f %f\n",
+                    attributes.normals[k + 0],
+                    attributes.normals[k + 2],
+                    -attributes.normals[k + 1]);
+        }
+        else
+        {
+            fprintf(fp, "vn %f %f %f\n",
+                    attributes.normals[k + 0],
+                    attributes.normals[k + 1],
+                    attributes.normals[k + 2]);
+        }
+    }
+
+    fprintf(fp, "\n");
+
+    // facevarying texcoord
+    for (size_t k = 0; k < attributes.texcoords.size(); k += 2)
+    {
+        fprintf(fp, "vt %f %f\n",
+                attributes.texcoords[k + 0],
+                attributes.texcoords[k + 1]);
+    }
+
+    for (size_t i = 0; i < shapes.size(); i++)
+    {
+        fprintf(fp, "\n");
+
+        if (shapes[i].name.empty())
+        {
+            fprintf(fp, "g Unknown\n");
+        }
+        else
+        {
+            fprintf(fp, "g %s\n", shapes[i].name.c_str());
+        }
+
+        bool has_vn = false;
+        bool has_vt = false;
+        // Assumes normals and textures are set shape-wise.
+        if (shapes[i].mesh.indices.size() > 0)
+        {
+            has_vn = shapes[i].mesh.indices[0].normal_index != -1;
+            has_vt = shapes[i].mesh.indices[0].texcoord_index != -1;
+        }
+
+        // face
+        int face_index = 0;
+        for (size_t k = 0; k < shapes[i].mesh.indices.size(); k += shapes[i].mesh.num_face_vertices[face_index++])
+        {
+            // Check Materials
+            int material_id = shapes[i].mesh.material_ids[face_index];
+            if (material_id != prev_material_id)
+            {
+                std::string material_name = materials[material_id].name;
+                fprintf(fp, "usemtl %s\n", material_name.c_str());
+                prev_material_id = material_id;
+            }
+
+            unsigned char v_per_f = shapes[i].mesh.num_face_vertices[face_index];
+            // Imperformant, but if you want to have variable vertices per face, you need some kind of a dynamic loop.
+            fprintf(fp, "f");
+            for (int l = 0; l < v_per_f; l++)
+            {
+                const tinyobj::index_t &ref = shapes[i].mesh.indices[k + l];
+                if (has_vn && has_vt)
+                {
+                    // v0/t0/vn0
+                    fprintf(fp, " %d/%d/%d", ref.vertex_index + 1, ref.texcoord_index + 1, ref.normal_index + 1);
+                    continue;
+                }
+                if (has_vn && !has_vt)
+                {
+                    // v0//vn0
+                    fprintf(fp, " %d//%d", ref.vertex_index + 1, ref.normal_index + 1);
+                    continue;
+                }
+                if (!has_vn && has_vt)
+                {
+                    // v0/vt0
+                    fprintf(fp, " %d/%d", ref.vertex_index + 1, ref.texcoord_index + 1);
+                    continue;
+                }
+                if (!has_vn && !has_vt)
+                {
+                    // v0 v1 v2
+                    fprintf(fp, " %d", ref.vertex_index + 1);
+                    continue;
+                }
+            }
+            fprintf(fp, "\n");
+        }
+    }
+
+    fclose(fp);
+
+    //
+    // Write material file
+    //
+    bool ret = WriteMat(material_filename, materials);
+
+    return ret;
+}
+
 void QuickHullVoronoi3d()
 {
     using namespace HDV;
@@ -2816,7 +2999,7 @@ void QuickHullVoronoi3d()
     std::default_random_engine rndEngine(seedGen());
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
 
-    auto scale_size = 3.f;
+    auto scale_size = 1.f;
     auto sampler_num = 100;
     std::vector<Primitives::Vertex3Ptr> vet3;
 
@@ -2833,37 +3016,50 @@ void QuickHullVoronoi3d()
     }
 
     // boundary
-    auto v3b1 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, -scale_size * 2.f, -scale_size * 2.f, sampler_num + 1);
-    auto v3b2 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, scale_size * 2.f, scale_size * 2.f, sampler_num + 2);
+    // auto v3b1 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, -scale_size * 2.f, -scale_size * 2.f, sampler_num + 1);
+    // auto v3b2 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, scale_size * 2.f, scale_size * 2.f, sampler_num + 2);
 
-    auto v3b3 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, -scale_size * 2.f, scale_size * 2.f, sampler_num + 3);
-    auto v3b4 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, scale_size * 2.f, scale_size * 2.f, sampler_num + 4);
-    auto v3b5 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, scale_size * 2.f, -scale_size * 2.f, sampler_num + 5);
+    // auto v3b3 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, -scale_size * 2.f, scale_size * 2.f, sampler_num + 3);
+    // auto v3b4 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, scale_size * 2.f, scale_size * 2.f, sampler_num + 4);
+    // auto v3b5 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.f, scale_size * 2.f, -scale_size * 2.f, sampler_num + 5);
 
-    auto v3b6 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, -scale_size * 2.f, -scale_size * 2.f, sampler_num + 6);
-    auto v3b7 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, -scale_size * 2.f, scale_size * 2.f, sampler_num + 7);
-    auto v3b8 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, scale_size * 2.f, -scale_size * 2.f, sampler_num + 8);
+    // auto v3b6 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, -scale_size * 2.f, -scale_size * 2.f, sampler_num + 6);
+    // auto v3b7 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, -scale_size * 2.f, scale_size * 2.f, sampler_num + 7);
+    // auto v3b8 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.f, scale_size * 2.f, -scale_size * 2.f, sampler_num + 8);
 
-    v3b1->SetAsBoundaryVertex();
-    v3b2->SetAsBoundaryVertex();
-    v3b3->SetAsBoundaryVertex();
-    v3b4->SetAsBoundaryVertex();
-    v3b5->SetAsBoundaryVertex();
-    v3b6->SetAsBoundaryVertex();
-    v3b7->SetAsBoundaryVertex();
-    v3b8->SetAsBoundaryVertex();
+    // v3b1->SetAsBoundaryVertex();
+    // v3b2->SetAsBoundaryVertex();
+    // v3b3->SetAsBoundaryVertex();
+    // v3b4->SetAsBoundaryVertex();
+    // v3b5->SetAsBoundaryVertex();
+    // v3b6->SetAsBoundaryVertex();
+    // v3b7->SetAsBoundaryVertex();
+    // v3b8->SetAsBoundaryVertex();
 
-    vet3.emplace_back(v3b1);
-    vet3.emplace_back(v3b2);
-    vet3.emplace_back(v3b3);
-    vet3.emplace_back(v3b4);
-    vet3.emplace_back(v3b5);
-    vet3.emplace_back(v3b6);
-    vet3.emplace_back(v3b7);
-    vet3.emplace_back(v3b8);
+    // vet3.emplace_back(v3b1);
+    // vet3.emplace_back(v3b2);
+    // vet3.emplace_back(v3b3);
+    // vet3.emplace_back(v3b4);
+    // vet3.emplace_back(v3b5);
+    // vet3.emplace_back(v3b6);
+    // vet3.emplace_back(v3b7);
+    // vet3.emplace_back(v3b8);
 
     voro3->Generate(vet3);
     KIRI_LOG_DEBUG("resgion size={0}", voro3->Regions.size());
+
+    // boundary bbox
+    BoundingBox3F boundary_box;
+    boundary_box.merge(Vector3F(-scale_size, -scale_size, -scale_size));
+    boundary_box.merge(Vector3F(scale_size, scale_size, scale_size));
+
+    boundary_box.merge(Vector3F(-scale_size, -scale_size, scale_size));
+    boundary_box.merge(Vector3F(-scale_size, scale_size, scale_size));
+    boundary_box.merge(Vector3F(-scale_size, scale_size, -scale_size));
+
+    boundary_box.merge(Vector3F(scale_size, -scale_size, -scale_size));
+    boundary_box.merge(Vector3F(scale_size, -scale_size, scale_size));
+    boundary_box.merge(Vector3F(scale_size, scale_size, -scale_size));
 
     auto counter = 0;
     for (auto i = 0; i < voro3->Regions.size(); i++)
@@ -2872,27 +3068,100 @@ void QuickHullVoronoi3d()
         if (voronoi_site->GetIsBoundaryVertex())
             continue;
 
-        auto cells = voro3->Regions[i]->Cells;
-        auto draw = true;
-        for (size_t j = 0; j < cells.size(); j++)
-        {
-            auto cc = cells[j]->CircumCenter;
-            auto v3 = Vector3F(cc->mPosition[0], cc->mPosition[1], cc->mPosition[2]);
-            if (!InBound(v3, scale_size))
-            {
-                draw = false;
-                break;
-            }
-        }
-
-        if (!draw)
+        if (boundary_box.contains(voronoi_site->Polygon->BBox.HighestPoint) && boundary_box.contains(voronoi_site->Polygon->BBox.LowestPoint))
             continue;
 
-        ExportVoroFile(
-            voronoi_site->Polygon->Positions,
-            voronoi_site->Polygon->Normals,
-            voronoi_site->Polygon->Indices,
-            UInt2Str4Digit(counter++));
+        // auto cells = voro3->Regions[i]->Cells;
+        // auto draw = true;
+        // for (size_t j = 0; j < cells.size(); j++)
+        // {
+        //     auto cc = cells[j]->CircumCenter;
+        //     auto v3 = Vector3F(cc->mPosition[0], cc->mPosition[1], cc->mPosition[2]);
+        //     if (!InBound(v3, scale_size))
+        //     {
+        //         draw = false;
+        //         break;
+        //     }
+        // }
+
+        // if (!draw)
+        //     continue;
+
+        std::vector<tinyobj::shape_t> obj_shapes;
+        std::vector<tinyobj::material_t> obj_materials;
+        tinyobj::attrib_t attrib;
+        tinyobj::shape_t ch_shape;
+
+        // convex hull edges
+        auto pos = voronoi_site->Polygon->Positions;
+        auto normal = voronoi_site->Polygon->Normals;
+        auto indices = voronoi_site->Polygon->Indices;
+
+        for (size_t j = 0; j < pos.size() / 3; j++)
+        {
+
+            auto idx1 = j * 3;
+            auto idx2 = j * 3 + 1;
+            auto idx3 = j * 3 + 2;
+
+            attrib.vertices.emplace_back(pos[idx1].x);
+            attrib.vertices.emplace_back(pos[idx1].y);
+            attrib.vertices.emplace_back(pos[idx1].z);
+
+            attrib.vertices.emplace_back(pos[idx2].x);
+            attrib.vertices.emplace_back(pos[idx2].y);
+            attrib.vertices.emplace_back(pos[idx2].z);
+
+            attrib.vertices.emplace_back(pos[idx3].x);
+            attrib.vertices.emplace_back(pos[idx3].y);
+            attrib.vertices.emplace_back(pos[idx3].z);
+
+            // attrib.normals.emplace_back(normal[idx1].x);
+            // attrib.normals.emplace_back(normal[idx1].y);
+            // attrib.normals.emplace_back(normal[idx1].z);
+
+            // attrib.normals.emplace_back(normal[idx2].x);
+            // attrib.normals.emplace_back(normal[idx2].y);
+            // attrib.normals.emplace_back(normal[idx2].z);
+
+            // attrib.normals.emplace_back(normal[idx3].x);
+            // attrib.normals.emplace_back(normal[idx3].y);
+            // attrib.normals.emplace_back(normal[idx3].z);
+
+            tinyobj::index_t i1, i2, i3;
+            i1.vertex_index = indices[idx1];
+            i2.vertex_index = indices[idx2];
+            i3.vertex_index = indices[idx3];
+
+            // i1.normal_index = indices[idx1];
+            // i2.normal_index = indices[idx2];
+            // i3.normal_index = indices[idx3];
+
+            i1.normal_index = -1;
+            i2.normal_index = -1;
+            i3.normal_index = -1;
+
+            i1.texcoord_index = -1;
+            i2.texcoord_index = -1;
+            i3.texcoord_index = -1;
+
+            ch_shape.mesh.indices.emplace_back(i1);
+            ch_shape.mesh.indices.emplace_back(i2);
+            ch_shape.mesh.indices.emplace_back(i3);
+
+            ch_shape.mesh.num_face_vertices.emplace_back(3);
+            ch_shape.mesh.material_ids.emplace_back(-1);
+        }
+
+        // write to file
+        obj_shapes.emplace_back(ch_shape);
+        TinyObjWriter(UInt2Str4Digit(counter++), attrib, obj_shapes, obj_materials);
+
+        // ExportVoroFile(
+        //     voronoi_site->Polygon->Positions,
+        //     voronoi_site->Polygon->Normals,
+        //     voronoi_site->Polygon->Indices,
+        //     UInt2Str4Digit(counter++));
     }
 }
 
