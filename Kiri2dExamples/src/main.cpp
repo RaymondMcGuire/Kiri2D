@@ -3097,6 +3097,10 @@ void QuickHullVoronoi3d()
         auto normal = voronoi_site->Polygon->Normals;
         auto indices = voronoi_site->Polygon->Indices;
 
+        String print_vert = "Vector vertices[] = {";
+        String print_norm = "Vector normals[] = {";
+        String print_ind = "triangles[] = {";
+
         for (size_t j = 0; j < pos.size() / 3; j++)
         {
 
@@ -3133,6 +3137,31 @@ void QuickHullVoronoi3d()
             i2.vertex_index = indices[idx2];
             i3.vertex_index = indices[idx3];
 
+            if (j != pos.size() / 3 - 1)
+            {
+                print_vert += "{" + std::to_string(pos[idx1].x) + "f," + std::to_string(pos[idx1].y) + "f," + std::to_string(pos[idx1].z) + "f},";
+                print_vert += "{" + std::to_string(pos[idx2].x) + "f," + std::to_string(pos[idx2].y) + "f," + std::to_string(pos[idx2].z) + "f},";
+                print_vert += "{" + std::to_string(pos[idx3].x) + "f," + std::to_string(pos[idx3].y) + "f," + std::to_string(pos[idx3].z) + "f},";
+
+                print_norm += "{" + std::to_string(normal[idx1].x) + "f," + std::to_string(normal[idx1].y) + "f," + std::to_string(normal[idx1].z) + "f},";
+                print_norm += "{" + std::to_string(normal[idx2].x) + "f," + std::to_string(normal[idx2].y) + "f," + std::to_string(normal[idx2].z) + "f},";
+                print_norm += "{" + std::to_string(normal[idx3].x) + "f," + std::to_string(normal[idx3].y) + "f," + std::to_string(normal[idx3].z) + "f},";
+
+                print_ind += "{" + std::to_string(indices[idx1]) + "," + std::to_string(indices[idx2]) + "," + std::to_string(indices[idx3]) + "},";
+            }
+            else
+            {
+                print_vert += "{" + std::to_string(pos[idx1].x) + "f," + std::to_string(pos[idx1].y) + "f," + std::to_string(pos[idx1].z) + "f},";
+                print_vert += "{" + std::to_string(pos[idx2].x) + "f," + std::to_string(pos[idx2].y) + "f," + std::to_string(pos[idx2].z) + "f},";
+                print_vert += "{" + std::to_string(pos[idx3].x) + "f," + std::to_string(pos[idx3].y) + "f," + std::to_string(pos[idx3].z) + "f}};";
+
+                print_norm += "{" + std::to_string(normal[idx1].x) + "f," + std::to_string(normal[idx1].y) + "f," + std::to_string(normal[idx1].z) + "f},";
+                print_norm += "{" + std::to_string(normal[idx2].x) + "f," + std::to_string(normal[idx2].y) + "f," + std::to_string(normal[idx2].z) + "f},";
+                print_norm += "{" + std::to_string(normal[idx3].x) + "f," + std::to_string(normal[idx3].y) + "f," + std::to_string(normal[idx3].z) + "f}};";
+
+                print_ind += "{" + std::to_string(indices[idx1]) + "," + std::to_string(indices[idx2]) + "," + std::to_string(indices[idx3]) + "}};";
+            }
+
             // i1.normal_index = indices[idx1];
             // i2.normal_index = indices[idx2];
             // i3.normal_index = indices[idx3];
@@ -3152,6 +3181,11 @@ void QuickHullVoronoi3d()
             ch_shape.mesh.num_face_vertices.emplace_back(3);
             ch_shape.mesh.material_ids.emplace_back(-1);
         }
+
+        KIRI_LOG_DEBUG("print_vert={0}", print_vert);
+        KIRI_LOG_DEBUG("print_norm={0}", print_norm);
+        KIRI_LOG_DEBUG("print_ind={0}", print_ind);
+        KIRI_LOG_DEBUG("---------------");
 
         // write to file
         obj_shapes.emplace_back(ch_shape);
