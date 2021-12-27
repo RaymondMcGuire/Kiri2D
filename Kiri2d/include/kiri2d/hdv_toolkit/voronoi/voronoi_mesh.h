@@ -322,26 +322,26 @@ namespace HDV::Voronoi
                 //     continue;
 
                 //! TODO (convex hull input must insure dont have same points) remove same points
-                // auto lessThanLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
-                // {
-                //     return lhs->SqrMagnitude() < rhs->SqrMagnitude();
-                // };
+                auto lessThanLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
+                {
+                    return lhs->SqrMagnitude() < rhs->SqrMagnitude();
+                };
 
-                // std::sort(verts.begin(), verts.end(), lessThanLambda);
+                std::sort(verts.begin(), verts.end(), lessThanLambda);
 
-                // auto equalLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
-                // {
-                //     auto dim = lhs->GetDimension();
-                //     for (auto d = 0; d < dim; d++)
-                //     {
-                //         if (lhs->mPosition[d] != rhs->mPosition[d])
-                //             return false;
-                //     }
+                auto equalLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
+                {
+                    auto dim = lhs->GetDimension();
+                    for (auto d = 0; d < dim; d++)
+                    {
+                        if (lhs->mPosition[d] != rhs->mPosition[d])
+                            return false;
+                    }
 
-                //     return true;
-                // };
+                    return true;
+                };
 
-                // verts.erase(unique(verts.begin(), verts.end(), equalLambda), verts.end());
+                verts.erase(unique(verts.begin(), verts.end(), equalLambda), verts.end());
 
                 auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
                 hull->Generate(verts);
