@@ -19,21 +19,21 @@ namespace HDV::Primitives
     {
     public:
         explicit Vertex() {}
-        explicit Vertex(int dimension) { mPosition.assign(dimension, 0.f); }
+        explicit Vertex(int dimension) { mPosition.assign(dimension, 0.0); }
         explicit Vertex(int dimension, int id) : Vertex(dimension) { mId = id; }
         virtual ~Vertex() noexcept {}
 
         int GetId() const { return mId; }
         int GetTag() const { return mTag; }
         int GetDimension() { return (mPosition.empty()) ? 0 : mPosition.size(); }
-        float GetWeight() { return mWeight; }
-        const std::vector<float> &GetPosition() const { return mPosition; }
+        double GetWeight() { return mWeight; }
+        const std::vector<double> &GetPosition() const { return mPosition; }
 
         void SetId(int id) { mId = id; }
         void SetTag(int tag) { mTag = tag; }
-        void SetWeight(float weight) { mWeight = weight; }
+        void SetWeight(double weight) { mWeight = weight; }
 
-        const std::vector<float> &GetPosition() { return mPosition; }
+        const std::vector<double> &GetPosition() { return mPosition; }
 
         std::string GetString()
         {
@@ -50,20 +50,20 @@ namespace HDV::Primitives
             return "[Vertex: Id=" + std::to_string(mId) + ",Tag=" + std::to_string(mTag) + ", Dimension=" + std::to_string(dim) + ",Data=" + data + "]";
         }
 
-        std::vector<float> mPosition;
+        std::vector<double> mPosition;
 
         void SetAsBoundaryVertex() { mIsBoundaryVertex = true; }
         bool GetIsBoundaryVertex() { return mIsBoundaryVertex; }
 
-        float Magnitude()
+        double Magnitude()
         {
             return std::sqrtf(SqrMagnitude());
         }
 
-        float SqrMagnitude()
+        double SqrMagnitude()
         {
 
-            auto sum = 0.f;
+            auto sum = 0.0;
             auto dim = GetDimension();
 
             for (auto i = 0; i < dim; i++)
@@ -72,19 +72,19 @@ namespace HDV::Primitives
             return sum;
         }
 
-        float Distance(Vertex v)
+        double Distance(Vertex v)
         {
             return std::sqrtf(SqrDistance(v));
         }
 
-        float SqrDistance(Vertex v)
+        double SqrDistance(Vertex v)
         {
             auto dim = std::min(GetDimension(), v.GetDimension());
-            auto sum = 0.f;
+            auto sum = 0.0;
 
             for (auto i = 0; i < dim; i++)
             {
-                float x = mPosition[i] - v.GetPosition()[i];
+                double x = mPosition[i] - v.GetPosition()[i];
                 sum += x * x;
             }
 
@@ -110,7 +110,7 @@ namespace HDV::Primitives
     protected:
         int mId = -1;
         int mTag = 0;
-        float mWeight = 0.f;
+        double mWeight = 0.0;
         bool mIsBoundaryVertex = false;
     };
     typedef std::shared_ptr<Vertex> VertexPtr;

@@ -27,7 +27,7 @@ namespace HDV::Hull
         explicit ConvexHull(int dimension)
         {
             mDimension = dimension;
-            mCentroid.assign(dimension, 0.f);
+            mCentroid.assign(dimension, 0.0);
         }
 
         virtual ~ConvexHull() noexcept {}
@@ -37,7 +37,7 @@ namespace HDV::Hull
             for (size_t i = 0; i < mSimplexs.size(); i++)
                 mSimplexs[i]->Clear();
 
-            mCentroid.assign(mDimension, 0.f);
+            mCentroid.assign(mDimension, 0.0);
             mSimplexs.clear();
             mVertices.clear();
         }
@@ -216,7 +216,7 @@ namespace HDV::Hull
         {
             // KIRI_LOG_DEBUG("-------GetVertexDistance Start-------");
             auto distance = MathHelper<VERTEXPTR>().GetVertexDistance(v, face);
-            // KIRI_LOG_DEBUG("-------distance={0}", distance);
+            // KIRI_LOG_DEBUG("-------distance={0}, mBuffer->MaxDistance={1}", distance, mBuffer->MaxDistance);
 
             if (distance >= PLANE_DISTANCE_TOLERANCE)
             {
@@ -242,7 +242,7 @@ namespace HDV::Hull
             for (auto i = 0; i < mDimension; i++)
                 mCentroid[i] *= (count - 1);
 
-            float f = 1.f / count;
+            double f = 1.f / count;
 
             for (auto i = 0; i < mDimension; i++)
                 mCentroid[i] = f * (mCentroid[i] + mBuffer->CurrentVertex->GetPosition()[i]);
@@ -279,8 +279,8 @@ namespace HDV::Hull
 
             for (auto i = 0; i < mDimension; i++)
             {
-                auto min = std::numeric_limits<float>::max();
-                auto max = std::numeric_limits<float>::lowest();
+                auto min = std::numeric_limits<double>::max();
+                auto max = std::numeric_limits<double>::lowest();
                 // KIRI_LOG_DEBUG(max);
                 auto minInd = 0, maxInd = 0;
 
@@ -319,10 +319,10 @@ namespace HDV::Hull
         /// <summary>
         /// Computes the sum of square distances to the initial points.
         /// </summary>
-        float GetSquaredDistanceSum(const VERTEXPTR &pivot, const std::vector<VERTEXPTR> &initialPoints)
+        double GetSquaredDistanceSum(const VERTEXPTR &pivot, const std::vector<VERTEXPTR> &initialPoints)
         {
             auto initPtsNum = initialPoints.size();
-            auto sum = 0.f;
+            auto sum = 0.0;
 
             for (auto i = 0; i < initPtsNum; i++)
             {
@@ -348,9 +348,9 @@ namespace HDV::Hull
             std::vector<VERTEXPTR> initialPoints;
 
             VERTEXPTR first = nullptr, second = nullptr;
-            auto maxDist = 0.f;
+            auto maxDist = 0.0;
 
-            std::vector<float> temp;
+            std::vector<double> temp;
 
             for (auto i = 0; i < extremes.size() - 1; i++)
             {
@@ -482,8 +482,8 @@ namespace HDV::Hull
                 return false;
             }
 
-            auto offset = 0.f;
-            auto centerDistance = 0.f;
+            auto offset = 0.0;
+            auto centerDistance = 0.0;
             auto fi = vertices[0]->GetPosition();
 
             for (auto i = 0; i < mDimension; i++)
@@ -561,7 +561,7 @@ namespace HDV::Hull
         /// </summary>
         void FindBeyondVertices(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)
         {
-            mBuffer->MaxDistance = std::numeric_limits<float>::lowest();
+            mBuffer->MaxDistance = std::numeric_limits<double>::lowest();
             mBuffer->FurthestVertex = nullptr;
 
             auto count = mBuffer->InputVertices.size();
@@ -619,11 +619,14 @@ namespace HDV::Hull
 
             auto numFaces = faces.size();
 
+            // KIRI_LOG_DEBUG("numFaces={0}", numFaces);
+
             // Init the vertex beyond buffers.
             for (auto i = 0; i < numFaces; i++)
             {
                 FindBeyondVertices(faces[i]);
 
+                // KIRI_LOG_DEBUG("faces[i]->VerticesBeyond->GetCount()={0}", faces[i]->VerticesBeyond->GetCount());
                 if (faces[i]->VerticesBeyond->GetCount() == 0)
                     mBuffer->ConvexSimplexs.emplace_back(faces[i]); // The face is on the hull
                 else
@@ -929,7 +932,7 @@ namespace HDV::Hull
         {
             auto beyondVertices = mBuffer->BeyondBuffer;
 
-            mBuffer->MaxDistance = std::numeric_limits<float>::lowest();
+            mBuffer->MaxDistance = std::numeric_limits<double>::lowest();
             mBuffer->FurthestVertex = nullptr;
 
             VERTEXPTR v;
@@ -1011,18 +1014,18 @@ namespace HDV::Hull
             return mVertices;
         }
 
-        std::vector<float> GetCentroid()
+        std::vector<double> GetCentroid()
         {
             return mCentroid;
         }
 
     private:
-        const float PLANE_DISTANCE_TOLERANCE = 1e-7f;
+        const double PLANE_DISTANCE_TOLERANCE = 1e-10;
         int mDimension;
 
         std::vector<VERTEXPTR> mVertices;
         std::vector<std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>>> mSimplexs;
-        std::vector<float> mCentroid;
+        std::vector<double> mCentroid;
         std::shared_ptr<ObjectBuffer<VERTEXPTR>> mBuffer;
     };
 
@@ -1032,6 +1035,14 @@ namespace HDV::Hull
         explicit ConvexHull2() : ConvexHull(2) {}
 
         ~ConvexHull2() noexcept {}
+    };
+
+    class ConvexHull3 : public ConvexHull<HDV::Primitives::Vertex3Ptr>
+    {
+    public:
+        explicit ConvexHull3() : ConvexHull(3) {}
+
+        ~ConvexHull3() noexcept {}
     };
 } // namespace HDV::Hull
 

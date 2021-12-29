@@ -1,5 +1,12 @@
 /***
  * @Author: Xu.WANG
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2021-12-29 15:01:22
+ * @LastEditors: Xu.WANG
+ * @Description:
+ */
+/***
+ * @Author: Xu.WANG
  * @Date: 2021-12-21 21:10:15
  * @LastEditTime: 2021-12-21 21:13:35
  * @LastEditors: Xu.WANG
@@ -29,13 +36,13 @@ namespace HDV::Voronoi
             mMesh->SetBoundaryPolygon(boundary);
             auto bbox = boundary->BBox;
 
-            if (bbox.width() < 0.f || bbox.height() < 0.f)
+            if (bbox.width() < 0.0 || bbox.height() < 0.0)
                 KIRI_LOG_ERROR("bbox low={0},{1}, high={2},{3}, width={4}, height={5}", bbox.LowestPoint.x, bbox.LowestPoint.y, bbox.HighestPoint.x, bbox.HighestPoint.y, bbox.width(), bbox.height());
 
             auto site1 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y - bbox.height());
-            auto site2 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x + 2.f * bbox.width(), bbox.LowestPoint.y - bbox.height());
-            auto site3 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x + 2.f * bbox.width(), bbox.LowestPoint.y + 2.f * bbox.height());
-            auto site4 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y + 2.f * bbox.height());
+            auto site2 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y - bbox.height());
+            auto site3 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height());
+            auto site4 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height());
 
             site1->SetAsBoundaryVertex();
             site2->SetAsBoundaryVertex();

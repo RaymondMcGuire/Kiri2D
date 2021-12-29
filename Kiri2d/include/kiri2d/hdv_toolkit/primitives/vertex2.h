@@ -1,10 +1,11 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-01 19:04:56
- * @LastEditTime: 2021-12-08 04:30:29
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2021-12-29 14:58:14
  * @LastEditors: Xu.WANG
  * @Description:
  */
+
 #ifndef _HDV_VERTEX2_H_
 #define _HDV_VERTEX2_H_
 
@@ -19,30 +20,30 @@ namespace HDV::Primitives
     public:
         explicit Vertex2() : Vertex(2) {}
         explicit Vertex2(int id) : Vertex(2, id) {}
-        explicit Vertex2(float x, float y) : Vertex(2)
+        explicit Vertex2(double x, double y) : Vertex(2)
         {
             mPosition[0] = x;
             mPosition[1] = y;
         }
-        explicit Vertex2(float x, float y, int id) : Vertex(2, id)
+        explicit Vertex2(double x, double y, int id) : Vertex(2, id)
         {
             mPosition[0] = x;
             mPosition[1] = y;
         }
         virtual ~Vertex2() noexcept {}
 
-        void Set(float x, float y)
+        void Set(double x, double y)
         {
             mPosition[0] = x;
             mPosition[1] = y;
         }
 
-        float Distance(float px, float py)
+        double Distance(double px, double py)
         {
             return std::sqrtf(SqrDistance(px, py));
         }
 
-        float SqrDistance(float px, float py)
+        double SqrDistance(double px, double py)
         {
             auto x = mPosition[0] - px;
             auto y = mPosition[1] - py;
@@ -50,8 +51,8 @@ namespace HDV::Primitives
             return x * x + y * y;
         }
 
-        float X() const { return mPosition[0]; }
-        float Y() const { return mPosition[1]; }
+        double X() const { return mPosition[0]; }
+        double Y() const { return mPosition[1]; }
     };
     typedef std::shared_ptr<Vertex2> Vertex2Ptr;
 } // namespace HDV::Primitives

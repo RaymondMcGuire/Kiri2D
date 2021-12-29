@@ -1,10 +1,11 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-01 19:36:02
- * @LastEditTime: 2021-12-08 16:11:17
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2021-12-29 14:58:29
  * @LastEditors: Xu.WANG
  * @Description:
  */
+
 #ifndef _HDV_Vertex4_H_
 #define _HDV_Vertex4_H_
 
@@ -19,14 +20,14 @@ namespace HDV::Primitives
     public:
         explicit Vertex4() : Vertex(4) {}
         explicit Vertex4(int id) : Vertex(4, id) {}
-        explicit Vertex4(float x, float y, float z, float w) : Vertex(4)
+        explicit Vertex4(double x, double y, double z, double w) : Vertex(4)
         {
             mPosition[0] = x;
             mPosition[1] = y;
             mPosition[2] = z;
             mPosition[3] = w;
         }
-        explicit Vertex4(float x, float y, float z, float w, int id) : Vertex(4, id)
+        explicit Vertex4(double x, double y, double z, double w, int id) : Vertex(4, id)
         {
             mPosition[0] = x;
             mPosition[1] = y;
@@ -35,7 +36,7 @@ namespace HDV::Primitives
         }
         virtual ~Vertex4() noexcept {}
 
-        void Set(float x, float y, float z, float w)
+        void Set(double x, double y, double z, double w)
         {
             mPosition[0] = x;
             mPosition[1] = y;
@@ -43,12 +44,12 @@ namespace HDV::Primitives
             mPosition[3] = w;
         }
 
-        float Distance(float px, float py, float pz, float pw)
+        double Distance(double px, double py, double pz, double pw)
         {
             return std::sqrtf(SqrDistance(px, py, pz, pw));
         }
 
-        float SqrDistance(float px, float py, float pz, float pw)
+        double SqrDistance(double px, double py, double pz, double pw)
         {
             auto x = mPosition[0] - px;
             auto y = mPosition[1] - py;
@@ -58,10 +59,10 @@ namespace HDV::Primitives
             return x * x + y * y + z * z + w * w;
         }
 
-        float X() const { return mPosition[0]; }
-        float Y() const { return mPosition[1]; }
-        float Z() const { return mPosition[2]; }
-        float W() const { return mPosition[3]; }
+        double X() const { return mPosition[0]; }
+        double Y() const { return mPosition[1]; }
+        double Z() const { return mPosition[2]; }
+        double W() const { return mPosition[3]; }
     };
 
     typedef std::shared_ptr<Vertex4> Vertex4Ptr;

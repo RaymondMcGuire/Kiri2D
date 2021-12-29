@@ -1,11 +1,10 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-09 00:10:54
- * @LastEditTime: 2021-12-22 17:41:13
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2021-12-29 14:59:24
  * @LastEditors: Xu.WANG
  * @Description:
  */
-
 #ifndef _HDV_SIMPLEX_WRAP_H_
 #define _HDV_SIMPLEX_WRAP_H_
 
@@ -24,7 +23,7 @@ namespace HDV::Hull
             const std::shared_ptr<VertexBuffer<VERTEXPTR>> &beyondList)
             : Next{nullptr}, Prev{}
         {
-            Normals.assign(dimension, 0.f);
+            Normals.assign(dimension, 0.0);
             Vertices.assign(dimension, VERTEXPTR());
             AdjacentFaces.assign(dimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
             BeyondList = beyondList;
@@ -48,7 +47,7 @@ namespace HDV::Hull
         std::shared_ptr<SimplexWrap<VERTEXPTR>> Next;
         std::weak_ptr<SimplexWrap<VERTEXPTR>> Prev;
 
-        float Offset = 0.f;
+        double Offset = 0.0;
         bool IsNormalFlipped = false;
 
         bool GetInList() const { return mInList; }
@@ -57,7 +56,7 @@ namespace HDV::Hull
         int GetTag() const { return mTag; }
         void SetTag(int tag) { mTag = tag; }
 
-        std::vector<float> Normals;
+        std::vector<double> Normals;
         std::vector<VERTEXPTR> Vertices;
         VERTEXPTR FurthestVertex;
         std::shared_ptr<VertexBuffer<VERTEXPTR>> BeyondList;

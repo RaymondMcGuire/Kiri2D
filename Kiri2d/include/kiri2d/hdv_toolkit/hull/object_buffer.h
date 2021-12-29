@@ -43,7 +43,7 @@ namespace HDV::Hull
 
         VERTEXPTR CurrentVertex;
         VERTEXPTR FurthestVertex;
-        float MaxDistance = -std::numeric_limits<float>::max();
+        double MaxDistance = -std::numeric_limits<double>::max();
 
         std::shared_ptr<SimplexList<VERTEXPTR>> UnprocessedFaces;
         std::shared_ptr<ObjectManager<VERTEXPTR>> ObjManager;
@@ -94,7 +94,7 @@ namespace HDV::Hull
             UpdateIndices.clear();
 
             InputVertices.clear();
-            MaxDistance = -std::numeric_limits<float>::max();
+            MaxDistance = -std::numeric_limits<double>::max();
 
             ConvexSimplexs.clear();
             AffectedFaceBuffer.clear();

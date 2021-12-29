@@ -20,10 +20,10 @@ namespace HDV::Delaunay
     public:
         explicit DelaunayTriangulation3D() : DelaunayTriangulation<VERTEXPTR, VERTEX>(3)
         {
-            mMatrixBuffer.assign(4, std::vector<float>());
+            mMatrixBuffer.assign(4, std::vector<double>());
             for (size_t i = 0; i < mMatrixBuffer.size(); i++)
             {
-                mMatrixBuffer[i].assign(4, 0.f);
+                mMatrixBuffer[i].assign(4, 0.0);
             }
         }
         virtual ~DelaunayTriangulation3D() noexcept {}
@@ -57,6 +57,8 @@ namespace HDV::Delaunay
             }
 
             this->Vertices = Hull->GetVertices();
+            // KIRI_LOG_DEBUG("Hull->GetVertices size={0}", this->Vertices.size());
+
             this->Centroid->mPosition[0] = Hull->GetCentroid()[0];
             this->Centroid->mPosition[1] = Hull->GetCentroid()[1];
             this->Centroid->mPosition[2] = Hull->GetCentroid()[2];
@@ -88,16 +90,16 @@ namespace HDV::Delaunay
         }
 
     private:
-        std::vector<std::vector<float>> mMatrixBuffer;
+        std::vector<std::vector<double>> mMatrixBuffer;
 
-        float MINOR(int r0, int r1, int r2, int c0, int c1, int c2)
+        double MINOR(int r0, int r1, int r2, int c0, int c1, int c2)
         {
             return mMatrixBuffer[r0][c0] * (mMatrixBuffer[r1][c1] * mMatrixBuffer[r2][c2] - mMatrixBuffer[r2][c1] * mMatrixBuffer[r1][c2]) -
                    mMatrixBuffer[r0][c1] * (mMatrixBuffer[r1][c0] * mMatrixBuffer[r2][c2] - mMatrixBuffer[r2][c0] * mMatrixBuffer[r1][c2]) +
                    mMatrixBuffer[r0][c2] * (mMatrixBuffer[r1][c0] * mMatrixBuffer[r2][c1] - mMatrixBuffer[r2][c0] * mMatrixBuffer[r1][c1]);
         }
 
-        float Determinant()
+        double Determinant()
         {
             return (mMatrixBuffer[0][0] * MINOR(1, 2, 3, 1, 2, 3) -
                     mMatrixBuffer[0][1] * MINOR(1, 2, 3, 0, 2, 3) +
@@ -149,11 +151,11 @@ namespace HDV::Delaunay
             }
             auto c = Determinant();
 
-            auto s = -1.f / (2.f * a);
+            auto s = -1.0 / (2.0 * a);
             auto radius = std::abs(s) * std::sqrtf(dx * dx + dy * dy + dz * dz - 4 * a * c);
 
-            std::vector<float> circumCenter;
-            circumCenter.assign(3, 0.f);
+            std::vector<double> circumCenter;
+            circumCenter.assign(3, 0.0);
             circumCenter[0] = s * dx;
             circumCenter[1] = s * dy;
             circumCenter[2] = s * dz;

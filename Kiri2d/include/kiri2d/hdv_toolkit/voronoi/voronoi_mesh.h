@@ -223,10 +223,10 @@ namespace HDV::Voronoi
                 for (auto j = 0; j < simplexs.size(); j++)
                 {
                     if (j == 0)
-                        cell_polygon->AddVert2(Vector2F(simplexs[j].x, simplexs[j].y));
+                        cell_polygon->AddVert2(Vector2D(simplexs[j].x, simplexs[j].y));
 
                     if (j != simplexs.size() - 1)
-                        cell_polygon->AddVert2(Vector2F(simplexs[j].z, simplexs[j].w));
+                        cell_polygon->AddVert2(Vector2D(simplexs[j].z, simplexs[j].w));
 
                     // KIRI_LOG_DEBUG("simplexs = ({0},{1})-({2},{3})", simplexs[j].x, simplexs[j].y, simplexs[j].z, simplexs[j].w);
                 }
@@ -266,7 +266,7 @@ namespace HDV::Voronoi
                                     for (size_t ppp = 0; ppp < results[pp].size(); ppp++)
                                     {
                                         auto polyn = results[pp][ppp];
-                                        clipedPolygon->AddVert2(Vector2F(polyn.x_, polyn.y_));
+                                        clipedPolygon->AddVert2(Vector2D(polyn.x_, polyn.y_));
                                     }
                                 }
 
@@ -312,14 +312,17 @@ namespace HDV::Voronoi
                 if (region->site->GetIsBoundaryVertex())
                     continue;
 
+                // KIRI_LOG_DEBUG("----------------new region-----------------");
+                // KIRI_LOG_DEBUG("region cell size={0}", region->Cells.size());
                 for (auto j = 0; j < region->Cells.size(); j++)
                 {
                     auto vert = region->Cells[j]->CircumCenter;
                     verts.emplace_back(std::make_shared<Primitives::Vertex3>(vert->X(), vert->Y(), vert->Z(), count++));
+                    // KIRI_LOG_DEBUG("vert={0},{1},{2}", vert->X(), vert->Y(), vert->Z());
                 }
-
-                // if (!record)
-                //     continue;
+                // KIRI_LOG_DEBUG("----------------region vert debug-----------------");
+                //  if (!record)
+                //      continue;
 
                 //! TODO (convex hull input must insure dont have same points) remove same points
                 auto lessThanLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
@@ -349,16 +352,17 @@ namespace HDV::Voronoi
                 auto simplexs = hull->GetSimplexs();
 
                 auto polygon = std::make_shared<VoronoiPolygon3>();
+                // KIRI_LOG_DEBUG("simplexs size={0}", simplexs.size());
                 for (auto j = 0; j < simplexs.size(); j++)
                 {
                     for (auto k = 0; k < 3; k++)
                     {
                         auto vertk = simplexs[j]->Vertices[k];
-                        auto vec3 = Vector3F(vertk->X(), vertk->Y(), vertk->Z());
+                        auto vec3 = Vector3D(vertk->X(), vertk->Y(), vertk->Z());
                         polygon->Positions.emplace_back(vec3);
                     }
 
-                    auto normal3 = Vector3F(simplexs[j]->Normals[0], simplexs[j]->Normals[1], simplexs[j]->Normals[2]);
+                    auto normal3 = Vector3D(simplexs[j]->Normals[0], simplexs[j]->Normals[1], simplexs[j]->Normals[2]);
                     polygon->Normals.emplace_back(normal3);
                     polygon->Normals.emplace_back(normal3);
                     polygon->Normals.emplace_back(normal3);

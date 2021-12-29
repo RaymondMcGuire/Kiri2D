@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2020-10-19 01:37:05
  * @LastEditTime: 2021-09-13 14:17:38
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
  */
 #ifndef _KIRI_PCH_H_
@@ -147,7 +147,7 @@ constexpr auto KIRI_SGN(T val) { return (T(0) < val) - (val < T(0)); }
 
 #include <kiri_math_mini/kiri_math_mini.h>
 
-//TODO need support Int type
+// TODO need support Int type
 template <Int N, class Type>
 using VectorX = kiri_math_mini::Vector<Type, N>;
 
@@ -190,6 +190,9 @@ using Array3F = kiri_math_mini::Array3<float>;
 
 using BoundingBox2F = kiri_math_mini::BoundingBox2F;
 using BoundingBox3F = kiri_math_mini::BoundingBox3F;
+
+using BoundingBox2D = kiri_math_mini::BoundingBox2D;
+using BoundingBox3D = kiri_math_mini::BoundingBox3D;
 ////////////////////////////////////////////////////////////////////////////////
 #include <kiri_log.h>
 #include <kiri_timer.h>

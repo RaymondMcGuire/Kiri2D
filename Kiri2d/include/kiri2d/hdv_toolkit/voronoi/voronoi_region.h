@@ -47,8 +47,8 @@ namespace HDV::Voronoi
             {
                 auto from = Edges[i]->From->CircumCenter;
                 auto to = Edges[i]->To->CircumCenter;
-                bbox.merge(Vector2F(from->X(), from->Y()));
-                bbox.merge(Vector2F(to->X(), to->Y()));
+                bbox.merge(Vector2D(from->X(), from->Y()));
+                bbox.merge(Vector2D(to->X(), to->Y()));
             }
             return bbox;
         }

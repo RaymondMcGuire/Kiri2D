@@ -28,8 +28,8 @@ namespace HDV::Primitives
             mId = id;
             mDimension = dimension;
             Vertices.assign(dimension, VERTEXPTR());
-            Normals.assign(dimension, 0.f);
-            mCentroid.assign(dimension, 0.f);
+            Normals.assign(dimension, 0.0);
+            mCentroid.assign(dimension, 0.0);
             Adjacent.assign(dimension, std::make_shared<Simplex<VERTEXPTR>>());
         }
         virtual ~Simplex() noexcept {}
@@ -42,24 +42,24 @@ namespace HDV::Primitives
         }
 
         std::vector<VERTEXPTR> Vertices;
-        std::vector<float> Normals;
+        std::vector<double> Normals;
         std::vector<std::shared_ptr<Simplex<VERTEXPTR>>> Adjacent;
 
         int GetId() const { return mId; }
         int GetTag() const { return mTag; }
         int GetDimension() const { return mDimension; }
-        float GetOffset() const { return mOffset; }
+        double GetOffset() const { return mOffset; }
         bool GetNormalFlipped() const { return mIsNormalFlipped; }
 
         void SetTag(int tag) { mTag = tag; }
-        void SetOffset(float offset) { mOffset = offset; }
+        void SetOffset(double offset) { mOffset = offset; }
         void SetNormalFlipped(int normal_flipped) { mIsNormalFlipped = normal_flipped; }
 
-        float Dot(VERTEXPTR v)
+        double Dot(VERTEXPTR v)
         {
             auto dim = mDimension;
             if (v.GetDimension() != dim)
-                return 0.f;
+                return 0.0;
 
             auto dp = 0.0f;
 
@@ -227,14 +227,14 @@ namespace HDV::Primitives
         int mId = -1;
         int mTag = 0;
         int mDimension;
-        float mOffset;
+        double mOffset;
         bool mIsNormalFlipped;
 
-        std::vector<float> mCentroid;
+        std::vector<double> mCentroid;
 
-        std::vector<float> Subtract(std::vector<float> x, std::vector<float> y)
+        std::vector<double> Subtract(std::vector<double> x, std::vector<double> y)
         {
-            std::vector<float> target;
+            std::vector<double> target;
             for (auto i = 0; i < mDimension; i++)
             {
                 target[i] = x[i] - y[i];
@@ -255,7 +255,7 @@ namespace HDV::Primitives
 
             auto norm = std::sqrtf(nx * nx + ny * ny);
 
-            auto f = 1.f / norm;
+            auto f = 1.0 / norm;
             Normals[0] = f * nx;
             Normals[1] = f * ny;
         }
@@ -274,7 +274,7 @@ namespace HDV::Primitives
 
             auto norm = std::sqrtf(nx * nx + ny * ny + nz * nz);
 
-            auto f = 1.f / norm;
+            auto f = 1.0 / norm;
             Normals[0] = f * nx;
             Normals[1] = f * ny;
             Normals[2] = f * nz;
@@ -301,7 +301,7 @@ namespace HDV::Primitives
 
             auto norm = std::sqrtf(nx * nx + ny * ny + nz * nz + nw * nw);
 
-            auto f = 1.f / norm;
+            auto f = 1.0 / norm;
             Normals[0] = f * nx;
             Normals[1] = f * ny;
             Normals[2] = f * nz;
@@ -312,27 +312,27 @@ namespace HDV::Primitives
         {
             if (Vertices.size() != 2)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
-            mCentroid[0] = (Vertices[0]->GetPosition()[0] + Vertices[1]->GetPosition()[0]) / 2.f;
-            mCentroid[1] = (Vertices[0]->GetPosition()[1] + Vertices[1]->GetPosition()[1]) / 2.f;
+            mCentroid[0] = (Vertices[0]->GetPosition()[0] + Vertices[1]->GetPosition()[0]) / 2.0;
+            mCentroid[1] = (Vertices[0]->GetPosition()[1] + Vertices[1]->GetPosition()[1]) / 2.0;
         }
 
         void CalculateCentroid3D()
         {
             if (Vertices.size() != 3)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
-            mCentroid[0] = (Vertices[0]->GetPosition()[0] + Vertices[1]->GetPosition()[0] + Vertices[2]->GetPosition()[0]) / 3.f;
-            mCentroid[1] = (Vertices[0]->GetPosition()[1] + Vertices[1]->GetPosition()[1] + Vertices[2]->GetPosition()[1]) / 3.f;
-            mCentroid[2] = (Vertices[0]->GetPosition()[2] + Vertices[1]->GetPosition()[2] + Vertices[2]->GetPosition()[2]) / 3.f;
+            mCentroid[0] = (Vertices[0]->GetPosition()[0] + Vertices[1]->GetPosition()[0] + Vertices[2]->GetPosition()[0]) / 3.0;
+            mCentroid[1] = (Vertices[0]->GetPosition()[1] + Vertices[1]->GetPosition()[1] + Vertices[2]->GetPosition()[1]) / 3.0;
+            mCentroid[2] = (Vertices[0]->GetPosition()[2] + Vertices[1]->GetPosition()[2] + Vertices[2]->GetPosition()[2]) / 3.0;
         }
 
         void CalculateCentroid4D()
         {
             if (Vertices.size() != 4)
                 throw std::invalid_argument("Invalid dimension for Vertices!");
-            mCentroid[0] = (Vertices[0]->GetPosition()[0] + Vertices[1]->GetPosition()[0] + Vertices[2]->GetPosition()[0] + Vertices[3]->GetPosition()[0]) / 4.f;
-            mCentroid[1] = (Vertices[0]->GetPosition()[1] + Vertices[1]->GetPosition()[1] + Vertices[2]->GetPosition()[1] + Vertices[3]->GetPosition()[1]) / 4.f;
-            mCentroid[2] = (Vertices[0]->GetPosition()[2] + Vertices[1]->GetPosition()[2] + Vertices[2]->GetPosition()[2] + Vertices[3]->GetPosition()[2]) / 4.f;
-            mCentroid[3] = (Vertices[0]->GetPosition()[3] + Vertices[1]->GetPosition()[3] + Vertices[2]->GetPosition()[3] + Vertices[3]->GetPosition()[3]) / 4.f;
+            mCentroid[0] = (Vertices[0]->GetPosition()[0] + Vertices[1]->GetPosition()[0] + Vertices[2]->GetPosition()[0] + Vertices[3]->GetPosition()[0]) / 4.0;
+            mCentroid[1] = (Vertices[0]->GetPosition()[1] + Vertices[1]->GetPosition()[1] + Vertices[2]->GetPosition()[1] + Vertices[3]->GetPosition()[1]) / 4.0;
+            mCentroid[2] = (Vertices[0]->GetPosition()[2] + Vertices[1]->GetPosition()[2] + Vertices[2]->GetPosition()[2] + Vertices[3]->GetPosition()[2]) / 4.0;
+            mCentroid[3] = (Vertices[0]->GetPosition()[3] + Vertices[1]->GetPosition()[3] + Vertices[2]->GetPosition()[3] + Vertices[3]->GetPosition()[3]) / 4.0;
         }
     };
 } // namespace HDV::Primitives

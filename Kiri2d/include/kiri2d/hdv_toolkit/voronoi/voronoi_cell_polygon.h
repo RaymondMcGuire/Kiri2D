@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-22 20:20:35
- * @LastEditTime: 2021-12-23 15:59:25
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2021-12-29 15:01:19
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -22,24 +22,24 @@ namespace HDV::Voronoi
         explicit VoronoiCellPolygon() {}
         virtual ~VoronoiCellPolygon() noexcept {}
 
-        void AddVert2(Vector2F vert)
+        void AddVert2(Vector2D vert)
         {
             Verts.emplace_back(vert);
             BBox.merge(vert);
         }
 
-        Vector2F GetCentroid()
+        Vector2D GetCentroid()
         {
-            std::vector<Vector2F> tmpPolygonVertices(Verts);
+            std::vector<Vector2D> tmpPolygonVertices(Verts);
 
             auto first = tmpPolygonVertices[0], last = tmpPolygonVertices[tmpPolygonVertices.size() - 1];
             if (first.x != last.x || first.y != last.y)
                 tmpPolygonVertices.emplace_back(first);
 
-            auto twicearea = 0.f,
-                 x = 0.f, y = 0.f, f = 0.f;
+            auto twicearea = 0.0,
+                 x = 0.0, y = 0.0, f = 0.0;
             auto nPts = tmpPolygonVertices.size();
-            Vector2F p1, p2;
+            Vector2D p1, p2;
 
             for (size_t i = 0, j = nPts - 1; i < nPts; j = i++)
             {
@@ -50,7 +50,7 @@ namespace HDV::Voronoi
                 x += (p1.x + p2.x) * f;
                 y += (p1.y + p2.y) * f;
             }
-            f = twicearea * 3.f;
+            f = twicearea * 3.0;
 
             // KIRI_LOG_DEBUG("GetCentroid -------");
             // for (size_t i = 0; i < tmpPolygonVertices.size(); i++)
@@ -59,11 +59,11 @@ namespace HDV::Voronoi
             // }
             // KIRI_LOG_DEBUG("GetCentroid -------,f={0}", f);
 
-            return Vector2F(x / f, y / f);
+            return Vector2D(x / f, y / f);
         }
 
-        BoundingBox2F BBox;
-        std::vector<Vector2F> Verts;
+        BoundingBox2D BBox;
+        std::vector<Vector2D> Verts;
     };
 
     class VoronoiPolygon3
@@ -79,9 +79,9 @@ namespace HDV::Voronoi
                 BBox.merge(Positions[i]);
         }
 
-        BoundingBox3F BBox;
-        std::vector<Vector3F> Positions;
-        std::vector<Vector3F> Normals;
+        BoundingBox3D BBox;
+        std::vector<Vector3D> Positions;
+        std::vector<Vector3D> Normals;
         std::vector<int> Indices;
     };
 

@@ -1,10 +1,9 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-21 13:08:13
- * @LastEditTime: 2021-12-21 13:10:12
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2021-12-29 15:00:06
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\hdv_toolkit\voronoi\voronoi_site.h
  */
 
 #ifndef _HDV_VORONOI_SITE_H_
@@ -23,8 +22,8 @@ namespace HDV::Voronoi
     public:
         explicit VoronoiSite2() : HDV::Primitives::Vertex2() {}
         explicit VoronoiSite2(int id) : HDV::Primitives::Vertex2(id) {}
-        explicit VoronoiSite2(float x, float y) : HDV::Primitives::Vertex2(x, y) {}
-        explicit VoronoiSite2(float x, float y, int id) : HDV::Primitives::Vertex2(x, y, id) {}
+        explicit VoronoiSite2(double x, double y) : HDV::Primitives::Vertex2(x, y) {}
+        explicit VoronoiSite2(double x, double y, int id) : HDV::Primitives::Vertex2(x, y, id) {}
 
         virtual ~VoronoiSite2() noexcept {}
 
@@ -37,8 +36,8 @@ namespace HDV::Voronoi
     public:
         explicit VoronoiSite3() : HDV::Primitives::Vertex3() {}
         explicit VoronoiSite3(int id) : HDV::Primitives::Vertex3(id) {}
-        explicit VoronoiSite3(float x, float y, float z) : HDV::Primitives::Vertex3(x, y, z) {}
-        explicit VoronoiSite3(float x, float y, float z, int id) : HDV::Primitives::Vertex3(x, y, z, id) {}
+        explicit VoronoiSite3(double x, double y, double z) : HDV::Primitives::Vertex3(x, y, z) {}
+        explicit VoronoiSite3(double x, double y, double z, int id) : HDV::Primitives::Vertex3(x, y, z, id) {}
 
         virtual ~VoronoiSite3() noexcept {}
 

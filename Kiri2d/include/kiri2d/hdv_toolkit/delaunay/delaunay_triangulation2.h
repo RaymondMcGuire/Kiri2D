@@ -20,10 +20,10 @@ namespace HDV::Delaunay
     public:
         explicit DelaunayTriangulation2D() : DelaunayTriangulation<VERTEXPTR, VERTEX>(2)
         {
-            mMatrixBuffer.assign(3, std::vector<float>());
+            mMatrixBuffer.assign(3, std::vector<double>());
             for (size_t i = 0; i < mMatrixBuffer.size(); i++)
             {
-                mMatrixBuffer[i].assign(3, 0.f);
+                mMatrixBuffer[i].assign(3, 0.0);
             }
         }
         virtual ~DelaunayTriangulation2D() noexcept {}
@@ -58,6 +58,7 @@ namespace HDV::Delaunay
             }
 
             this->Vertices = Hull->GetVertices();
+
             this->Centroid->mPosition[0] = Hull->GetCentroid()[0];
             this->Centroid->mPosition[1] = Hull->GetCentroid()[1];
 
@@ -88,9 +89,9 @@ namespace HDV::Delaunay
         }
 
     private:
-        std::vector<std::vector<float>> mMatrixBuffer;
+        std::vector<std::vector<double>> mMatrixBuffer;
 
-        float Determinant()
+        double Determinant()
         {
             auto fCofactor00 = mMatrixBuffer[1][1] * mMatrixBuffer[2][2] - mMatrixBuffer[1][2] * mMatrixBuffer[2][1];
             auto fCofactor10 = mMatrixBuffer[1][2] * mMatrixBuffer[2][0] - mMatrixBuffer[1][0] * mMatrixBuffer[2][2];
@@ -140,14 +141,14 @@ namespace HDV::Delaunay
             }
             auto c = -Determinant();
 
-            auto s = -1.f / (2.f * a);
+            auto s = -1.0 / (2.0 * a);
 
-            std::vector<float> circumCenter;
-            circumCenter.assign(2, 0.f);
+            std::vector<double> circumCenter;
+            circumCenter.assign(2, 0.0);
             circumCenter[0] = s * dx;
             circumCenter[1] = s * dy;
 
-            auto radius = std::abs(s) * std::sqrtf(dx * dx + dy * dy - 4.f * a * c);
+            auto radius = std::abs(s) * std::sqrtf(dx * dx + dy * dy - 4.0 * a * c);
 
             return std::make_shared<DelaunayCell<VERTEXPTR, VERTEX>>(simplex, circumCenter, radius);
         }

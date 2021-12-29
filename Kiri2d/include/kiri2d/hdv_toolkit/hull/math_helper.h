@@ -22,9 +22,9 @@ namespace HDV::Hull
 
         virtual ~MathHelper() noexcept {}
 
-        static float LengthSquared(std::vector<float> x)
+        static double LengthSquared(std::vector<double> x)
         {
-            auto norm = 0.f;
+            auto norm = 0.0;
             for (int i = 0; i < x.size(); i++)
             {
                 auto t = x[i];
@@ -33,18 +33,18 @@ namespace HDV::Hull
             return norm;
         }
 
-        static std::vector<float> SubtractFast(std::vector<float> x, std::vector<float> y)
+        static std::vector<double> SubtractFast(std::vector<double> x, std::vector<double> y)
         {
-            std::vector<float> target;
+            std::vector<double> target;
             auto d = x.size();
-            target.assign(d, 0.f);
+            target.assign(d, 0.0);
             for (auto i = 0; i < d; i++)
                 target[i] = x[i] - y[i];
 
             return target;
         }
 
-        static void FindNormalVector4D(const std::vector<VERTEXPTR> &vertices, std::vector<float> &normal)
+        static void FindNormalVector4D(const std::vector<VERTEXPTR> &vertices, std::vector<double> &normal)
         {
             auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
             auto y = SubtractFast(vertices[2]->GetPosition(), vertices[1]->GetPosition());
@@ -57,14 +57,14 @@ namespace HDV::Hull
 
             auto norm = std::sqrtf(nx * nx + ny * ny + nz * nz + nw * nw);
 
-            auto f = 1.f / norm;
+            auto f = 1.0 / norm;
             normal[0] = f * nx;
             normal[1] = f * ny;
             normal[2] = f * nz;
             normal[3] = f * nw;
         }
 
-        static void FindNormalVector3D(const std::vector<VERTEXPTR> &vertices, std::vector<float> &normal)
+        static void FindNormalVector3D(const std::vector<VERTEXPTR> &vertices, std::vector<double> &normal)
         {
             auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
             auto y = SubtractFast(vertices[2]->GetPosition(), vertices[1]->GetPosition());
@@ -75,13 +75,13 @@ namespace HDV::Hull
 
             auto norm = std::sqrtf(nx * nx + ny * ny + nz * nz);
 
-            auto f = 1.f / norm;
+            auto f = 1.0 / norm;
             normal[0] = f * nx;
             normal[1] = f * ny;
             normal[2] = f * nz;
         }
 
-        static void FindNormalVector2D(const std::vector<VERTEXPTR> &vertices, std::vector<float> &normal)
+        static void FindNormalVector2D(const std::vector<VERTEXPTR> &vertices, std::vector<double> &normal)
         {
             auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
 
@@ -90,12 +90,12 @@ namespace HDV::Hull
 
             auto norm = std::sqrtf(nx * nx + ny * ny);
 
-            auto f = 1.f / norm;
+            auto f = 1.0 / norm;
             normal[0] = f * nx;
             normal[1] = f * ny;
         }
 
-        static void FindNormalVector(const std::vector<VERTEXPTR> &vertices, std::vector<float> &normalData)
+        static void FindNormalVector(const std::vector<VERTEXPTR> &vertices, std::vector<double> &normalData)
         {
             switch (vertices[0]->GetDimension())
             {
@@ -116,7 +116,7 @@ namespace HDV::Hull
         /// The vertex is "over face" if the return value is > Constants.PlaneDistanceTolerance.
         /// </summary>
         /// <returns>The vertex is "over face" if the result is positive.</returns>
-        static float GetVertexDistance(const VERTEXPTR &v, const std::shared_ptr<SimplexWrap<VERTEXPTR>> &f)
+        static double GetVertexDistance(const VERTEXPTR &v, const std::shared_ptr<SimplexWrap<VERTEXPTR>> &f)
         {
             auto normal = f->Normals;
             auto p = v->GetPosition();

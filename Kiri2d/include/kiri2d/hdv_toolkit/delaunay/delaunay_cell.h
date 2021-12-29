@@ -1,10 +1,11 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-22 20:20:35
- * @LastEditTime: 2021-12-22 20:21:10
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2021-12-29 14:58:41
  * @LastEditors: Xu.WANG
  * @Description:
  */
+
 #ifndef _HDV_DELAUNAY_CELL_H_
 #define _HDV_DELAUNAY_CELL_H_
 
@@ -19,7 +20,7 @@ namespace HDV::Delaunay
     {
     public:
         explicit DelaunayCell() {}
-        explicit DelaunayCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex, std::vector<float> circumCenter, float radius)
+        explicit DelaunayCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex, std::vector<double> circumCenter, double radius)
         {
             mSimplex = simplex;
 
@@ -40,7 +41,7 @@ namespace HDV::Delaunay
 
         VERTEXPTR CircumCenter;
 
-        float Radius;
+        double Radius;
     };
 
 } // namespace HDV::Delaunay
