@@ -242,7 +242,7 @@ namespace HDV::Hull
             for (auto i = 0; i < mDimension; i++)
                 mCentroid[i] *= (count - 1);
 
-            double f = 1.f / count;
+            double f = 1.0 / count;
 
             for (auto i = 0; i < mDimension; i++)
                 mCentroid[i] = f * (mCentroid[i] + mBuffer->CurrentVertex->GetPosition()[i]);
@@ -258,7 +258,7 @@ namespace HDV::Hull
             for (auto i = 0; i < mDimension; i++)
                 mCentroid[i] *= count;
 
-            auto f = 1.f / (count - 1);
+            auto f = 1.0 / (count - 1);
 
             for (auto i = 0; i < mDimension; i++)
                 mCentroid[i] = f * (mCentroid[i] - mBuffer->CurrentVertex->GetPosition()[i]);
@@ -377,7 +377,7 @@ namespace HDV::Hull
 
             for (auto i = 2; i <= mDimension; i++)
             {
-                auto maximum = 0.000001f;
+                auto maximum = std::numeric_limits<double>::epsilon();
                 VERTEXPTR maxPoint = nullptr;
 
                 for (auto j = 0; j < extremes.size(); j++)

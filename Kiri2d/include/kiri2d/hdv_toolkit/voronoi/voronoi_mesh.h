@@ -313,7 +313,10 @@ namespace HDV::Voronoi
                     continue;
 
                 // KIRI_LOG_DEBUG("----------------new region-----------------");
+
+                // if (region->Cells.size() == 0)
                 // KIRI_LOG_DEBUG("region cell size={0}", region->Cells.size());
+
                 for (auto j = 0; j < region->Cells.size(); j++)
                 {
                     auto vert = region->Cells[j]->CircumCenter;
@@ -325,34 +328,46 @@ namespace HDV::Voronoi
                 //      continue;
 
                 //! TODO (convex hull input must insure dont have same points) remove same points
-                auto lessThanLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
-                {
-                    return lhs->SqrMagnitude() < rhs->SqrMagnitude();
-                };
+                // auto lessThanLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
+                // {
+                //     return lhs->SqrMagnitude() < rhs->SqrMagnitude();
+                // };
 
-                std::sort(verts.begin(), verts.end(), lessThanLambda);
+                // std::sort(verts.begin(), verts.end(), lessThanLambda);
 
-                auto equalLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
-                {
-                    auto dim = lhs->GetDimension();
-                    for (auto d = 0; d < dim; d++)
-                    {
-                        if (lhs->mPosition[d] != rhs->mPosition[d])
-                            return false;
-                    }
+                // auto equalLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
+                // {
+                //     auto dim = lhs->GetDimension();
+                //     for (auto d = 0; d < dim; d++)
+                //     {
+                //         if (lhs->mPosition[d] != rhs->mPosition[d])
+                //             return false;
+                //     }
 
-                    return true;
-                };
+                //     return true;
+                // };
 
-                verts.erase(unique(verts.begin(), verts.end(), equalLambda), verts.end());
+                // verts.erase(unique(verts.begin(), verts.end(), equalLambda), verts.end());
 
                 auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
                 hull->Generate(verts);
 
                 auto simplexs = hull->GetSimplexs();
 
+                if (simplexs.size() == 0)
+                {
+                    KIRI_LOG_DEBUG("-----------simplexs.size().size=0-------------");
+                    for (auto jd = 0; jd < verts.size(); jd++)
+                    {
+                        auto vert = verts[jd];
+                        KIRI_LOG_DEBUG("vert={0},{1},{2}", vert->X(), vert->Y(), vert->Z());
+                    }
+                    KIRI_LOG_DEBUG("-----------simplexs.size().size=0-------------");
+                }
+
                 auto polygon = std::make_shared<VoronoiPolygon3>();
-                // KIRI_LOG_DEBUG("simplexs size={0}", simplexs.size());
+                // KIRI_LOG_DEBUG("hull vert size={0}", hull->GetVertices().size());
+
                 for (auto j = 0; j < simplexs.size(); j++)
                 {
                     for (auto k = 0; k < 3; k++)
