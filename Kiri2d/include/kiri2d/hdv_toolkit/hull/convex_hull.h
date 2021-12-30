@@ -28,9 +28,35 @@ namespace HDV::Hull
         {
             mDimension = dimension;
             mCentroid.assign(dimension, 0.0);
+
+            mAxisMinma.assign(dimension, 0.0);
+            mAxisMaxma.assign(dimension, 0.0);
+            mShiftAmount.assign(dimension, 0.0);
         }
 
         virtual ~ConvexHull() noexcept {}
+
+        void ShiftAndScalePositions()
+        {
+            for (auto i = 0; i < mDimension; i++)
+            {
+                if (mAxisMinma[i] == mAxisMaxma[i])
+                    mShiftAmount[i] = 0.0;
+                else
+                    mShiftAmount[i] = mAxisMaxma[i] - mAxisMinma[i] - mAxisMinma[i];
+
+                KIRI_LOG_DEBUG("shift amount={0}", mShiftAmount[i]);
+            }
+
+            //! TODO plz not directly edit the vertex value
+            for (auto i = 0; i < mBuffer->InputVertices.size(); i++)
+            {
+                for (auto j = 0; j < mDimension; j++)
+                {
+                    mBuffer->InputVertices[i]->mPosition[j] += mShiftAmount[j];
+                }
+            }
+        }
 
         void Clear()
         {
@@ -207,6 +233,14 @@ namespace HDV::Hull
             // release memory
             mBuffer->Clear();
             mBuffer = nullptr;
+
+            for (auto i = 0; i < input.size(); i++)
+            {
+                for (auto j = 0; j < mDimension; j++)
+                {
+                    input[i]->mPosition[j] -= mShiftAmount[j];
+                }
+            }
         }
 
         /// <summary>
@@ -303,6 +337,8 @@ namespace HDV::Hull
                 }
 
                 // KIRI_LOG_DEBUG("min={0}, max={1}, minidx={2}, maxidx={3}", min, max, minInd, maxInd);
+                mAxisMinma[i] = min;
+                mAxisMaxma[i] = max;
 
                 if (minInd != maxInd)
                 {
@@ -352,28 +388,35 @@ namespace HDV::Hull
 
             std::vector<double> temp;
 
-            for (auto i = 0; i < extremes.size() - 1; i++)
-            {
-                auto a = extremes[i];
-                for (auto j = i + 1; j < extremes.size(); j++)
-                {
-                    auto b = extremes[j];
+            // ??
+            // for (auto i = 0; i < extremes.size() - 1; i++)
+            // {
+            //     auto a = extremes[i];
+            //     for (auto j = i + 1; j < extremes.size(); j++)
+            //     {
+            //         auto b = extremes[j];
 
-                    temp = MathHelper<VERTEXPTR>().SubtractFast(a->GetPosition(), b->GetPosition());
+            //         temp = MathHelper<VERTEXPTR>().SubtractFast(a->GetPosition(), b->GetPosition());
 
-                    auto dist = MathHelper<VERTEXPTR>().LengthSquared(temp);
+            //         auto dist = MathHelper<VERTEXPTR>().LengthSquared(temp);
 
-                    if (dist > maxDist)
-                    {
-                        first = a;
-                        second = b;
-                        maxDist = dist;
-                    }
-                }
-            }
+            //         if (dist > maxDist)
+            //         {
+            //             first = a;
+            //             second = b;
+            //             maxDist = dist;
+            //         }
+            //     }
+            // }
+
+            first = extremes[0];
+            second = extremes[1];
 
             initialPoints.emplace_back(first);
             initialPoints.emplace_back(second);
+
+            // KIRI_LOG_DEBUG("first={0}", first->GetString());
+            // KIRI_LOG_DEBUG("second={0}", second->GetString());
 
             for (auto i = 2; i <= mDimension; i++)
             {
@@ -582,13 +625,21 @@ namespace HDV::Hull
         {
             auto extremes = FindExtremes();
 
-            // for (size_t i = 0; i < extremes.size(); i++)
-            // {
-            //     KIRI_LOG_DEBUG("data={0}", extremes[i]->GetString());
-            // }
-            // KIRI_LOG_DEBUG("---extremes.size={0}", extremes.size());
+            for (size_t i = 0; i < extremes.size(); i++)
+            {
+                KIRI_LOG_DEBUG("data={0}", extremes[i]->GetString());
+            }
+            KIRI_LOG_DEBUG("---extremes.size={0}", extremes.size());
+
+            ShiftAndScalePositions();
 
             auto initialPoints = FindInitialPoints(extremes);
+            for (size_t i = 0; i < initialPoints.size(); i++)
+            {
+                KIRI_LOG_DEBUG("data={0}", initialPoints[i]->GetString());
+            }
+            KIRI_LOG_DEBUG("---initialPoints.size={0}", initialPoints.size());
+
             auto numPoints = initialPoints.size();
 
             // Add the initial points to the convex hull.
@@ -626,7 +677,7 @@ namespace HDV::Hull
             {
                 FindBeyondVertices(faces[i]);
 
-                // KIRI_LOG_DEBUG("faces[i]->VerticesBeyond->GetCount()={0}", faces[i]->VerticesBeyond->GetCount());
+                KIRI_LOG_DEBUG("faces[i]->VerticesBeyond->GetCount()={0}", faces[i]->VerticesBeyond->GetCount());
                 if (faces[i]->VerticesBeyond->GetCount() == 0)
                     mBuffer->ConvexSimplexs.emplace_back(faces[i]); // The face is on the hull
                 else
@@ -1027,6 +1078,10 @@ namespace HDV::Hull
         std::vector<std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>>> mSimplexs;
         std::vector<double> mCentroid;
         std::shared_ptr<ObjectBuffer<VERTEXPTR>> mBuffer;
+
+        std::vector<double> mAxisMinma;
+        std::vector<double> mAxisMaxma;
+        std::vector<double> mShiftAmount;
     };
 
     class ConvexHull2 : public ConvexHull<HDV::Primitives::Vertex2Ptr>

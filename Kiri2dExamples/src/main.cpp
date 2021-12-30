@@ -2467,22 +2467,22 @@ void QuickHullConvexHull2d()
 
     std::vector<Primitives::Vertex3Ptr> vet3;
 
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-2.5876516559561837, 1.2602781920236017, -0.3029862067772433));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.4010244128864405, 0.914247467472549, -0.08683153037911856));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-2.4894838812361946, 0.6186603046369201, -0.9657503329204622));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.6479427643008192, 0.5883794838059194, -0.5032205358719412));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.602884060419136, 0.030094655108957088, -2.34880979826302));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.6639730650038314, 0.2046716664443358, -1.5814154399344482));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.2365697429499025, 0.5144520884358706, -3.250116207041395));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.05847797235717604, 0.4428171153299514, -2.186730730758976));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.08126335419268313, 4.087488959968131, -0.24239658405197473));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.1952521064280114, 1.2723519096463554, -0.32461657257011417));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.14824827658275183, 2.264022369622641, -0.2428448391592803));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.007301185543003275, 1.2110906756544644, -0.06876280128997762));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.022365119094271625, 1.2263945811577093, -0.0878784598976346));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.0, 3.7954155415160167, -0.5796869974799633));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.0, 4.118629586439488, -0.293940576328835));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.030251424004723516, 4.033571630627174, -0.3057902195088554));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.3473947652160714, -1.3934941357739392, 2.6554023997597196));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.4335608806265805, -0.3618126948426488, 3.8195126655309948));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.1807481524741172, -2.117988644862587, 0.7889682041779849));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.9745695332406514, -0.20193462475825275, 1.3321065109919257));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.9215385168721664, -0.196548079476635, 1.4509445695438));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.9637395264899453, -0.20006264135376473, 3.3957176506195688));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.74705880118956, -0.24823438044353807, 1.4039036660352582));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.4352324347291834, -0.359118740486994, 3.554530157331668));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.7722492977696822, -0.2865878482457451, 1.1215549299553809));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.36843732936572415, -1.1881103828317805, 2.166602501943894));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.8119086042454957, -1.3465705798154093, 0.7249814962218988));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.4543293670228525, -1.9231052897259961, 0.7069221833716544));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-2.489134307724693, -0.35445765106358573, 1.4163321399855633));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.6564909582695075, -0.270654849216843, 1.2435471502160946));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.7720004533844125, -0.33384164976170183, 1.014992799700995));
+    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.6107243657750612, -0.9749529956596823, 0.7871385897623107));
 
     auto cv2 = std::make_shared<Hull::ConvexHull3>();
     cv2->Generate(vet3);
@@ -2521,7 +2521,6 @@ void QuickHullConvexHull2d()
     // auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     // std::vector<KiriLine2> precompute_lines;
-
     // auto simplexs = cv2->GetSortSimplexsList();
     // for (size_t i = 0; i < simplexs.size(); i++)
     // {
@@ -2665,7 +2664,7 @@ void QuickHullVoronoi2d()
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
     auto scale_size = 200.0;
-    auto sampler_num = 1000;
+    auto sampler_num = 100;
 
     for (auto i = 0; i < sampler_num; i++)
     {
@@ -3011,7 +3010,7 @@ void QuickHullVoronoi3d()
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
     auto scale_size = 1.0;
-    auto sampler_num = 20;
+    auto sampler_num = 100;
 
     for (size_t idd = 0; idd < 1000; idd++)
     {
@@ -3099,161 +3098,160 @@ void QuickHullVoronoi3d()
         /* code */
 
         // boundary bbox
-        BoundingBox3D boundary_box;
-        boundary_box.merge(Vector3D(-scale_size, -scale_size, -scale_size));
-        boundary_box.merge(Vector3D(scale_size, scale_size, scale_size));
+        // BoundingBox3D boundary_box;
+        // boundary_box.merge(Vector3D(-scale_size, -scale_size, -scale_size));
+        // boundary_box.merge(Vector3D(scale_size, scale_size, scale_size));
 
-        boundary_box.merge(Vector3D(-scale_size, -scale_size, scale_size));
-        boundary_box.merge(Vector3D(-scale_size, scale_size, scale_size));
-        boundary_box.merge(Vector3D(-scale_size, scale_size, -scale_size));
+        // boundary_box.merge(Vector3D(-scale_size, -scale_size, scale_size));
+        // boundary_box.merge(Vector3D(-scale_size, scale_size, scale_size));
+        // boundary_box.merge(Vector3D(-scale_size, scale_size, -scale_size));
 
-        boundary_box.merge(Vector3D(scale_size, -scale_size, -scale_size));
-        boundary_box.merge(Vector3D(scale_size, -scale_size, scale_size));
-        boundary_box.merge(Vector3D(scale_size, scale_size, -scale_size));
+        // boundary_box.merge(Vector3D(scale_size, -scale_size, -scale_size));
+        // boundary_box.merge(Vector3D(scale_size, -scale_size, scale_size));
+        // boundary_box.merge(Vector3D(scale_size, scale_size, -scale_size));
 
-        auto counter = 0;
-        for (auto i = 0; i < voro3->Regions.size(); i++)
-        {
-            auto voronoi_site = std::dynamic_pointer_cast<HDV::Voronoi::VoronoiSite3>(voro3->Regions[i]->site);
-            if (voronoi_site->GetIsBoundaryVertex())
-                continue;
+        // auto counter = 0;
+        // for (auto i = 0; i < voro3->Regions.size(); i++)
+        // {
+        //     auto voronoi_site = std::dynamic_pointer_cast<HDV::Voronoi::VoronoiSite3>(voro3->Regions[i]->site);
+        //     if (voronoi_site->GetIsBoundaryVertex())
+        //         continue;
 
-            // if (voronoi_site->X() > 0.f)
-            //     continue;
+        //     // if (voronoi_site->X() > 0.f)
+        //     //     continue;
 
-            // if (boundary_box.contains(voronoi_site->Polygon->BBox.HighestPoint) && boundary_box.contains(voronoi_site->Polygon->BBox.LowestPoint))
-            //     continue;
+        //     // if (boundary_box.contains(voronoi_site->Polygon->BBox.HighestPoint) && boundary_box.contains(voronoi_site->Polygon->BBox.LowestPoint))
+        //     //     continue;
 
-            // auto cells = voro3->Regions[i]->Cells;
-            // auto draw = true;
-            // for (size_t j = 0; j < cells.size(); j++)
-            // {
-            //     auto cc = cells[j]->CircumCenter;
-            //     auto v3 = Vector3F(cc->mPosition[0], cc->mPosition[1], cc->mPosition[2]);
-            //     if (!InBound(v3, scale_size))
-            //     {
-            //         draw = false;
-            //         break;
-            //     }
-            // }
+        //     // auto cells = voro3->Regions[i]->Cells;
+        //     // auto draw = true;
+        //     // for (size_t j = 0; j < cells.size(); j++)
+        //     // {
+        //     //     auto cc = cells[j]->CircumCenter;
+        //     //     auto v3 = Vector3F(cc->mPosition[0], cc->mPosition[1], cc->mPosition[2]);
+        //     //     if (!InBound(v3, scale_size))
+        //     //     {
+        //     //         draw = false;
+        //     //         break;
+        //     //     }
+        //     // }
 
-            // if (!draw)
-            //     continue;
+        //     // if (!draw)
+        //     //     continue;
 
-            std::vector<tinyobj::shape_t> obj_shapes;
-            std::vector<tinyobj::material_t> obj_materials;
-            tinyobj::attrib_t attrib;
-            tinyobj::shape_t ch_shape;
+        //     std::vector<tinyobj::shape_t> obj_shapes;
+        //     std::vector<tinyobj::material_t> obj_materials;
+        //     tinyobj::attrib_t attrib;
+        //     tinyobj::shape_t ch_shape;
 
-            // convex hull edges
-            auto pos = voronoi_site->Polygon->Positions;
-            auto normal = voronoi_site->Polygon->Normals;
-            auto indices = voronoi_site->Polygon->Indices;
+        //     // convex hull edges
+        //     auto pos = voronoi_site->Polygon->Positions;
+        //     auto normal = voronoi_site->Polygon->Normals;
+        //     auto indices = voronoi_site->Polygon->Indices;
 
-            String print_vert = "Vector vertices[] = {";
-            String print_norm = "Vector normals[] = {";
-            String print_ind = "triangles[] = {";
+        //     String print_vert = "Vector vertices[] = {";
+        //     String print_norm = "Vector normals[] = {";
+        //     String print_ind = "triangles[] = {";
 
-            if (pos.size() == 0)
-                KIRI_LOG_DEBUG("pos size={0}, id={1}", pos.size(), i);
+        //     if (pos.size() == 0)
+        //         KIRI_LOG_DEBUG("pos size={0}, id={1}", pos.size(), i);
 
-            for (size_t j = 0; j < pos.size() / 3; j++)
-            {
+        //     for (size_t j = 0; j < pos.size() / 3; j++)
+        //     {
 
-                auto idx1 = j * 3;
-                auto idx2 = j * 3 + 1;
-                auto idx3 = j * 3 + 2;
+        //         auto idx1 = j * 3;
+        //         auto idx2 = j * 3 + 1;
+        //         auto idx3 = j * 3 + 2;
 
-                attrib.vertices.emplace_back(pos[idx1].x);
-                attrib.vertices.emplace_back(pos[idx1].y);
-                attrib.vertices.emplace_back(pos[idx1].z);
+        //         attrib.vertices.emplace_back(pos[idx1].x);
+        //         attrib.vertices.emplace_back(pos[idx1].y);
+        //         attrib.vertices.emplace_back(pos[idx1].z);
 
-                attrib.vertices.emplace_back(pos[idx2].x);
-                attrib.vertices.emplace_back(pos[idx2].y);
-                attrib.vertices.emplace_back(pos[idx2].z);
+        //         attrib.vertices.emplace_back(pos[idx2].x);
+        //         attrib.vertices.emplace_back(pos[idx2].y);
+        //         attrib.vertices.emplace_back(pos[idx2].z);
 
-                attrib.vertices.emplace_back(pos[idx3].x);
-                attrib.vertices.emplace_back(pos[idx3].y);
-                attrib.vertices.emplace_back(pos[idx3].z);
+        //         attrib.vertices.emplace_back(pos[idx3].x);
+        //         attrib.vertices.emplace_back(pos[idx3].y);
+        //         attrib.vertices.emplace_back(pos[idx3].z);
 
-                // attrib.normals.emplace_back(normal[idx1].x);
-                // attrib.normals.emplace_back(normal[idx1].y);
-                // attrib.normals.emplace_back(normal[idx1].z);
+        //         // attrib.normals.emplace_back(normal[idx1].x);
+        //         // attrib.normals.emplace_back(normal[idx1].y);
+        //         // attrib.normals.emplace_back(normal[idx1].z);
 
-                // attrib.normals.emplace_back(normal[idx2].x);
-                // attrib.normals.emplace_back(normal[idx2].y);
-                // attrib.normals.emplace_back(normal[idx2].z);
+        //         // attrib.normals.emplace_back(normal[idx2].x);
+        //         // attrib.normals.emplace_back(normal[idx2].y);
+        //         // attrib.normals.emplace_back(normal[idx2].z);
 
-                // attrib.normals.emplace_back(normal[idx3].x);
-                // attrib.normals.emplace_back(normal[idx3].y);
-                // attrib.normals.emplace_back(normal[idx3].z);
+        //         // attrib.normals.emplace_back(normal[idx3].x);
+        //         // attrib.normals.emplace_back(normal[idx3].y);
+        //         // attrib.normals.emplace_back(normal[idx3].z);
 
-                tinyobj::index_t i1, i2, i3;
-                i1.vertex_index = indices[idx1];
-                i2.vertex_index = indices[idx2];
-                i3.vertex_index = indices[idx3];
+        //         tinyobj::index_t i1, i2, i3;
+        //         i1.vertex_index = indices[idx1];
+        //         i2.vertex_index = indices[idx2];
+        //         i3.vertex_index = indices[idx3];
 
-                // if (j != pos.size() / 3 - 1)
-                // {
-                //     print_vert += "{" + std::to_string(pos[idx1].x) + "f," + std::to_string(pos[idx1].y) + "f," + std::to_string(pos[idx1].z) + "f},";
-                //     print_vert += "{" + std::to_string(pos[idx2].x) + "f," + std::to_string(pos[idx2].y) + "f," + std::to_string(pos[idx2].z) + "f},";
-                //     print_vert += "{" + std::to_string(pos[idx3].x) + "f," + std::to_string(pos[idx3].y) + "f," + std::to_string(pos[idx3].z) + "f},";
+        //         // if (j != pos.size() / 3 - 1)
+        //         // {
+        //         //     print_vert += "{" + std::to_string(pos[idx1].x) + "f," + std::to_string(pos[idx1].y) + "f," + std::to_string(pos[idx1].z) + "f},";
+        //         //     print_vert += "{" + std::to_string(pos[idx2].x) + "f," + std::to_string(pos[idx2].y) + "f," + std::to_string(pos[idx2].z) + "f},";
+        //         //     print_vert += "{" + std::to_string(pos[idx3].x) + "f," + std::to_string(pos[idx3].y) + "f," + std::to_string(pos[idx3].z) + "f},";
 
-                //     print_norm += "{" + std::to_string(normal[idx1].x) + "f," + std::to_string(normal[idx1].y) + "f," + std::to_string(normal[idx1].z) + "f},";
-                //     print_norm += "{" + std::to_string(normal[idx2].x) + "f," + std::to_string(normal[idx2].y) + "f," + std::to_string(normal[idx2].z) + "f},";
-                //     print_norm += "{" + std::to_string(normal[idx3].x) + "f," + std::to_string(normal[idx3].y) + "f," + std::to_string(normal[idx3].z) + "f},";
+        //         //     print_norm += "{" + std::to_string(normal[idx1].x) + "f," + std::to_string(normal[idx1].y) + "f," + std::to_string(normal[idx1].z) + "f},";
+        //         //     print_norm += "{" + std::to_string(normal[idx2].x) + "f," + std::to_string(normal[idx2].y) + "f," + std::to_string(normal[idx2].z) + "f},";
+        //         //     print_norm += "{" + std::to_string(normal[idx3].x) + "f," + std::to_string(normal[idx3].y) + "f," + std::to_string(normal[idx3].z) + "f},";
 
-                //     print_ind += "{" + std::to_string(indices[idx1]) + "," + std::to_string(indices[idx2]) + "," + std::to_string(indices[idx3]) + "},";
-                // }
-                // else
-                // {
-                //     print_vert += "{" + std::to_string(pos[idx1].x) + "f," + std::to_string(pos[idx1].y) + "f," + std::to_string(pos[idx1].z) + "f},";
-                //     print_vert += "{" + std::to_string(pos[idx2].x) + "f," + std::to_string(pos[idx2].y) + "f," + std::to_string(pos[idx2].z) + "f},";
-                //     print_vert += "{" + std::to_string(pos[idx3].x) + "f," + std::to_string(pos[idx3].y) + "f," + std::to_string(pos[idx3].z) + "f}};";
+        //         //     print_ind += "{" + std::to_string(indices[idx1]) + "," + std::to_string(indices[idx2]) + "," + std::to_string(indices[idx3]) + "},";
+        //         // }
+        //         // else
+        //         // {
+        //         //     print_vert += "{" + std::to_string(pos[idx1].x) + "f," + std::to_string(pos[idx1].y) + "f," + std::to_string(pos[idx1].z) + "f},";
+        //         //     print_vert += "{" + std::to_string(pos[idx2].x) + "f," + std::to_string(pos[idx2].y) + "f," + std::to_string(pos[idx2].z) + "f},";
+        //         //     print_vert += "{" + std::to_string(pos[idx3].x) + "f," + std::to_string(pos[idx3].y) + "f," + std::to_string(pos[idx3].z) + "f}};";
 
-                //     print_norm += "{" + std::to_string(normal[idx1].x) + "f," + std::to_string(normal[idx1].y) + "f," + std::to_string(normal[idx1].z) + "f},";
-                //     print_norm += "{" + std::to_string(normal[idx2].x) + "f," + std::to_string(normal[idx2].y) + "f," + std::to_string(normal[idx2].z) + "f},";
-                //     print_norm += "{" + std::to_string(normal[idx3].x) + "f," + std::to_string(normal[idx3].y) + "f," + std::to_string(normal[idx3].z) + "f}};";
+        //         //     print_norm += "{" + std::to_string(normal[idx1].x) + "f," + std::to_string(normal[idx1].y) + "f," + std::to_string(normal[idx1].z) + "f},";
+        //         //     print_norm += "{" + std::to_string(normal[idx2].x) + "f," + std::to_string(normal[idx2].y) + "f," + std::to_string(normal[idx2].z) + "f},";
+        //         //     print_norm += "{" + std::to_string(normal[idx3].x) + "f," + std::to_string(normal[idx3].y) + "f," + std::to_string(normal[idx3].z) + "f}};";
 
-                //     print_ind += "{" + std::to_string(indices[idx1]) + "," + std::to_string(indices[idx2]) + "," + std::to_string(indices[idx3]) + "}};";
-                // }
+        //         //     print_ind += "{" + std::to_string(indices[idx1]) + "," + std::to_string(indices[idx2]) + "," + std::to_string(indices[idx3]) + "}};";
+        //         // }
 
-                // i1.normal_index = indices[idx1];
-                // i2.normal_index = indices[idx2];
-                // i3.normal_index = indices[idx3];
+        //         // i1.normal_index = indices[idx1];
+        //         // i2.normal_index = indices[idx2];
+        //         // i3.normal_index = indices[idx3];
 
-                i1.normal_index = -1;
-                i2.normal_index = -1;
-                i3.normal_index = -1;
+        //         i1.normal_index = -1;
+        //         i2.normal_index = -1;
+        //         i3.normal_index = -1;
 
-                i1.texcoord_index = -1;
-                i2.texcoord_index = -1;
-                i3.texcoord_index = -1;
+        //         i1.texcoord_index = -1;
+        //         i2.texcoord_index = -1;
+        //         i3.texcoord_index = -1;
 
-                ch_shape.mesh.indices.emplace_back(i1);
-                ch_shape.mesh.indices.emplace_back(i2);
-                ch_shape.mesh.indices.emplace_back(i3);
+        //         ch_shape.mesh.indices.emplace_back(i1);
+        //         ch_shape.mesh.indices.emplace_back(i2);
+        //         ch_shape.mesh.indices.emplace_back(i3);
 
-                ch_shape.mesh.num_face_vertices.emplace_back(3);
-                ch_shape.mesh.material_ids.emplace_back(-1);
-            }
+        //         ch_shape.mesh.num_face_vertices.emplace_back(3);
+        //         ch_shape.mesh.material_ids.emplace_back(-1);
+        //     }
 
-            // KIRI_LOG_DEBUG("print_vert={0}", print_vert);
-            // KIRI_LOG_DEBUG("print_norm={0}", print_norm);
-            // KIRI_LOG_DEBUG("print_ind={0}", print_ind);
-            // KIRI_LOG_DEBUG("---------------");
+        //     // KIRI_LOG_DEBUG("print_vert={0}", print_vert);
+        //     // KIRI_LOG_DEBUG("print_norm={0}", print_norm);
+        //     // KIRI_LOG_DEBUG("print_ind={0}", print_ind);
+        //     // KIRI_LOG_DEBUG("---------------");
 
-            // write to file
-            obj_shapes.emplace_back(ch_shape);
-            // TinyObjWriter(UInt2Str4Digit(counter++), attrib, obj_shapes, obj_materials);
-            TinyObjWriter(UInt2Str4Digit(counter++), attrib, obj_shapes, obj_materials);
+        //     // write to file
+        //     obj_shapes.emplace_back(ch_shape);
+        //     TinyObjWriter(UInt2Str4Digit(counter++), attrib, obj_shapes, obj_materials);
 
-            // ExportVoroFile(
-            //     voronoi_site->Polygon->Positions,
-            //     voronoi_site->Polygon->Normals,
-            //     voronoi_site->Polygon->Indices,
-            //     UInt2Str4Digit(counter++));
-        }
+        //     // ExportVoroFile(
+        //     //     voronoi_site->Polygon->Positions,
+        //     //     voronoi_site->Polygon->Normals,
+        //     //     voronoi_site->Polygon->Indices,
+        //     //     UInt2Str4Digit(counter++));
+        // }
         /* code */
     }
 
