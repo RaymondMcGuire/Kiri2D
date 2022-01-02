@@ -215,12 +215,21 @@ namespace HDV::Primitives
             auto dim = mDimension;
             for (auto i = 0; i < dim; i++)
             {
-                indexs += std::to_string(Vertices[i].GetId());
+                indexs += std::to_string(Vertices[i]->GetId()) + "=";
+
+                for (auto j = 0; j < dim; j++)
+                {
+                    indexs += std::to_string(Vertices[i]->mPosition[j]);
+
+                    if (j != dim - 1)
+                        indexs += ",";
+                }
+
                 if (i != dim - 1)
-                    indexs += ",";
+                    indexs += ";";
             }
 
-            return KIRI_LOG_DEBUG("[Simplex: Dimension={0},  Vertices={1}]", mDimension, indexs);
+            return KIRI_LOG_DEBUG("[Simplex: Dimension={0},  Vertices:{1}]", mDimension, indexs);
         }
 
     private:

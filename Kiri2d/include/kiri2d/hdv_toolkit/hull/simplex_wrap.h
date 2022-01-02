@@ -1,10 +1,11 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2021-12-29 14:59:24
+ * @LastEditTime: 2022-01-02 20:24:33
  * @LastEditors: Xu.WANG
  * @Description:
  */
+
 #ifndef _HDV_SIMPLEX_WRAP_H_
 #define _HDV_SIMPLEX_WRAP_H_
 
@@ -24,7 +25,8 @@ namespace HDV::Hull
             : Next{nullptr}, Prev{}
         {
             Normals.assign(dimension, 0.0);
-            Vertices.assign(dimension, VERTEXPTR());
+            // Vertices.assign(dimension, VERTEXPTR());
+            Vertices.assign(dimension, -1);
             AdjacentFaces.assign(dimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
             BeyondList = beyondList;
             VerticesBeyond = std::make_shared<VertexBuffer<VERTEXPTR>>();
@@ -37,7 +39,7 @@ namespace HDV::Hull
         {
             Next = nullptr;
             Prev.reset();
-            FurthestVertex = nullptr;
+            FurthestVertex = -1;
             BeyondList = nullptr;
             VerticesBeyond = nullptr;
             Vertices.clear();
@@ -57,8 +59,13 @@ namespace HDV::Hull
         void SetTag(int tag) { mTag = tag; }
 
         std::vector<double> Normals;
-        std::vector<VERTEXPTR> Vertices;
-        VERTEXPTR FurthestVertex;
+
+        // std::vector<VERTEXPTR> Vertices;
+        std::vector<int> Vertices;
+
+        // VERTEXPTR FurthestVertex;
+        int FurthestVertex;
+
         std::shared_ptr<VertexBuffer<VERTEXPTR>> BeyondList;
         std::shared_ptr<VertexBuffer<VERTEXPTR>> VerticesBeyond;
         std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> AdjacentFaces;
@@ -68,18 +75,26 @@ namespace HDV::Hull
             std::string vert_data = "";
             for (size_t i = 0; i < Vertices.size(); i++)
             {
-                vert_data += Vertices[i]->GetString();
-                // vert_data += std::to_string(Vertices[i]->GetId()) + ":(" + std::to_string(Vertices[i]->GetPosition()[0]) + "," + std::to_string(Vertices[i]->GetPosition()[1]) + "); ";
+                // vert_data += Vertices[i]->GetString();
+                //  vert_data += std::to_string(Vertices[i]->GetId()) + ":(" + std::to_string(Vertices[i]->GetPosition()[0]) + "," + std::to_string(Vertices[i]->GetPosition()[1]) + "); ";
+                vert_data += std::to_string(Vertices[i]) + "->";
             }
 
-            KIRI_LOG_DEBUG("Tag = {0}, InList = {1}, Prev tag = {2}, Next tag = {3}; Verts={4}; Normal={5},{6}; Offset={7}; IsNormalFlipped={8}, FurthestVertex={9}",
+            /*   KIRI_LOG_DEBUG("Tag = {0}, InList = {1}, Prev tag = {2}, Next tag = {3}; Verts={4}; Normal={5},{6}; Offset={7}; IsNormalFlipped={8}, FurthestVertex={9}",
+                              mTag,
+                              mInList,
+                              Prev.lock() == nullptr ? "null" : std::to_string(Prev.lock()->GetTag()),
+                              Next == nullptr ? "null" : std::to_string(Next->GetTag()),
+                              vert_data,
+                              Normals[0], Normals[1], Offset, IsNormalFlipped,
+                              FurthestVertex == nullptr ? "null" : FurthestVertex->GetString());*/
+
+            KIRI_LOG_DEBUG("Tag = {0}; InList = {1}; Verts={2}; Normal={3},{4},{5}; Offset={6}; IsNormalFlipped={7}, FurthestVertex={8}",
                            mTag,
                            mInList,
-                           Prev.lock() == nullptr ? "null" : std::to_string(Prev.lock()->GetTag()),
-                           Next == nullptr ? "null" : std::to_string(Next->GetTag()),
                            vert_data,
-                           Normals[0], Normals[1], Offset, IsNormalFlipped,
-                           FurthestVertex == nullptr ? "null" : FurthestVertex->GetString());
+                           Normals[0], Normals[1], Normals[2], Offset, IsNormalFlipped,
+                           FurthestVertex);
         }
 
     private:

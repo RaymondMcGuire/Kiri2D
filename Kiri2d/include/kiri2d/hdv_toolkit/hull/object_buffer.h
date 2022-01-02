@@ -41,8 +41,11 @@ namespace HDV::Hull
 
         const int CONNECTOR_TABLE_SIZE = 2017;
 
-        VERTEXPTR CurrentVertex;
-        VERTEXPTR FurthestVertex;
+        // VERTEXPTR CurrentVertex;
+        // VERTEXPTR FurthestVertex;
+        int CurrentVertex;
+        int FurthestVertex;
+
         double MaxDistance = -std::numeric_limits<double>::max();
 
         std::shared_ptr<SimplexList<VERTEXPTR>> UnprocessedFaces;
@@ -55,7 +58,10 @@ namespace HDV::Hull
         std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> ConvexSimplexs;
         std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> AffectedFaceBuffer;
         std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>> TraverseStack;
-        std::unordered_set<VERTEXPTR> SingularVertices;
+
+        // std::unordered_set<VERTEXPTR> SingularVertices;
+        std::unordered_set<int> SingularVertices;
+
         std::vector<std::shared_ptr<DeferredSimplex<VERTEXPTR>>> ConeFaceBuffer;
         std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> UpdateBuffer;
         std::vector<int> UpdateIndices;
@@ -106,8 +112,8 @@ namespace HDV::Hull
             EmptyBuffer->Clear();
             BeyondBuffer->Clear();
 
-            CurrentVertex = nullptr;
-            FurthestVertex = nullptr;
+            CurrentVertex = -1;
+            FurthestVertex = -1;
 
             ObjManager = nullptr;
             UnprocessedFaces = nullptr;

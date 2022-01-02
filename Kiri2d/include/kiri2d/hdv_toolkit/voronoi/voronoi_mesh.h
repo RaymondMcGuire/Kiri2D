@@ -382,18 +382,9 @@ namespace HDV::Voronoi
                     polygon->Normals.emplace_back(normal3);
                     polygon->Normals.emplace_back(normal3);
 
-                    if (simplexs[j]->GetNormalFlipped())
-                    {
-                        polygon->Indices.emplace_back(j * 3 + 2);
-                        polygon->Indices.emplace_back(j * 3 + 1);
-                        polygon->Indices.emplace_back(j * 3 + 0);
-                    }
-                    else
-                    {
-                        polygon->Indices.emplace_back(j * 3 + 0);
-                        polygon->Indices.emplace_back(j * 3 + 1);
-                        polygon->Indices.emplace_back(j * 3 + 2);
-                    }
+                    polygon->Indices.emplace_back(j * 3 + 0);
+                    polygon->Indices.emplace_back(j * 3 + 1);
+                    polygon->Indices.emplace_back(j * 3 + 2);
                 }
                 polygon->UpdateBBox();
 

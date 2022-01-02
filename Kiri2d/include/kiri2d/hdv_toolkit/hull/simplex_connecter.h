@@ -51,7 +51,9 @@ namespace HDV::Hull
             {
                 if (i != edgeIndex)
                 {
-                    int v = vs[i]->GetId();
+                    // int v = vs[i]->GetId();
+                    int v = vs[i];
+
                     VerticeIndexes[c++] = v;
                     hashCode += 23 * hashCode + (uint)v;
                 }

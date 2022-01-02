@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-09 00:10:54
- * @LastEditTime: 2021-12-22 18:09:20
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2022-01-02 21:14:10
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -21,14 +21,16 @@ namespace HDV::Hull
         explicit VertexBuffer() {}
         explicit VertexBuffer(int capacity)
         {
-            mItems.assign(capacity, VERTEXPTR());
+            // mItems.assign(capacity, VERTEXPTR());
+            mItems.assign(capacity, -1);
             mCapacity = capacity;
         }
         virtual ~VertexBuffer() noexcept {}
 
         int GetCount() const { return mCount; }
         int GetCapacity() const { return mCapacity; }
-        const VERTEXPTR &GetItem(int idx) { return mItems[idx]; }
+        // const VERTEXPTR &GetItem(int idx) { return mItems[idx]; }
+        int GetItem(int idx) { return mItems[idx]; }
 
         void EnsureCapacity()
         {
@@ -38,11 +40,18 @@ namespace HDV::Hull
                     mCapacity = 4;
                 else
                     mCapacity = 2 * mCapacity;
-                mItems.resize(mCapacity, VERTEXPTR());
+                // mItems.resize(mCapacity, VERTEXPTR());
+                mItems.resize(mCapacity, -1);
             };
         }
 
-        void Add(const VERTEXPTR &item)
+        // void Add(const VERTEXPTR &item)
+        // {
+        //     EnsureCapacity();
+        //     mItems[mCount++] = item;
+        // }
+
+        void Add(int item)
         {
             EnsureCapacity();
             mItems[mCount++] = item;
@@ -55,18 +64,19 @@ namespace HDV::Hull
 
         void ToString()
         {
-            KIRI_LOG_DEBUG("Vertex Buffer: Capacity={0},Count={1}", mCapacity, mCount);
-            std::string indexs = "";
-            for (auto i = 0; i < mCount; i++)
-                mItems[i]->ToString();
+            // KIRI_LOG_DEBUG("Vertex Buffer: Capacity={0},Count={1}", mCapacity, mCount);
+            // std::string indexs = "";
+            // for (auto i = 0; i < mCount; i++)
+            //     mItems[i]->ToString();
 
-            KIRI_LOG_DEBUG("Vertex Buffer------------------------");
+            // KIRI_LOG_DEBUG("Vertex Buffer------------------------");
         }
 
     private:
         int mCount = 0;
         int mCapacity = 0;
-        std::vector<VERTEXPTR> mItems;
+        // std::vector<VERTEXPTR> mItems;
+        std::vector<int> mItems;
     };
 } // namespace HDV::Hull
 
