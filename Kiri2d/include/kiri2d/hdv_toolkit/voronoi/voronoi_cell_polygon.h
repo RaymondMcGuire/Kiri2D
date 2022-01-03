@@ -66,6 +66,22 @@ namespace HDV::Voronoi
         std::vector<Vector2D> Verts;
     };
 
+    class VoronoiCellPolygon3
+    {
+    public:
+        explicit VoronoiCellPolygon3() {}
+        virtual ~VoronoiCellPolygon3() noexcept {}
+
+        void AddVert3(Vector3D vert)
+        {
+            Verts.emplace_back(vert);
+            BBox.merge(vert);
+        }
+
+        BoundingBox3D BBox;
+        std::vector<Vector3D> Verts;
+    };
+
     class VoronoiPolygon3
     {
     public:

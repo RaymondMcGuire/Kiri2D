@@ -904,27 +904,6 @@ namespace HDV::Hull
             }
         }
 
-        /// <summary>
-        /// Check whether the vertex v is beyond the given face. If so, add it to beyondVertices.
-        /// </summary>
-        void IsBeyond(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face, const std::shared_ptr<VertexBuffer<VERTEXPTR>> &beyondVertices, const VERTEXPTR &v)
-        {
-            // KIRI_LOG_DEBUG("-------GetVertexDistance Start-------");
-            auto distance = MathHelper<VERTEXPTR>().GetVertexDistance(v, face);
-            // KIRI_LOG_DEBUG("-------distance={0}, mBuffer->MaxDistance={1}", distance, mBuffer->MaxDistance);
-
-            if (distance >= PLANE_DISTANCE_TOLERANCE)
-            {
-                if (distance > mBuffer->MaxDistance)
-                {
-                    mBuffer->MaxDistance = distance;
-                    mBuffer->FurthestVertex = v;
-                }
-
-                beyondVertices->Add(v);
-            }
-        }
-
         // Recalculates the centroid of the current hull.
         void UpdateCenter()
         {
