@@ -3020,6 +3020,9 @@ bool TinyObjWriter(const String &filename, const tinyobj::attrib_t &attributes, 
     return ret;
 }
 
+#define CSGJSCPP_IMPLEMENTATION
+#include <csgjs.h>
+
 void QuickHullVoronoi3d()
 {
     using namespace HDV;
@@ -3045,12 +3048,7 @@ void QuickHullVoronoi3d()
 
             auto v3 = std::make_shared<HDV::Voronoi::VoronoiSite3>(x, y, z, i);
 
-            // if (!InBound(Vector3F(x, y, z), scale_size))
-            //     v3->SetAsBoundaryVertex();
-
             vet3.emplace_back(v3);
-
-            // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}, {1}, {2}));", x, y, i);
         }
 
         // boundary
@@ -3064,17 +3062,6 @@ void QuickHullVoronoi3d()
         auto v3b6 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.0, -scale_size * 2.0, -scale_size * 2.0, sampler_num + 6);
         auto v3b7 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.0, -scale_size * 2.0, scale_size * 2.0, sampler_num + 7);
         auto v3b8 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.0, scale_size * 2.0, -scale_size * 2.0, sampler_num + 8);
-
-        // auto v3b9 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.5, -scale_size * 2.5, -scale_size * 2.5, sampler_num + 9);
-        // auto v3b10 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.5, scale_size * 2.5, scale_size * 2.5, sampler_num + 10);
-
-        // auto v3b11 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.5, -scale_size * 2.5, scale_size * 2.5, sampler_num + 11);
-        // auto v3b12 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.5, scale_size * 2.5, scale_size * 2.5, sampler_num + 12);
-        // auto v3b13 = std::make_shared<HDV::Voronoi::VoronoiSite3>(-scale_size * 2.5, scale_size * 2.5, -scale_size * 2.5, sampler_num + 13);
-
-        // auto v3b14 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.5, -scale_size * 2.5, -scale_size * 2.5, sampler_num + 14);
-        // auto v3b15 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.5, -scale_size * 2.5, scale_size * 2.5, sampler_num + 15);
-        // auto v3b16 = std::make_shared<HDV::Voronoi::VoronoiSite3>(scale_size * 2.5, scale_size * 2.5, -scale_size * 2.5, sampler_num + 16);
 
         v3b1->SetAsBoundaryVertex();
         v3b2->SetAsBoundaryVertex();
@@ -3094,73 +3081,40 @@ void QuickHullVoronoi3d()
         vet3.emplace_back(v3b7);
         vet3.emplace_back(v3b8);
 
-        // v3b9->SetAsBoundaryVertex();
-        // v3b10->SetAsBoundaryVertex();
-        // v3b11->SetAsBoundaryVertex();
-        // v3b12->SetAsBoundaryVertex();
-        // v3b13->SetAsBoundaryVertex();
-        // v3b14->SetAsBoundaryVertex();
-        // v3b15->SetAsBoundaryVertex();
-        // v3b16->SetAsBoundaryVertex();
-
-        // vet3.emplace_back(v3b9);
-        // vet3.emplace_back(v3b10);
-        // vet3.emplace_back(v3b11);
-        // vet3.emplace_back(v3b12);
-        // vet3.emplace_back(v3b13);
-        // vet3.emplace_back(v3b14);
-        // vet3.emplace_back(v3b15);
-        // vet3.emplace_back(v3b16);
-
         voro3->Generate(vet3);
         KIRI_LOG_DEBUG("resgion size={0}", voro3->Regions.size());
         /* code */
 
         // boundary bbox
-        // BoundingBox3D boundary_box;
-        // boundary_box.merge(Vector3D(-scale_size, -scale_size, -scale_size));
-        // boundary_box.merge(Vector3D(scale_size, scale_size, scale_size));
+        BoundingBox3D boundary_box;
+        boundary_box.merge(Vector3D(-scale_size, -scale_size, -scale_size));
+        boundary_box.merge(Vector3D(scale_size, scale_size, scale_size));
 
-        // boundary_box.merge(Vector3D(-scale_size, -scale_size, scale_size));
-        // boundary_box.merge(Vector3D(-scale_size, scale_size, scale_size));
-        // boundary_box.merge(Vector3D(-scale_size, scale_size, -scale_size));
+        boundary_box.merge(Vector3D(-scale_size, -scale_size, scale_size));
+        boundary_box.merge(Vector3D(-scale_size, scale_size, scale_size));
+        boundary_box.merge(Vector3D(-scale_size, scale_size, -scale_size));
 
-        // boundary_box.merge(Vector3D(scale_size, -scale_size, -scale_size));
-        // boundary_box.merge(Vector3D(scale_size, -scale_size, scale_size));
-        // boundary_box.merge(Vector3D(scale_size, scale_size, -scale_size));
+        boundary_box.merge(Vector3D(scale_size, -scale_size, -scale_size));
+        boundary_box.merge(Vector3D(scale_size, -scale_size, scale_size));
+        boundary_box.merge(Vector3D(scale_size, scale_size, -scale_size));
+
+        std::vector<tinyobj::shape_t> obj_shapes;
+        std::vector<tinyobj::material_t> obj_materials;
+        tinyobj::attrib_t attrib;
 
         auto counter = 0;
+
+        auto index_offset = 0;
         for (auto i = 0; i < voro3->Regions.size(); i++)
         {
             auto voronoi_site = std::dynamic_pointer_cast<HDV::Voronoi::VoronoiSite3>(voro3->Regions[i]->site);
             if (voronoi_site->GetIsBoundaryVertex())
                 continue;
 
-            // if (voronoi_site->X() > 0.f)
-            //     continue;
+            // section visible
+            if (voronoi_site->X() < 0.0)
+                continue;
 
-            // if (boundary_box.contains(voronoi_site->Polygon->BBox.HighestPoint) && boundary_box.contains(voronoi_site->Polygon->BBox.LowestPoint))
-            //     continue;
-
-            // auto cells = voro3->Regions[i]->Cells;
-            // auto draw = true;
-            // for (size_t j = 0; j < cells.size(); j++)
-            // {
-            //     auto cc = cells[j]->CircumCenter;
-            //     auto v3 = Vector3F(cc->mPosition[0], cc->mPosition[1], cc->mPosition[2]);
-            //     if (!InBound(v3, scale_size))
-            //     {
-            //         draw = false;
-            //         break;
-            //     }
-            // }
-
-            // if (!draw)
-            //     continue;
-
-            std::vector<tinyobj::shape_t> obj_shapes;
-            std::vector<tinyobj::material_t> obj_materials;
-            tinyobj::attrib_t attrib;
             tinyobj::shape_t ch_shape;
 
             // convex hull edges
@@ -3168,110 +3122,186 @@ void QuickHullVoronoi3d()
             auto normal = voronoi_site->Polygon->Normals;
             auto indices = voronoi_site->Polygon->Indices;
 
-            String print_vert = "Vector vertices[] = {";
-            String print_norm = "Vector normals[] = {";
-            String print_ind = "triangles[] = {";
+            if (boundary_box.contains(voronoi_site->Polygon->BBox.HighestPoint) && boundary_box.contains(voronoi_site->Polygon->BBox.LowestPoint))
+            {
+                for (size_t j = 0; j < pos.size() / 3; j++)
+                {
 
-            if (pos.size() == 0)
-                KIRI_LOG_DEBUG("pos size={0}, id={1}", pos.size(), i);
+                    auto idx1 = j * 3;
+                    auto idx2 = j * 3 + 1;
+                    auto idx3 = j * 3 + 2;
 
-            for (size_t j = 0; j < pos.size() / 3; j++)
+                    attrib.vertices.emplace_back(pos[idx1].x);
+                    attrib.vertices.emplace_back(pos[idx1].y);
+                    attrib.vertices.emplace_back(pos[idx1].z);
+
+                    attrib.vertices.emplace_back(pos[idx2].x);
+                    attrib.vertices.emplace_back(pos[idx2].y);
+                    attrib.vertices.emplace_back(pos[idx2].z);
+
+                    attrib.vertices.emplace_back(pos[idx3].x);
+                    attrib.vertices.emplace_back(pos[idx3].y);
+                    attrib.vertices.emplace_back(pos[idx3].z);
+
+                    attrib.normals.emplace_back(normal[idx1].x);
+                    attrib.normals.emplace_back(normal[idx1].y);
+                    attrib.normals.emplace_back(normal[idx1].z);
+
+                    attrib.normals.emplace_back(normal[idx2].x);
+                    attrib.normals.emplace_back(normal[idx2].y);
+                    attrib.normals.emplace_back(normal[idx2].z);
+
+                    attrib.normals.emplace_back(normal[idx3].x);
+                    attrib.normals.emplace_back(normal[idx3].y);
+                    attrib.normals.emplace_back(normal[idx3].z);
+
+                    tinyobj::index_t i1, i2, i3;
+                    i1.vertex_index = indices[idx1] + index_offset;
+                    i2.vertex_index = indices[idx2] + index_offset;
+                    i3.vertex_index = indices[idx3] + index_offset;
+
+                    i1.normal_index = -1;
+                    i2.normal_index = -1;
+                    i3.normal_index = -1;
+
+                    i1.texcoord_index = -1;
+                    i2.texcoord_index = -1;
+                    i3.texcoord_index = -1;
+
+                    ch_shape.mesh.indices.emplace_back(i1);
+                    ch_shape.mesh.indices.emplace_back(i2);
+                    ch_shape.mesh.indices.emplace_back(i3);
+
+                    ch_shape.mesh.num_face_vertices.emplace_back(3);
+                    ch_shape.mesh.material_ids.emplace_back(-1);
+                }
+                index_offset += pos.size();
+                obj_shapes.emplace_back(ch_shape);
+            }
+            else
             {
 
-                auto idx1 = j * 3;
-                auto idx2 = j * 3 + 1;
-                auto idx3 = j * 3 + 2;
+                // clip boundary0
+                std::vector<csgjscpp::Polygon> polygons;
+                for (size_t j = 0; j < indices.size() / 3; j++)
+                {
 
-                attrib.vertices.emplace_back(pos[idx1].x);
-                attrib.vertices.emplace_back(pos[idx1].y);
-                attrib.vertices.emplace_back(pos[idx1].z);
+                    auto idx1 = j * 3;
+                    auto idx2 = j * 3 + 1;
+                    auto idx3 = j * 3 + 2;
 
-                attrib.vertices.emplace_back(pos[idx2].x);
-                attrib.vertices.emplace_back(pos[idx2].y);
-                attrib.vertices.emplace_back(pos[idx2].z);
+                    auto pos1 = pos[indices[idx1]];
+                    auto pos2 = pos[indices[idx2]];
+                    auto pos3 = pos[indices[idx3]];
 
-                attrib.vertices.emplace_back(pos[idx3].x);
-                attrib.vertices.emplace_back(pos[idx3].y);
-                attrib.vertices.emplace_back(pos[idx3].z);
+                    auto norm1 = normal[indices[idx1]];
+                    auto norm2 = normal[indices[idx2]];
+                    auto norm3 = normal[indices[idx3]];
 
-                // attrib.normals.emplace_back(normal[idx1].x);
-                // attrib.normals.emplace_back(normal[idx1].y);
-                // attrib.normals.emplace_back(normal[idx1].z);
+                    std::vector<csgjscpp::Vertex> verts;
 
-                // attrib.normals.emplace_back(normal[idx2].x);
-                // attrib.normals.emplace_back(normal[idx2].y);
-                // attrib.normals.emplace_back(normal[idx2].z);
+                    verts.push_back({csgjscpp::Vector(pos1.x, pos1.y, pos1.z), csgjscpp::Vector(norm1.x, norm1.y, norm1.z), csgjscpp::green});
+                    verts.push_back({csgjscpp::Vector(pos2.x, pos2.y, pos2.z), csgjscpp::Vector(norm2.x, norm2.y, norm2.z), csgjscpp::green});
+                    verts.push_back({csgjscpp::Vector(pos3.x, pos3.y, pos3.z), csgjscpp::Vector(norm3.x, norm3.y, norm3.z), csgjscpp::green});
 
-                // attrib.normals.emplace_back(normal[idx3].x);
-                // attrib.normals.emplace_back(normal[idx3].y);
-                // attrib.normals.emplace_back(normal[idx3].z);
+                    polygons.push_back(csgjscpp::Polygon(verts));
+                }
 
-                tinyobj::index_t i1, i2, i3;
-                i1.vertex_index = indices[idx1];
-                i2.vertex_index = indices[idx2];
-                i3.vertex_index = indices[idx3];
+                auto voro_mesh = csgjscpp::modelfrompolygons(polygons);
+                auto boundary_mesh = csgjscpp::csgmodel_cube({0.0f, 0.0f, 0.0f}, {(float)scale_size, (float)scale_size, (float)scale_size}, csgjscpp::green);
+                auto clipped_mesh = csgjscpp::csgintersection(boundary_mesh, voro_mesh);
 
-                // if (j != pos.size() / 3 - 1)
-                // {
-                //     print_vert += "{" + std::to_string(pos[idx1].x) + "f," + std::to_string(pos[idx1].y) + "f," + std::to_string(pos[idx1].z) + "f},";
-                //     print_vert += "{" + std::to_string(pos[idx2].x) + "f," + std::to_string(pos[idx2].y) + "f," + std::to_string(pos[idx2].z) + "f},";
-                //     print_vert += "{" + std::to_string(pos[idx3].x) + "f," + std::to_string(pos[idx3].y) + "f," + std::to_string(pos[idx3].z) + "f},";
+                std::vector<HDV::Primitives::Vertex3Ptr> vertsj;
+                for (auto j = 0; j < clipped_mesh.vertices.size(); j++)
+                {
+                    auto v = clipped_mesh.vertices[j];
+                    vertsj.emplace_back(std::make_shared<HDV::Primitives::Vertex3>(v.pos.x, v.pos.y, v.pos.z));
+                }
 
-                //     print_norm += "{" + std::to_string(normal[idx1].x) + "f," + std::to_string(normal[idx1].y) + "f," + std::to_string(normal[idx1].z) + "f},";
-                //     print_norm += "{" + std::to_string(normal[idx2].x) + "f," + std::to_string(normal[idx2].y) + "f," + std::to_string(normal[idx2].z) + "f},";
-                //     print_norm += "{" + std::to_string(normal[idx3].x) + "f," + std::to_string(normal[idx3].y) + "f," + std::to_string(normal[idx3].z) + "f},";
+                auto hull = std::make_shared<HDV::Hull::ConvexHull<HDV::Primitives::Vertex3Ptr>>(3);
+                hull->Generate(vertsj);
 
-                //     print_ind += "{" + std::to_string(indices[idx1]) + "," + std::to_string(indices[idx2]) + "," + std::to_string(indices[idx3]) + "},";
-                // }
-                // else
-                // {
-                //     print_vert += "{" + std::to_string(pos[idx1].x) + "f," + std::to_string(pos[idx1].y) + "f," + std::to_string(pos[idx1].z) + "f},";
-                //     print_vert += "{" + std::to_string(pos[idx2].x) + "f," + std::to_string(pos[idx2].y) + "f," + std::to_string(pos[idx2].z) + "f},";
-                //     print_vert += "{" + std::to_string(pos[idx3].x) + "f," + std::to_string(pos[idx3].y) + "f," + std::to_string(pos[idx3].z) + "f}};";
+                std::vector<Vector3D> clipped_pos;
+                std::vector<Vector3D> clipped_norm;
+                std::vector<int> clipped_ind;
+                auto simplexs = hull->GetSimplexs();
+                for (auto j = 0; j < simplexs.size(); j++)
+                {
+                    for (auto k = 0; k < 3; k++)
+                    {
+                        auto vertk = simplexs[j]->Vertices[k];
+                        auto vec3 = Vector3D(vertk->X(), vertk->Y(), vertk->Z());
+                        clipped_pos.emplace_back(vec3);
+                    }
 
-                //     print_norm += "{" + std::to_string(normal[idx1].x) + "f," + std::to_string(normal[idx1].y) + "f," + std::to_string(normal[idx1].z) + "f},";
-                //     print_norm += "{" + std::to_string(normal[idx2].x) + "f," + std::to_string(normal[idx2].y) + "f," + std::to_string(normal[idx2].z) + "f},";
-                //     print_norm += "{" + std::to_string(normal[idx3].x) + "f," + std::to_string(normal[idx3].y) + "f," + std::to_string(normal[idx3].z) + "f}};";
+                    auto normal3 = Vector3D(simplexs[j]->Normals[0], simplexs[j]->Normals[1], simplexs[j]->Normals[2]);
+                    clipped_norm.emplace_back(normal3);
+                    clipped_norm.emplace_back(normal3);
+                    clipped_norm.emplace_back(normal3);
 
-                //     print_ind += "{" + std::to_string(indices[idx1]) + "," + std::to_string(indices[idx2]) + "," + std::to_string(indices[idx3]) + "}};";
-                // }
+                    clipped_ind.emplace_back(j * 3 + 0);
+                    clipped_ind.emplace_back(j * 3 + 1);
+                    clipped_ind.emplace_back(j * 3 + 2);
+                }
 
-                // i1.normal_index = indices[idx1];
-                // i2.normal_index = indices[idx2];
-                // i3.normal_index = indices[idx3];
+                for (size_t j = 0; j < clipped_pos.size() / 3; j++)
+                {
 
-                i1.normal_index = -1;
-                i2.normal_index = -1;
-                i3.normal_index = -1;
+                    auto idx1 = j * 3;
+                    auto idx2 = j * 3 + 1;
+                    auto idx3 = j * 3 + 2;
 
-                i1.texcoord_index = -1;
-                i2.texcoord_index = -1;
-                i3.texcoord_index = -1;
+                    attrib.vertices.emplace_back(clipped_pos[idx1].x);
+                    attrib.vertices.emplace_back(clipped_pos[idx1].y);
+                    attrib.vertices.emplace_back(clipped_pos[idx1].z);
 
-                ch_shape.mesh.indices.emplace_back(i1);
-                ch_shape.mesh.indices.emplace_back(i2);
-                ch_shape.mesh.indices.emplace_back(i3);
+                    attrib.vertices.emplace_back(clipped_pos[idx2].x);
+                    attrib.vertices.emplace_back(clipped_pos[idx2].y);
+                    attrib.vertices.emplace_back(clipped_pos[idx2].z);
 
-                ch_shape.mesh.num_face_vertices.emplace_back(3);
-                ch_shape.mesh.material_ids.emplace_back(-1);
+                    attrib.vertices.emplace_back(clipped_pos[idx3].x);
+                    attrib.vertices.emplace_back(clipped_pos[idx3].y);
+                    attrib.vertices.emplace_back(clipped_pos[idx3].z);
+
+                    attrib.normals.emplace_back(clipped_norm[idx1].x);
+                    attrib.normals.emplace_back(clipped_norm[idx1].y);
+                    attrib.normals.emplace_back(clipped_norm[idx1].z);
+
+                    attrib.normals.emplace_back(clipped_norm[idx2].x);
+                    attrib.normals.emplace_back(clipped_norm[idx2].y);
+                    attrib.normals.emplace_back(clipped_norm[idx2].z);
+
+                    attrib.normals.emplace_back(clipped_norm[idx3].x);
+                    attrib.normals.emplace_back(clipped_norm[idx3].y);
+                    attrib.normals.emplace_back(clipped_norm[idx3].z);
+
+                    tinyobj::index_t i1, i2, i3;
+                    i1.vertex_index = clipped_ind[idx1] + index_offset;
+                    i2.vertex_index = clipped_ind[idx2] + index_offset;
+                    i3.vertex_index = clipped_ind[idx3] + index_offset;
+
+                    i1.normal_index = -1;
+                    i2.normal_index = -1;
+                    i3.normal_index = -1;
+
+                    i1.texcoord_index = -1;
+                    i2.texcoord_index = -1;
+                    i3.texcoord_index = -1;
+
+                    ch_shape.mesh.indices.emplace_back(i1);
+                    ch_shape.mesh.indices.emplace_back(i2);
+                    ch_shape.mesh.indices.emplace_back(i3);
+
+                    ch_shape.mesh.num_face_vertices.emplace_back(3);
+                    ch_shape.mesh.material_ids.emplace_back(-1);
+                }
+                index_offset += clipped_pos.size();
+                obj_shapes.emplace_back(ch_shape);
             }
-
-            // KIRI_LOG_DEBUG("print_vert={0}", print_vert);
-            // KIRI_LOG_DEBUG("print_norm={0}", print_norm);
-            // KIRI_LOG_DEBUG("print_ind={0}", print_ind);
-            // KIRI_LOG_DEBUG("---------------");
-
-            // write to file
-            obj_shapes.emplace_back(ch_shape);
-            TinyObjWriter(UInt2Str4Digit(counter++), attrib, obj_shapes, obj_materials);
-
-            // ExportVoroFile(
-            //     voronoi_site->Polygon->Positions,
-            //     voronoi_site->Polygon->Normals,
-            //     voronoi_site->Polygon->Indices,
-            //     UInt2Str4Digit(counter++));
         }
-        /* code */
+
+        // write to file
+        TinyObjWriter(UInt2Str4Digit(counter++), attrib, obj_shapes, obj_materials);
     }
 
     /* code */
