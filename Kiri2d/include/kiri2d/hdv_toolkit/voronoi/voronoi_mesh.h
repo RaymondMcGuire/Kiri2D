@@ -19,6 +19,7 @@
 #include <kiri2d/hdv_toolkit/utils/tinyobj_utils.h>
 
 #define CSGJSCPP_IMPLEMENTATION
+#define CSGJSCPP_REAL double
 #include <csgjs.h>
 
 namespace HDV::Voronoi
@@ -57,12 +58,10 @@ namespace HDV::Voronoi
 
             delaunay->Generate(input, assignIds, checkInput);
 
-            // KIRI_LOG_DEBUG("input size={0}, delaunay triangle size={1}", input.size(), delaunay->Vertices.size());
-
             for (auto i = 0; i < delaunay->Vertices.size(); i++)
             {
-                delaunay->Vertices[i]->SetTag(i);
-                // KIRI_LOG_DEBUG("*******Vertices={0},{1}", delaunay->Vertices[i]->mPosition[0], delaunay->Vertices[i]->mPosition[1]);
+                delaunay->Vertices[i]->SetTag(delaunay->Vertices[i]->GetId());
+                // KIRI_LOG_DEBUG("delaunay->Vertices id={0}, Vertices={1},{2},{3}", delaunay->Vertices[i]->GetId(), delaunay->Vertices[i]->mPosition[0], delaunay->Vertices[i]->mPosition[1], delaunay->Vertices[i]->mPosition[2]);
             }
 
             for (auto i = 0; i < delaunay->Cells.size(); i++)
@@ -74,7 +73,7 @@ namespace HDV::Voronoi
 
             std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> cells;
             std::map<int, std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> neighbourCell;
-
+            // KIRI_LOG_DEBUG("------region generate-------");
             for (auto i = 0; i < delaunay->Vertices.size(); i++)
             {
                 cells.clear();
@@ -136,6 +135,10 @@ namespace HDV::Voronoi
 
                     region->Id = Regions.size();
                     region->site = delaunay->Vertices[i];
+
+                    // auto site = std::dynamic_pointer_cast<VoronoiSite3>(region->site);
+                    // KIRI_LOG_DEBUG("id={0}; pos={1},{2},{3}; region id={4}", site->GetId(), site->X(), site->Y(), site->Z(), region->Id);
+
                     Regions.emplace_back(region);
                 }
             }
@@ -179,43 +182,11 @@ namespace HDV::Voronoi
                 if (region->site->GetIsBoundaryVertex())
                     continue;
 
-                // KIRI_LOG_DEBUG("----------------edge points------------------");
-                for (auto j = 0; j < region->Edges.size(); j++)
+                for (auto j = 0; j < region->Cells.size(); j++)
                 {
-                    auto edge = region->Edges[j];
-                    auto from = edge->From->CircumCenter;
-                    auto to = edge->To->CircumCenter;
-
-                    verts.emplace_back(std::make_shared<Primitives::Vertex2>(from->X(), from->Y(), count++));
-                    verts.emplace_back(std::make_shared<Primitives::Vertex2>(to->X(), to->Y(), count++));
-
-                    // KIRI_LOG_DEBUG("from={0},{1}; to={2},{3}", from->X(), from->Y(), to->X(), to->Y());
-                    // KIRI_LOG_DEBUG("vet2.emplace_back(std::make_shared<Primitives::Vertex2>({0}f, {1}f, {2}));vet2.emplace_back(std::make_shared<Primitives::Vertex2>({3}f, {4}f, {5}));",
-                    //                from->X(), from->Y(), c1++,
-                    //                to->X(), to->Y(), c1++);
+                    auto vert = region->Cells[j]->CircumCenter;
+                    verts.emplace_back(std::make_shared<Primitives::Vertex2>(vert->X(), vert->Y(), count++));
                 }
-
-                //! TODO (convex hull input must insure dont have same points) remove same points
-                auto lessThanLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
-                {
-                    return lhs->SqrMagnitude() < rhs->SqrMagnitude();
-                };
-
-                std::sort(verts.begin(), verts.end(), lessThanLambda);
-
-                auto equalLambda = [](const VERTEXPTR &lhs, const VERTEXPTR &rhs)
-                {
-                    auto dim = lhs->GetDimension();
-                    for (auto d = 0; d < dim; d++)
-                    {
-                        if (lhs->mPosition[d] != rhs->mPosition[d])
-                            return false;
-                    }
-
-                    return true;
-                };
-
-                verts.erase(unique(verts.begin(), verts.end(), equalLambda), verts.end());
 
                 auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
                 hull->Generate(verts);
@@ -288,6 +259,9 @@ namespace HDV::Voronoi
                 site->CellPolygon = cell_polygon;
 
                 hull->Clear();
+
+                // if (!cell_polygon->BBox.contains(Vector2D(site->X(), site->Y())))
+                //     KIRI_LOG_ERROR("bbox not contain!!");
             }
         }
     };
@@ -301,13 +275,18 @@ namespace HDV::Voronoi
 
         bool mNeedClipBoundary = true;
 
-        bool mWrite2Obj = true;
         int mIndexOffset = 0;
         tinyobj::attrib_t mAttrib;
         std::vector<tinyobj::shape_t> mTinyObjShapes;
         std::vector<tinyobj::material_t> mTinyObjmaterials;
 
-        std::shared_ptr<VoronoiCellPolygon3> mBoundaryPolygon;
+        std::unordered_set<int> mConstrainSites;
+        std::shared_ptr<VoronoiPolygon3> mBoundaryPolygon;
+
+        void ExportVoronoiMeshObj(int idx)
+        {
+            TinyObjWriter(UInt2Str4Digit(idx), mAttrib, mTinyObjShapes, mTinyObjmaterials);
+        }
 
         void TinyObjClear()
         {
@@ -384,7 +363,7 @@ namespace HDV::Voronoi
             this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
         }
 
-        void SetBoundaryPolygon(const std::shared_ptr<VoronoiCellPolygon3> &boundary)
+        void SetBoundaryPolygon(const std::shared_ptr<VoronoiPolygon3> &boundary)
         {
             mBoundaryPolygon = boundary;
         }
@@ -393,7 +372,7 @@ namespace HDV::Voronoi
         {
             // clear obj writer
             TinyObjClear();
-
+            // KIRI_LOG_DEBUG("----------Region2Polygon------------------");
             for (auto i = 0; i < Regions.size(); i++)
             {
                 std::vector<VERTEXPTR> verts;
@@ -437,23 +416,26 @@ namespace HDV::Voronoi
                 polygon->UpdateBBox();
                 hull->Clear();
 
+                //! FIXME site is not correspondend to polygon, but it has no influence on Lloyid iteration
                 auto site = std::dynamic_pointer_cast<VoronoiSite3>(region->site);
-                site->Polygon = polygon;
 
                 if (!mNeedClipBoundary)
                 {
-                    if (mWrite2Obj)
-                        TinyObjAppend(polygon->Positions, polygon->Normals, polygon->Indices);
+                    TinyObjAppend(polygon->Positions, polygon->Normals, polygon->Indices);
                 }
                 else
                 {
-                    // clip condition
-                    if (site->X() < 0.0)
-                        continue;
                     // clip boundary
                     if (mBoundaryPolygon->BBox.contains(polygon->BBox.HighestPoint) && mBoundaryPolygon->BBox.contains(polygon->BBox.LowestPoint))
                     {
-                        // dont need clip voronoi mesh
+                        site->Polygon = polygon;
+
+                        // clip condition
+                        if (!mConstrainSites.empty())
+                            if (mConstrainSites.find(site->GetId()) == mConstrainSites.end())
+                                continue;
+
+                        // KIRI_LOG_DEBUG("xid={0}; pos={1},{2},{3}", site->GetId(), site->X(), site->Y(), site->Z());
                         TinyObjAppend(polygon->Positions, polygon->Normals, polygon->Indices);
                     }
                     else
@@ -485,7 +467,7 @@ namespace HDV::Voronoi
                         }
 
                         auto voroMesh = csgjscpp::modelfrompolygons(voroPolygons);
-                        auto boundaryMesh = csgjscpp::csgmodel_cube({0.0f, 0.0f, 0.0f}, {1.f, 1.f, 1.f}, csgjscpp::green);
+                        auto boundaryMesh = csgjscpp::csgmodel_cube({0.0, 0.0, 0.0f}, {1.0, 1.0, 1.0}, csgjscpp::green);
                         auto clippedMesh = csgjscpp::csgintersection(boundaryMesh, voroMesh);
 
                         std::vector<HDV::Primitives::Vertex3Ptr> csgVerts;
@@ -522,13 +504,25 @@ namespace HDV::Voronoi
                             clippedIndices.emplace_back(j * 3 + 2);
                         }
                         hull->Clear();
+
+                        polygon->Positions = clippedPositions;
+                        polygon->Normals = clippedNormals;
+                        polygon->Indices = clippedIndices;
+                        polygon->UpdateBBox();
+
+                        site->Polygon = polygon;
+
+                        // clip condition
+                        if (!mConstrainSites.empty())
+                            if (mConstrainSites.find(site->GetId()) == mConstrainSites.end())
+                                continue;
+
+                        // KIRI_LOG_DEBUG("id={0}; pos={1},{2},{3}", site->GetId(), site->X(), site->Y(), site->Z());
+
                         TinyObjAppend(clippedPositions, clippedNormals, clippedIndices);
                     }
                 }
             }
-
-            if (mWrite2Obj)
-                TinyObjWriter(UInt2Str4Digit(0), mAttrib, mTinyObjShapes, mTinyObjmaterials);
         }
     };
 

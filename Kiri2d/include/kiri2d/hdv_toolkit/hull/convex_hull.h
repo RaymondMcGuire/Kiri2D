@@ -686,6 +686,7 @@ namespace HDV::Hull
 
             mVertices.assign(hullVertexCount, VERTEXPTR());
 
+            auto counter = 0;
             for (auto i = 0; i < mNumberOfVertices; i++)
             {
                 if (mVertexVisited[i])

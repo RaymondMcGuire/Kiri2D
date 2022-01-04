@@ -2712,47 +2712,6 @@ void QuickHullVoronoi2d()
 
     pd2->Compute();
 
-    // auto linea = KiriLine2(Vector2F(-200.f, -200.f) + offset, Vector2F(-200.f, 200.f) + offset);
-    // linea.thick = 1.f;
-    // auto lineb = KiriLine2(Vector2F(-200.f, 200.f) + offset, Vector2F(200.f, 200.f) + offset);
-    // lineb.thick = 1.f;
-    // auto linec = KiriLine2(Vector2F(200.f, 200.f) + offset, Vector2F(200.f, -200.f) + offset);
-    // linec.thick = 1.f;
-    // auto lined = KiriLine2(Vector2F(200.f, -200.f) + offset, Vector2F(-200.f, -200.f) + offset);
-    // lined.thick = 1.f;
-    // precompute_lines.emplace_back(linea);
-    // precompute_lines.emplace_back(lineb);
-    // precompute_lines.emplace_back(linec);
-    // precompute_lines.emplace_back(lined);
-
-    // std::vector<KiriLine2> precompute_lines;
-    // std::vector<Vector2F> precompute_points;
-
-    // auto sites = pd2->GetSites();
-
-    // for (size_t i = 0; i < sites.size(); i++)
-    // {
-    //     auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-    //     if (site->GetIsBoundaryVertex())
-    //         continue;
-
-    //     auto cellpolygon = site->CellPolygon;
-    //     for (size_t j = 0; j < cellpolygon->Verts.size(); j++)
-    //     {
-    //         auto vert = cellpolygon->Verts[j];
-    //         auto vert1 = cellpolygon->Verts[(j + 1) % (cellpolygon->Verts.size())];
-    //         auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
-    //         line.thick = 1.f;
-    //         precompute_lines.emplace_back(line);
-
-    //         // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
-    //     }
-    //     // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Verts.size());
-    //     precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
-
-    //     // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
-    // }
-
     while (1)
     {
         // KIRI_LOG_DEBUG("-----------------new----------------------------------");
@@ -2861,7 +2820,7 @@ void QuickHullVoronoi3d()
     }
 
     // clip boundary
-    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon3>();
+    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon3>();
     BoundaryPolygon->AddVert3(Vector3D(-scale_size, -scale_size, -scale_size));
     BoundaryPolygon->AddVert3(Vector3D(scale_size, scale_size, scale_size));
     BoundaryPolygon->AddVert3(Vector3D(-scale_size, -scale_size, scale_size));
@@ -2873,9 +2832,14 @@ void QuickHullVoronoi3d()
 
     pd3->SetBoundaryPolygon(BoundaryPolygon);
 
-    pd3->Compute();
+    pd3->Init();
 
-    /* code */
+    for (size_t i = 0; i < 120; i++)
+    {
+        pd3->LloydIteration();
+
+        KIRI_LOG_DEBUG("Lloyd Iteration idx={0}", i);
+    }
 }
 
 int main()
@@ -2923,7 +2887,7 @@ int main()
     // QuickHullDelaunayTriangulation2d();
 
     // QuickHullVoronoi2d();
-    //        VoronoiExample1();
+    //         VoronoiExample1();
 
     QuickHullVoronoi3d();
 

@@ -66,27 +66,17 @@ namespace HDV::Voronoi
         std::vector<Vector2D> Verts;
     };
 
-    class VoronoiCellPolygon3
-    {
-    public:
-        explicit VoronoiCellPolygon3() {}
-        virtual ~VoronoiCellPolygon3() noexcept {}
-
-        void AddVert3(Vector3D vert)
-        {
-            Verts.emplace_back(vert);
-            BBox.merge(vert);
-        }
-
-        BoundingBox3D BBox;
-        std::vector<Vector3D> Verts;
-    };
-
     class VoronoiPolygon3
     {
     public:
         explicit VoronoiPolygon3() {}
         virtual ~VoronoiPolygon3() noexcept {}
+
+        void AddVert3(Vector3D vert)
+        {
+            Positions.emplace_back(vert);
+            BBox.merge(vert);
+        }
 
         void UpdateBBox()
         {
@@ -95,6 +85,56 @@ namespace HDV::Voronoi
                 BBox.merge(Positions[i]);
         }
 
+        double ComputeVolume(Vector3D a, Vector3D b, Vector3D c)
+        {
+            return b.cross(c).dot(a) / 6.0;
+        }
+
+        double GetVolume()
+        {
+            IndexOffset = IsLoadedFromObj ? 1 : 0;
+
+            auto V = 0.0;
+            for (size_t j = 0; j < Indices.size() / 3; j++)
+            {
+                // if indices loaded from a .obj file, index need -1
+                auto a = Positions[Indices[j * 3] - IndexOffset];
+                auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
+                auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
+
+                V += ComputeVolume(a, b, c);
+            }
+
+            if (V < 0.0)
+                KIRI_LOG_ERROR("Volume is negnative!!!");
+
+            return V;
+        }
+
+        Vector3D GetCentroid()
+        {
+            IndexOffset = IsLoadedFromObj ? 1 : 0;
+
+            auto volume = 0.0;
+            Vector3D centroid;
+            for (size_t j = 0; j < Indices.size() / 3; j++)
+            {
+
+                // if indices loaded from a .obj file, index need -1
+                auto a = Positions[Indices[j * 3] - IndexOffset];
+                auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
+                auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
+
+                auto v = ComputeVolume(a, b, c);
+                volume += v;
+                centroid += v * (a + b + c) / 4.0;
+            }
+
+            return centroid / volume;
+        }
+
+        bool IsLoadedFromObj = false;
+        int IndexOffset = 0;
         BoundingBox3D BBox;
         std::vector<Vector3D> Positions;
         std::vector<Vector3D> Normals;
