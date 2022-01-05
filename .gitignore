@@ -8,4 +8,5 @@ build
 /export/**/*.bgeo
 /export/**/*.voro
 /export/**/*.obj
+/export/**/*.ply
 /**/*.pyc

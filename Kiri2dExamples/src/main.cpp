@@ -2796,50 +2796,147 @@ static void ExportVoroFile(
     file.close();
 }
 
+#include <kiri2d/model/model_tiny_obj_loader.h>
+#include <kiri_pbs_cuda/sampler/cuda_shape_sampler.cuh>
+#include <cuda/cuda_helper.h>
 void QuickHullVoronoi3d()
 {
     using namespace HDV;
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
-    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    // ############################################################################# for boundary mesh
+    auto boundaryModel = std::make_shared<KiriModelTinyObjLoader>("bunny", "models", ".obj");
+    boundaryModel->Normalize();
 
-    auto scale_size = 1.0;
-    auto sampler_num = 1000;
+    auto cellSize = 0.01f;
+    auto bBMin = boundaryModel->GetAABBMin();
+    auto bBMax = boundaryModel->GetAABBMax();
+    auto lengths = bBMax - bBMin;
+    auto maxLength = lengths.max();
+
+    Vector3F newBBoxMin(bBMin), newBBoxMax(bBMax);
+    KIRI_LOG_INFO("Model Face Vertices Size={0}, Face Normals Size={1}", boundaryModel->GetFaceVertices().size(), boundaryModel->GetFaceVertexNormals().size());
+    KIRI_LOG_INFO("Model BBoxMin={0},{1},{2}, BBoxMax={3},{4},{5}", newBBoxMin.x, newBBoxMin.y, newBBoxMin.z, newBBoxMax.x, newBBoxMax.y, newBBoxMax.z);
+
+    for (size_t i = 0; i < 3; i++)
+    {
+        if (maxLength == lengths[i])
+            continue;
+
+        auto delta = maxLength - lengths[i];
+        newBBoxMin[i] = bBMin[i] - (delta / 2.f);
+        newBBoxMax[i] = bBMax[i] + (delta / 2.f);
+    }
+
+    auto epsilon = (newBBoxMax - newBBoxMin) / 10001.f;
+    newBBoxMax += epsilon;
+    newBBoxMin -= epsilon;
+
+    KIRI_LOG_INFO("Model BBoxMin={0},{1},{2}, BBoxMax={3},{4},{5}", newBBoxMin.x, newBBoxMin.y, newBBoxMin.z, newBBoxMax.x, newBBoxMax.y, newBBoxMax.z);
+
+    // convert float array to vector3 array
+    Vec_Vec3F faceVerticesList(boundaryModel->GetNFaceVertices());
+    Vec_Vec3F faceNormalsList(boundaryModel->GetNFaceVertices());
+    std::memcpy(faceVerticesList.data(), boundaryModel->GetFaceVertices().data(), boundaryModel->GetFaceVertices().size() * sizeof(float));
+    std::memcpy(faceNormalsList.data(), boundaryModel->GetFaceVertexNormals().data(), boundaryModel->GetFaceVertexNormals().size() * sizeof(float));
+
+    LevelSetShapeInfo mInfo(CudaAxisAlignedBox<float3>(KiriToCUDA(newBBoxMin), KiriToCUDA(newBBoxMax)), cellSize / 2.f, (uint)boundaryModel->GetNFaces());
+    auto cudaSampler = std::make_shared<CudaShapeSampler>(mInfo, KiriToCUDA(faceVerticesList));
+    auto insidePoints = cudaSampler->GetInsidePoints(10);
+    for (size_t i = 0; i < insidePoints.size(); i++)
+    {
+        KIRI_LOG_DEBUG("inside point = {0},{1},{2}", insidePoints[i].x, insidePoints[i].y, insidePoints[i].z);
+    }
+    // ############################################################################# for boundary mesh
 
     auto pd3 = std::make_shared<Voronoi::PowerDiagram3D>();
     auto voro3 = std::make_shared<Voronoi::VoronoiMesh3>();
 
-    for (auto i = 0; i < sampler_num; i++)
+    for (auto i = 0; i < insidePoints.size(); i++)
     {
-        auto x = dist(rndEngine) * scale_size;
-        auto y = dist(rndEngine) * scale_size;
-        auto z = dist(rndEngine) * scale_size;
+        auto x = insidePoints[i].x;
+        auto y = insidePoints[i].y;
+        auto z = insidePoints[i].z;
 
         pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>(x, y, z, i));
+
+        KIRI_LOG_DEBUG("pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>({0},{1},{2},{3});", x, y, z, i);
     }
 
-    // clip boundary
-    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon3>();
-    BoundaryPolygon->AddVert3(Vector3D(-scale_size, -scale_size, -scale_size));
-    BoundaryPolygon->AddVert3(Vector3D(scale_size, scale_size, scale_size));
-    BoundaryPolygon->AddVert3(Vector3D(-scale_size, -scale_size, scale_size));
-    BoundaryPolygon->AddVert3(Vector3D(-scale_size, scale_size, scale_size));
-    BoundaryPolygon->AddVert3(Vector3D(-scale_size, scale_size, -scale_size));
-    BoundaryPolygon->AddVert3(Vector3D(scale_size, -scale_size, -scale_size));
-    BoundaryPolygon->AddVert3(Vector3D(scale_size, -scale_size, scale_size));
-    BoundaryPolygon->AddVert3(Vector3D(scale_size, scale_size, -scale_size));
+    std::vector<csgjscpp::Polygon> boundaryPolygons;
+    for (size_t j = 0; j < faceVerticesList.size() / 3; j++)
+    {
 
-    pd3->SetBoundaryPolygon(BoundaryPolygon);
+        auto idx1 = j * 3;
+        auto idx2 = j * 3 + 1;
+        auto idx3 = j * 3 + 2;
+
+        auto pos1 = faceVerticesList[idx1];
+        auto pos2 = faceVerticesList[idx2];
+        auto pos3 = faceVerticesList[idx3];
+
+        auto norm1 = faceNormalsList[idx1];
+        auto norm2 = faceNormalsList[idx2];
+        auto norm3 = faceNormalsList[idx3];
+
+        std::vector<csgjscpp::Vertex> csgVerts;
+
+        csgVerts.push_back({csgjscpp::Vector(pos1.x, pos1.y, pos1.z), csgjscpp::Vector(norm1.x, norm1.y, norm1.z), csgjscpp::green});
+        csgVerts.push_back({csgjscpp::Vector(pos2.x, pos2.y, pos2.z), csgjscpp::Vector(norm2.x, norm2.y, norm2.z), csgjscpp::green});
+        csgVerts.push_back({csgjscpp::Vector(pos3.x, pos3.y, pos3.z), csgjscpp::Vector(norm3.x, norm3.y, norm3.z), csgjscpp::green});
+
+        boundaryPolygons.push_back(csgjscpp::Polygon(csgVerts));
+    }
+
+    // // // auto cube = csgjscpp::csgmodel_cube({-1.0, -1.0, -1.0}, {1.0, 1.0, 1.0}, csgjscpp::green);
+    // auto boundaryMesh = csgjscpp::modelfrompolygons(boundaryPolygons);
+
+    // // // auto unionModel = csgjscpp::csgunion(cube, boundaryMesh);
+    // csgjscpp::modeltoply(String(EXPORT_PATH) + "voro/test.ply", boundaryMesh);
+
+    pd3->SetBoundaryPolygon(boundaryPolygons);
 
     pd3->Init();
 
-    for (size_t i = 0; i < 120; i++)
-    {
-        pd3->LloydIteration();
+    // std::random_device seedGen;
+    // std::default_random_engine rndEngine(seedGen());
+    // std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
-        KIRI_LOG_DEBUG("Lloyd Iteration idx={0}", i);
-    }
+    // auto scale_size = 1.0;
+    // auto sampler_num = 1000;
+
+    // auto pd3 = std::make_shared<Voronoi::PowerDiagram3D>();
+    // auto voro3 = std::make_shared<Voronoi::VoronoiMesh3>();
+
+    // for (auto i = 0; i < sampler_num; i++)
+    // {
+    //     auto x = dist(rndEngine) * scale_size;
+    //     auto y = dist(rndEngine) * scale_size;
+    //     auto z = dist(rndEngine) * scale_size;
+
+    //     pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>(x, y, z, i));
+    // }
+
+    // // clip boundary
+    // auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon3>();
+    // BoundaryPolygon->AddVert3(Vector3D(-scale_size, -scale_size, -scale_size));
+    // BoundaryPolygon->AddVert3(Vector3D(scale_size, scale_size, scale_size));
+    // BoundaryPolygon->AddVert3(Vector3D(-scale_size, -scale_size, scale_size));
+    // BoundaryPolygon->AddVert3(Vector3D(-scale_size, scale_size, scale_size));
+    // BoundaryPolygon->AddVert3(Vector3D(-scale_size, scale_size, -scale_size));
+    // BoundaryPolygon->AddVert3(Vector3D(scale_size, -scale_size, -scale_size));
+    // BoundaryPolygon->AddVert3(Vector3D(scale_size, -scale_size, scale_size));
+    // BoundaryPolygon->AddVert3(Vector3D(scale_size, scale_size, -scale_size));
+
+    // pd3->SetBoundaryPolygon(BoundaryPolygon);
+
+    // pd3->Init();
+
+    // for (size_t i = 0; i < 120; i++)
+    // {
+    //     pd3->LloydIteration();
+
+    //     KIRI_LOG_DEBUG("Lloyd Iteration idx={0}", i);
+    // }
 }
 
 int main()

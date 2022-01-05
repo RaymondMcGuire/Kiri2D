@@ -15,7 +15,7 @@ endif()
 if(NOT APPLE)
 find_package(CUDA)
 if (CUDA_FOUND)
-  set(CUDA_ARCH_DYNAMIC "TRUE")
+  set(CUDA_ARCH_DYNAMIC "FALSE")
   set(CUDA_FIXED_ARCH "75")
   #Get CUDA compute capability
   set(OUTPUTFILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/checkCUDA/compile/cuda_script)
