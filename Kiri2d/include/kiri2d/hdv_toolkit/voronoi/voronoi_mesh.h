@@ -273,7 +273,7 @@ namespace HDV::Voronoi
         explicit VoronoiMesh3D() : VoronoiMesh<VERTEXPTR, VERTEX>(3) {}
         virtual ~VoronoiMesh3D() noexcept {}
 
-        bool mNeedClipBoundary = false;
+        bool mNeedClipBoundary = true;
 
         int mIndexOffset = 0;
         tinyobj::attrib_t mAttrib;
@@ -287,7 +287,7 @@ namespace HDV::Voronoi
 
         void ExportVoronoiMeshObj(int idx)
         {
-            // TinyObjWriter(UInt2Str4Digit(idx), mAttrib, mTinyObjShapes, mTinyObjmaterials);
+            TinyObjWriter(UInt2Str4Digit(idx), mAttrib, mTinyObjShapes, mTinyObjmaterials);
         }
 
         void TinyObjClear()
@@ -424,123 +424,90 @@ namespace HDV::Voronoi
                 polygon->UpdateBBox();
                 hull->Clear();
 
-                //! FIXME site is not correspondend to polygon, but it has no influence on Lloyid iteration
                 auto site = std::dynamic_pointer_cast<VoronoiSite3>(region->site);
 
                 if (!mNeedClipBoundary)
                 {
-                    KIRI_LOG_DEBUG("xid={0}; pos={1},{2},{3}", site->GetId(), site->X(), site->Y(), site->Z());
-                    TinyObjClear();
+                    // KIRI_LOG_DEBUG("xid={0}; pos={1},{2},{3}", site->GetId(), site->X(), site->Y(), site->Z());
                     TinyObjAppend(polygon->Positions, polygon->Normals, polygon->Indices);
-                    TinyObjWriter(UInt2Str4Digit(counter++), mAttrib, mTinyObjShapes, mTinyObjmaterials);
                 }
                 else
                 {
-                    // clip boundary
-                    if (mBoundaryBBox.contains(polygon->BBox.HighestPoint) && mBoundaryBBox.contains(polygon->BBox.LowestPoint))
+                    std::vector<csgjscpp::Polygon> voroPolygons;
+                    for (size_t j = 0; j < polygon->Indices.size() / 3; j++)
                     {
-                        site->Polygon = polygon;
 
-                        // clip condition
-                        if (!mConstrainSites.empty())
-                            if (mConstrainSites.find(site->GetId()) == mConstrainSites.end())
-                                continue;
+                        auto idx1 = j * 3;
+                        auto idx2 = j * 3 + 1;
+                        auto idx3 = j * 3 + 2;
 
-                        // KIRI_LOG_DEBUG("xid={0}; pos={1},{2},{3}", site->GetId(), site->X(), site->Y(), site->Z());
-                        TinyObjAppend(polygon->Positions, polygon->Normals, polygon->Indices);
-                        KIRI_LOG_DEBUG("No Need Clip Boundary");
+                        auto pos1 = polygon->Positions[polygon->Indices[idx1]];
+                        auto pos2 = polygon->Positions[polygon->Indices[idx2]];
+                        auto pos3 = polygon->Positions[polygon->Indices[idx3]];
+
+                        auto norm1 = polygon->Normals[polygon->Indices[idx1]];
+                        auto norm2 = polygon->Normals[polygon->Indices[idx2]];
+                        auto norm3 = polygon->Normals[polygon->Indices[idx3]];
+
+                        std::vector<csgjscpp::Vertex> csgVerts;
+
+                        csgVerts.push_back({csgjscpp::Vector(pos1.x, pos1.y, pos1.z), csgjscpp::Vector(norm1.x, norm1.y, norm1.z), csgjscpp::green});
+                        csgVerts.push_back({csgjscpp::Vector(pos2.x, pos2.y, pos2.z), csgjscpp::Vector(norm2.x, norm2.y, norm2.z), csgjscpp::green});
+                        csgVerts.push_back({csgjscpp::Vector(pos3.x, pos3.y, pos3.z), csgjscpp::Vector(norm3.x, norm3.y, norm3.z), csgjscpp::green});
+
+                        voroPolygons.push_back(csgjscpp::Polygon(csgVerts));
                     }
-                    else
+
+                    auto voroMesh = csgjscpp::modelfrompolygons(voroPolygons);
+
+                    auto boundaryMesh = csgjscpp::modelfrompolygons(mBoundaryPolygon);
+
+                    auto clippedMesh = csgjscpp::csgintersection(boundaryMesh, voroMesh);
+
+                    std::vector<Vector3D> clippedPositions;
+                    std::vector<Vector3D> clippedNormals;
+                    std::vector<int> clippedIndices;
+
+                    for (size_t idx = 0; idx < clippedMesh.indices.size(); idx += 3)
                     {
-                        KIRI_LOG_DEBUG("Clip Boundary");
-                        // clip boundary0
-                        std::vector<csgjscpp::Polygon> voroPolygons;
-                        for (size_t j = 0; j < polygon->Indices.size() / 3; j++)
-                        {
+                        auto indIdx1 = clippedMesh.indices[idx];
+                        auto indIdx2 = clippedMesh.indices[idx + 1];
+                        auto indIdx3 = clippedMesh.indices[idx + 2];
 
-                            auto idx1 = j * 3;
-                            auto idx2 = j * 3 + 1;
-                            auto idx3 = j * 3 + 2;
+                        auto faceVert1 = clippedMesh.vertices[indIdx1].pos;
+                        auto faceVert2 = clippedMesh.vertices[indIdx2].pos;
+                        auto faceVert3 = clippedMesh.vertices[indIdx3].pos;
 
-                            auto pos1 = polygon->Positions[polygon->Indices[idx1]];
-                            auto pos2 = polygon->Positions[polygon->Indices[idx2]];
-                            auto pos3 = polygon->Positions[polygon->Indices[idx3]];
+                        auto faceNorm1 = clippedMesh.vertices[indIdx1].normal;
+                        auto faceNorm2 = clippedMesh.vertices[indIdx2].normal;
+                        auto faceNorm3 = clippedMesh.vertices[indIdx3].normal;
 
-                            auto norm1 = polygon->Normals[polygon->Indices[idx1]];
-                            auto norm2 = polygon->Normals[polygon->Indices[idx2]];
-                            auto norm3 = polygon->Normals[polygon->Indices[idx3]];
+                        clippedPositions.emplace_back(Vector3D(faceVert1.x, faceVert1.y, faceVert1.z));
+                        clippedPositions.emplace_back(Vector3D(faceVert2.x, faceVert2.y, faceVert2.z));
+                        clippedPositions.emplace_back(Vector3D(faceVert3.x, faceVert3.y, faceVert3.z));
 
-                            std::vector<csgjscpp::Vertex> csgVerts;
+                        clippedNormals.emplace_back(Vector3D(faceNorm1.x, faceNorm1.y, faceNorm1.z));
+                        clippedNormals.emplace_back(Vector3D(faceNorm2.x, faceNorm2.y, faceNorm2.z));
+                        clippedNormals.emplace_back(Vector3D(faceNorm3.x, faceNorm3.y, faceNorm3.z));
 
-                            csgVerts.push_back({csgjscpp::Vector(pos1.x, pos1.y, pos1.z), csgjscpp::Vector(norm1.x, norm1.y, norm1.z), csgjscpp::green});
-                            csgVerts.push_back({csgjscpp::Vector(pos2.x, pos2.y, pos2.z), csgjscpp::Vector(norm2.x, norm2.y, norm2.z), csgjscpp::green});
-                            csgVerts.push_back({csgjscpp::Vector(pos3.x, pos3.y, pos3.z), csgjscpp::Vector(norm3.x, norm3.y, norm3.z), csgjscpp::green});
-
-                            voroPolygons.push_back(csgjscpp::Polygon(csgVerts));
-                        }
-
-                        auto voroMesh = csgjscpp::modelfrompolygons(voroPolygons);
-
-                        // auto boundaryMesh = csgjscpp::csgmodel_cube({0.0, 0.0, 0.0f}, {1.0, 1.0, 1.0}, csgjscpp::green);
-                        auto boundaryMesh = csgjscpp::modelfrompolygons(mBoundaryPolygon);
-
-                        auto clippedMesh = csgjscpp::csgintersection(boundaryMesh, voroMesh);
-
-                        KIRI_LOG_DEBUG("Clip Boundary Finished!");
-
-                        csgjscpp::modeltoply(String(EXPORT_PATH) + "voro/" + UInt2Str4Digit(counter++) + ".ply", clippedMesh);
-
-                        // std::vector<HDV::Primitives::Vertex3Ptr> csgVerts;
-                        // for (auto j = 0; j < clippedMesh.vertices.size(); j++)
-                        // {
-                        //     auto v = clippedMesh.vertices[j];
-                        //     csgVerts.emplace_back(std::make_shared<HDV::Primitives::Vertex3>(v.pos.x, v.pos.y, v.pos.z));
-                        // }
-
-                        // auto hull = std::make_shared<HDV::Hull::ConvexHull<HDV::Primitives::Vertex3Ptr>>(3);
-                        // hull->Generate(csgVerts);
-
-                        // std::vector<Vector3D> clippedPositions;
-                        // std::vector<Vector3D> clippedNormals;
-                        // std::vector<int> clippedIndices;
-
-                        // auto simplexs = hull->GetSimplexs();
-                        // for (auto j = 0; j < simplexs.size(); j++)
-                        // {
-                        //     for (auto k = 0; k < 3; k++)
-                        //     {
-                        //         auto vertk = simplexs[j]->Vertices[k];
-                        //         auto vec3 = Vector3D(vertk->X(), vertk->Y(), vertk->Z());
-                        //         clippedPositions.emplace_back(vec3);
-                        //     }
-
-                        //     auto normal3 = Vector3D(simplexs[j]->Normals[0], simplexs[j]->Normals[1], simplexs[j]->Normals[2]);
-                        //     clippedNormals.emplace_back(normal3);
-                        //     clippedNormals.emplace_back(normal3);
-                        //     clippedNormals.emplace_back(normal3);
-
-                        //     clippedIndices.emplace_back(j * 3 + 0);
-                        //     clippedIndices.emplace_back(j * 3 + 1);
-                        //     clippedIndices.emplace_back(j * 3 + 2);
-                        // }
-                        // hull->Clear();
-
-                        // polygon->Positions = clippedPositions;
-                        // polygon->Normals = clippedNormals;
-                        // polygon->Indices = clippedIndices;
-                        // polygon->UpdateBBox();
-
-                        // site->Polygon = polygon;
-
-                        // // clip condition
-                        // if (!mConstrainSites.empty())
-                        //     if (mConstrainSites.find(site->GetId()) == mConstrainSites.end())
-                        //         continue;
-
-                        // // KIRI_LOG_DEBUG("id={0}; pos={1},{2},{3}", site->GetId(), site->X(), site->Y(), site->Z());
-
-                        // TinyObjAppend(clippedPositions, clippedNormals, clippedIndices);
+                        clippedIndices.emplace_back(idx);
+                        clippedIndices.emplace_back(idx + 1);
+                        clippedIndices.emplace_back(idx + 2);
                     }
+
+                    polygon->Positions = clippedPositions;
+                    polygon->Normals = clippedNormals;
+                    polygon->Indices = clippedIndices;
+                    polygon->UpdateBBox();
+
+                    site->Polygon = polygon;
+
+                    // clip condition
+                    if (!mConstrainSites.empty())
+                        if (mConstrainSites.find(site->GetId()) == mConstrainSites.end())
+                            continue;
+
+                    TinyObjAppend(clippedPositions, clippedNormals, clippedIndices);
                 }
             }
         }

@@ -151,7 +151,7 @@ namespace HDV::Delaunay
             }
             auto c = Determinant();
 
-            auto s = -1.0 / (2.0 * a);
+            auto s = 1.0 / (2.0 * a);
             auto radius = std::abs(s) * std::sqrtf(dx * dx + dy * dy + dz * dz - 4 * a * c);
 
             std::vector<double> circumCenter;

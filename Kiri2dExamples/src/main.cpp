@@ -2806,6 +2806,7 @@ void QuickHullVoronoi3d()
     // ############################################################################# for boundary mesh
     auto boundaryModel = std::make_shared<KiriModelTinyObjLoader>("bunny", "models", ".obj");
     boundaryModel->Normalize();
+    // boundaryModel->ScaleToBox(2.f);
 
     auto cellSize = 0.01f;
     auto bBMin = boundaryModel->GetAABBMin();
@@ -2841,11 +2842,7 @@ void QuickHullVoronoi3d()
 
     LevelSetShapeInfo mInfo(CudaAxisAlignedBox<float3>(KiriToCUDA(newBBoxMin), KiriToCUDA(newBBoxMax)), cellSize / 2.f, (uint)boundaryModel->GetNFaces());
     auto cudaSampler = std::make_shared<CudaShapeSampler>(mInfo, KiriToCUDA(faceVerticesList));
-    auto insidePoints = cudaSampler->GetInsidePoints(10);
-    for (size_t i = 0; i < insidePoints.size(); i++)
-    {
-        KIRI_LOG_DEBUG("inside point = {0},{1},{2}", insidePoints[i].x, insidePoints[i].y, insidePoints[i].z);
-    }
+    auto insidePoints = cudaSampler->GetInsidePoints(1000);
     // ############################################################################# for boundary mesh
 
     auto pd3 = std::make_shared<Voronoi::PowerDiagram3D>();
@@ -2859,7 +2856,7 @@ void QuickHullVoronoi3d()
 
         pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>(x, y, z, i));
 
-        KIRI_LOG_DEBUG("pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>({0},{1},{2},{3});", x, y, z, i);
+        // KIRI_LOG_DEBUG("pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>({0},{1},{2},{3});", x, y, z, i);
     }
 
     std::vector<csgjscpp::Polygon> boundaryPolygons;
@@ -2897,46 +2894,20 @@ void QuickHullVoronoi3d()
 
     pd3->Init();
 
-    // std::random_device seedGen;
-    // std::default_random_engine rndEngine(seedGen());
-    // std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    KiriTimer timer;
+    float totalTime = 0.f;
+    int iterNumber = 120;
+    for (size_t i = 0; i < iterNumber; i++)
+    {
+        float currentTime = 0.f;
+        timer.Restart();
+        pd3->LloydIteration();
+        currentTime = timer.Elapsed();
+        totalTime += currentTime;
 
-    // auto scale_size = 1.0;
-    // auto sampler_num = 1000;
-
-    // auto pd3 = std::make_shared<Voronoi::PowerDiagram3D>();
-    // auto voro3 = std::make_shared<Voronoi::VoronoiMesh3>();
-
-    // for (auto i = 0; i < sampler_num; i++)
-    // {
-    //     auto x = dist(rndEngine) * scale_size;
-    //     auto y = dist(rndEngine) * scale_size;
-    //     auto z = dist(rndEngine) * scale_size;
-
-    //     pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>(x, y, z, i));
-    // }
-
-    // // clip boundary
-    // auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon3>();
-    // BoundaryPolygon->AddVert3(Vector3D(-scale_size, -scale_size, -scale_size));
-    // BoundaryPolygon->AddVert3(Vector3D(scale_size, scale_size, scale_size));
-    // BoundaryPolygon->AddVert3(Vector3D(-scale_size, -scale_size, scale_size));
-    // BoundaryPolygon->AddVert3(Vector3D(-scale_size, scale_size, scale_size));
-    // BoundaryPolygon->AddVert3(Vector3D(-scale_size, scale_size, -scale_size));
-    // BoundaryPolygon->AddVert3(Vector3D(scale_size, -scale_size, -scale_size));
-    // BoundaryPolygon->AddVert3(Vector3D(scale_size, -scale_size, scale_size));
-    // BoundaryPolygon->AddVert3(Vector3D(scale_size, scale_size, -scale_size));
-
-    // pd3->SetBoundaryPolygon(BoundaryPolygon);
-
-    // pd3->Init();
-
-    // for (size_t i = 0; i < 120; i++)
-    // {
-    //     pd3->LloydIteration();
-
-    //     KIRI_LOG_DEBUG("Lloyd Iteration idx={0}", i);
-    // }
+        KIRI_LOG_DEBUG("Lloyd Iteration Idx={0}, Computation Time={1}", i, currentTime);
+    }
+    KIRI_LOG_DEBUG("Total Computation Time={0}", totalTime, totalTime / iterNumber);
 }
 
 int main()

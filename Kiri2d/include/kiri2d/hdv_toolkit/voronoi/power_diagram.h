@@ -26,15 +26,16 @@ namespace HDV::Voronoi
         void SetBoundaryPolygon(const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
         {
             mMesh->SetBoundaryPolygon(boundary);
-            auto bbox = boundary->BBox;
 
-            if (bbox.width() < 0.0 || bbox.height() < 0.0)
-                KIRI_LOG_ERROR("bbox low={0},{1}, high={2},{3}, width={4}, height={5}", bbox.LowestPoint.x, bbox.LowestPoint.y, bbox.HighestPoint.x, bbox.HighestPoint.y, bbox.width(), bbox.height());
+            auto mBBox = boundary->BBox;
 
-            auto site1 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y - bbox.height());
-            auto site2 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y - bbox.height());
-            auto site3 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height());
-            auto site4 = std::make_shared<Voronoi::VoronoiSite2>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height());
+            if (mBBox.width() < 0.0 || mBBox.height() < 0.0)
+                KIRI_LOG_ERROR("mBBox low={0},{1}, high={2},{3}, width={4}, height={5}", mBBox.LowestPoint.x, mBBox.LowestPoint.y, mBBox.HighestPoint.x, mBBox.HighestPoint.y, mBBox.width(), mBBox.height());
+
+            auto site1 = std::make_shared<Voronoi::VoronoiSite2>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y - mBBox.height());
+            auto site2 = std::make_shared<Voronoi::VoronoiSite2>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y - mBBox.height());
+            auto site3 = std::make_shared<Voronoi::VoronoiSite2>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height());
+            auto site4 = std::make_shared<Voronoi::VoronoiSite2>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height());
 
             site1->SetAsBoundaryVertex();
             site2->SetAsBoundaryVertex();
@@ -100,7 +101,7 @@ namespace HDV::Voronoi
         std::vector<HDV::Primitives::Vertex3Ptr> GetSites() { return mSites; }
 
         int mCounter = 0;
-        int mTCounter = 0;
+        BoundingBox3D mBBox;
 
         void SetBoundaryPolygon(std::vector<csgjscpp::Polygon> boundary)
         {
@@ -113,24 +114,24 @@ namespace HDV::Voronoi
                 boundaryPolygon->AddVert3(Vector3D(face.vertices[2].pos.x, face.vertices[2].pos.y, face.vertices[2].pos.z));
             }
 
-            auto bbox = boundaryPolygon->BBox;
+            mBBox = boundaryPolygon->BBox;
 
             mMesh->SetBoundaryPolygon(boundary);
-            mMesh->SetBoundaryBBox(bbox);
+            mMesh->SetBoundaryBBox(mBBox);
 
-            KIRI_LOG_ERROR("bbox low={0},{1}, high={2},{3}, width={4}, height={5}", bbox.LowestPoint.x, bbox.LowestPoint.y, bbox.HighestPoint.x, bbox.HighestPoint.y, bbox.width(), bbox.height());
+            // KIRI_LOG_ERROR("mBBox low={0},{1}, high={2},{3}, width={4}, height={5}", mBBox.LowestPoint.x, mBBox.LowestPoint.y, mBBox.HighestPoint.x, mBBox.HighestPoint.y, mBBox.width(), mBBox.height());
 
-            if (bbox.width() < 0.0 || bbox.height() < 0.0 || bbox.depth() < 0.0)
-                KIRI_LOG_ERROR("bbox low={0},{1}, high={2},{3}, width={4}, height={5}", bbox.LowestPoint.x, bbox.LowestPoint.y, bbox.HighestPoint.x, bbox.HighestPoint.y, bbox.width(), bbox.height());
+            if (mBBox.width() < 0.0 || mBBox.height() < 0.0 || mBBox.depth() < 0.0)
+                KIRI_LOG_ERROR("mBBox low={0},{1}, high={2},{3}, width={4}, height={5}", mBBox.LowestPoint.x, mBBox.LowestPoint.y, mBBox.HighestPoint.x, mBBox.HighestPoint.y, mBBox.width(), mBBox.height());
 
-            auto site1 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y - bbox.height(), bbox.LowestPoint.z - bbox.depth());
-            auto site2 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height(), bbox.LowestPoint.z + 2.0 * bbox.depth());
-            auto site3 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y - bbox.height(), bbox.LowestPoint.z + 2.0 * bbox.depth());
-            auto site4 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height(), bbox.LowestPoint.z + 2.0 * bbox.depth());
-            auto site5 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height(), bbox.LowestPoint.z - bbox.depth());
-            auto site6 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y - bbox.height(), bbox.LowestPoint.z - bbox.depth());
-            auto site7 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y - bbox.height(), bbox.LowestPoint.z + 2.0 * bbox.depth());
-            auto site8 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height(), bbox.LowestPoint.z - bbox.depth());
+            auto site1 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
+            auto site2 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
+            auto site3 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
+            auto site4 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
+            auto site5 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
+            auto site6 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
+            auto site7 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
+            auto site8 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
 
             site1->SetAsBoundaryVertex();
             site2->SetAsBoundaryVertex();
@@ -154,19 +155,19 @@ namespace HDV::Voronoi
         // void SetBoundaryPolygon(const std::shared_ptr<VoronoiPolygon3> &boundary)
         // {
         //     mMesh->SetBoundaryPolygon(boundary);
-        //     auto bbox = boundary->BBox;
+        //     auto mBBox = boundary->BBox;
 
-        //     if (bbox.width() < 0.0 || bbox.height() < 0.0 || bbox.depth() < 0.0)
-        //         KIRI_LOG_ERROR("bbox low={0},{1}, high={2},{3}, width={4}, height={5}", bbox.LowestPoint.x, bbox.LowestPoint.y, bbox.HighestPoint.x, bbox.HighestPoint.y, bbox.width(), bbox.height());
+        //     if (mBBox.width() < 0.0 || mBBox.height() < 0.0 || mBBox.depth() < 0.0)
+        //         KIRI_LOG_ERROR("mBBox low={0},{1}, high={2},{3}, width={4}, height={5}", mBBox.LowestPoint.x, mBBox.LowestPoint.y, mBBox.HighestPoint.x, mBBox.HighestPoint.y, mBBox.width(), mBBox.height());
 
-        //     auto site1 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y - bbox.height(), bbox.LowestPoint.z - bbox.depth());
-        //     auto site2 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height(), bbox.LowestPoint.z + 2.0 * bbox.depth());
-        //     auto site3 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y - bbox.height(), bbox.LowestPoint.z + 2.0 * bbox.depth());
-        //     auto site4 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height(), bbox.LowestPoint.z + 2.0 * bbox.depth());
-        //     auto site5 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x - bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height(), bbox.LowestPoint.z - bbox.depth());
-        //     auto site6 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y - bbox.height(), bbox.LowestPoint.z - bbox.depth());
-        //     auto site7 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y - bbox.height(), bbox.LowestPoint.z + 2.0 * bbox.depth());
-        //     auto site8 = std::make_shared<Voronoi::VoronoiSite3>(bbox.LowestPoint.x + 2.0 * bbox.width(), bbox.LowestPoint.y + 2.0 * bbox.height(), bbox.LowestPoint.z - bbox.depth());
+        //     auto site1 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
+        //     auto site2 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
+        //     auto site3 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
+        //     auto site4 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
+        //     auto site5 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
+        //     auto site6 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
+        //     auto site7 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
+        //     auto site8 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
 
         //     site1->SetAsBoundaryVertex();
         //     site2->SetAsBoundaryVertex();
@@ -191,14 +192,12 @@ namespace HDV::Voronoi
         {
             mConstrainSites.clear();
             Compute();
-            // AddConstrain();
+            AddConstrain();
         }
 
         void LloydIteration()
         {
             // Reset();
-            Move2Centroid();
-            Compute();
             Move2Centroid();
             Compute();
         }
@@ -216,12 +215,8 @@ namespace HDV::Voronoi
         void Compute()
         {
             mMesh->Generate(mSites, mAssignIds, mCheckInput);
-
-            if (mTCounter % 2 == 0)
-                mMesh->ExportVoronoiMeshObj(mCounter++);
-
-            mTCounter++;
-            // KIRI_LOG_DEBUG("resgion size={0}", mMesh->Regions.size());
+            mMesh->ExportVoronoiMeshObj(mCounter++);
+            //  KIRI_LOG_DEBUG("resgion size={0}", mMesh->Regions.size());
         }
 
         void Move2Centroid()
@@ -239,10 +234,12 @@ namespace HDV::Voronoi
 
         void AddConstrain()
         {
+            auto center = (mBBox.LowestPoint + mBBox.HighestPoint) / 2.0;
             for (size_t i = 0; i < mSites.size(); i++)
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
-                if (site->X() < 0.0)
+
+                if (site->Z() < (center.z + mBBox.depth() * 0.2))
                     mConstrainSites.insert(site->GetId());
             }
 
