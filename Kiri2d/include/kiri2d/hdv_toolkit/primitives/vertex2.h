@@ -1,11 +1,10 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2021-12-29 14:58:14
+ * @LastEditTime: 2022-01-10 23:49:49
  * @LastEditors: Xu.WANG
  * @Description:
  */
-
 #ifndef _HDV_VERTEX2_H_
 #define _HDV_VERTEX2_H_
 
@@ -36,6 +35,11 @@ namespace HDV::Primitives
         {
             mPosition[0] = x;
             mPosition[1] = y;
+        }
+
+        double Distance(std::shared_ptr<Vertex2> v)
+        {
+            return std::sqrtf(SqrDistance(v->X(), v->Y()));
         }
 
         double Distance(double px, double py)

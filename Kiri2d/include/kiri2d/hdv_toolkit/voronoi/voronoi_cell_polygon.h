@@ -24,13 +24,87 @@ namespace HDV::Voronoi
 
         void AddVert2(Vector2D vert)
         {
-            Verts.emplace_back(vert);
+            Positions.emplace_back(vert);
             BBox.merge(vert);
+        }
+
+        void UpdateBBox()
+        {
+            BBox.reset();
+            for (auto i = 0; i < Positions.size(); i++)
+                BBox.merge(Positions[i]);
+        }
+
+        bool CheckBBox()
+        {
+            if (BBox.isEmpty())
+            {
+                if (!Positions.empty())
+                {
+                    UpdateBBox();
+                    return true;
+                }
+                else
+                {
+                    KIRI_LOG_ERROR("Contains:: No polygon data!!");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        Vector2D GetRndInnerPoint()
+        {
+            if (!CheckBBox())
+            {
+                KIRI_LOG_ERROR("GetRndInnerPoint:: Get inner point failed!!");
+                return Vector2D(0.0);
+            }
+
+            Vector2D inner;
+            std::random_device seedGen;
+            std::default_random_engine rndEngine(seedGen());
+            std::uniform_real_distribution<double> dist(0.0, 1.0);
+            do
+            {
+                inner = BBox.LowestPoint + Vector2D(dist(rndEngine) * BBox.width(), dist(rndEngine) * BBox.height());
+            } while (!Contains(inner));
+
+            return inner;
+        }
+
+        bool Contains(const Vector2D &v)
+        {
+            if (!CheckBBox())
+                return false;
+
+            if (!BBox.contains(v))
+                return false;
+
+            bool contains = false;
+            for (size_t i = 0, j = Positions.size() - 1; i < Positions.size(); j = i++)
+            {
+                auto verti = Positions[i];
+                auto vertj = Positions[j];
+                if ((((verti.y <= v.y) && (v.y < vertj.y) || ((vertj.y <= v.y) && (v.y < verti.y))) && (v.x < (vertj.x - verti.x) * (v.y - verti.y) / (vertj.y - verti.y) + verti.x)))
+                    contains = !contains;
+            }
+            return contains;
+        }
+
+        double GetArea()
+        {
+            auto area = 0.0;
+            if (!Positions.empty())
+                for (size_t i = 0; i < Positions.size(); i++)
+                    area += Positions[i].cross(Positions[(i + 1) % Positions.size()]);
+
+            return std::abs(area * 0.5);
         }
 
         Vector2D GetCentroid()
         {
-            std::vector<Vector2D> tmpPolygonVertices(Verts);
+            std::vector<Vector2D> tmpPolygonVertices(Positions);
 
             auto first = tmpPolygonVertices[0], last = tmpPolygonVertices[tmpPolygonVertices.size() - 1];
             if (first.x != last.x || first.y != last.y)
@@ -52,18 +126,110 @@ namespace HDV::Voronoi
             }
             f = twicearea * 3.0;
 
-            // KIRI_LOG_DEBUG("GetCentroid -------");
-            // for (size_t i = 0; i < tmpPolygonVertices.size(); i++)
-            // {
-            //     KIRI_LOG_DEBUG("vert={0},{1}", tmpPolygonVertices[i].x, tmpPolygonVertices[i].y);
-            // }
-            // KIRI_LOG_DEBUG("GetCentroid -------,f={0}", f);
-
             return Vector2D(x / f, y / f);
         }
 
+        bool IsClockwise(const std::vector<Vector4F> &poly)
+        {
+            auto a = 0.f;
+            auto polySize = poly.size();
+            for (size_t i = 0; i < polySize; i++)
+            {
+                auto s = Vector2F(poly[i].x, poly[i].y);
+                auto e = Vector2F(poly[i].z, poly[i].w);
+                a += (e.x - s.x) * (e.y + s.y);
+            }
+
+            return a < 0.f;
+        }
+
+        void ComputeSSkel1998Convex()
+        {
+            mSkeletons.clear();
+
+            std::vector<Vector4F> poly;
+            std::vector<Vector2F> rPolyVert;
+
+            for (size_t i = 0; i < Positions.size(); i++)
+            {
+                auto v1 = Positions[i];
+                auto v2 = Positions[(i + 1) % Positions.size()];
+                poly.emplace_back(Vector4F(v1.x, v1.y, v2.x, v2.y));
+                rPolyVert.emplace_back(Vector2F(v1.x, v1.y));
+            }
+
+            if (IsClockwise(poly))
+                std::reverse(rPolyVert.begin(), rPolyVert.end());
+
+            auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelSLAV>(rPolyVert);
+
+            auto skeletons = sskel_convex->GetSkeletons();
+
+            for (size_t i = 0; i < skeletons.size(); i++)
+            {
+                auto [intersect, sinks] = skeletons[i];
+                for (size_t j = 0; j < sinks.size(); j++)
+                    mSkeletons.emplace_back(Vector4F(intersect.x, intersect.y, sinks[j].x, sinks[j].y));
+            }
+        }
+
+        double MinDis2LineSegment2(Vector2D v, Vector2D w, Vector2D p)
+        {
+            const double l2 = v.distanceSquaredTo(w);
+            if (l2 == 0.f)
+                return p.distanceTo(v);
+
+            const double t = std::clamp(((p - v).dot(w - v)) / l2, 0.0, 1.0);
+            const Vector2D projection = v + t * (w - v);
+            return p.distanceTo(projection);
+        }
+
+        double ComputeMinDisInPoly(const Vector2D &p)
+        {
+            auto minDis = std::numeric_limits<double>::max();
+            for (size_t i = 0; i < Positions.size(); i++)
+                minDis = std::min(minDis, MinDis2LineSegment2(Positions[i], Positions[(i + 1) % Positions.size()], p));
+            return minDis;
+        }
+
+        Vector3D ComputeMICByStraightSkeleton()
+        {
+            auto maxCirVec = Vector2D(0.0);
+            auto maxCirRad = std::numeric_limits<double>::min();
+            if (!mSkeletons.empty())
+            {
+                for (size_t i = 0; i < mSkeletons.size(); i++)
+                {
+                    auto v1 = Vector2D(mSkeletons[i].x, mSkeletons[i].y);
+                    auto v2 = Vector2D(mSkeletons[i].z, mSkeletons[i].w);
+
+                    if (Contains(v1))
+                    {
+                        auto minDis = ComputeMinDisInPoly(v1);
+                        if (minDis > maxCirRad)
+                        {
+                            maxCirRad = minDis;
+                            maxCirVec = v1;
+                        }
+                    }
+
+                    if (Contains(v2))
+                    {
+                        auto minDis = ComputeMinDisInPoly(v2);
+                        if (minDis > maxCirRad)
+                        {
+                            maxCirRad = minDis;
+                            maxCirVec = v2;
+                        }
+                    }
+                }
+            }
+            return Vector3D(maxCirVec.x, maxCirVec.y, maxCirRad);
+        }
+
         BoundingBox2D BBox;
-        std::vector<Vector2D> Verts;
+        std::vector<Vector2D> Positions;
+        std::vector<Vector4F> mSkeletons;
     };
 
     class VoronoiPolygon3

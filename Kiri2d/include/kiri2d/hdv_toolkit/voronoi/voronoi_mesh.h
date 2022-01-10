@@ -185,7 +185,7 @@ namespace HDV::Voronoi
         {
             for (auto i = 0; i < Regions.size(); i++)
             {
-                std::vector<VERTEXPTR> verts;
+                std::vector<VERTEXPTR> Positions;
                 auto count = 0, c1 = 0;
                 auto region = Regions[i];
 
@@ -195,11 +195,11 @@ namespace HDV::Voronoi
                 for (auto j = 0; j < region->Cells.size(); j++)
                 {
                     auto vert = region->Cells[j]->CircumCenter;
-                    verts.emplace_back(std::make_shared<Primitives::Vertex2>(vert->X(), vert->Y(), count++));
+                    Positions.emplace_back(std::make_shared<Primitives::Vertex2>(vert->X(), vert->Y(), count++));
                 }
 
                 auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
-                hull->Generate(verts);
+                hull->Generate(Positions);
 
                 auto simplexs = hull->GetSortSimplexsList();
 
@@ -217,14 +217,14 @@ namespace HDV::Voronoi
                 }
 
                 // clip voronoi cell polygon
-                if (cell_polygon->Verts.size() > 2)
+                if (cell_polygon->Positions.size() > 2)
                 {
                     if (mBoundaryPolygon->BBox.overlaps(cell_polygon->BBox))
                     {
                         if (!mBoundaryPolygon->BBox.contains(cell_polygon->BBox))
                         {
-                            auto A = mBoundaryPolygon->Verts;
-                            auto B = cell_polygon->Verts;
+                            auto A = mBoundaryPolygon->Positions;
+                            auto B = cell_polygon->Positions;
 
                             std::vector<PolyClip::Point2d> polyA;
                             std::vector<PolyClip::Point2d> polyB;
@@ -256,8 +256,8 @@ namespace HDV::Voronoi
                                 }
 
                                 //! TODO
-                                clipedPolygon->Verts.pop_back();
-                                std::reverse(clipedPolygon->Verts.begin(), clipedPolygon->Verts.end());
+                                clipedPolygon->Positions.pop_back();
+                                std::reverse(clipedPolygon->Positions.begin(), clipedPolygon->Positions.end());
 
                                 cell_polygon = clipedPolygon;
                             }
@@ -314,36 +314,36 @@ namespace HDV::Voronoi
             std::vector<int> indices)
         {
             tinyobj::shape_t tinyObjShape;
-            for (size_t j = 0; j < positions.size() / 3; j++)
+            for (auto j = 0; j < positions.size() / 3; j++)
             {
 
                 auto idx1 = j * 3;
                 auto idx2 = j * 3 + 1;
                 auto idx3 = j * 3 + 2;
 
-                mAttrib.vertices.emplace_back(positions[idx1].x);
-                mAttrib.vertices.emplace_back(positions[idx1].y);
-                mAttrib.vertices.emplace_back(positions[idx1].z);
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx1].x));
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx1].y));
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx1].z));
 
-                mAttrib.vertices.emplace_back(positions[idx2].x);
-                mAttrib.vertices.emplace_back(positions[idx2].y);
-                mAttrib.vertices.emplace_back(positions[idx2].z);
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx2].x));
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx2].y));
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx2].z));
 
-                mAttrib.vertices.emplace_back(positions[idx3].x);
-                mAttrib.vertices.emplace_back(positions[idx3].y);
-                mAttrib.vertices.emplace_back(positions[idx3].z);
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx3].x));
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx3].y));
+                mAttrib.vertices.emplace_back(static_cast<float>(positions[idx3].z));
 
-                mAttrib.normals.emplace_back(normals[idx1].x);
-                mAttrib.normals.emplace_back(normals[idx1].y);
-                mAttrib.normals.emplace_back(normals[idx1].z);
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx1].x));
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx1].y));
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx1].z));
 
-                mAttrib.normals.emplace_back(normals[idx2].x);
-                mAttrib.normals.emplace_back(normals[idx2].y);
-                mAttrib.normals.emplace_back(normals[idx2].z);
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx2].x));
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx2].y));
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx2].z));
 
-                mAttrib.normals.emplace_back(normals[idx3].x);
-                mAttrib.normals.emplace_back(normals[idx3].y);
-                mAttrib.normals.emplace_back(normals[idx3].z);
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx3].x));
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx3].y));
+                mAttrib.normals.emplace_back(static_cast<float>(normals[idx3].z));
 
                 tinyobj::index_t i1, i2, i3;
                 i1.vertex_index = indices[idx1] + mIndexOffset;
@@ -393,7 +393,7 @@ namespace HDV::Voronoi
             // KIRI_LOG_DEBUG("----------Region2Polygon------------------");
             for (auto i = 0; i < Regions.size(); i++)
             {
-                std::vector<VERTEXPTR> verts;
+                std::vector<VERTEXPTR> Positions;
                 auto count = 0, c1 = 0;
                 auto region = Regions[i];
 
@@ -403,11 +403,11 @@ namespace HDV::Voronoi
                 for (auto j = 0; j < region->Cells.size(); j++)
                 {
                     auto vert = region->Cells[j]->CircumCenter;
-                    verts.emplace_back(std::make_shared<Primitives::Vertex3>(vert->X(), vert->Y(), vert->Z(), count++));
+                    Positions.emplace_back(std::make_shared<Primitives::Vertex3>(vert->X(), vert->Y(), vert->Z(), count++));
                 }
 
                 auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
-                hull->Generate(verts);
+                hull->Generate(Positions);
 
                 auto simplexs = hull->GetSimplexs();
                 auto polygon = std::make_shared<VoronoiPolygon3>();
@@ -459,13 +459,13 @@ namespace HDV::Voronoi
                         auto norm2 = polygon->Normals[polygon->Indices[idx2]];
                         auto norm3 = polygon->Normals[polygon->Indices[idx3]];
 
-                        std::vector<csgjscpp::Vertex> csgVerts;
+                        std::vector<csgjscpp::Vertex> csgPositions;
 
-                        csgVerts.push_back({csgjscpp::Vector(pos1.x, pos1.y, pos1.z), csgjscpp::Vector(norm1.x, norm1.y, norm1.z), csgjscpp::green});
-                        csgVerts.push_back({csgjscpp::Vector(pos2.x, pos2.y, pos2.z), csgjscpp::Vector(norm2.x, norm2.y, norm2.z), csgjscpp::green});
-                        csgVerts.push_back({csgjscpp::Vector(pos3.x, pos3.y, pos3.z), csgjscpp::Vector(norm3.x, norm3.y, norm3.z), csgjscpp::green});
+                        csgPositions.push_back({csgjscpp::Vector(pos1.x, pos1.y, pos1.z), csgjscpp::Vector(norm1.x, norm1.y, norm1.z), csgjscpp::green});
+                        csgPositions.push_back({csgjscpp::Vector(pos2.x, pos2.y, pos2.z), csgjscpp::Vector(norm2.x, norm2.y, norm2.z), csgjscpp::green});
+                        csgPositions.push_back({csgjscpp::Vector(pos3.x, pos3.y, pos3.z), csgjscpp::Vector(norm3.x, norm3.y, norm3.z), csgjscpp::green});
 
-                        voroPolygons.push_back(csgjscpp::Polygon(csgVerts));
+                        voroPolygons.push_back(csgjscpp::Polygon(csgPositions));
                     }
 
                     auto voroMesh = csgjscpp::modelfrompolygons(voroPolygons);
@@ -478,7 +478,7 @@ namespace HDV::Voronoi
                     std::vector<Vector3D> clippedNormals;
                     std::vector<int> clippedIndices;
 
-                    for (size_t idx = 0; idx < clippedMesh.indices.size(); idx += 3)
+                    for (auto idx = 0; idx < clippedMesh.indices.size(); idx += 3)
                     {
                         auto indIdx1 = clippedMesh.indices[idx];
                         auto indIdx2 = clippedMesh.indices[idx + 1];

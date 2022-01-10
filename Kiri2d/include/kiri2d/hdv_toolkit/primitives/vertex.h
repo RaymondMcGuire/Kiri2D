@@ -27,13 +27,13 @@ namespace HDV::Primitives
         int GetTag() const { return mTag; }
         int GetDimension() { return (mPosition.empty()) ? 0 : mPosition.size(); }
         double GetWeight() { return mWeight; }
+        double GetRadius() { return mRadius; }
         const std::vector<double> &GetPosition() const { return mPosition; }
 
         void SetId(int id) { mId = id; }
         void SetTag(int tag) { mTag = tag; }
         void SetWeight(double weight) { mWeight = weight; }
-
-        const std::vector<double> &GetPosition() { return mPosition; }
+        void SetRadius(double radius) { mRadius = radius; }
 
         std::string GetString()
         {
@@ -112,6 +112,7 @@ namespace HDV::Primitives
         int mId = -1;
         int mTag = 0;
         double mWeight = 0.0;
+        double mRadius = 0.0;
         bool mIsBoundaryVertex = false;
     };
     typedef std::shared_ptr<Vertex> VertexPtr;
