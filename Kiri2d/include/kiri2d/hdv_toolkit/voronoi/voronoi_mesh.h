@@ -79,6 +79,7 @@ namespace HDV::Voronoi
                 cells.clear();
 
                 auto vertex = delaunay->Vertices[i];
+                vertex->mNeighborSites.clear();
 
                 for (auto j = 0; j < delaunay->Cells.size(); j++)
                 {
@@ -104,6 +105,15 @@ namespace HDV::Voronoi
 
                     for (auto j = 0; j < cells.size(); j++)
                     {
+                        auto simplex = cells[j]->mSimplex;
+                        for (auto k = 0; k < simplex->Vertices.size(); k++)
+                        {
+                            if (simplex->Vertices[k]->GetId() != vertex->GetId() && !simplex->Vertices[k]->GetIsBoundaryVertex())
+                            {
+                                vertex->mNeighborSites.insert(simplex->Vertices[k]->GetId());
+                            }
+                        }
+
                         region->Cells.emplace_back(cells[j]);
                     }
 

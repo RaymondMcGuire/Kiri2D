@@ -2748,7 +2748,6 @@ void QuickHullVoronoi2d()
 
         std::vector<KiriLine2> lines;
         std::vector<KiriPoint2> points;
-
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
@@ -2954,10 +2953,10 @@ int main()
 
     // QuickHullDelaunayTriangulation2d();
 
-    // QuickHullVoronoi2d();
+    QuickHullVoronoi2d();
     //         VoronoiExample1();
 
-    QuickHullVoronoi3d();
+    // QuickHullVoronoi3d();
 
     return 0;
 }

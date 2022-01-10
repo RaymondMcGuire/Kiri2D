@@ -51,6 +51,7 @@ namespace HDV::Primitives
         }
 
         std::vector<double> mPosition;
+        std::unordered_set<int> mNeighborSites;
 
         void SetAsBoundaryVertex() { mIsBoundaryVertex = true; }
         bool GetIsBoundaryVertex() { return mIsBoundaryVertex; }
