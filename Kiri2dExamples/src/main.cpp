@@ -2672,7 +2672,106 @@ void QuickHullDelaunayTriangulation2d()
 }
 
 #include <kiri2d/hdv_toolkit/sampler/ms_sampler.h>
+
 void QuickHullVoronoi2d()
+{
+    using namespace HDV;
+
+    auto pd2 = std::make_shared<Voronoi::PowerDiagram2D>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+
+    auto scale_size = 200.0;
+    auto sampler_num = 100;
+
+    for (auto i = 0; i < sampler_num; i++)
+    {
+        auto x = dist(rndEngine) * scale_size;
+        auto y = dist(rndEngine) * scale_size;
+
+        pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(x, y, i));
+    }
+
+    // clip boundary
+    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
+    BoundaryPolygon->AddVert2(Vector2D(-scale_size, -scale_size));
+    BoundaryPolygon->AddVert2(Vector2D(-scale_size, scale_size));
+    BoundaryPolygon->AddVert2(Vector2D(scale_size, scale_size));
+    BoundaryPolygon->AddVert2(Vector2D(scale_size, -scale_size));
+    pd2->SetBoundaryPolygon(BoundaryPolygon);
+
+    // scene renderer config
+    float windowheight = 1080.f;
+    float windowwidth = 1920.f;
+
+    Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    pd2->Compute();
+
+    while (1)
+    {
+        // KIRI_LOG_DEBUG("-----------------new----------------------------------");
+
+        std::vector<KiriLine2> precompute_lines;
+        std::vector<Vector2F> precompute_points;
+
+        pd2->LloydIteration();
+
+        auto sites = pd2->GetSites();
+
+        for (size_t i = 0; i < sites.size(); i++)
+        {
+            auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
+            if (site->GetIsBoundaryVertex())
+                continue;
+
+            auto cellpolygon = site->CellPolygon;
+            for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+            {
+                auto vert = cellpolygon->Positions[j];
+                auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
+                auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
+                line.thick = 1.f;
+                precompute_lines.emplace_back(line);
+
+                // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
+            }
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Verts.size());
+            precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+
+            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+        }
+
+        std::vector<KiriLine2> lines;
+        std::vector<KiriPoint2> points;
+        for (size_t i = 0; i < precompute_points.size(); i++)
+        {
+            points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
+        }
+
+        for (auto i = 0; i < precompute_lines.size(); ++i)
+        {
+            lines.emplace_back(precompute_lines[i]);
+        }
+
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
+void MSSampler2D()
 {
     using namespace HDV;
 
@@ -2720,12 +2819,25 @@ void QuickHullVoronoi2d()
         total_sum += m * (ary1[i + 1] * ary1[i + 1] - ary1[i] * ary1[i]) + b * (ary1[i + 1] - ary1[i]);
     }
 
-    // clip boundary
+    // clip boundary : box
     auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
-    BoundaryPolygon->AddVert2(Vector2D(-scale_size, -scale_size));
-    BoundaryPolygon->AddVert2(Vector2D(-scale_size, scale_size));
-    BoundaryPolygon->AddVert2(Vector2D(scale_size, scale_size));
-    BoundaryPolygon->AddVert2(Vector2D(scale_size, -scale_size));
+    // BoundaryPolygon->AddVert2(Vector2D(-scale_size, -scale_size));
+    // BoundaryPolygon->AddVert2(Vector2D(-scale_size, scale_size));
+    // BoundaryPolygon->AddVert2(Vector2D(scale_size, scale_size));
+    // BoundaryPolygon->AddVert2(Vector2D(scale_size, -scale_size));
+
+    String boundaryFileName = "bunny";
+    String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
+    std::vector<Vector2F> bunny2d;
+    size_t bunnyNum;
+    load_xy_file1(bunny2d, bunnyNum, filePath.c_str());
+
+    for (size_t i = 0; i < bunny2d.size(); i++)
+    {
+        auto newPos = Vector2D(bunny2d[i].x, bunny2d[i].y) * scale_size * 3.0;
+        BoundaryPolygon->AddVert2(newPos);
+    }
+
     multiSizeSampler->SetBoundaryPolygon(BoundaryPolygon);
 
     auto total_area = BoundaryPolygon->GetArea();
@@ -2733,19 +2845,12 @@ void QuickHullVoronoi2d()
 
     KIRI_LOG_DEBUG("avg_radius={0},total_area={1},total_num={2}", total_sum, total_area, total_num);
 
-    auto cnt = 0;
     auto maxcnt = 100;
-    while (cnt < maxcnt)
+    for (size_t i = 0; i < maxcnt; i++)
     {
-        auto sitePos2 = Vector2D(dist(rndEngine) * scale_size, dist(rndEngine) * scale_size);
-
-        if (BoundaryPolygon->Contains(sitePos2))
-        {
-            auto radius = pcdis(gen);
-
-            multiSizeSampler->AddSite(sitePos2.x, sitePos2.y, radius);
-            cnt++;
-        }
+        auto pos = BoundaryPolygon->GetRndInnerPoint();
+        auto radius = pcdis(gen);
+        multiSizeSampler->AddSite(pos.x, pos.y, radius);
     }
 
     multiSizeSampler->SetMaxiumNum(static_cast<int>(total_num * 1.5));
@@ -2754,14 +2859,20 @@ void QuickHullVoronoi2d()
     float windowheight = 4000.f;
     float windowwidth = 4000.f;
 
-    Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+    // Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+    Vector2F offset = Vector2F(500.f);
 
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     multiSizeSampler->Init();
 
-    for (size_t i = 0; i < 3000; i++)
+    std::vector<float> errorArray, porosityArray, radiusErrorArray;
+    std::vector<Vector4D> lastMaxCircle;
+    auto minRadius = std::numeric_limits<double>::max();
+    auto maxRadius = std::numeric_limits<double>::min();
+
+    for (size_t idx = 0; idx < 3000; idx++)
     {
         multiSizeSampler->Compute();
         // KIRI_LOG_DEBUG("-----------------new----------------------------------");
@@ -2778,16 +2889,20 @@ void QuickHullVoronoi2d()
                 continue;
 
             auto cellpolygon = site->CellPolygon;
-            for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+            if (cellpolygon)
             {
-                auto vert = cellpolygon->Positions[j];
-                auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
-                auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
-                line.thick = 1.f;
-                precompute_lines.emplace_back(line);
+                for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+                {
+                    auto vert = cellpolygon->Positions[j];
+                    auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
+                    auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
+                    line.thick = 1.f;
+                    precompute_lines.emplace_back(line);
 
-                // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
+                    // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
+                }
             }
+
             // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Positions.size());
             precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
 
@@ -2796,6 +2911,7 @@ void QuickHullVoronoi2d()
 
         std::vector<KiriLine2> lines;
         std::vector<KiriPoint2> points;
+        std::vector<KiriCircle2> circles;
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
@@ -2806,12 +2922,35 @@ void QuickHullVoronoi2d()
             lines.emplace_back(precompute_lines[i]);
         }
 
+        auto maxIC = multiSizeSampler->GetMICBySSkel();
+        lastMaxCircle = maxIC;
+
+        for (size_t i = 0; i < maxIC.size(); i++)
+        {
+            // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
+            auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y) + offset, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+
+            circles.emplace_back(maxCir2);
+
+            minRadius = std::min(minRadius, maxIC[i].z);
+            maxRadius = std::max(maxRadius, maxIC[i].z);
+        }
+
+        // re-color
+        for (size_t i = 0; i < maxIC.size(); i++)
+        {
+            auto rad = (maxIC[i].z - minRadius) / (maxRadius - minRadius);
+            const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
+            circles[i].col = Vector3F(color.r(), color.g(), color.b());
+        }
+
         scene->AddLines(lines);
         scene->AddParticles(points);
+        scene->AddCircles(circles);
 
         renderer->DrawCanvas();
 
-        if (i % 100 == 0)
+        if (idx % 10 == 0)
             renderer->SaveImages2File();
         // cv::imshow("KIRI2D", renderer->GetCanvas());
         // cv::waitKey(5);
@@ -3003,10 +3142,12 @@ int main()
 
     // QuickHullDelaunayTriangulation2d();
 
-    QuickHullVoronoi2d();
+    // QuickHullVoronoi2d();
     //         VoronoiExample1();
 
     // QuickHullVoronoi3d();
+
+    MSSampler2D();
 
     return 0;
 }

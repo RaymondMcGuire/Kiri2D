@@ -51,14 +51,59 @@ namespace HDV::Sampler
             mPowerDiagram->Compute();
         }
 
+        bool CheckVoroCell()
+        {
+            std::vector<int> remove;
+
+            auto sites = mPowerDiagram->GetSites();
+            for (int i = 0; i < sites.size(); i++)
+            {
+
+                auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
+                if (siteI->GetIsBoundaryVertex())
+                    continue;
+
+                if (!siteI->CellPolygon)
+                    remove.emplace_back(siteI->GetId());
+                else
+                {
+                    auto centroid = siteI->CellPolygon->GetCentroid();
+                    if (!mPowerDiagram->GetBoundary()->Contains(centroid))
+                        remove.emplace_back(siteI->GetId());
+                }
+            }
+
+            if (!remove.empty())
+            {
+                mPowerDiagram->RemoveVoroSitesByIndexArray(remove);
+                return true;
+            }
+
+            return false;
+        }
+
         void Compute()
         {
             mCurIteration++;
-            this->DynamicAddSites();
-            mPowerDiagram->Move2Centroid();
-            this->ComputeWeightsError();
-            this->AdaptWeights();
-            mPowerDiagram->Compute();
+
+            auto needAddSites = this->DynamicAddSites();
+            if (needAddSites)
+            {
+                mPowerDiagram->Compute();
+                // KIRI_LOG_DEBUG("Iter={0} : Add Sites!!!!", mCurIteration);
+            }
+            else
+            {
+                mPowerDiagram->Move2Centroid();
+                this->ComputeWeightsError();
+                this->AdaptWeights();
+                mPowerDiagram->Compute();
+            }
+
+            if (CheckVoroCell())
+            {
+                mPowerDiagram->Compute();
+            }
 
             mCurGlobalPorosity = this->ComputeMiniumPorosity();
             mGlobalPorosityArray.emplace_back(mCurGlobalPorosity);
@@ -122,7 +167,7 @@ namespace HDV::Sampler
                 {
                     for (auto neighbor : site[i]->mNeighborSites)
                     {
-                        auto sn = site[neighbor];
+                        auto sn = std::dynamic_pointer_cast<Primitives::Vertex2>(neighbor);
                         auto distance = site[i]->Distance(sn);
                         sum += distance;
                         num++;
@@ -187,6 +232,7 @@ namespace HDV::Sampler
                 else
                 {
                     KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
+                    // remove.emplace_back(siteI->GetRadius());
                 }
             }
 
@@ -210,17 +256,34 @@ namespace HDV::Sampler
             return (boundary->GetArea() - sum) / boundary->GetArea();
         }
 
-        void DynamicAddSites()
+        bool DynamicAddSites()
         {
             if (mPowerDiagram->GetSites().size() - 4 >= mMaxiumNum && bReachMaxuimNum == false)
                 bReachMaxuimNum = true;
 
+            if (bReachMaxuimNum)
+                return false;
+
             auto entityNum = 20;
             auto kThreshold = 200;
 
+            std::vector<double> radiusRange;
+            radiusRange.push_back(20.0);
+            radiusRange.push_back(30.0);
+            radiusRange.push_back(80.0);
+            radiusRange.push_back(150.0);
+
+            std::vector<double> radiusRangeProb;
+            radiusRangeProb.push_back(0.5);
+            radiusRangeProb.push_back(0.4);
+            radiusRangeProb.push_back(0.1);
+
+            std::random_device engine;
+            std::mt19937 gen(engine());
+            std::piecewise_constant_distribution<double> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
+
             if (mGlobalPorosityArray.size() > entityNum)
             {
-                bool bAddVoroSite = false;
                 std::vector<Voronoi::VoronoiSite2Ptr> newVoroArrays;
                 std::vector<double> errorArray(mGlobalPorosityArray.end() - entityNum, mGlobalPorosityArray.end());
                 auto line = LineFitLeastSquares(errorArray);
@@ -228,27 +291,15 @@ namespace HDV::Sampler
                 if (std::abs(line.x) < 1e-6)
                 {
                     // KIRI_LOG_DEBUG("reach line res={0}", std::abs(line.x) < 1e-6f);
-                    std::vector<double> radiusRange;
-                    radiusRange.push_back(20.0);
-                    radiusRange.push_back(30.0);
-                    radiusRange.push_back(80.0);
-                    radiusRange.push_back(150.0);
-
-                    std::vector<double> radiusRangeProb;
-                    radiusRangeProb.push_back(0.5);
-                    radiusRangeProb.push_back(0.4);
-                    radiusRangeProb.push_back(0.1);
-
-                    std::random_device engine;
-                    std::mt19937 gen(engine());
-                    std::piecewise_constant_distribution<double> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
                     if (bReachMaxuimNum)
                     {
-                        auto pos = mPowerDiagram->GetBoundary()->GetRndInnerPoint();
-                        auto site = std::make_shared<Voronoi::VoronoiSite2>(pos.x, pos.y, mSiteCounter++);
-                        site->SetRadius(pcdis(gen));
-                        newVoroArrays.emplace_back(site);
+                        // auto pos = mPowerDiagram->GetBoundary()->GetRndInnerPoint();
+                        // auto site = std::make_shared<Voronoi::VoronoiSite2>(pos.x, pos.y, mSiteCounter++);
+                        // site->SetRadius(pcdis(gen));
+                        // newVoroArrays.emplace_back(site);
+
+                        //  KIRI_LOG_DEBUG("new site={0},{1};radius={2};id={3}", pos.x, pos.y, site->GetRadius(), mSiteCounter - 1);
                     }
                     else
                     {
@@ -260,6 +311,7 @@ namespace HDV::Sampler
 
                             nSite->SetRadius(pcdis(gen));
                             newVoroArrays.emplace_back(nSite);
+                            // KIRI_LOG_DEBUG("new site={0},{1};radius={2};id={3}", pos.x, pos.y, nSite->GetRadius(), mSiteCounter - 1);
                         }
                     }
                 }
@@ -271,27 +323,43 @@ namespace HDV::Sampler
                 if (!bReachMaxuimNum)
                 {
                     if ((new_vorosite_num + cur_vorosite_num) > mMaxiumNum)
+                    {
+                        bReachMaxuimNum = true;
                         need_append_vorosite_num = mMaxiumNum - cur_vorosite_num;
+                    }
 
                     for (int i = 0; i < need_append_vorosite_num; i++)
                         mPowerDiagram->AddSite(newVoroArrays[i]);
+
+                    // re-cal weights
+                    // auto sites = mPowerDiagram->GetSites();
+                    // for (auto i = 0; i < sites.size(); i++)
+                    // {
+                    //     if (sites[i]->GetIsBoundaryVertex())
+                    //         continue;
+
+                    //     sites[i]->SetRadius(pcdis(gen));
+                    //     sites[i]->SetWeight(0.0);
+                    // }
                 }
                 else
                 {
-                    auto current_mp = ComputeMiniumPorosity();
-                    if (mLastMP > current_mp)
-                    {
-                        // KIRI_LOG_DEBUG("Add P");
-                        for (int i = 0; i < need_append_vorosite_num; i++)
-                            mPowerDiagram->AddSite(newVoroArrays[i]);
+                    // auto current_mp = ComputeMiniumPorosity();
+                    // if (mLastMP > current_mp)
+                    // {
+                    //     // KIRI_LOG_DEBUG("Add P");
+                    //     for (int i = 0; i < need_append_vorosite_num; i++)
+                    //         mPowerDiagram->AddSite(newVoroArrays[i]);
 
-                        mLastMP = current_mp;
-                    }
+                    //     mLastMP = current_mp;
+                    // }
                 }
 
-                // if (bAddVoroSite)
-                //     mPowerDiagram->ResetVoroSitesWeight();
+                if (!newVoroArrays.empty())
+                    return true;
             }
+
+            return false;
         }
 
         void ComputeWeightsError()
@@ -316,7 +384,7 @@ namespace HDV::Sampler
 
                     for (auto neighbor : siteI->mNeighborSites)
                     {
-                        auto sn = site[neighbor];
+                        auto sn = std::dynamic_pointer_cast<Primitives::Vertex2>(neighbor);
                         total += sn->GetWeight() - sn->GetRadius() * sn->GetRadius();
                         cnt++;
                     }
@@ -325,7 +393,7 @@ namespace HDV::Sampler
 
                     for (auto neighbor : siteI->mNeighborSites)
                     {
-                        auto sn = site[neighbor];
+                        auto sn = std::dynamic_pointer_cast<Primitives::Vertex2>(neighbor);
                         auto distance = siteI->Distance(sn);
                         auto minW = std::abs(std::sqrt(sn->GetWeight()) - std::sqrt(siteI->GetWeight()));
                         auto maxW = std::sqrt(sn->GetWeight()) + std::sqrt(siteI->GetWeight());

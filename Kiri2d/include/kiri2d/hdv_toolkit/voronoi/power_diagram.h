@@ -58,6 +58,22 @@ namespace HDV::Voronoi
             mMesh->Generate(mSites, mAssignIds, mCheckInput);
         }
 
+        void RemoveVoroSitesByIndexArray(std::vector<int> indexs)
+        {
+
+            auto removeSites = std::remove_if(mSites.begin(),
+                                              mSites.end(),
+                                              [=](const HDV::Primitives::Vertex2Ptr &site)
+                                              {
+                                                  if (std::find(indexs.begin(), indexs.end(), site->GetId()) != indexs.end())
+                                                      return true;
+                                                  else
+                                                      return false;
+                                              });
+
+            mSites.erase(removeSites, mSites.end());
+        }
+
         void Move2Centroid()
         {
             for (size_t i = 0; i < mSites.size(); i++)
@@ -67,7 +83,8 @@ namespace HDV::Voronoi
                     continue;
 
                 auto centroid = site->CellPolygon->GetCentroid();
-                site->Set(centroid.x, centroid.y);
+                if (mMesh->mBoundaryPolygon->Contains(centroid))
+                    site->Set(centroid.x, centroid.y);
             }
         }
 

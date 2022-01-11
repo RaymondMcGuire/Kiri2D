@@ -51,7 +51,7 @@ namespace HDV::Primitives
         }
 
         std::vector<double> mPosition;
-        std::unordered_set<int> mNeighborSites;
+        std::vector<std::shared_ptr<Vertex>> mNeighborSites;
 
         void SetAsBoundaryVertex() { mIsBoundaryVertex = true; }
         bool GetIsBoundaryVertex() { return mIsBoundaryVertex; }

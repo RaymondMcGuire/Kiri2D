@@ -42,6 +42,11 @@ namespace HDV::Hull
 
         virtual ~ConvexHull() noexcept {}
 
+        void SetForPowerDiagram(bool enable)
+        {
+            mForPowerDiagram = enable;
+        }
+
         double GetCoordinate(int index, int dimension)
         {
             return mPositions[index * mDimension + dimension];
@@ -157,6 +162,7 @@ namespace HDV::Hull
             mVertexVisited.assign(mNumberOfVertices, false);
 
             //! TODO for power diagram
+
             for (auto i = 0; i < mNumberOfVertices; i++)
             {
                 auto vi = input[i];
@@ -249,6 +255,30 @@ namespace HDV::Hull
 
         void ShiftAndScalePositions()
         {
+            if (mForPowerDiagram)
+            {
+
+                auto absSum = [](const std::vector<double> &v) -> double
+                {
+                    double sum{};
+                    for (const auto &x : v)
+                        sum += std::abs(x);
+                    return sum;
+                };
+
+                auto origNumDim = mDimension - 1;
+                auto parabolaScale = 2 / (absSum(mAxisMinma) + absSum(mAxisMaxma) - std::abs(mAxisMaxma[origNumDim]) - std::abs(mAxisMinma[origNumDim]));
+                // the parabola scale is 1 / average of the sum of the other dimensions.
+                // multiplying this by the parabola will scale it back to be on near similar size to the
+                // other dimensions. Without this, the term is much larger than the others, which causes
+                // problems for roundoff error and finding the normal of faces.
+                mAxisMinma[origNumDim] *= parabolaScale; // change the extreme values as well
+                mAxisMaxma[origNumDim] *= parabolaScale;
+                // it is done here because
+                for (int i = origNumDim; i < mPositions.size(); i += mDimension)
+                    mPositions[i] *= parabolaScale;
+            }
+
             for (auto i = 0; i < mDimension; i++)
             {
                 if (mAxisMinma[i] == mAxisMaxma[i])
@@ -541,6 +571,17 @@ namespace HDV::Hull
             return std::abs(Determinant(A));
         }
 
+        void RandomOffsetToLift(int index, double maxHeight)
+        {
+
+            std::random_device seedGen;
+            std::default_random_engine rndEngine(seedGen());
+            std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+            auto liftIndex = (index * mDimension) + mDimension - 1;
+            mPositions[liftIndex] += 0.0001 * maxHeight * (dist(rndEngine) - 0.5);
+        }
+
         std::vector<int> FindInitialPoints()
         {
             auto bigNumber = std::accumulate(mAxisMaxma.begin(), mAxisMaxma.end(), decltype(mAxisMaxma)::value_type(0)) * mDimension * mNumberOfVertices;
@@ -612,7 +653,7 @@ namespace HDV::Hull
                 UpdateCenter();
             }
 
-            if (initialPoints.size() <= mDimension)
+            if (initialPoints.size() <= mDimension && !mForPowerDiagram)
             {
                 // KIRI_LOG_DEBUG("initial points not enough!!");
 
@@ -633,6 +674,52 @@ namespace HDV::Hull
                     {
                         auto vIndex = allVertices[i];
 
+                        edgeVectors[index] = VectorBetweenVertices(vIndex, vertex1);
+                        auto volume = GetSimplexVolume(edgeVectors, index, bigNumber);
+                        if (maxVolume < volume)
+                        {
+                            maxVolume = volume;
+                            bestVertex = vIndex;
+                            bestEdgeVector = edgeVectors[index];
+                        }
+                    }
+
+                    allVertices.erase(std::remove_if(allVertices.begin(), allVertices.end(),
+                                                     [=](int elem)
+                                                     { if(elem == bestVertex) return true;else return false; }),
+                                      allVertices.end());
+
+                    if (bestVertex == -1)
+                        break;
+                    initialPoints.emplace_back(bestVertex);
+                    edgeVectors[index++] = bestEdgeVector;
+                    mBuffer->CurrentVertex = bestVertex;
+                    UpdateCenter();
+                }
+            }
+
+            if (initialPoints.size() <= mDimension && mForPowerDiagram)
+            {
+                // KIRI_LOG_DEBUG("initial points not enough!!");
+
+                std::vector<int> allVertices(mNumberOfVertices);
+                std::iota(allVertices.begin(), allVertices.end(), 0);
+                while (index < mDimension && !allVertices.empty())
+                {
+                    auto bestVertex = -1;
+                    std::vector<double> bestEdgeVector;
+                    auto maxVolume = 0.0;
+
+                    allVertices.erase(std::remove_if(allVertices.begin(), allVertices.end(),
+                                                     [=](int elem)
+                                                     { if(std::find(initialPoints.begin(), initialPoints.end(), elem) != initialPoints.end()) return true;else return false; }),
+                                      allVertices.end());
+
+                    for (auto i = 0; i < allVertices.size(); i++)
+                    {
+                        auto vIndex = allVertices[i];
+
+                        RandomOffsetToLift(vIndex, mAxisMaxma.back() - mAxisMinma.back());
                         edgeVectors[index] = VectorBetweenVertices(vIndex, vertex1);
                         auto volume = GetSimplexVolume(edgeVectors, index, bigNumber);
                         if (maxVolume < volume)

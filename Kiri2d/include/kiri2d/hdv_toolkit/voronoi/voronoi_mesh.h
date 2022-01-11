@@ -103,6 +103,7 @@ namespace HDV::Voronoi
                 {
                     auto region = std::make_shared<VoronoiRegion<VERTEXPTR, VERTEX>>();
 
+                    std::unordered_set<int> neighborsId;
                     for (auto j = 0; j < cells.size(); j++)
                     {
                         auto simplex = cells[j]->mSimplex;
@@ -110,7 +111,11 @@ namespace HDV::Voronoi
                         {
                             if (simplex->Vertices[k]->GetId() != vertex->GetId() && !simplex->Vertices[k]->GetIsBoundaryVertex())
                             {
-                                vertex->mNeighborSites.insert(simplex->Vertices[k]->GetId());
+                                if (neighborsId.find(simplex->Vertices[k]->GetId()) == neighborsId.end())
+                                {
+                                    vertex->mNeighborSites.emplace_back(simplex->Vertices[k]);
+                                    neighborsId.insert(simplex->Vertices[k]->GetId());
+                                }
                             }
                         }
 
