@@ -172,6 +172,26 @@ namespace HDV::Voronoi
             AddSite(site8);
         }
 
+        void Compute()
+        {
+            mMesh->Generate(mSites, mAssignIds, mCheckInput);
+            // mMesh->ExportVoronoiMeshObj(mCounter++);
+            //   KIRI_LOG_DEBUG("resgion size={0}", mMesh->Regions.size());
+        }
+
+        void Move2Centroid()
+        {
+            for (size_t i = 0; i < mSites.size(); i++)
+            {
+                auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
+                if (site->GetIsBoundaryVertex())
+                    continue;
+
+                auto centroid = site->Polygon->GetCentroid();
+                site->Set(centroid.x, centroid.y, centroid.z);
+            }
+        }
+
         void Init()
         {
             mConstrainSites.clear();
@@ -195,26 +215,6 @@ namespace HDV::Voronoi
         std::unordered_set<int> mConstrainSites;
 
         std::vector<HDV::Primitives::Vertex3Ptr> mSites;
-
-        void Compute()
-        {
-            mMesh->Generate(mSites, mAssignIds, mCheckInput);
-            mMesh->ExportVoronoiMeshObj(mCounter++);
-            //  KIRI_LOG_DEBUG("resgion size={0}", mMesh->Regions.size());
-        }
-
-        void Move2Centroid()
-        {
-            for (size_t i = 0; i < mSites.size(); i++)
-            {
-                auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
-                if (site->GetIsBoundaryVertex())
-                    continue;
-
-                auto centroid = site->Polygon->GetCentroid();
-                site->Set(centroid.x, centroid.y, centroid.z);
-            }
-        }
 
         void AddConstrain()
         {

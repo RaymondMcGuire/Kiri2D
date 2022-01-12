@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-25 01:18:58
- * @LastEditTime: 2022-01-05 23:29:28
+ * @LastEditTime: 2022-01-12 15:10:46
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath: \Kiri\KiriPBSCuda\src\kiri_pbs_cuda\sampler\cuda_shape_sampler.cu
@@ -14,6 +14,7 @@
 namespace KIRI {
 CudaShapeSampler::CudaShapeSampler(const LevelSetShapeInfo &info,
                                    const Vec_Float3 &faceVertices,
+                                   const int attemptNum,
                                    const int dim3BlockSize)
     : mInfo(info), mFaceVertices(faceVertices.size()),
       mSamplerTable(info.GridSize.x * info.GridSize.y * info.GridSize.z, true),
@@ -35,7 +36,7 @@ CudaShapeSampler::CudaShapeSampler(const LevelSetShapeInfo &info,
                          sizeof(float3) * faceVertices.size(),
                          cudaMemcpyHostToDevice));
 
-  float cudaSamplingTime = this->ComputeSamplerTableMTSafe(13);
+  float cudaSamplingTime = this->ComputeSamplerTableMTSafe(attemptNum);
   printf("CUDA Shape Sampler MMT Construct Finished! Time=%.3f \n",
          cudaSamplingTime);
 }
@@ -71,6 +72,27 @@ float CudaShapeSampler::ComputeSamplerTableMTSafe(int attempt) {
   return elapsedTime;
 }
 
+bool CudaShapeSampler::CheckPointsInside(float3 p) {
+  float3 relPos = p - mInfo.BBox.Min;
+  int3 pos2SamplerTable =
+      make_int3(static_cast<int>(relPos.x / mInfo.CellSize),
+                static_cast<int>(relPos.y / mInfo.CellSize),
+                static_cast<int>(relPos.z / mInfo.CellSize));
+
+  if (pos2SamplerTable.x < 0 || pos2SamplerTable.y < 0 ||
+      pos2SamplerTable.z < 0 || pos2SamplerTable.x >= mInfo.GridSize.x ||
+      pos2SamplerTable.y >= mInfo.GridSize.y ||
+      pos2SamplerTable.z >= mInfo.GridSize.z)
+    return false;
+
+  if (CheckSamplerTable(pos2SamplerTable.x, pos2SamplerTable.y,
+                        pos2SamplerTable.z, mInfo.GridSize,
+                        mSamplerTable.Data()))
+    return true;
+
+  return false;
+}
+
 Vec_Float3 CudaShapeSampler::GetInsidePoints(int num) {
   std::random_device seedGen;
   std::default_random_engine rndEngine(seedGen());
@@ -83,21 +105,7 @@ Vec_Float3 CudaShapeSampler::GetInsidePoints(int num) {
                                               dist(rndEngine)) *
                                       (mInfo.BBox.Max - mInfo.BBox.Min);
 
-    float3 relPos = pos - mInfo.BBox.Min;
-    int3 pos2SamplerTable =
-        make_int3(static_cast<int>(relPos.x / mInfo.CellSize),
-                  static_cast<int>(relPos.y / mInfo.CellSize),
-                  static_cast<int>(relPos.z / mInfo.CellSize));
-
-    if (pos2SamplerTable.x < 0 || pos2SamplerTable.y < 0 ||
-        pos2SamplerTable.z < 0 || pos2SamplerTable.x >= mInfo.GridSize.x ||
-        pos2SamplerTable.y >= mInfo.GridSize.y ||
-        pos2SamplerTable.z >= mInfo.GridSize.z)
-      continue;
-
-    if (CheckSamplerTable(pos2SamplerTable.x, pos2SamplerTable.y,
-                          pos2SamplerTable.z, mInfo.GridSize,
-                          mSamplerTable.Data())) {
+    if (this->CheckPointsInside(pos)) {
       posArray.emplace_back(pos);
       counter++;
     }

@@ -47,6 +47,7 @@ namespace HDV::Delaunay
             }
 
             Hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
+            Hull->SetForPowerDiagram(true);
             Hull->Generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)

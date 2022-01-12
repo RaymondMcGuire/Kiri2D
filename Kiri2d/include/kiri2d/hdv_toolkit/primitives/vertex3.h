@@ -1,14 +1,7 @@
-/*** 
- * @Author: Xu.WANG
- * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2021-12-29 14:58:25
- * @LastEditors: Xu.WANG
- * @Description: 
- */
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-01 19:36:00
- * @LastEditTime: 2021-12-08 16:10:57
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2022-01-12 14:49:13
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -45,6 +38,11 @@ namespace HDV::Primitives
             mPosition[0] = x;
             mPosition[1] = y;
             mPosition[2] = z;
+        }
+
+        double Distance(std::shared_ptr<Vertex3> v)
+        {
+            return std::sqrtf(SqrDistance(v->X(), v->Y(), v->Z()));
         }
 
         double Distance(double px, double py, double pz)

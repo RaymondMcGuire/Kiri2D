@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-25 01:18:29
- * @LastEditTime: 2022-01-05 23:24:45
+ * @LastEditTime: 2022-01-12 15:10:24
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath:
@@ -21,6 +21,7 @@ class CudaShapeSampler {
 public:
   explicit CudaShapeSampler(const LevelSetShapeInfo &info,
                             const Vec_Float3 &faceVertices,
+                            const int attemptNum = 13,
                             const int dim3BlockSize = 8);
 
   virtual ~CudaShapeSampler() noexcept {}
@@ -43,6 +44,8 @@ public:
 
   inline const LevelSetShapeInfo &GetLevelSetInfo() { return mInfo; }
   size_t *GetSamplerTablePtr() const { return mSamplerTable.Data(); }
+
+  bool CheckPointsInside(float3 p);
 
 private:
   size_t mCudaGridSize;

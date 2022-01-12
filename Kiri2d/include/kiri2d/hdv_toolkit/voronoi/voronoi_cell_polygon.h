@@ -256,6 +256,40 @@ namespace HDV::Voronoi
             return b.cross(c).dot(a) / 6.0;
         }
 
+        // https://www.geeksforgeeks.org/distance-between-a-point-and-a-plane-in-3-d/
+        double shortest_distance(Vector3D p, Vector4D l)
+        {
+            auto v = Vector3D(l.x, l.y, l.z);
+            auto d = std::abs(p.dot(v) + l.w);
+            float e = std::sqrt(v.dot(v));
+            return d / e;
+        }
+
+        // https://www.geeksforgeeks.org/program-to-find-equation-of-a-plane-passing-through-3-points/
+        Vector4D equation_plane(Vector3D p1, Vector3D p2, Vector3D p3)
+        {
+            auto pxq = (p2 - p1).cross(p3 - p1);
+            return Vector4D(pxq.x, pxq.y, pxq.z, -pxq.dot(p1));
+        }
+
+        double ComputeMinDisInPoly(Vector3D p)
+        {
+            IndexOffset = IsLoadedFromObj ? 1 : 0;
+            auto minDis = std::numeric_limits<double>::max();
+            for (size_t j = 0; j < Indices.size() / 3; j++)
+            {
+                auto a = Positions[Indices[j * 3] - IndexOffset];
+                auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
+                auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
+                // if indices loaded from a .obj file, index need -1
+                auto l = equation_plane(a, b, c);
+                minDis = std::min(minDis, shortest_distance(p, l));
+            }
+
+            KIRI_LOG_DEBUG("minDis={0}", minDis);
+            return minDis;
+        }
+
         double GetVolume()
         {
             IndexOffset = IsLoadedFromObj ? 1 : 0;

@@ -448,6 +448,8 @@ namespace HDV::Voronoi
                 }
                 else
                 {
+                    TinyObjClear();
+                    // KIRI_LOG_DEBUG("start clipped mesh idx={0}", i);
                     std::vector<csgjscpp::Polygon> voroPolygons;
                     for (size_t j = 0; j < polygon->Indices.size() / 3; j++)
                     {
@@ -478,6 +480,8 @@ namespace HDV::Voronoi
                     auto boundaryMesh = csgjscpp::modelfrompolygons(mBoundaryPolygon);
 
                     auto clippedMesh = csgjscpp::csgintersection(boundaryMesh, voroMesh);
+
+                    // KIRI_LOG_DEBUG("end clipped mesh idx={0}", i);
 
                     std::vector<Vector3D> clippedPositions;
                     std::vector<Vector3D> clippedNormals;
@@ -518,11 +522,13 @@ namespace HDV::Voronoi
                     site->Polygon = polygon;
 
                     // clip condition
-                    if (!mConstrainSites.empty())
-                        if (mConstrainSites.find(site->GetId()) == mConstrainSites.end())
-                            continue;
+                    // if (!mConstrainSites.empty())
+                    //     if (mConstrainSites.find(site->GetId()) == mConstrainSites.end())
+                    //         continue;
 
                     TinyObjAppend(clippedPositions, clippedNormals, clippedIndices);
+
+                    ExportVoronoiMeshObj(counter++);
                 }
             }
         }

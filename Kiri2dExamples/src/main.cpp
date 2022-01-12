@@ -2671,8 +2671,8 @@ void QuickHullDelaunayTriangulation2d()
     }
 }
 
-#include <kiri2d/hdv_toolkit/sampler/ms_sampler.h>
-
+#include <kiri2d/hdv_toolkit/sampler/ms_sampler2.h>
+#include <kiri2d/hdv_toolkit/sampler/ms_sampler3.h>
 void QuickHullVoronoi2d()
 {
     using namespace HDV;
@@ -2794,6 +2794,9 @@ void MSSampler2D()
     radiusRangeProb.push_back(0.5);
     radiusRangeProb.push_back(0.4);
     radiusRangeProb.push_back(0.1);
+
+    multiSizeSampler->SetRadiusDist(radiusRange);
+    multiSizeSampler->SetRadiusDistProb(radiusRangeProb);
 
     std::random_device engine;
     std::mt19937 gen(engine());
@@ -2985,8 +2988,32 @@ static void ExportVoroFile(
 }
 
 #include <kiri2d/model/model_tiny_obj_loader.h>
-#include <kiri_pbs_cuda/sampler/cuda_shape_sampler.cuh>
 #include <cuda/cuda_helper.h>
+#include <partio/Partio.h>
+void ExportBgeoFileFromCPU(String Folder, String FileName, std::vector<Vector4D> data)
+{
+    String exportPath = String(EXPORT_PATH) + "bgeo/" + Folder + "/" + FileName + ".bgeo";
+
+    Partio::ParticlesDataMutable *p = Partio::create();
+    Partio::ParticleAttribute positionAttr = p->addAttribute("position", Partio::VECTOR, 3);
+    Partio::ParticleAttribute pScaleAttr = p->addAttribute("pscale", Partio::FLOAT, 1);
+
+    for (UInt i = 0; i < data.size(); i++)
+    {
+        Int particle = p->addParticle();
+        float *pos = p->dataWrite<float>(positionAttr, particle);
+        float *pscale = p->dataWrite<float>(pScaleAttr, particle);
+        pos[0] = data[i].x;
+        pos[1] = data[i].y;
+        pos[2] = data[i].z;
+
+        *pscale = data[i].w;
+    }
+    Partio::write(exportPath.c_str(), *p);
+
+    p->release();
+}
+
 void QuickHullVoronoi3d()
 {
     using namespace HDV;
@@ -2996,7 +3023,7 @@ void QuickHullVoronoi3d()
     boundaryModel->Normalize();
     // boundaryModel->ScaleToBox(2.f);
 
-    auto cellSize = 0.01f;
+    auto cellSize = 0.1f;
     auto bBMin = boundaryModel->GetAABBMin();
     auto bBMax = boundaryModel->GetAABBMax();
     auto lengths = bBMax - bBMin;
@@ -3029,11 +3056,14 @@ void QuickHullVoronoi3d()
     std::memcpy(faceNormalsList.data(), boundaryModel->GetFaceVertexNormals().data(), boundaryModel->GetFaceVertexNormals().size() * sizeof(float));
 
     LevelSetShapeInfo mInfo(CudaAxisAlignedBox<float3>(KiriToCUDA(newBBoxMin), KiriToCUDA(newBBoxMax)), cellSize / 2.f, (uint)boundaryModel->GetNFaces());
-    auto cudaSampler = std::make_shared<CudaShapeSampler>(mInfo, KiriToCUDA(faceVerticesList));
-    auto insidePoints = cudaSampler->GetInsidePoints(1000);
+
+    KIRI_LOG_INFO("Start Construct SDF!");
+    auto cudaSampler = std::make_shared<CudaShapeSampler>(mInfo, KiriToCUDA(faceVerticesList), 13, 8);
+    auto insidePoints = cudaSampler->GetInsidePoints(100);
+    KIRI_LOG_INFO("Generated Initial Points!");
     // ############################################################################# for boundary mesh
 
-    auto pd3 = std::make_shared<Voronoi::PowerDiagram3D>();
+    auto multiSizeSampler3 = std::make_shared<Sampler::MultiSizeSampler3D>(cudaSampler);
     auto voro3 = std::make_shared<Voronoi::VoronoiMesh3>();
 
     for (auto i = 0; i < insidePoints.size(); i++)
@@ -3042,9 +3072,9 @@ void QuickHullVoronoi3d()
         auto y = insidePoints[i].y;
         auto z = insidePoints[i].z;
 
-        pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>(x, y, z, i));
+        multiSizeSampler3->AddSite(x, y, z, 0.0);
 
-        // KIRI_LOG_DEBUG("pd3->AddSite(std::make_shared<Voronoi::VoronoiSite3>({0},{1},{2},{3});", x, y, z, i);
+        // KIRI_LOG_DEBUG("multiSizeSampler3->AddSite(std::make_shared<Voronoi::VoronoiSite3>({0},{1},{2},{3});", x, y, z, i);
     }
 
     std::vector<csgjscpp::Polygon> boundaryPolygons;
@@ -3078,24 +3108,32 @@ void QuickHullVoronoi3d()
     // // // auto unionModel = csgjscpp::csgunion(cube, boundaryMesh);
     // csgjscpp::modeltoply(String(EXPORT_PATH) + "voro/test.ply", boundaryMesh);
 
-    pd3->SetBoundaryPolygon(boundaryPolygons);
+    multiSizeSampler3->SetBoundaryPolygon(boundaryPolygons);
 
-    pd3->Init();
+    KIRI_LOG_INFO("Start Init Voronoi Diagram 3D!");
+    multiSizeSampler3->Init();
+    KIRI_LOG_INFO("Finished Init Voronoi Diagram 3D!");
 
-    KiriTimer timer;
-    float totalTime = 0.f;
-    int iterNumber = 120;
-    for (size_t i = 0; i < iterNumber; i++)
-    {
-        float currentTime = 0.f;
-        timer.Restart();
-        pd3->LloydIteration();
-        currentTime = timer.Elapsed();
-        totalTime += currentTime;
+    multiSizeSampler3->Compute();
 
-        KIRI_LOG_DEBUG("Lloyd Iteration Idx={0}, Computation Time={1}", i, currentTime);
-    }
-    KIRI_LOG_DEBUG("Total Computation Time={0}", totalTime, totalTime / iterNumber);
+    auto data = multiSizeSampler3->GetSampledSpheres();
+    KIRI_LOG_INFO("GetSampledSpheres size={0}!", data.size());
+    ExportBgeoFileFromCPU("ms3", UInt2Str4Digit(0), data);
+
+    // KiriTimer timer;
+    // float totalTime = 0.f;
+    // int iterNumber = 120;
+    // for (size_t i = 0; i < iterNumber; i++)
+    // {
+    //     float currentTime = 0.f;
+    //     timer.Restart();
+    //     multiSizeSampler3->LloydIteration();
+    //     currentTime = timer.Elapsed();
+    //     totalTime += currentTime;
+
+    //     KIRI_LOG_DEBUG("Lloyd Iteration Idx={0}, Computation Time={1}", i, currentTime);
+    // }
+    // KIRI_LOG_DEBUG("Total Computation Time={0}", totalTime, totalTime / iterNumber);
 }
 
 int main()
@@ -3145,9 +3183,9 @@ int main()
     // QuickHullVoronoi2d();
     //         VoronoiExample1();
 
-    // QuickHullVoronoi3d();
+    QuickHullVoronoi3d();
 
-    MSSampler2D();
+    // MSSampler2D();
 
     return 0;
 }
