@@ -180,22 +180,26 @@ namespace HDV::Sampler
         double GetGlobalAreaError()
         {
             auto error = 0.0;
-            /*       auto sites = mPowerDiagram->GetSites();
+            auto sites = mPowerDiagram->GetSites();
 
-                   for (int i = 0; i < sites.size(); i++)
-                   {
-                       auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(sites[i]);
-                       if (siteI->GetIsBoundaryVertex())
-                           continue;
+         /*   for (int i = 0; i < sites.size(); i++)
+            {
+                auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(sites[i]);
+                if (siteI->GetIsBoundaryVertex())
+                    continue;
 
-                       auto n = siteI->mNeighborSites.size();
-                       if (n > 2)
-                       {
-                           auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->GetArea();
-                           auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
-                           error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.0);
-                       }
-                   }*/
+                auto n = siteI->mNeighborSites.size();
+                if (n > 3)
+                {
+                    auto currentArea = (!siteI->Polygon) ? 0.0 : siteI->Polygon->GetArea();
+                    auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
+                    error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.0);
+                }
+                else
+                {
+                    KIRI_LOG_ERROR("No Neighbor Sites")
+                }
+            }*/
             return error;
         }
 
@@ -316,7 +320,7 @@ namespace HDV::Sampler
                  auto n = siteI->mNeighborSites.size();
                  if (n > 2)
                  {
-                     auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->GetArea();
+                     auto currentArea = (!siteI->Polygon) ? 0.0 : siteI->Polygon->GetArea();
                      auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
 
                      auto pArea = 2.0;

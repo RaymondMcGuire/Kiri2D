@@ -191,7 +191,7 @@ namespace HDV::Voronoi
             for (auto i = 0; i < Regions.size(); i++)
             {
                 std::vector<VERTEXPTR> Positions;
-                auto count = 0, c1 = 0;
+                auto count = 0;
                 auto region = Regions[i];
 
                 if (region->site->GetIsBoundaryVertex())
@@ -399,7 +399,7 @@ namespace HDV::Voronoi
             for (auto i = 0; i < Regions.size(); i++)
             {
                 std::vector<VERTEXPTR> Positions;
-                auto count = 0, c1 = 0;
+                auto count = 0;
                 auto region = Regions[i];
 
                 if (region->site->GetIsBoundaryVertex())

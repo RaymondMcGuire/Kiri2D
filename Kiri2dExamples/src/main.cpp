@@ -3059,7 +3059,7 @@ void QuickHullVoronoi3d()
 
     KIRI_LOG_INFO("Start Construct SDF!");
     auto cudaSampler = std::make_shared<CudaShapeSampler>(mInfo, KiriToCUDA(faceVerticesList), 13, 8);
-    auto insidePoints = cudaSampler->GetInsidePoints(100);
+    auto insidePoints = cudaSampler->GetInsidePoints(10);
     KIRI_LOG_INFO("Generated Initial Points!");
     // ############################################################################# for boundary mesh
 
@@ -3113,10 +3113,10 @@ void QuickHullVoronoi3d()
     KIRI_LOG_INFO("Start Init Voronoi Diagram 3D!");
     multiSizeSampler3->Init();
     KIRI_LOG_INFO("Finished Init Voronoi Diagram 3D!");
-
-    multiSizeSampler3->Compute();
-
     auto data = multiSizeSampler3->GetSampledSpheres();
+
+    // multiSizeSampler3->Compute();
+
     KIRI_LOG_INFO("GetSampledSpheres size={0}!", data.size());
     ExportBgeoFileFromCPU("ms3", UInt2Str4Digit(0), data);
 
@@ -3136,6 +3136,13 @@ void QuickHullVoronoi3d()
     // KIRI_LOG_DEBUG("Total Computation Time={0}", totalTime, totalTime / iterNumber);
 }
 
+double shortest_distance(Vector3D p, Vector4D l)
+{
+    auto v = Vector3D(l.x, l.y, l.z);
+    auto d = std::abs(p.dot(v) + l.w);
+    float e = std::sqrt(v.dot(v));
+    return d / e;
+}
 int main()
 {
     KIRI::KiriLog::Init();
@@ -3183,7 +3190,7 @@ int main()
     // QuickHullVoronoi2d();
     //         VoronoiExample1();
 
-    QuickHullVoronoi3d();
+    // QuickHullVoronoi3d();
 
     // MSSampler2D();
 
