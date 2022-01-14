@@ -12,7 +12,7 @@
 #pragma once
 
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_cell.h>
-#include <TriangleMeshDistance/TriangleMeshDistance.h>
+#include <Mathematics/DistPointTriangle.h>
 namespace HDV::Voronoi
 {
     template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
@@ -256,70 +256,61 @@ namespace HDV::Voronoi
             return b.cross(c).dot(a) / 6.0;
         }
 
-        // https://www.geeksforgeeks.org/distance-between-a-point-and-a-plane-in-3-d/
-        double shortest_distance(Vector3D p, Vector4D l)
-        {
-            auto v = Vector3D(l.x, l.y, l.z);
-            auto d = std::abs(p.dot(v) + l.w);
-            float e = std::sqrt(v.dot(v));
-            return d / e;
-        }
-
-        // https://www.geeksforgeeks.org/program-to-find-equation-of-a-plane-passing-through-3-points/
-        Vector4D equation_plane(Vector3D p1, Vector3D p2, Vector3D p3)
-        {
-            auto pxq = (p2 - p1).cross(p3 - p1);
-            return Vector4D(pxq.x, pxq.y, pxq.z, -pxq.dot(p1));
-        }
-
         double ComputeMinDisInPoly(Vector3D p)
         {
-            std::vector<tmd::Vec3d> vertices;
-            std::vector<std::array<int, 3>> triangles;
+            // std::vector<tmd::Vec3d> vertices;
+            // std::vector<std::array<int, 3>> triangles;
 
-            for (auto i = 0; i < Positions.size(); i++)
-            {
-                vertices.emplace_back(tmd::Vec3d(Positions[i].x, Positions[i].y, Positions[i].z));
-            }
+            // for (auto i = 0; i < Positions.size(); i++)
+            // {
+            //     vertices.emplace_back(tmd::Vec3d(Positions[i].x, Positions[i].y, Positions[i].z));
+            // }
 
-            for (auto i = 0; i < Indices.size() / 3; i++)
-            {
-                std::array<int, 3> ind = {Indices[i * 3], Indices[i * 3 + 1], Indices[i * 3 + 2]};
-                triangles.emplace_back(ind);
-            }
+            // for (auto i = 0; i < Indices.size() / 3; i++)
+            // {
+            //     std::array<int, 3> ind = {Indices[i * 3], Indices[i * 3 + 1], Indices[i * 3 + 2]};
+            //     triangles.emplace_back(ind);
+            // }
 
-            // Initialize TriangleMeshDistance
-            tmd::TriangleMeshDistance mesh_distance(vertices, triangles);
+            // // Initialize TriangleMeshDistance
+            // tmd::TriangleMeshDistance mesh_distance(vertices, triangles);
 
-            // Query TriangleMeshDistance
-            tmd::Result result = mesh_distance.signed_distance({p.x, p.y, p.z});
-            auto minDis = std::abs(result.distance);
-            KIRI_LOG_DEBUG("minDis={0}", minDis);
+            // // Query TriangleMeshDistance
+            // tmd::Result result = mesh_distance.signed_distance({p.x, p.y, p.z});
+            // auto minDis = std::abs(result.distance);
+            // KIRI_LOG_DEBUG("minDis={0}", minDis);
 
             // KIRI_LOG_DEBUG("---------------------------------------------");
             // IndexOffset = IsLoadedFromObj ? 1 : 0;
-            // auto minDis = std::numeric_limits<double>::max();
-            // Vector3D tmpa, tmpb, tmpc;
-            // for (size_t j = 0; j < Indices.size() / 3; j++)
-            // {
-            //     auto a = Positions[Indices[j * 3] - IndexOffset];
-            //     auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
-            //     auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
-            //     // if indices loaded from a .obj file, index need -1
-            //     auto l = equation_plane(a, b, c);
-            //     auto dis = shortest_distance(p, l);
+            auto minDis = std::numeric_limits<double>::max();
 
-            //     auto da = a.distanceTo(p), db = b.distanceTo(p), dc = c.distanceTo(p);
-            //     if (minDis > dis)
-            //     {
-            //         KIRI_LOG_DEBUG("a={0},{1},{2};b={3},{4},{5};c={6},{7},{8}", a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
-            //         KIRI_LOG_DEBUG("current={0};p={1},{2},{3};da={4},db={5},dc={6}", dis, p.x, p.y, p.z, da, db, dc);
-            //     }
+            for (size_t j = 0; j < Indices.size() / 3; j++)
+            {
+                auto a = Positions[Indices[j * 3] - IndexOffset];
+                auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
+                auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
+                // // if indices loaded from a .obj file, index need -1
+                // auto l = equation_plane(a, b, c);
+                // auto dis = shortest_distance(p, l);
 
-            //     minDis = std::min(minDis, dis);
-            // }
+                // auto da = a.distanceTo(p), db = b.distanceTo(p), dc = c.distanceTo(p);
+                // if (minDis > dis)
+                // {
+                //     KIRI_LOG_DEBUG("a={0},{1},{2};b={3},{4},{5};c={6},{7},{8}", a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+                //     KIRI_LOG_DEBUG("current={0};p={1},{2},{3};da={4},db={5},dc={6}", dis, p.x, p.y, p.z, da, db, dc);
+                // }
 
-            // KIRI_LOG_DEBUG("minDis={0}", minDis);
+                gte::Vector<3, double> vec3 = {{p.x, p.y, p.z}};
+                gte::Vector<3, double> a3 = {{a.x, a.y, a.z}}, b3 = gte::Vector<3, double>{{b.x, b.y, b.z}}, c3 = gte::Vector<3, double>{{c.x, c.y, c.z}};
+                gte::Triangle<3, double> tri3(a3, b3, c3);
+
+                gte::DCPPoint3Triangle3<double> dpt3;
+                auto res = dpt3(vec3, tri3);
+                auto dis = res.distance;
+                minDis = std::min(minDis, dis);
+            }
+
+            KIRI_LOG_DEBUG("minDis={0}", minDis);
             return minDis;
         }
 
