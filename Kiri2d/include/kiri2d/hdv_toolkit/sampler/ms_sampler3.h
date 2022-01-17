@@ -62,8 +62,6 @@ namespace HDV::Sampler
             ComputeBoundaryArea();
 
             mPowerDiagram->Init();
-
-            CheckVoroCell();
         }
 
         std::vector<Vector4D> GetSampledSpheres()
@@ -98,7 +96,7 @@ namespace HDV::Sampler
 
         bool CheckVoroCell()
         {
-            // std::vector<int> remove;
+            std::vector<int> remove;
 
             auto sites = mPowerDiagram->GetSites();
             for (int i = 0; i < sites.size(); i++)
@@ -110,17 +108,24 @@ namespace HDV::Sampler
 
                 if (mCudaSDF->CheckPointsInside(make_float3(siteI->X(), siteI->Y(), siteI->Z())))
                 {
-                    if (siteI->Polygon)
+                    if (!siteI->Polygon)
                     {
+                        remove.emplace_back(siteI->GetId());
+                        auto points = mCudaSDF->GetInsidePoints(1);
+                        // KIRI_LOG_INFO("change site pos={0},{1},{2}", points[0].x, points[0].y, points[0].z);
+                        siteI->Set(points[0].x, points[0].y, points[0].z);
                     }
                     else
                     {
-                        KIRI_LOG_ERROR("no polygon");
+                        auto centroid = siteI->Polygon->GetCentroid();
+                        if (!mCudaSDF->CheckPointsInside(make_float3(centroid.x, centroid.y, centroid.z)))
+                        {
+                            remove.emplace_back(siteI->GetId());
+                            auto points = mCudaSDF->GetInsidePoints(1);
+                            // KIRI_LOG_INFO("change site pos={0},{1},{2}", points[0].x, points[0].y, points[0].z);
+                            siteI->Set(points[0].x, points[0].y, points[0].z);
+                        }
                     }
-                }
-                else
-                {
-                    KIRI_LOG_ERROR("point not inside polygon");
                 }
             }
 
@@ -138,32 +143,32 @@ namespace HDV::Sampler
             mCurIteration++;
 
             mPowerDiagram->Move2Centroid();
+            this->ComputeWeightsError();
+            this->AdaptWeights();
+
+            // auto sites = mPowerDiagram->GetSites();
+            // for (int i = 0; i < sites.size(); i++)
+            // {
+
+            //     auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(sites[i]);
+            //     if (siteI->GetIsBoundaryVertex())
+            //         continue;
+
+            //     KIRI_LOG_DEBUG("id={0}:({1},{2},{3}); weight={4}", siteI->GetId(), siteI->X(), siteI->Y(), siteI->Z(), siteI->GetWeight());
+            // }
+
             mPowerDiagram->Compute();
 
-            // auto needAddSites = this->DynamicAddSites();
-            // if (needAddSites)
-            // {
-            //     mPowerDiagram->Compute();
-            //     // KIRI_LOG_DEBUG("Iter={0} : Add Sites!!!!", mCurIteration);
-            // }
-            // else
-            // {
-            //     mPowerDiagram->Move2Centroid();
-            //     this->ComputeWeightsError();
-            //     this->AdaptWeights();
-            //     mPowerDiagram->Compute();
-            // }
-
-            // if (CheckVoroCell())
-            // {
-            //     mPowerDiagram->Compute();
-            // }
+            if (CheckVoroCell())
+            {
+                mPowerDiagram->Compute();
+            }
 
             // mCurGlobalPorosity = this->ComputeMiniumPorosity();
             // mGlobalPorosityArray.emplace_back(mCurGlobalPorosity);
             // mGlobalErrorArray.emplace_back(mCurGlobalWeightError);
-
-            // KIRI_LOG_DEBUG("porosity={0}; error={1}", mCurGlobalPorosity, mCurGlobalWeightError);
+            mPowerDiagram->ExportObj();
+            KIRI_LOG_DEBUG("error={0}", mCurGlobalWeightError);
         }
 
         void Reset()
@@ -175,6 +180,14 @@ namespace HDV::Sampler
 
         void ComputeBoundaryArea()
         {
+            auto boundary = mPowerDiagram->GetBoundary();
+            if (!boundary)
+            {
+                KIRI_LOG_ERROR("Not Set Boundary!");
+                return;
+            }
+            mCompleteArea = mPowerDiagram->GetBoundary()->GetVolume();
+            KIRI_LOG_DEBUG("Boundary Volume={0}", mCompleteArea);
         }
 
         double GetGlobalAreaError()
@@ -182,24 +195,25 @@ namespace HDV::Sampler
             auto error = 0.0;
             auto sites = mPowerDiagram->GetSites();
 
-         /*   for (int i = 0; i < sites.size(); i++)
+            for (int i = 0; i < sites.size(); i++)
             {
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(sites[i]);
                 if (siteI->GetIsBoundaryVertex())
                     continue;
 
                 auto n = siteI->mNeighborSites.size();
-                if (n > 3)
+                if (n > 0)
                 {
-                    auto currentArea = (!siteI->Polygon) ? 0.0 : siteI->Polygon->GetArea();
-                    auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
+                    auto currentArea = (!siteI->Polygon) ? 0.0 : siteI->Polygon->GetVolume();
+                    auto targetArea = 4.0 / 3.0 * kiri_math_mini::pi<double>() * std::pow(siteI->GetRadius(), 3.0);
                     error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.0);
+                    // KIRI_LOG_DEBUG("currentArea={0};targetArea={1},error={2}", currentArea, targetArea, error);
                 }
                 else
                 {
-                    KIRI_LOG_ERROR("No Neighbor Sites")
+                    KIRI_LOG_ERROR("No Neighbor Sites");
                 }
-            }*/
+            }
             return error;
         }
 
@@ -220,6 +234,10 @@ namespace HDV::Sampler
                     {
                         auto sn = std::dynamic_pointer_cast<Primitives::Vertex3>(neighbor);
                         auto distance = site[i]->Distance(sn);
+                        if (distance != distance)
+                            KIRI_LOG_ERROR("id={0}:({1},{2},{3})--neigh={4}:({5},{6},{7})",
+                                           site[i]->GetId(), site[i]->X(), site[i]->Y(), site[i]->Z(),
+                                           sn->GetId(), sn->X(), sn->Y(), sn->Z());
                         sum += distance;
                         num++;
                     }
@@ -231,6 +249,8 @@ namespace HDV::Sampler
                 KIRI_LOG_ERROR("GetGlobalAvgDistance:: no neighbor site!!");
                 return 0.0;
             }
+
+            // KIRI_LOG_DEBUG("avg distance sum={0}", sum);
 
             return sum / num;
         }
@@ -298,54 +318,57 @@ namespace HDV::Sampler
         void AdaptWeights()
         {
 
-            /* auto gAreaError = GetGlobalAreaError();
-             auto gAvgDistance = GetGlobalAvgDistance();
+            auto gAreaError = GetGlobalAreaError();
+            auto gAvgDistance = GetGlobalAvgDistance();
 
-             auto gammaArea = 1.0;
-             auto gammaBC = 1.0;
+            KIRI_LOG_DEBUG("gAreaError={0}; gAvgDistance={1}; mCurGlobalWeightError={2}", gAreaError, gAvgDistance, mCurGlobalWeightError);
 
-             auto sites = mPowerDiagram->GetSites();
-             for (int i = 0; i < sites.size(); i++)
-             {
+            auto gammaArea = 1e-2;
+            auto gammaBC = 1e-2;
 
-                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(sites[i]);
-                 if (siteI->GetIsBoundaryVertex())
-                     continue;
+            auto sites = mPowerDiagram->GetSites();
+            for (int i = 0; i < sites.size(); i++)
+            {
 
-                 auto weight = siteI->GetWeight();
+                auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(sites[i]);
+                if (siteI->GetIsBoundaryVertex())
+                    continue;
 
-                 auto areaWeight = 0.0;
-                 auto bcWeight = 0.0;
+                auto weight = siteI->GetWeight();
 
-                 auto n = siteI->mNeighborSites.size();
-                 if (n > 2)
-                 {
-                     auto currentArea = (!siteI->Polygon) ? 0.0 : siteI->Polygon->GetArea();
-                     auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
+                auto areaWeight = 0.0;
+                auto bcWeight = 0.0;
 
-                     auto pArea = 2.0;
-                     if (currentArea != 0.0)
-                         pArea = targetArea / currentArea;
+                auto n = siteI->mNeighborSites.size();
+                if (n > 0)
+                {
+                    auto currentArea = (!siteI->Polygon) ? 0.0 : siteI->Polygon->GetVolume();
+                    auto targetArea = 4.0 / 3.0 * kiri_math_mini::pi<double>() * std::pow(siteI->GetRadius(), 3.0);
 
-                     auto areaErrorTransform = (-(gAreaError - 1.0) * (gAreaError - 1.0) + 1.0);
-                     auto areaStep = gAvgDistance * areaErrorTransform * gammaArea;
-                     if (pArea < (1.0 - std::numeric_limits<double>::epsilon()) && weight > 0.0)
-                         areaWeight -= areaStep;
-                     else if (pArea > (1.0 + std::numeric_limits<double>::epsilon()))
-                         areaWeight += areaStep;
-                 }
+                    auto pArea = 2.0;
+                    if (currentArea != 0.0)
+                        pArea = targetArea / currentArea;
 
-                 auto error = mWeightAbsError[i] / (mCurGlobalWeightError + std::numeric_limits<double>::epsilon());
-                 auto errorTransform = (-(error - 1.0) * (error - 1.0) + 1.0);
+                    auto areaErrorTransform = (-(gAreaError - 1.0) * (gAreaError - 1.0) + 1.0);
+                    auto areaStep = gAvgDistance * areaErrorTransform * gammaArea;
+                    if (pArea < (1.0 - std::numeric_limits<double>::epsilon()) && weight > 0.0)
+                        areaWeight -= areaStep;
+                    else if (pArea > (1.0 + std::numeric_limits<double>::epsilon()))
+                        areaWeight += areaStep;
+                }
 
-                 auto step = errorTransform * gammaBC;
-                 if (mWeightError[i] < 0.0)
-                     bcWeight -= step;
-                 else if (mWeightError[i] > 0.0)
-                     bcWeight += step;
+                auto error = mWeightAbsError[i] / (mCurGlobalWeightError + std::numeric_limits<double>::epsilon());
+                auto errorTransform = (-(error - 1.0) * (error - 1.0) + 1.0);
 
-                 siteI->SetWeight(weight + areaWeight + bcWeight);
-             }*/
+                auto step = errorTransform * gammaBC;
+                if (mWeightError[i] < 0.0)
+                    bcWeight -= step;
+                else if (mWeightError[i] > 0.0)
+                    bcWeight += step;
+
+                // KIRI_LOG_DEBUG("current site weight={0}; areaweight={1}, bcweight={2}", weight, areaWeight, bcWeight);
+                siteI->SetWeight(weight + areaWeight + bcWeight);
+            }
         }
 
     private:

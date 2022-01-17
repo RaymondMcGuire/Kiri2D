@@ -156,6 +156,7 @@ namespace HDV::Sampler
                 {
                     auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->GetArea();
                     auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
+                    // auto targetArea = siteI->GetRadius() * siteI->GetRadius() * kiri_math_mini::pi<double>();
                     error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.0);
                 }
             }
@@ -411,6 +412,7 @@ namespace HDV::Sampler
                 {
                     auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->GetArea();
                     auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
+                    // auto targetArea = kiri_math_mini::pi<double>() * siteI->GetRadius() * siteI->GetRadius();
 
                     auto pArea = 2.0;
                     if (currentArea != 0.0)

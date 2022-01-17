@@ -306,7 +306,7 @@ namespace HDV::Voronoi
 
                 gte::DCPPoint3Triangle3<double> dpt3;
                 auto res = dpt3(vec3, tri3);
-                auto dis = res.distance;
+                auto dis = res.distance * 2.0;
                 minDis = std::min(minDis, dis);
             }
 
@@ -353,6 +353,9 @@ namespace HDV::Voronoi
                 volume += v;
                 centroid += v * (a + b + c) / 4.0;
             }
+
+            if (centroid.x != centroid.x || centroid.y != centroid.y || centroid.z != centroid.z)
+                KIRI_LOG_ERROR("error centroid!!!!");
 
             return centroid / volume;
         }

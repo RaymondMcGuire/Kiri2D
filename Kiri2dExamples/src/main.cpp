@@ -2461,47 +2461,129 @@ void TestPolygonUnion()
 #include <kiri2d/hdv_toolkit/primitives/vertex3.h>
 #include <kiri2d/hdv_toolkit/primitives/vertex4.h>
 #include <kiri2d/hdv_toolkit/hull/convex_hull.h>
+#include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation2.h>
+#include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation3.h>
 void QuickHullConvexHull3d()
 {
     using namespace HDV;
 
     std::vector<Primitives::Vertex3Ptr> vet3;
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.38154536485671997, 0.1146271675825119, 0.6684877276420593));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.24616186320781708, 0.4564620852470398, 0.31010201573371887));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.35921716690063477, 0.48692381381988525, 0.336710661649704));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6343265175819397, 0.0794384554028511, 0.7002074718475342));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8470532298088074, 0.45811811089515686, 0.40726399421691895));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8116405606269836, 0.5894207954406738, 0.43800264596939087));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4764929413795471, 0.34879007935523987, 0.5977563858032227));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4468737542629242, 0.4204060435295105, 0.347401887178421));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4420554041862488, 0.45802855491638184, 0.6625888347625732));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7877325415611267, 0.4891592264175415, 0.342998743057251));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.3631060719490051, 0.1395331472158432, 0.4028662443161011));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7630274891853333, 0.04730677604675293, 0.6007089018821716));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8409253358840942, 0.4443286657333374, 0.3612082004547119));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8785147666931152, 0.28778958320617676, 0.6280174255371094));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6030551791191101, 0.2018173336982727, 0.60934978723526));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7312994003295898, 0.3841328024864197, 0.7008111476898193));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5594123601913452, 0.23014654219150543, 0.7550745606422424));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.2169153392314911, 0.6580185890197754, 0.421272337436676));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.31979966163635254, 0.4698064923286438, 0.3549903631210327));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.22061549127101898, 0.48685160279273987, 0.3842077851295471));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.07072707265615463, 0.6613724231719971, 0.6572007536888123));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6411411166191101, 0.575503408908844, 0.6193653345108032));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7741573452949524, 0.21821317076683044, 0.36062467098236084));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7509543895721436, 0.37132030725479126, 0.522675633430481));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7690234184265137, 0.2553803324699402, 0.7250300645828247));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.2977566719055176, 0.32577580213546753, 0.6474320292472839));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7262822389602661, 0.3219805359840393, 0.35913342237472534));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5279478430747986, 0.584001362323761, 0.5908053517341614));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.19639888405799866, 0.7609197497367859, 0.2988492548465729));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.20517075061798096, 0.054803285747766495, 0.39519381523132324));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5520908832550049, 0.26270177960395813, 0.27787646651268005));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4260469079017639, 0.3692712187767029, 0.41294586658477783));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6608512997627258, 0.5496494174003601, 0.44731688499450684));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6051326990127563, 0.15145641565322876, 0.6067054271697998));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5419924259185791, 0.9405410289764404, 0.31930989027023315));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5081912875175476, 0.9590598344802856, 0.26466289162635803));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5079513192176819, 0.31332895159721375, 0.5777361392974854));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.17393185198307037, 0.755401611328125, 0.6720157265663147));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8610098958015442, 0.24821564555168152, 0.43328291177749634));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4345715343952179, 0.4681691527366638, 0.5155949592590332));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5131782293319702, 0.46006253361701965, 0.35858088731765747));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6175758838653564, 0.2746777832508087, 0.26007571816444397));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6896041035652161, 0.5187002420425415, 0.4056354761123657));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5481720566749573, 0.9835112690925598, 0.25742068886756897));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6547431945800781, 0.4671425223350525, 0.4660925269126892));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.38980695605278015, 0.1620403230190277, 0.5588512420654297));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6969920992851257, 0.08670969307422638, 0.3079794943332672));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4928244650363922, 0.2831677496433258, 0.6367471218109131));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7093964219093323, 0.1470286250114441, 0.31880077719688416));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8482162356376648, 0.5279671549797058, 0.40371400117874146));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4991582930088043, 0.19517174363136292, 0.42477959394454956));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.3727628290653229, 0.505084753036499, 0.5972374081611633));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8029602766036987, 0.41443052887916565, 0.6251235604286194));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6300662755966187, 0.09997764229774475, 0.41645264625549316));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7209357023239136, 0.050708968192338943, 0.31318268179893494));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.16147856414318085, 0.8286169767379761, 0.38890695571899414));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6654874682426453, 0.29885637760162354, 0.7438512444496155));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.07246582955121994, 0.6110273003578186, 0.4885712265968323));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.2686154842376709, 0.5899538993835449, 0.5954372882843018));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.14579883217811584, 0.6043238639831543, 0.6893882751464844));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.489347904920578, 0.33180323243141174, 0.1924036741256714));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.47071751952171326, 0.4080698490142822, 0.5519131422042847));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8826482892036438, 0.37401124835014343, 0.5228121876716614));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5837278962135315, 0.415609210729599, 0.3626022934913635));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7871206402778625, 0.34567737579345703, 0.7289097309112549));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8190171718597412, 0.16528236865997314, 0.5943465232849121));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7671700119972229, 0.5507073402404785, 0.4056755304336548));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8843605518341064, 0.2750672996044159, 0.5510888695716858));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5052724480628967, 0.41969117522239685, 0.6983670592308044));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.25021272897720337, 0.31463423371315, 0.6785677671432495));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6953755021095276, 0.14149902760982513, 0.437629759311676));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.5068426132202148, 0.0951828733086586, 0.7099730968475342));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6820862293243408, 0.16675879061222076, 0.5543367266654968));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.21292303502559662, 0.21016167104244232, 0.47843223810195923));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6063047051429749, 0.0772307962179184, 0.7232301831245422));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.34390950202941895, 0.10781310498714447, 0.390392005443573));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8020079731941223, 0.30070576071739197, 0.5059731006622314));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.12251769751310349, 0.38184821605682373, 0.356222927570343));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.19920434057712555, 0.43950775265693665, 0.5920177698135376));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.41542673110961914, 0.4361895024776459, 0.3829081952571869));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.7208181619644165, 0.31229427456855774, 0.7798858880996704));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.823697566986084, 0.3999618887901306, 0.531923770904541));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.23186556994915009, 0.401278018951416, 0.311093807220459));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.08388122171163559, 0.6041345000267029, 0.5608069896697998));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6046280860900879, 0.4452591836452484, 0.2808905839920044));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.633285641670227, 0.4264303743839264, 0.7469958662986755));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6978915929794312, 0.4412091076374054, 0.3944694995880127));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4369846284389496, 0.19924719631671906, 0.6523071527481079));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6807717680931091, 0.556245744228363, 0.6691657304763794));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.4586567282676697, 0.3110058009624481, 0.6783725619316101));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8028092384338379, 0.4317425489425659, 0.6201617121696472));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6059055328369141, 0.2091643363237381, 0.7335872650146484));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.27032196521759033, 0.4030919075012207, 0.34194907546043396));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.9019389152526855, 0.28607332706451416, 0.5791234374046326));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.16338388621807098, 0.48983773589134216, 0.4772653579711914));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.8833513259887695, 0.4419476389884949, 0.4198605418205261));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.21356308460235596, 0.8361571431159973, 0.3021114468574524));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.21050220727920532, 0.3016509413719177, 0.42408573627471924));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.15061642229557037, 0.4166421592235565, 0.3476000726222992));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(0.6098446846008301, 0.07590754330158234, 0.7174344658851624));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.0, -0.9910658001899719, -0.7753245234489441));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(2.0, 1.9821316003799438, 1.5506490468978882));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.0, -0.9910658001899719, 1.5506490468978882));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.0, 1.9821316003799438, 1.5506490468978882));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.0, 1.9821316003799438, -0.7753245234489441));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(2.0, -0.9910658001899719, -0.7753245234489441));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(2.0, -0.9910658001899719, 1.5506490468978882));
+    // vet3.emplace_back(std::make_shared<Primitives::Vertex3>(2.0, 1.9821316003799438, -0.7753245234489441));
 
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.3473947652160714, -1.3934941357739392, 2.6554023997597196));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.4335608806265805, -0.3618126948426488, 3.8195126655309948));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.1807481524741172, -2.117988644862587, 0.7889682041779849));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.9745695332406514, -0.20193462475825275, 1.3321065109919257));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.9215385168721664, -0.196548079476635, 1.4509445695438));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.9637395264899453, -0.20006264135376473, 3.3957176506195688));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.74705880118956, -0.24823438044353807, 1.4039036660352582));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.4352324347291834, -0.359118740486994, 3.554530157331668));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.7722492977696822, -0.2865878482457451, 1.1215549299553809));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.36843732936572415, -1.1881103828317805, 2.166602501943894));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.8119086042454957, -1.3465705798154093, 0.7249814962218988));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.4543293670228525, -1.9231052897259961, 0.7069221833716544));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-2.489134307724693, -0.35445765106358573, 1.4163321399855633));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-1.6564909582695075, -0.270654849216843, 1.2435471502160946));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.7720004533844125, -0.33384164976170183, 1.014992799700995));
-    vet3.emplace_back(std::make_shared<Primitives::Vertex3>(-0.6107243657750612, -0.9749529956596823, 0.7871385897623107));
+    auto dt3 = std::make_shared<Delaunay::DelaunayTriangulation3>();
+    dt3->Generate(vet3);
 
-    auto cv3 = std::make_shared<Hull::ConvexHull3>();
-    cv3->Generate(vet3);
+    // auto cv3 = std::make_shared<Hull::ConvexHull3>();
+    // cv3->Generate(vet3);
 
-    // auto vert = cv3->GetHullVertices();
-
-    // for (size_t i = 0; i < vert.size(); i++)
-    // {
-    //     vert[i]->ToString();
-    // }
-
-    // auto face = cv3->GetSimplexs();
-
-    // for (size_t i = 0; i < face.size(); i++)
-    // {
-    //     face[i]->ToString();
-    // }
-
-    KIRI_LOG_DEBUG("size={0}, eps={1}", cv3->GetSimplexs().size(), std::numeric_limits<double>::epsilon());
+    // KIRI_LOG_DEBUG("size={0}, eps={1}", cv3->GetSimplexs().size(), std::numeric_limits<double>::epsilon());
 }
 
 void QuickHullConvexHull2d()
@@ -2579,7 +2661,6 @@ void QuickHullConvexHull2d()
     }
 }
 
-#include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation2.h>
 void QuickHullDelaunayTriangulation2d()
 {
     using namespace HDV;
@@ -3059,12 +3140,32 @@ void QuickHullVoronoi3d()
 
     KIRI_LOG_INFO("Start Construct SDF!");
     auto cudaSampler = std::make_shared<CudaShapeSampler>(mInfo, KiriToCUDA(faceVerticesList), 13, 8);
-    auto insidePoints = cudaSampler->GetInsidePoints(10);
+    auto insidePoints = cudaSampler->GetInsidePoints(100);
     KIRI_LOG_INFO("Generated Initial Points!");
     // ############################################################################# for boundary mesh
 
     auto multiSizeSampler3 = std::make_shared<Sampler::MultiSizeSampler3D>(cudaSampler);
     auto voro3 = std::make_shared<Voronoi::VoronoiMesh3>();
+
+    std::random_device seedGen;
+    std::default_random_engine rndEngine(seedGen());
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    std::uniform_real_distribution<double> rdist(-1.0, 1.0);
+
+    std::vector<double> radiusRange;
+    radiusRange.push_back(0.01);
+    radiusRange.push_back(0.03);
+    radiusRange.push_back(0.08);
+    radiusRange.push_back(0.15);
+
+    std::vector<double> radiusRangeProb;
+    radiusRangeProb.push_back(0.5);
+    radiusRangeProb.push_back(0.4);
+    radiusRangeProb.push_back(0.1);
+
+    std::random_device engine;
+    std::mt19937 gen(engine());
+    std::piecewise_constant_distribution<double> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
     for (auto i = 0; i < insidePoints.size(); i++)
     {
@@ -3072,7 +3173,9 @@ void QuickHullVoronoi3d()
         auto y = insidePoints[i].y;
         auto z = insidePoints[i].z;
 
-        multiSizeSampler3->AddSite(x, y, z, 0.0);
+        auto radius = pcdis(gen);
+
+        multiSizeSampler3->AddSite(x, y, z, radius);
 
         // KIRI_LOG_DEBUG("multiSizeSampler3->AddSite(std::make_shared<Voronoi::VoronoiSite3>({0},{1},{2},{3});", x, y, z, i);
     }
@@ -3114,10 +3217,13 @@ void QuickHullVoronoi3d()
     multiSizeSampler3->Init();
     KIRI_LOG_INFO("Finished Init Voronoi Diagram 3D!");
 
-    multiSizeSampler3->Compute();
-    auto data = multiSizeSampler3->GetSampledSpheres();
-    KIRI_LOG_INFO("GetSampledSpheres size={0}!", data.size());
-    ExportBgeoFileFromCPU("ms3", UInt2Str4Digit(0), data);
+    for (auto i = 0; i < 100; i++)
+    {
+        multiSizeSampler3->Compute();
+        // auto data = multiSizeSampler3->GetSampledSpheres();
+        // KIRI_LOG_INFO("GetSampledSpheres size={0}!", data.size());
+        // ExportBgeoFileFromCPU("ms3", UInt2Str4Digit(i), data);
+    }
 
     // KiriTimer timer;
     // float totalTime = 0.f;

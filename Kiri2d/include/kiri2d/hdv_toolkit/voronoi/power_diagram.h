@@ -125,18 +125,69 @@ namespace HDV::Voronoi
         int mCounter = 0;
         BoundingBox3D mBBox;
 
+        void RemoveVoroSitesByIndexArray(std::vector<int> indexs)
+        {
+
+            auto removeSites = std::remove_if(mSites.begin(),
+                                              mSites.end(),
+                                              [=](const HDV::Primitives::Vertex3Ptr &site)
+                                              {
+                                                  if (std::find(indexs.begin(), indexs.end(), site->GetId()) != indexs.end())
+                                                      return true;
+                                                  else
+                                                      return false;
+                                              });
+
+            mSites.erase(removeSites, mSites.end());
+        }
+
+        const std::shared_ptr<VoronoiPolygon3> &GetBoundary()
+        {
+            return mBoundaryPolygon;
+        }
+
         void SetBoundaryPolygon(std::vector<csgjscpp::Polygon> boundary)
         {
-            auto boundaryPolygon = std::make_shared<VoronoiPolygon3>();
-            for (auto i = 0; i < boundary.size(); i++)
+            auto boundaryMesh = csgjscpp::modelfrompolygons(boundary);
+
+            std::vector<Vector3D> Positions;
+            std::vector<Vector3D> Normals;
+            std::vector<int> Indices;
+
+            for (auto idx = 0; idx < boundaryMesh.indices.size(); idx += 3)
             {
-                auto face = boundary[i];
-                boundaryPolygon->AddVert3(Vector3D(face.vertices[0].pos.x, face.vertices[0].pos.y, face.vertices[0].pos.z));
-                boundaryPolygon->AddVert3(Vector3D(face.vertices[1].pos.x, face.vertices[1].pos.y, face.vertices[1].pos.z));
-                boundaryPolygon->AddVert3(Vector3D(face.vertices[2].pos.x, face.vertices[2].pos.y, face.vertices[2].pos.z));
+                auto indIdx1 = boundaryMesh.indices[idx];
+                auto indIdx2 = boundaryMesh.indices[idx + 1];
+                auto indIdx3 = boundaryMesh.indices[idx + 2];
+
+                auto faceVert1 = boundaryMesh.vertices[indIdx1].pos;
+                auto faceVert2 = boundaryMesh.vertices[indIdx2].pos;
+                auto faceVert3 = boundaryMesh.vertices[indIdx3].pos;
+
+                auto faceNorm1 = boundaryMesh.vertices[indIdx1].normal;
+                auto faceNorm2 = boundaryMesh.vertices[indIdx2].normal;
+                auto faceNorm3 = boundaryMesh.vertices[indIdx3].normal;
+
+                Positions.emplace_back(Vector3D(faceVert1.x, faceVert1.y, faceVert1.z));
+                Positions.emplace_back(Vector3D(faceVert2.x, faceVert2.y, faceVert2.z));
+                Positions.emplace_back(Vector3D(faceVert3.x, faceVert3.y, faceVert3.z));
+
+                Normals.emplace_back(Vector3D(faceNorm1.x, faceNorm1.y, faceNorm1.z));
+                Normals.emplace_back(Vector3D(faceNorm2.x, faceNorm2.y, faceNorm2.z));
+                Normals.emplace_back(Vector3D(faceNorm3.x, faceNorm3.y, faceNorm3.z));
+
+                Indices.emplace_back(idx);
+                Indices.emplace_back(idx + 1);
+                Indices.emplace_back(idx + 2);
             }
 
-            mBBox = boundaryPolygon->BBox;
+            mBoundaryPolygon = std::make_shared<VoronoiPolygon3>();
+            mBoundaryPolygon->Positions = Positions;
+            mBoundaryPolygon->Normals = Normals;
+            mBoundaryPolygon->Indices = Indices;
+            mBoundaryPolygon->UpdateBBox();
+
+            mBBox = mBoundaryPolygon->BBox;
 
             mMesh->SetBoundaryPolygon(boundary);
             mMesh->SetBoundaryBBox(mBBox);
@@ -206,6 +257,11 @@ namespace HDV::Voronoi
             Compute();
         }
 
+        void ExportObj()
+        {
+            mMesh->ExportVoronoiMeshObj(mCounter++);
+        }
+
         VoronoiMesh3Ptr mMesh;
 
     private:
@@ -213,6 +269,8 @@ namespace HDV::Voronoi
         bool mCheckInput = false;
 
         std::unordered_set<int> mConstrainSites;
+
+        std::shared_ptr<VoronoiPolygon3> mBoundaryPolygon;
 
         std::vector<HDV::Primitives::Vertex3Ptr> mSites;
 

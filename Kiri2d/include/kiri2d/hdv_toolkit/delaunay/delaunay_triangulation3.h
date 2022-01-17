@@ -41,7 +41,7 @@ namespace HDV::Delaunay
             {
                 auto v = input[i]->GetPosition();
                 v.resize(dim + 1);
-                v[dim] = input[i]->SqrMagnitude();
+                v[dim] = input[i]->SqrMagnitude() - input[i]->GetWeight();
 
                 input[i]->mPosition = v;
             }
@@ -58,7 +58,7 @@ namespace HDV::Delaunay
             }
 
             this->Vertices = Hull->GetVertices();
-            // KIRI_LOG_DEBUG("Hull->GetVertices size={0}", this->Vertices.size());
+            KIRI_LOG_DEBUG("Hull->GetVertices size={0}; input size={1}", this->Vertices.size(), count);
 
             this->Centroid->mPosition[0] = Hull->GetCentroid()[0];
             this->Centroid->mPosition[1] = Hull->GetCentroid()[1];
