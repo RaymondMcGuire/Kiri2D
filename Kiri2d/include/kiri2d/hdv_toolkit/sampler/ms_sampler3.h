@@ -74,22 +74,40 @@ namespace HDV::Sampler
                 if (siteI->GetIsBoundaryVertex())
                     continue;
 
-                if (mCudaSDF->CheckPointsInside(make_float3(siteI->X(), siteI->Y(), siteI->Z())))
+                if (siteI->Polygon)
                 {
-                    if (siteI->Polygon)
+                    auto cen = siteI->Polygon->GetCentroid();
+                    if (mCudaSDF->CheckPointsInside(make_float3(cen.x, cen.y, cen.z)))
                     {
-                        auto radius = siteI->Polygon->ComputeMinDisInPoly(Vector3D(siteI->X(), siteI->Y(), siteI->Z()));
-                        data.emplace_back(Vector4D(siteI->X(), siteI->Y(), siteI->Z(), radius));
+                        auto radius = siteI->Polygon->ComputeMinDisInPoly(cen);
+                        data.emplace_back(Vector4D(cen.x, cen.y, cen.z, radius));
                     }
                     else
                     {
-                        KIRI_LOG_ERROR("no polygon");
+                        KIRI_LOG_ERROR("point not inside polygon");
                     }
                 }
                 else
                 {
-                    KIRI_LOG_ERROR("point not inside polygon");
+                    KIRI_LOG_ERROR("no polygon");
                 }
+
+                // if (mCudaSDF->CheckPointsInside(make_float3(siteI->X(), siteI->Y(), siteI->Z())))
+                // {
+                //     if (siteI->Polygon)
+                //     {
+                //         auto radius = siteI->Polygon->ComputeMinDisInPoly(Vector3D(siteI->X(), siteI->Y(), siteI->Z()));
+                //         data.emplace_back(Vector4D(siteI->X(), siteI->Y(), siteI->Z(), radius));
+                //     }
+                //     else
+                //     {
+                //         KIRI_LOG_ERROR("no polygon");
+                //     }
+                // }
+                // else
+                // {
+                //     KIRI_LOG_ERROR("point not inside polygon");
+                // }
             }
             return data;
         }

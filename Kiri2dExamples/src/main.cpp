@@ -3104,7 +3104,7 @@ void QuickHullVoronoi3d()
     boundaryModel->Normalize();
     // boundaryModel->ScaleToBox(2.f);
 
-    auto cellSize = 0.1f;
+    auto cellSize = 0.005f;
     auto bBMin = boundaryModel->GetAABBMin();
     auto bBMax = boundaryModel->GetAABBMax();
     auto lengths = bBMax - bBMin;
@@ -3140,7 +3140,7 @@ void QuickHullVoronoi3d()
 
     KIRI_LOG_INFO("Start Construct SDF!");
     auto cudaSampler = std::make_shared<CudaShapeSampler>(mInfo, KiriToCUDA(faceVerticesList), 13, 8);
-    auto insidePoints = cudaSampler->GetInsidePoints(100);
+    auto insidePoints = cudaSampler->GetInsidePoints(1000);
     KIRI_LOG_INFO("Generated Initial Points!");
     // ############################################################################# for boundary mesh
 
@@ -3217,13 +3217,17 @@ void QuickHullVoronoi3d()
     multiSizeSampler3->Init();
     KIRI_LOG_INFO("Finished Init Voronoi Diagram 3D!");
 
-    for (auto i = 0; i < 100; i++)
-    {
-        multiSizeSampler3->Compute();
-        // auto data = multiSizeSampler3->GetSampledSpheres();
-        // KIRI_LOG_INFO("GetSampledSpheres size={0}!", data.size());
-        // ExportBgeoFileFromCPU("ms3", UInt2Str4Digit(i), data);
-    }
+    auto data = multiSizeSampler3->GetSampledSpheres();
+    KIRI_LOG_INFO("GetSampledSpheres size={0}!", data.size());
+    ExportBgeoFileFromCPU("ms3", UInt2Str4Digit(0), data);
+
+    // for (auto i = 0; i < 100; i++)
+    // {
+    //     multiSizeSampler3->Compute();
+    //     // auto data = multiSizeSampler3->GetSampledSpheres();
+    //     // KIRI_LOG_INFO("GetSampledSpheres size={0}!", data.size());
+    //     // ExportBgeoFileFromCPU("ms3", UInt2Str4Digit(i), data);
+    // }
 
     // KiriTimer timer;
     // float totalTime = 0.f;
