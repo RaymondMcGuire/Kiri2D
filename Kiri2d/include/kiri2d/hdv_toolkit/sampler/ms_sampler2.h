@@ -115,6 +115,11 @@ namespace HDV::Sampler
                 mPowerDiagram->Compute();
             }
 
+            if (RemoveNoiseVoroSites())
+            {
+                mPowerDiagram->Compute();
+            }
+
             mCurGlobalPorosity = this->ComputeMiniumPorosity();
             mGlobalPorosityArray.emplace_back(mCurGlobalPorosity);
             mGlobalErrorArray.emplace_back(mCurGlobalWeightError);
@@ -267,6 +272,69 @@ namespace HDV::Sampler
             return (boundary->GetArea() - sum) / boundary->GetArea();
         }
 
+        bool RemoveNoiseVoroSites()
+        {
+            std::vector<int> removeVoroIdxs;
+            auto sites = mPowerDiagram->GetSites();
+            for (int i = 0; i < sites.size(); i++)
+            {
+                auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
+                if (siteI->GetIsBoundaryVertex())
+                    continue;
+
+                auto poly = siteI->CellPolygon;
+                if (poly)
+                {
+
+                    if (poly->mSkeletons.empty())
+                        poly->ComputeSSkel1998Convex();
+
+                    auto micI = poly->ComputeMICByStraightSkeleton();
+                    for (auto neighbor : siteI->mNeighborSites)
+                    {
+                        auto siteJ = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(neighbor);
+                        if (siteJ->GetIsBoundaryVertex())
+                            continue;
+
+                        auto polyJ = siteJ->CellPolygon;
+                        if (polyJ)
+                        {
+
+                            if (polyJ->mSkeletons.empty())
+                                polyJ->ComputeSSkel1998Convex();
+
+                            auto micJ = polyJ->ComputeMICByStraightSkeleton();
+
+                            auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
+                            if ((disIJ < ((micI.z + micJ.z) / 2.f)) &&
+                                !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetId()) &&
+                                !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetId()))
+                                removeVoroIdxs.emplace_back(siteJ->GetId());
+                        }
+                        else
+                        {
+                            KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
+                            // remove.emplace_back(siteI->GetRadius());
+                        }
+                    }
+                }
+                else
+                {
+                    KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
+                    // remove.emplace_back(siteI->GetRadius());
+                }
+            }
+
+            if (!removeVoroIdxs.empty())
+            {
+                KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
+                mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
+                return true;
+            }
+
+            return false;
+        }
+
         bool DynamicAddSites()
         {
             if (mPowerDiagram->GetSites().size() - 4 >= mMaxiumNum && bReachMaxuimNum == false)
@@ -374,7 +442,6 @@ namespace HDV::Sampler
                         }
                         else
                         {
-
                             auto pw = distance * distance - siteI->GetWeight();
                             mWeightError[i] += pw;
                             mWeightAbsError[i] += std::abs(pw);

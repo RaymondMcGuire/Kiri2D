@@ -2866,14 +2866,14 @@ void MSSampler2D()
     std::uniform_real_distribution<double> rdist(-1.0, 1.0);
 
     std::vector<double> radiusRange;
+    radiusRange.push_back(10.0);
     radiusRange.push_back(20.0);
-    radiusRange.push_back(30.0);
-    radiusRange.push_back(80.0);
-    radiusRange.push_back(150.0);
+    radiusRange.push_back(50.0);
+    radiusRange.push_back(100.0);
 
     std::vector<double> radiusRangeProb;
-    radiusRangeProb.push_back(0.5);
-    radiusRangeProb.push_back(0.4);
+    radiusRangeProb.push_back(0.7);
+    radiusRangeProb.push_back(0.2);
     radiusRangeProb.push_back(0.1);
 
     multiSizeSampler->SetRadiusDist(radiusRange);
@@ -3292,9 +3292,9 @@ int main()
     // QuickHullVoronoi2d();
     //         VoronoiExample1();
 
-    QuickHullVoronoi3d();
+    // QuickHullVoronoi3d();
 
-    // MSSampler2D();
+    MSSampler2D();
 
     return 0;
 }
