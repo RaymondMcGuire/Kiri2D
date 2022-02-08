@@ -2856,6 +2856,9 @@ void MSSampler2D()
 {
     using namespace HDV;
 
+    // omp_set_num_threads(20);
+    // KIRI_LOG_INFO("OpenMP max threads number ={0}; ", omp_get_max_threads());
+
     auto multiSizeSampler = std::make_shared<Sampler::MultiSizeSampler2D>();
 
     auto scale_size = 1000.0;
@@ -3248,6 +3251,7 @@ void QuickHullVoronoi3d()
 int main()
 {
     KIRI::KiriLog::Init();
+
     // VoronoiExample();
     //  VoronoiExample1();
     //   VoronoiExample2();
@@ -3290,7 +3294,7 @@ int main()
     // QuickHullDelaunayTriangulation2d();
 
     // QuickHullVoronoi2d();
-    //         VoronoiExample1();
+    //          VoronoiExample1();
 
     // QuickHullVoronoi3d();
 

@@ -21,7 +21,7 @@ namespace HDV::Delaunay
         explicit DelaunayTriangulation2D() : DelaunayTriangulation<VERTEXPTR, VERTEX>(2)
         {
             mMatrixBuffer.assign(3, std::vector<double>());
-            for (size_t i = 0; i < mMatrixBuffer.size(); i++)
+            for (auto i = 0; i < mMatrixBuffer.size(); i++)
             {
                 mMatrixBuffer[i].assign(3, 0.0);
             }
@@ -38,6 +38,8 @@ namespace HDV::Delaunay
                 return;
 
             auto count = input.size();
+
+#pragma omp parallel for
             for (auto i = 0; i < count; i++)
             {
                 auto v = input[i]->GetPosition();
@@ -51,6 +53,7 @@ namespace HDV::Delaunay
             Hull->SetForPowerDiagram(true);
             Hull->Generate(input, assignIds, checkInput);
 
+#pragma omp parallel for
             for (auto i = 0; i < count; i++)
             {
                 auto v = input[i]->GetPosition();

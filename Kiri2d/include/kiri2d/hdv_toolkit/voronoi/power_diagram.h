@@ -76,7 +76,9 @@ namespace HDV::Voronoi
 
         void Move2Centroid()
         {
-            for (size_t i = 0; i < mSites.size(); i++)
+
+#pragma omp parallel for
+            for (auto i = 0; i < mSites.size(); i++)
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
                 if (site->GetIsBoundaryVertex())
@@ -105,7 +107,7 @@ namespace HDV::Voronoi
 
         void Reset()
         {
-            for (size_t i = 0; i < mSites.size(); i++)
+            for (auto i = 0; i < mSites.size(); i++)
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
                 site->Reset();
@@ -232,7 +234,7 @@ namespace HDV::Voronoi
 
         void Move2Centroid()
         {
-            for (size_t i = 0; i < mSites.size(); i++)
+            for (auto i = 0; i < mSites.size(); i++)
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
                 if (site->GetIsBoundaryVertex())
@@ -277,7 +279,7 @@ namespace HDV::Voronoi
         void AddConstrain()
         {
             auto center = (mBBox.LowestPoint + mBBox.HighestPoint) / 2.0;
-            for (size_t i = 0; i < mSites.size(); i++)
+            for (auto i = 0; i < mSites.size(); i++)
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
 
@@ -290,7 +292,7 @@ namespace HDV::Voronoi
 
         void Reset()
         {
-            for (size_t i = 0; i < mSites.size(); i++)
+            for (auto i = 0; i < mSites.size(); i++)
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
                 site->Reset();

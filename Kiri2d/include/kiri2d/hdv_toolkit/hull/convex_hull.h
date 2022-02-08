@@ -19,6 +19,11 @@
 #include <kiri2d/hdv_toolkit/hull/object_buffer.h>
 
 #include <experimental/vector>
+
+#ifdef KIRI_WINDOWS
+#include <omp.h>
+#endif
+
 namespace HDV::Hull
 {
     template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
@@ -54,7 +59,7 @@ namespace HDV::Hull
 
         void Clear()
         {
-            for (size_t i = 0; i < mSimplexs.size(); i++)
+            for (auto i = 0; i < mSimplexs.size(); i++)
                 mSimplexs[i]->Clear();
 
             mCentroid.assign(mDimension, 0.0);
@@ -78,6 +83,7 @@ namespace HDV::Hull
         std::vector<Vector4F> GetSortSimplexsList()
         {
             std::vector<Vector4F> pre_simplexs, unprocessed_simplexs, simplexs;
+
             for (auto i = 0; i < mSimplexs.size(); i++)
             {
                 auto from_i = mSimplexs[i]->Vertices[0];
@@ -85,8 +91,8 @@ namespace HDV::Hull
                 pre_simplexs.emplace_back(Vector4F(from_i->X(), from_i->Y(), to_i->X(), to_i->Y()));
             }
 
-            std::vector<int> remove_idx;
             // preprocess
+            std::vector<int> remove_idx;
             for (auto i = 0; i < pre_simplexs.size() - 1; i++)
             {
                 auto usi = pre_simplexs[i];
@@ -177,6 +183,7 @@ namespace HDV::Hull
         {
             mIndexOfDimensionWithLeastExtremes = -1;
             auto minNumExtremes = std::numeric_limits<int>::max();
+
             for (auto i = 0; i < mDimension; i++)
             {
                 std::vector<int> minIndices;
@@ -759,6 +766,9 @@ namespace HDV::Hull
 
             for (auto i = 0; i < cellCount; i++)
             {
+                // auto myid = omp_get_thread_num();
+                // KIRI_LOG_DEBUG("thread id={0},cell count={1}", myid, cellCount);
+
                 auto vs = mBuffer->ConvexSimplexs[i]->Vertices;
                 for (auto j = 0; j < vs.size(); j++)
                 {
@@ -831,8 +841,7 @@ namespace HDV::Hull
             }
 
             // Set all vertices to false (unvisited).
-
-            for (size_t i = 0; i < initialPoints.size(); i++)
+            for (auto i = 0; i < initialPoints.size(); i++)
             {
                 mVertexVisited[initialPoints[i]] = false;
             }
@@ -840,7 +849,6 @@ namespace HDV::Hull
 
         void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false)
         {
-
             Clear();
 
             mBuffer = std::make_shared<ObjectBuffer<VERTEXPTR>>(mDimension);

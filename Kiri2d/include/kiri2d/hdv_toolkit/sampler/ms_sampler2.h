@@ -66,7 +66,8 @@ namespace HDV::Sampler
             std::vector<int> remove;
 
             auto sites = mPowerDiagram->GetSites();
-            for (int i = 0; i < sites.size(); i++)
+
+            for (auto i = 0; i < sites.size(); i++)
             {
 
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
@@ -150,6 +151,8 @@ namespace HDV::Sampler
             auto error = 0.0;
             auto sites = mPowerDiagram->GetSites();
 
+#pragma omp parallel for reduction(+ \
+                                   : error)
             for (int i = 0; i < sites.size(); i++)
             {
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
@@ -174,6 +177,8 @@ namespace HDV::Sampler
             int num = 0;
             auto site = mPowerDiagram->GetSites();
 
+#pragma omp parallel for reduction(+ \
+                                   : sum, num)
             for (int i = 0; i < site.size(); i++)
             {
                 if (site[i]->GetIsBoundaryVertex())
@@ -260,6 +265,9 @@ namespace HDV::Sampler
             auto maxCircleArray = this->GetMICBySSkel();
 
             auto sum = 0.0;
+
+#pragma omp parallel for reduction(+ \
+                                   : sum)
             for (int i = 0; i < maxCircleArray.size(); i++)
             {
                 auto circle = maxCircleArray[i];
@@ -276,6 +284,7 @@ namespace HDV::Sampler
         {
             std::vector<int> removeVoroIdxs;
             auto sites = mPowerDiagram->GetSites();
+
             for (int i = 0; i < sites.size(); i++)
             {
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
@@ -306,9 +315,12 @@ namespace HDV::Sampler
                             auto micJ = polyJ->ComputeMICByStraightSkeleton();
 
                             auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
-                            if ((disIJ < ((micI.z + micJ.z) / 2.f)) &&
-                                !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetId()) &&
-                                !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetId()))
+                            // if ((disIJ < ((micI.z + micJ.z) / 2.f)) &&
+                            //     !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetId()) &&
+                            //     !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetId()))
+                            //     removeVoroIdxs.emplace_back(siteJ->GetId());
+
+                            if ((disIJ < ((micI.z + micJ.z) / 2.f)))
                                 removeVoroIdxs.emplace_back(siteJ->GetId());
                         }
                         else
@@ -405,6 +417,7 @@ namespace HDV::Sampler
             mWeightError.assign(site.size(), 0.0);
             mWeightAbsError.assign(site.size(), 0.0);
 
+#pragma omp parallel for
             for (int i = 0; i < site.size(); i++)
             {
                 if (site[i]->GetIsBoundaryVertex())
@@ -462,6 +475,8 @@ namespace HDV::Sampler
             auto gammaBC = 1.0;
 
             auto sites = mPowerDiagram->GetSites();
+
+#pragma omp parallel for
             for (int i = 0; i < sites.size(); i++)
             {
 

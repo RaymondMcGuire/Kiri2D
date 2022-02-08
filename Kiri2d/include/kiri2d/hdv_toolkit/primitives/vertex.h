@@ -37,7 +37,6 @@ namespace HDV::Primitives
 
         std::string GetString()
         {
-
             auto dim = GetDimension();
             std::string data = "";
             for (auto i = 0; i < dim; i++)
