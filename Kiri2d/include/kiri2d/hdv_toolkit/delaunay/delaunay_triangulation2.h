@@ -39,7 +39,7 @@ namespace HDV::Delaunay
 
             auto count = input.size();
 
-#pragma omp parallel for
+//#pragma omp parallel for
             for (auto i = 0; i < count; i++)
             {
                 auto v = input[i]->GetPosition();
@@ -53,7 +53,7 @@ namespace HDV::Delaunay
             Hull->SetForPowerDiagram(true);
             Hull->Generate(input, assignIds, checkInput);
 
-#pragma omp parallel for
+//#pragma omp parallel for
             for (auto i = 0; i < count; i++)
             {
                 auto v = input[i]->GetPosition();

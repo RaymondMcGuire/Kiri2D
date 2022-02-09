@@ -55,6 +55,19 @@ namespace HDV::Voronoi
 
         void Compute()
         {
+
+            // for (auto i = 0; i < mSites.size(); i++)
+            // {
+            //     if (mSites[i]->GetIsBoundaryVertex())
+            //         continue;
+
+            //     auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
+
+            //     auto centroid = site->CellPolygon->GetCentroid();
+            //     if (mMesh->mBoundaryPolygon->Contains(centroid))
+            //         site->Set(centroid.x, centroid.y);
+            // }
+
             mMesh->Generate(mSites, mAssignIds, mCheckInput);
         }
 
@@ -76,25 +89,28 @@ namespace HDV::Voronoi
 
         void Move2Centroid()
         {
-
-#pragma omp parallel for
+//#pragma omp parallel for
             for (auto i = 0; i < mSites.size(); i++)
             {
-                auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
-                if (site->GetIsBoundaryVertex())
+                if (mSites[i]->GetIsBoundaryVertex())
                     continue;
 
-                auto centroid = site->CellPolygon->GetCentroid();
-                if (mMesh->mBoundaryPolygon->Contains(centroid))
-                    site->Set(centroid.x, centroid.y);
+                auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
+
+                if (site->CellPolygon)
+                {
+                    auto centroid = site->CellPolygon->GetCentroid();
+                    if (mMesh->mBoundaryPolygon->Contains(centroid))
+                        site->Set(centroid.x, centroid.y);
+                }
             }
         }
 
         void LloydIteration()
         {
             Reset();
-            Move2Centroid();
             Compute();
+            Move2Centroid();
         }
 
         VoronoiMesh2Ptr mMesh;
@@ -109,8 +125,12 @@ namespace HDV::Voronoi
         {
             for (auto i = 0; i < mSites.size(); i++)
             {
+                if (mSites[i]->GetIsBoundaryVertex())
+                    continue;
+
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
                 site->Reset();
+                site->CellPolygon = nullptr;
             }
         }
     };
@@ -255,8 +275,8 @@ namespace HDV::Voronoi
         void LloydIteration()
         {
             // Reset();
-            Move2Centroid();
             Compute();
+            Move2Centroid();
         }
 
         void ExportObj()

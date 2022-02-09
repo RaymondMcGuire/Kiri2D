@@ -58,7 +58,7 @@ namespace HDV::Voronoi
 
             delaunay->Generate(input, assignIds, checkInput);
 
-#pragma omp parallel for
+            // #pragma omp parallel for
             for (auto i = 0; i < delaunay->Vertices.size(); i++)
             {
                 delaunay->Vertices[i]->SetTag(i);
@@ -190,7 +190,7 @@ namespace HDV::Voronoi
         void Region2Polygon() override
         {
 
-#pragma omp parallel for
+            // #pragma omp parallel for
             for (auto i = 0; i < Regions.size(); i++)
             {
                 std::vector<VERTEXPTR> Positions;
@@ -270,7 +270,19 @@ namespace HDV::Voronoi
                                 cell_polygon = clipedPolygon;
                             }
                         }
+                        else
+                        {
+                            cell_polygon = nullptr;
+                        }
                     }
+                    else
+                    {
+                        cell_polygon = nullptr;
+                    }
+                }
+                else
+                {
+                    cell_polygon = nullptr;
                 }
 
                 auto site = std::dynamic_pointer_cast<VoronoiSite2>(Regions[i]->site);

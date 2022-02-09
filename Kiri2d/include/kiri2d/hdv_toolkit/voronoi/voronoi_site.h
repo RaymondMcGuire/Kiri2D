@@ -1,9 +1,10 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2021-12-29 15:00:06
+ * @Date: 2021-12-30 11:28:04
+ * @LastEditTime: 2022-02-09 12:48:22
  * @LastEditors: Xu.WANG
  * @Description:
+ * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\hdv_toolkit\voronoi\voronoi_site.h
  */
 
 #ifndef _HDV_VORONOI_SITE_H_
@@ -30,6 +31,20 @@ namespace HDV::Voronoi
         std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> CellPolygon;
     };
     typedef std::shared_ptr<VoronoiSite2> VoronoiSite2Ptr;
+
+    class CapacityVoronoiSite2 : public VoronoiSite2
+    {
+    public:
+        explicit CapacityVoronoiSite2() : VoronoiSite2() {}
+        explicit CapacityVoronoiSite2(int id) : VoronoiSite2(id) {}
+        explicit CapacityVoronoiSite2(double x, double y) : VoronoiSite2(x, y) {}
+        explicit CapacityVoronoiSite2(double x, double y, int id) : VoronoiSite2(x, y, id) {}
+
+        virtual ~CapacityVoronoiSite2() noexcept {}
+
+        double capacity = 0.0;
+    };
+    typedef std::shared_ptr<CapacityVoronoiSite2> CapacityVoronoiSite2Ptr;
 
     class VoronoiSite3 : public HDV::Primitives::Vertex3
     {
