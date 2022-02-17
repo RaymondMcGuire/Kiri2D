@@ -7,7 +7,7 @@
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
  */
 
-#ifdef KIRI_WINDOWS
+#if defined (KIRI_WINDOWS) && defined (ENABLE_CUDA)  
 
 #include <kiri_utils.h>
 #include <kiri2d/renderer/renderer.h>

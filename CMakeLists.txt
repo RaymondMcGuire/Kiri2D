@@ -1,18 +1,23 @@
 # CMake Version
 cmake_minimum_required(VERSION 3.18.0)
 
+set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
+message(STATUS "ENABLE_CUDA: ${ENABLE_CUDA}")
+
 # Project Name
-if(WIN32)
+if(WIN32 AND ${ENABLE_CUDA})
 project(kiri2d LANGUAGES C CXX CUDA)
 else()
 project(kiri2d LANGUAGES C CXX)
+if(APPLE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 endif()
+endif()
 
 # Get CUDA INFO
-if(NOT APPLE)
+if(NOT APPLE AND ${ENABLE_CUDA})
 find_package(CUDA)
 if (CUDA_FOUND)
   set(CUDA_ARCH_DYNAMIC "FALSE")
@@ -61,6 +66,6 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 add_subdirectory(Kiri2d)
 add_subdirectory(Kiri2dExamples)
 
-if(NOT APPLE)
+if(NOT APPLE AND ${ENABLE_CUDA})
 add_subdirectory(kiri2dPBSCuda)
 endif()

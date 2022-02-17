@@ -1,6 +1,9 @@
 # Project Name
 set(PROJECT_NAME kiri2d_examples)
 
+set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
+message(STATUS "Kiri2dExample ENABLE_CUDA: ${ENABLE_CUDA}")
+
 # Find Extra Library Package
 set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/KiriExtlib/include)
 set(EXTLIBS_LIB ${CMAKE_SOURCE_DIR}/KiriExtlib/lib)
@@ -63,8 +66,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${PBS2D_CUDA_INCLUDE}
 )
 
-if(WIN32)
+if(WIN32 AND ${ENABLE_CUDA})
 target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio kiri2d kiri2d_pbs_cuda)
+elseif(WIN32)
+target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio kiri2d)
 elseif(APPLE)
 target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui kiri2d)
 endif()

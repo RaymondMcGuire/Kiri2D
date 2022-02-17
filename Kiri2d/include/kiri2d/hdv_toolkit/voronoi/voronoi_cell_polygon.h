@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include<kiri2d/straight_skeleton/sskel_slav.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_cell.h>
 #include <Mathematics/DistPointTriangle.h>
 namespace HDV::Voronoi
