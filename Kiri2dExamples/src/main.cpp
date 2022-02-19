@@ -9,7 +9,6 @@
 using namespace KIRI;
 using namespace KIRI2D;
 
-
 String UInt2Str4Digit(UInt Input)
 {
     char output[5];
@@ -116,10 +115,64 @@ void QuickHullVoronoi2d()
     }
 }
 
+#include <kiri2d/sph/sph_solver.h>
+void Sph2dExample()
+{
+    // sph config
+    const float particleScale = 350.f;
+    const float timeStep = 0.0001f;
+    const Vector2F worldSize = Vector2F(3.f, 2.f);
+    const float radius = 1.f / 140.f;
+    const Vector2F boxVolumeSize = Vector2F(35.f, 70.f);
+
+    // scene renderer config
+    float windowheight = 720.f;
+    float windowwidth = 1280.f;
+
+    Vector2F offset = (Vector2F(windowwidth, windowheight) - worldSize * particleScale) / 2.f;
+
+    SPH::SPHSolver sphSolver = SPH::SPHSolver(worldSize);
+
+    sphSolver.initWithBoxVolume(boxVolumeSize, radius);
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    // draw boundary
+    auto boundaryRect = KiriRect2(offset - Vector2F(radius) * 2.f * particleScale, (worldSize + 4.f * Vector2F(radius)) * particleScale);
+
+    while (1)
+    {
+        // KIRI_LOG_DEBUG("-----------------new----------------------------------");
+
+        std::vector<KiriPoint2> points;
+        sphSolver.update(timeStep);
+        auto particles = sphSolver.GetParticles();
+        for (auto i = 0; i < particles.size(); i++)
+        {
+            auto particle = particles[i];
+            auto p = KiriPoint2(particle.position * particleScale + offset, Vector3F(1.f, 0.f, 0.f));
+            p.radius = particleScale * radius;
+            points.emplace_back(p);
+        }
+
+        scene->AddRect(boundaryRect);
+        scene->AddParticles(points);
+
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D::SPH2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
 void main()
 {
     KIRI::KiriLog::Init();
 
     QuickHullVoronoi2d();
 
+    // Sph2dExample();
 }
