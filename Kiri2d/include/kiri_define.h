@@ -1,9 +1,16 @@
-/*** 
+/***
+ * @Author: Xu.WANG
+ * @Date: 2022-02-19 10:59:26
+ * @LastEditTime: 2022-02-20 19:48:02
+ * @LastEditors: Xu.WANG
+ * @Description:
+ */
+/***
  * @Author: Xu.WANG
  * @Date: 2020-10-18 01:04:15
  * @LastEditTime: 2021-02-20 19:41:33
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \KiriCore\include\kiri_define.h
  */
 
@@ -13,7 +20,7 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 #define KIRI_WINDOWS
-//#define ENABLE_CUDA
+#define ENABLE_CUDA 1
 #elif defined(__APPLE__)
 #define KIRI_APPLE
 #endif

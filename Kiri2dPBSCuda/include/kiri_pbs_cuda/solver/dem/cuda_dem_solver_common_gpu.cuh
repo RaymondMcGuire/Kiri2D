@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-19 20:47:03
+ * @LastEditTime: 2022-02-20 20:55:12
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath:
@@ -180,6 +180,7 @@ static __device__ void ComputeDemWorldBoundaryForces(
   if (i >= num)
     return;
 
+  // FIXME
   float rij = boundaryRadius + radiusi;
   float ri2 = radiusi + radiusi;
   float kn = young * radiusi;
@@ -191,25 +192,25 @@ static __device__ void ComputeDemWorldBoundaryForces(
   if (posi.x > highestPoint.x - rij) {
     N = make_float2(-1.f, 0.f);
     diff = abs(posi.x - highestPoint.x);
-    ComputeDemForces(f, N * diff, veli, ri2, kn, ks, tanFrictionAngle, dt);
+    ComputeDemForces(f, N * diff, veli, rij, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.x < lowestPoint.x + rij) {
     N = make_float2(1.f, 0.f);
     diff = abs(posi.x - lowestPoint.x);
-    ComputeDemForces(f, N * diff, veli, ri2, kn, ks, tanFrictionAngle, dt);
+    ComputeDemForces(f, N * diff, veli, rij, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.y > highestPoint.y - rij) {
     N = make_float2(0.f, -1.f);
     diff = abs(posi.y - highestPoint.y);
-    ComputeDemForces(f, N * diff, veli, ri2, kn, ks, tanFrictionAngle, dt);
+    ComputeDemForces(f, N * diff, veli, rij, kn, ks, tanFrictionAngle, dt);
   }
 
   if (posi.y < lowestPoint.y + rij) {
     N = make_float2(0.f, 1.f);
     diff = abs(posi.y - lowestPoint.y);
-    ComputeDemForces(f, N * diff, veli, ri2, kn, ks, tanFrictionAngle, dt);
+    ComputeDemForces(f, N * diff, veli, rij, kn, ks, tanFrictionAngle, dt);
   }
 
   return;
