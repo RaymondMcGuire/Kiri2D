@@ -7,8 +7,6 @@
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
  */
 
-#if defined (KIRI_WINDOWS) && defined (ENABLE_CUDA)  
-
 #include <kiri_utils.h>
 #include <kiri2d/renderer/renderer.h>
 
@@ -79,13 +77,13 @@ std::vector<NSPack> LoadCSVFile2NSPack(const String fileName)
 }
 
 // scene config
-// float windowheight = 1080.f;
-// float windowwidth = 800.f;
-// auto world_size = make_float2(1.5f, 1.5f);
-
 float windowheight = 1080.f;
-float windowwidth = 1920.f;
-auto world_size = make_float2(900, 800);
+float windowwidth = 800.f;
+auto world_size = make_float2(1.5f, 1.5f);
+
+// float windowheight = 1080;
+// float windowwidth = 1920;
+// auto world_size = make_float2(900, 800);
 
 auto particle_scale = 500.f;
 
@@ -213,26 +211,26 @@ void DEM_SetupParams()
     auto volumeEmitter = std::make_shared<CudaVolumeEmitter>();
 
     // volume sampling
-    // DemVolumeData volumeData;
-    // int2 vbox = make_int2(20, 20);
-    // volumeEmitter->BuildUniDemVolume(
-    //     volumeData,
-    //     CUDA_BOUNDARY_PARAMS.world_center - make_float2(vbox.x * CUDA_DEM_PARAMS.particle_radius, vbox.y * CUDA_DEM_PARAMS.particle_radius),
-    //     vbox,
-    //     CUDA_DEM_PARAMS.particle_radius,
-    //     make_float3(0.88f, 0.79552f, 0.5984f),
-    //     CUDA_DEM_PARAMS.rest_mass,
-    //     0.001f * CUDA_DEM_PARAMS.particle_radius);
-
-    DemShapeVolumeData volumeData;
-    auto shape = LoadCSVFile2ShapeSamplers("uni_bunny_samplers_0000.csv");
-    volumeEmitter->BuildDemUniShapeVolume(
+    DemVolumeData volumeData;
+    int2 vbox = make_int2(20, 20);
+    volumeEmitter->BuildUniDemVolume(
         volumeData,
-        shape,
+        CUDA_BOUNDARY_PARAMS.world_center - make_float2(vbox.x * CUDA_DEM_PARAMS.particle_radius, vbox.y * CUDA_DEM_PARAMS.particle_radius),
+        vbox,
+        CUDA_DEM_PARAMS.particle_radius,
         make_float3(0.88f, 0.79552f, 0.5984f),
         CUDA_DEM_PARAMS.rest_mass,
-        make_float2(0.25f, 0.f));
-    CUDA_DEM_APP_PARAMS.max_num = volumeData.pos.size();
+        0.001f * CUDA_DEM_PARAMS.particle_radius);
+
+    // DemShapeVolumeData volumeData;
+    // auto shape = LoadCSVFile2ShapeSamplers("uni_bunny_samplers_0000.csv");
+    // volumeEmitter->BuildDemUniShapeVolume(
+    //     volumeData,
+    //     shape,
+    //     make_float3(0.88f, 0.79552f, 0.5984f),
+    //     CUDA_DEM_PARAMS.rest_mass,
+    //     make_float2(0.25f, 0.f));
+    // CUDA_DEM_APP_PARAMS.max_num = volumeData.pos.size();
 
     // spatial searcher & particles
     CudaDemParticlesPtr particles =
@@ -315,13 +313,15 @@ void MRDEM_SetupParams()
     // volume sampling
     auto volumeEmitter = std::make_shared<CudaVolumeEmitter>();
     DemShapeVolumeData volumeData;
-    auto shape = LoadCSVFile2ShapeSamplers("bunny_samplers_7001.csv");
+    // auto shape = LoadCSVFile2ShapeSamplers("bunny_samplers_7001.csv");
+    auto shape = LoadCSVFile2ShapeSamplers("jiang2015.csv");
     volumeEmitter->BuildMRDemShapeVolume(
         volumeData,
         CUDA_DEM_PARAMS.rest_density,
         shape,
         make_float3(0.88f, 0.79552f, 0.5984f),
-        make_float2(-0.1f, -0.1f));
+        make_float2(0.2f, 0.2f));
+    // make_float2(-0.1f, -0.1f));
 
     KIRI_LOG_DEBUG("max radius={0}, min radius={1}", volumeData.maxRadius, volumeData.minRadius);
     CUDA_BOUNDARY_PARAMS.min_radius = volumeData.minRadius;
@@ -726,22 +726,20 @@ void UpdateNSSystemRealTime()
     UpdateScene(circles);
 }
 
-void main1()
+void main()
 {
     KiriLog::Init();
 
     CUDA_DEM_APP_PARAMS.run = true;
 
     // DEM_SetupParams();
-    // MRDEM_SetupParams();
-    // while (CUDA_DEM_APP_PARAMS.run)
-    //     Update();
-
-    NSDEM_SetupParams();
+    MRDEM_SetupParams();
     while (CUDA_DEM_APP_PARAMS.run)
-        UpdateNSSystemRealTime();
+        Update();
+
+    // NSDEM_SetupParams();
+    // while (CUDA_DEM_APP_PARAMS.run)
+    //     UpdateNSSystemRealTime();
 
     return;
 }
-
-#endif

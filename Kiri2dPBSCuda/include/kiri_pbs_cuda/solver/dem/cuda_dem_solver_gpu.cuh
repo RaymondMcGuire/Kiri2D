@@ -1,10 +1,11 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-19 16:34:29
+ * @LastEditTime: 2022-02-20 20:29:47
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_gpu.cuh
+ * @FilePath:
+ * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_gpu.cuh
  */
 
@@ -61,12 +62,11 @@ static __device__ void ComputeUniRadiusDemCapillaryForces(
 template <typename Pos2GridXY, typename GridXY2GridHash, typename AttenuFunc>
 __global__ void ComputeDemLinearMomentum_CUDA(
     float2 *pos, float2 *vel, float2 *acc, float *mass, const float radius,
-    const float boundaryRadius,
-    const float young, const float poisson, const float tanFrictionAngle,
-    const float sr, const size_t num, const float2 lowestPoint,
-    const float2 highestPoint, const float dt, size_t *cellStart,
-    const int2 gridSize, Pos2GridXY p2xy, GridXY2GridHash xy2hash,
-    AttenuFunc G) {
+    const float boundaryRadius, const float young, const float poisson,
+    const float tanFrictionAngle, const float sr, const size_t num,
+    const float2 lowestPoint, const float2 highestPoint, const float dt,
+    size_t *cellStart, const int2 gridSize, Pos2GridXY p2xy,
+    GridXY2GridHash xy2hash, AttenuFunc G) {
   const size_t i = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
   if (i >= num)
     return;
@@ -89,9 +89,9 @@ __global__ void ComputeDemLinearMomentum_CUDA(
                                        cellStart[hash_idx + 1], G);
   }
 
-  ComputeDemWorldBoundaryForces(&f, pos[i], -vel[i], radius, boundaryRadius, young,
-                                poisson, tanFrictionAngle, num, lowestPoint,
-                                highestPoint, dt);
+  ComputeDemWorldBoundaryForces(&f, pos[i], vel[i], radius, boundaryRadius,
+                                young, poisson, tanFrictionAngle, num,
+                                lowestPoint, highestPoint, dt);
 
   acc[i] += 2.f * f / mass[i];
   return;
