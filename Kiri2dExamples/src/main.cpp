@@ -168,11 +168,134 @@ void Sph2dExample()
     }
 }
 
+#include <kiri2d/sph/blue_noise_sph_solver.h>
+void BlueNoiseSampling()
+{
+    auto load_polygon2d = [](std::vector<Vector2F> &points, size_t &num, const char *filePath)
+    {
+        std::ifstream file(filePath);
+        file >> num;
+        for (int i = 0; i < num; ++i)
+        {
+            Vector2F xy;
+            file >> xy.x >> xy.y;
+            points.emplace_back(xy);
+        }
+
+        file.close();
+    };
+
+    // scene renderer config
+    float windowheight = 720.f;
+    float windowwidth = 1280.f;
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
+    using namespace HDV;
+    // 2d boundary polygon
+    auto scaleSize = 600.f;
+
+    // load 2d boundary file
+    String boundaryFileName = "bunny";
+    String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
+    std::vector<Vector2F> boundary2d_data;
+
+    size_t bunnyNum;
+    load_polygon2d(boundary2d_data, bunnyNum, filePath.c_str());
+
+    KiriSDFPoly2D boundary_sdf;
+    BoundingBox2F boundary_bbox;
+
+    for (auto i = 0; i < boundary2d_data.size(); i++)
+    {
+        auto newPos = Vector2F(boundary2d_data[i].x, boundary2d_data[i].y);
+        boundary_sdf.Append(newPos);
+        boundary_bbox.merge(newPos);
+    }
+
+    // sdf sampling points
+    std::vector<Vector2F> sdf_points;
+    auto radius = 1.f / 140.f;
+    auto lower = boundary_bbox.LowestPoint;
+    auto higher = boundary_bbox.HighestPoint;
+    auto wn = UInt(((higher - lower) / (radius * 2.f)).x);
+    auto hn = UInt(((higher - lower) / (radius * 2.f)).y);
+    for (auto i = 0; i <= wn; i++)
+    {
+        for (auto j = 0; j < hn; j++)
+        {
+            auto pos = lower + Vector2F(radius, radius) + Vector2F(i, j) * (radius * 2.f);
+
+            if (boundary_sdf.FindRegion(pos) <= 0.f)
+                sdf_points.emplace_back(pos);
+        }
+    }
+
+    // std::cout << boundary_bbox.LowestPoint.x << "," << boundary_bbox.LowestPoint.y << ";" << boundary_bbox.HighestPoint.x << "," << boundary_bbox.HighestPoint.y << std::endl;
+
+    // blue noise sampling
+    // TODO worldsize
+    const float timeStep = 0.00001f;
+    auto worldSize = boundary_bbox.LowestPoint + boundary_bbox.HighestPoint;
+    SPH::BlueNoiseSPHSolver blueNoiseSolver = SPH::BlueNoiseSPHSolver(worldSize, boundary_sdf);
+    blueNoiseSolver.init(sdf_points, radius);
+
+    // visualization
+    Vector2F offset = (Vector2F(windowwidth, windowheight) - (boundary_bbox.width(), boundary_bbox.height()) * scaleSize) / 2.f;
+
+    KiriSDFPoly2D boundary_vis;
+    boundary_bbox.reset();
+    for (auto i = 0; i < boundary2d_data.size(); i++)
+    {
+        auto newPos = Vector2F(boundary2d_data[i].x, boundary2d_data[i].y) * scaleSize + offset;
+        boundary_vis.Append(newPos);
+        boundary_bbox.merge(newPos);
+    }
+
+    std::vector<KiriCircle2> circles;
+    for (auto i = 0; i < sdf_points.size(); i++)
+        circles.emplace_back(KiriCircle2(sdf_points[i] * scaleSize + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, radius * scaleSize));
+
+    // draw boundary
+    auto boundaryRect = KiriRect2(offset - Vector2F(radius) * 2.f * scaleSize, (worldSize + 4.f * Vector2F(radius)) * scaleSize);
+
+    while (1)
+    {
+
+        std::vector<KiriPoint2> points;
+        blueNoiseSolver.update(timeStep);
+        auto particles = blueNoiseSolver.GetParticles();
+        for (auto i = 0; i < particles.size(); i++)
+        {
+            auto particle = particles[i];
+            auto p = KiriPoint2(particle.position * scaleSize + offset, Vector3F(1.f, 0.f, 0.f));
+            p.radius = scaleSize * radius;
+            points.emplace_back(p);
+        }
+
+        scene->AddRect(boundaryRect);
+        scene->AddParticles(points);
+
+        // scene->AddCircles(circles);
+        //  scene->AddObject(boundary_vis);
+
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D::Blue Noise Sampling", renderer->GetCanvas());
+        cv::waitKey(5);
+        renderer->ClearCanvas();
+        scene->Clear();
+    }
+}
+
 void main()
 {
     KIRI::KiriLog::Init();
 
-    QuickHullVoronoi2d();
+    // QuickHullVoronoi2d();
 
     // Sph2dExample();
+
+    BlueNoiseSampling();
 }

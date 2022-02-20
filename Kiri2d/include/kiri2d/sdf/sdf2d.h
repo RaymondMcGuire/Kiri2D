@@ -1,10 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
- * @Date: 2021-02-22 14:40:10
- * @LastEditTime: 2021-09-21 17:57:56
+ * @Date: 2021-09-26 16:12:57
+ * @LastEditTime: 2022-02-20 13:27:25
  * @LastEditors: Xu.WANG
- * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\sdf\sdf2d.h
+ * @Description:
  */
 
 #ifndef _KIRI2D_SDF2D_H_
@@ -61,6 +60,20 @@ namespace KIRI2D
 
         void SetOffset(const Vector2F &offset) { mOffset = offset; }
         Vector2F GetOffset() { return mOffset; }
+
+        void Clear()
+        {
+            mBBoxMin = Vector2F(Huge<float>());
+            mBBoxMax = Vector2F(Tiny<float>());
+
+            mOffset = Vector2F(0.f);
+            mName = "sdf_poly2d",
+            mColor = Vector3F(0.f),
+            bMoveable = false,
+
+            mPoints.clear();
+            mVelocities.clear();
+        }
 
     protected:
         String mName;
