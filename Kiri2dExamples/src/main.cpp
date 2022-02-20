@@ -217,15 +217,16 @@ void BlueNoiseSampling()
     // sdf sampling points
     std::vector<Vector2F> sdf_points;
     auto radius = 1.f / 140.f;
+    auto density_radius = 0.95f * radius;
     auto lower = boundary_bbox.LowestPoint;
     auto higher = boundary_bbox.HighestPoint;
-    auto wn = UInt(((higher - lower) / (radius * 2.f)).x);
-    auto hn = UInt(((higher - lower) / (radius * 2.f)).y);
+    auto wn = UInt(((higher - lower) / (density_radius * 2.f)).x);
+    auto hn = UInt(((higher - lower) / (density_radius * 2.f)).y);
     for (auto i = 0; i <= wn; i++)
     {
         for (auto j = 0; j < hn; j++)
         {
-            auto pos = lower + Vector2F(radius, radius) + Vector2F(i, j) * (radius * 2.f);
+            auto pos = lower + Vector2F(density_radius, density_radius) + Vector2F(i, j) * (density_radius * 2.f);
 
             if (boundary_sdf.FindRegion(pos) <= 0.f)
                 sdf_points.emplace_back(pos);
@@ -236,7 +237,7 @@ void BlueNoiseSampling()
 
     // blue noise sampling
     // TODO worldsize
-    const float timeStep = 0.00001f;
+    const float timeStep = 0.00005f;
     auto worldSize = boundary_bbox.LowestPoint + boundary_bbox.HighestPoint;
     SPH::BlueNoiseSPHSolver blueNoiseSolver = SPH::BlueNoiseSPHSolver(worldSize, boundary_sdf);
     blueNoiseSolver.init(sdf_points, radius);
@@ -281,7 +282,7 @@ void BlueNoiseSampling()
         //  scene->AddObject(boundary_vis);
 
         renderer->DrawCanvas();
-        // renderer->SaveImages2File();
+        renderer->SaveImages2File();
         cv::imshow("KIRI2D::Blue Noise Sampling", renderer->GetCanvas());
         cv::waitKey(5);
         renderer->ClearCanvas();
