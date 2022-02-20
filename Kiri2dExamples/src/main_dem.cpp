@@ -7,6 +7,8 @@
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
  */
 
+#if defined (KIRI_WINDOWS) && defined (ENABLE_CUDA)  
+
 #include <kiri_utils.h>
 #include <kiri2d/renderer/renderer.h>
 
@@ -726,7 +728,7 @@ void UpdateNSSystemRealTime()
     UpdateScene(circles);
 }
 
-void main()
+void main_dem()
 {
     KiriLog::Init();
 
@@ -743,3 +745,5 @@ void main()
 
     return;
 }
+
+#endif

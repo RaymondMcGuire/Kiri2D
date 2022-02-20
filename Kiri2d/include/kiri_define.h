@@ -20,7 +20,7 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 #define KIRI_WINDOWS
-#define ENABLE_CUDA 1
+//#define ENABLE_CUDA
 #elif defined(__APPLE__)
 #define KIRI_APPLE
 #endif
