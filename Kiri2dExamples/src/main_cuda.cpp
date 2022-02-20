@@ -9,7 +9,6 @@
 
 #if defined (KIRI_WINDOWS) && defined (ENABLE_CUDA)  
 
-
 #include <kiri2d/voronoi/voro_treemap_nocaj12.h>
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>

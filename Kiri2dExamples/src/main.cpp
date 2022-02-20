@@ -1,4 +1,3 @@
-
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>
 #include <root_directory.h>
