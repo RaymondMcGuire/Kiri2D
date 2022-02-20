@@ -169,7 +169,7 @@ void Sph2dExample()
 }
 
 #include <kiri2d/sph/blue_noise_sph_solver.h>
-void BlueNoiseSampling()
+void BlueNoiseSamplingVisual()
 {
     auto load_polygon2d = [](std::vector<Vector2F> &points, size_t &num, const char *filePath)
     {
@@ -288,6 +288,103 @@ void BlueNoiseSampling()
         renderer->ClearCanvas();
         scene->Clear();
     }
+}
+
+void BlueNoiseSampling()
+{
+    auto load_polygon2d = [](std::vector<Vector2F> &points, size_t &num, const char *filePath)
+    {
+        std::ifstream file(filePath);
+        file >> num;
+        for (int i = 0; i < num; ++i)
+        {
+            Vector2F xy;
+            file >> xy.x >> xy.y;
+            points.emplace_back(xy);
+        }
+
+        file.close();
+    };
+
+    auto export_sampling_data=[](const String fileName, const std::vector<Vector2F> &center, const std::vector<float> &radius)
+    {
+        String filePath = String(EXPORT_PATH) + "csv/" + fileName;
+        std::fstream file;
+        file.open(filePath.c_str(), std::ios_base::out);
+        file << "cx,cy,rad"
+            << std::endl;
+        for (int i = 0; i < center.size(); i++)
+            file << center[i].x << "," << center[i].y << "," << radius[i] << std::endl;
+
+        file.close();
+    };
+
+    // load 2d boundary file
+    String boundaryFileName = "bunny";
+    String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
+    std::vector<Vector2F> boundary2d_data;
+
+    size_t bunnyNum;
+    load_polygon2d(boundary2d_data, bunnyNum, filePath.c_str());
+
+    KiriSDFPoly2D boundary_sdf;
+    BoundingBox2F boundary_bbox;
+
+    for (auto i = 0; i < boundary2d_data.size(); i++)
+    {
+        auto newPos = Vector2F(boundary2d_data[i].x, boundary2d_data[i].y);
+        boundary_sdf.Append(newPos);
+        boundary_bbox.merge(newPos);
+    }
+
+    // sdf sampling points
+    std::vector<Vector2F> position;
+    std::vector<float> rad;
+
+    auto radius = 1.f / 140.f;
+    auto density_radius = 0.95f * radius;
+    auto lower = boundary_bbox.LowestPoint;
+    auto higher = boundary_bbox.HighestPoint;
+    auto wn = UInt(((higher - lower) / (density_radius * 2.f)).x);
+    auto hn = UInt(((higher - lower) / (density_radius * 2.f)).y);
+    for (auto i = 0; i <= wn; i++)
+    {
+        for (auto j = 0; j < hn; j++)
+        {
+            auto pos = lower + Vector2F(density_radius, density_radius) + Vector2F(i, j) * (density_radius * 2.f);
+
+            if (boundary_sdf.FindRegion(pos) <= 0.f)
+                position.emplace_back(pos);
+        }
+    }
+
+    // std::cout << boundary_bbox.LowestPoint.x << "," << boundary_bbox.LowestPoint.y << ";" << boundary_bbox.HighestPoint.x << "," << boundary_bbox.HighestPoint.y << std::endl;
+
+    // blue noise sampling
+    // TODO worldsize
+    const float timeStep = 0.00005f;
+    auto worldSize = boundary_bbox.LowestPoint + boundary_bbox.HighestPoint;
+    SPH::BlueNoiseSPHSolver blueNoiseSolver = SPH::BlueNoiseSPHSolver(worldSize, boundary_sdf);
+    blueNoiseSolver.init(position, radius);
+
+    for (auto i = 0; i < 1000; i++)
+    {
+        blueNoiseSolver.update(timeStep);
+        std::cout << "step num=" << i << std::endl;
+    }
+        
+
+    auto particles = blueNoiseSolver.GetParticles();
+    position.clear();
+    for (auto i = 0; i < particles.size(); i++)
+    {
+        auto particle = particles[i];
+        position.emplace_back(particle.position);
+        rad.emplace_back(radius);
+    }
+
+    export_sampling_data("jiang2015.csv", position,rad);
+
 }
 
 void main()
