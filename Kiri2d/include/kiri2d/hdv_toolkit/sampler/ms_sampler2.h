@@ -93,7 +93,7 @@ namespace HDV::Sampler
             return false;
         }
 
-        void Compute()
+        float Compute()
         {
             mCurIteration++;
 
@@ -126,6 +126,8 @@ namespace HDV::Sampler
             mGlobalErrorArray.emplace_back(mCurGlobalWeightError);
 
             KIRI_LOG_DEBUG("porosity={0}; error={1}", mCurGlobalPorosity, mCurGlobalWeightError);
+
+            return mCurGlobalPorosity;
         }
 
         void Reset()
