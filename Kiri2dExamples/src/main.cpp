@@ -135,7 +135,28 @@ void MSSampler2D()
         file.close();
     };
 
+    auto ComputeRMSPE= [](const Vec_Double &predict, const Vec_Double &real)
+    {
+        auto sum = 0.0;
+        auto n = predict.size();
+        for (size_t i = 0; i < n; i++)
+            sum += std::pow((predict[i] - real[i]) / real[i], 2.0);
+
+        return std::sqrt(sum / n);
+    };
+
     auto boundary_name_list = std::vector<String>{"bunny","alligator","beast","cheburashka","cow","homer","horse","lucy","nefertiti","spot","teapot","woody","xyzrgb_dragon"};
+
+    // scene renderer config
+    float windowheight = 4000.f;
+    float windowwidth = 4000.f;
+
+    // Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
+    Vector2F offset = Vector2F(500.f);
+
+    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+
 
     for(auto bidx = 0; bidx<boundary_name_list.size();bidx++)
     {
@@ -225,15 +246,6 @@ void MSSampler2D()
 
         multiSizeSampler->SetMaxiumNum(static_cast<int>(total_num * 1.5));
 
-        // scene renderer config
-        float windowheight = 4000.f;
-        float windowwidth = 4000.f;
-
-        // Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
-        Vector2F offset = Vector2F(500.f);
-
-        auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-        auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
         multiSizeSampler->Init();
 
@@ -245,77 +257,81 @@ void MSSampler2D()
         for (size_t idx = 0; idx < 3000; idx++)
         {
             auto porosity = multiSizeSampler->Compute();
-            // KIRI_LOG_DEBUG("-----------------new----------------------------------");
 
-            std::vector<KiriLine2> precompute_lines;
-            std::vector<Vector2F> precompute_points;
-
-            auto sites = multiSizeSampler->GetSites();
-
-            for (size_t i = 0; i < sites.size(); i++)
-            {
-                auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-                if (site->GetIsBoundaryVertex())
-                    continue;
-
-                auto cellpolygon = site->CellPolygon;
-                if (cellpolygon)
-                {
-                    for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
-                    {
-                        auto vert = cellpolygon->Positions[j];
-                        auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
-                        auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
-                        line.thick = 1.f;
-                        precompute_lines.emplace_back(line);
-
-                        // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
-                    }
-                }
-
-                // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Positions.size());
-                precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
-
-                // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
-            }
-
-            std::vector<KiriLine2> lines;
-            std::vector<KiriPoint2> points;
-            std::vector<KiriCircle2> circles;
-            for (size_t i = 0; i < precompute_points.size(); i++)
-            {
-                points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
-            }
-
-            for (auto i = 0; i < precompute_lines.size(); ++i)
-            {
-                lines.emplace_back(precompute_lines[i]);
-            }
-
-            auto maxIC = multiSizeSampler->GetMICBySSkel();
-            lastMaxCircle = maxIC;
-
-            for (size_t i = 0; i < maxIC.size(); i++)
-            {
-                // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
-                auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y) + offset, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
-
-                circles.emplace_back(maxCir2);
-
-                minRadius = std::min(minRadius, maxIC[i].z);
-                maxRadius = std::max(maxRadius, maxIC[i].z);
-            }
-
-            // re-color
-            for (size_t i = 0; i < maxIC.size(); i++)
-            {
-                auto rad = (maxIC[i].z - minRadius) / (maxRadius - minRadius);
-                const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
-                circles[i].col = Vector3F(color.r(), color.g(), color.b());
-            }
 
             if (idx == 2999)
             {
+                      std::vector<KiriLine2> precompute_lines;
+                    std::vector<Vector2F> precompute_points;
+
+                    auto sites = multiSizeSampler->GetSites();
+
+                    for (size_t i = 0; i < sites.size(); i++)
+                    {
+                        auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
+                        if (site->GetIsBoundaryVertex())
+                            continue;
+
+                        auto cellpolygon = site->CellPolygon;
+                        if (cellpolygon)
+                        {
+                            for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+                            {
+                                auto vert = cellpolygon->Positions[j];
+                                auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
+                                auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
+                                line.thick = 1.f;
+                                precompute_lines.emplace_back(line);
+
+                                // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
+                            }
+                        }
+
+                        // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Positions.size());
+                        precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+
+                        // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+                    }
+
+                    std::vector<KiriLine2> lines;
+                    std::vector<KiriPoint2> points;
+                    std::vector<KiriCircle2> circles;
+                    for (size_t i = 0; i < precompute_points.size(); i++)
+                    {
+                        points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
+                    }
+
+                    for (auto i = 0; i < precompute_lines.size(); ++i)
+                    {
+                        lines.emplace_back(precompute_lines[i]);
+                    }
+
+                    auto maxIC = multiSizeSampler->GetMICBySSkel();
+                    lastMaxCircle = maxIC;
+
+                    Vec_Double predictRadiusArray, realRadiusArray;
+                    for (size_t i = 0; i < maxIC.size(); i++)
+                    {
+                        // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
+                        auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y) + offset, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+
+                        circles.emplace_back(maxCir2);
+
+                        minRadius = std::min(minRadius, maxIC[i].z);
+                        maxRadius = std::max(maxRadius, maxIC[i].z);
+
+                        predictRadiusArray.emplace_back(maxIC[i].z);
+                        realRadiusArray.emplace_back(maxIC[i].w);
+                    }
+
+                    // re-color
+                    for (size_t i = 0; i < maxIC.size(); i++)
+                    {
+                        auto rad = (maxIC[i].z - minRadius) / (maxRadius - minRadius);
+                        const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
+                        circles[i].col = Vector3F(color.r(), color.g(), color.b());
+                    }
+
                 scene->AddLines(lines);
                 scene->AddParticles(points);
                 scene->AddCircles(circles);
@@ -326,7 +342,9 @@ void MSSampler2D()
                 renderer->ClearCanvas();
                 scene->Clear();
 
-                KIRI_LOG_DEBUG("name={0}, porosity={1}",boundaryFileName,porosity);
+                 auto cur_rmsp = ComputeRMSPE(predictRadiusArray, realRadiusArray);
+
+                KIRI_LOG_DEBUG("name={0}, porosity={1},cur_rmsp={2}",boundaryFileName,porosity,cur_rmsp);
             }
 
         }

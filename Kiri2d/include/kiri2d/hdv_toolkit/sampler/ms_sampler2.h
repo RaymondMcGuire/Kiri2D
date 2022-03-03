@@ -125,7 +125,7 @@ namespace HDV::Sampler
             mGlobalPorosityArray.emplace_back(mCurGlobalPorosity);
             mGlobalErrorArray.emplace_back(mCurGlobalWeightError);
 
-            // KIRI_LOG_DEBUG("porosity={0}; error={1}", mCurGlobalPorosity, mCurGlobalWeightError);
+            //KIRI_LOG_DEBUG("porosity={0}; error={1}", mCurGlobalPorosity, mCurGlobalWeightError);
 
             return mCurGlobalPorosity;
         }
