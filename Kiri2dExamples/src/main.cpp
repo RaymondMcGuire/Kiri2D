@@ -135,7 +135,7 @@ void MSSampler2D()
         file.close();
     };
 
-    auto boundary_name_list = std::vector<string>(){"bunny","alligator","beast","cheburashka","cow","homer","horse","lucy","nefertiti","spot","teapot","woody","xyzrgb_dragon"};
+    auto boundary_name_list = std::vector<String>{"bunny","alligator","beast","cheburashka","cow","homer","horse","lucy","nefertiti","spot","teapot","woody","xyzrgb_dragon"};
 
     for(auto bidx = 0; bidx<boundary_name_list.size();bidx++)
     {
@@ -326,7 +326,7 @@ void MSSampler2D()
                 renderer->ClearCanvas();
                 scene->Clear();
 
-                KIRI_LOG_DEBUG("name={0}, porosity={1}",boundaryFileName,poroity);
+                KIRI_LOG_DEBUG("name={0}, porosity={1}",boundaryFileName,porosity);
             }
 
         }
