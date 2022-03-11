@@ -97,7 +97,9 @@ namespace HDV::Sampler
         {
             mCurIteration++;
 
+            // KIRI_LOG_DEBUG("start A");
             auto needAddSites = this->DynamicAddSites();
+            // KIRI_LOG_DEBUG("start B");
             if (needAddSites)
             {
                 mPowerDiagram->Compute();
@@ -110,23 +112,28 @@ namespace HDV::Sampler
                 this->AdaptWeights();
                 mPowerDiagram->Compute();
             }
+            // KIRI_LOG_DEBUG("start C");
 
             if (CheckVoroCell())
             {
                 mPowerDiagram->Compute();
             }
 
-            if (RemoveNoiseVoroSites())
-            {
-                mPowerDiagram->Compute();
-            }
+            // KIRI_LOG_DEBUG("start D");
+
+            // if (RemoveNoiseVoroSites())
+            // {
+            //     mPowerDiagram->Compute();
+            // }
+
+            // KIRI_LOG_DEBUG("start E");
 
             mCurGlobalPorosity = this->ComputeMiniumPorosity();
             mGlobalPorosityArray.emplace_back(mCurGlobalPorosity);
             mGlobalErrorArray.emplace_back(mCurGlobalWeightError);
 
-            //KIRI_LOG_DEBUG("porosity={0}; error={1}", mCurGlobalPorosity, mCurGlobalWeightError);
-
+            // KIRI_LOG_DEBUG("porosity={0}; error={1}", mCurGlobalPorosity, mCurGlobalWeightError);
+            // KIRI_LOG_DEBUG("start F");
             return mCurGlobalPorosity;
         }
 
