@@ -103,8 +103,6 @@ namespace KIRI2D::SPH
             calculateCohesion();
             integrationStep(dt);
 
-            // collisionHandling();
-
             grid.updateStructure(particles);
 
             reset();

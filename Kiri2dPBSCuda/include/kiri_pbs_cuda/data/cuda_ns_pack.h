@@ -10,6 +10,7 @@
 #define _CUDA_NS_PACK_H_
 
 #include <kiri_pbs_cuda/data/cuda_dem_params.h>
+#include <thrust/host_vector.h>
 namespace KIRI
 {
     class NSPack

@@ -23,7 +23,7 @@ namespace KIRI2D::SPH::Constants
 
     const float GRAVITY = -12000.f;
 
-    const float COHESION = 20.f;
+    const float COHESION = 1000.f;
 
 } // namespace KIRI2D::SPH
 

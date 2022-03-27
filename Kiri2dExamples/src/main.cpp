@@ -668,7 +668,8 @@ void main()
     // Sph2dExample();
 
     // BlueNoiseSampling();
+    BlueNoiseSamplingVisual();
 
-    MSSampler2D();
-    // ExportParticleRadiusDist();
+    // MSSampler2D();
+    //  ExportParticleRadiusDist();
 }
