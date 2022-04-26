@@ -11,25 +11,23 @@
 
 #pragma once
 
-#include <kiri2d/hdv_toolkit/hull/vertex_buffer.h>
+#include <kiri_pch.h>
 namespace HDV::Hull
 {
-    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class SimplexWrap
     {
     public:
         explicit SimplexWrap() : Next{nullptr}, Prev{} {}
         explicit SimplexWrap(
             int dimension,
-            const std::shared_ptr<VertexBuffer<VERTEXPTR>> &beyondList)
+            std::vector<int> &beyondList)
             : Next{nullptr}, Prev{}
         {
             Normals.assign(dimension, 0.0);
-            // Vertices.assign(dimension, VERTEXPTR());
+
             Vertices.assign(dimension, -1);
-            AdjacentFaces.assign(dimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
+            AdjacentFaces.assign(dimension, std::make_shared<SimplexWrap>());
             BeyondList = beyondList;
-            VerticesBeyond = std::make_shared<VertexBuffer<VERTEXPTR>>();
         }
         virtual ~SimplexWrap() noexcept
         {
@@ -40,14 +38,14 @@ namespace HDV::Hull
             Next = nullptr;
             Prev.reset();
             FurthestVertex = -1;
-            BeyondList = nullptr;
-            VerticesBeyond = nullptr;
+            BeyondList.clear();
+            VerticesBeyond.clear();
             Vertices.clear();
             AdjacentFaces.clear();
         }
 
-        std::shared_ptr<SimplexWrap<VERTEXPTR>> Next;
-        std::weak_ptr<SimplexWrap<VERTEXPTR>> Prev;
+        std::shared_ptr<SimplexWrap> Next;
+        std::weak_ptr<SimplexWrap> Prev;
 
         double Offset = 0.0;
         bool IsNormalFlipped = false;
@@ -60,34 +58,20 @@ namespace HDV::Hull
 
         std::vector<double> Normals;
 
-        // std::vector<VERTEXPTR> Vertices;
         std::vector<int> Vertices;
-
-        // VERTEXPTR FurthestVertex;
         int FurthestVertex;
 
-        std::shared_ptr<VertexBuffer<VERTEXPTR>> BeyondList;
-        std::shared_ptr<VertexBuffer<VERTEXPTR>> VerticesBeyond;
-        std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> AdjacentFaces;
+        std::vector<int> BeyondList;
+        std::vector<int> VerticesBeyond;
+        std::vector<std::shared_ptr<SimplexWrap>> AdjacentFaces;
 
         void ToString()
         {
             std::string vert_data = "";
             for (size_t i = 0; i < Vertices.size(); i++)
             {
-                // vert_data += Vertices[i]->GetString();
-                //  vert_data += std::to_string(Vertices[i]->GetId()) + ":(" + std::to_string(Vertices[i]->GetPosition()[0]) + "," + std::to_string(Vertices[i]->GetPosition()[1]) + "); ";
                 vert_data += std::to_string(Vertices[i]) + "->";
             }
-
-            /*   KIRI_LOG_DEBUG("Tag = {0}, InList = {1}, Prev tag = {2}, Next tag = {3}; Verts={4}; Normal={5},{6}; Offset={7}; IsNormalFlipped={8}, FurthestVertex={9}",
-                              mTag,
-                              mInList,
-                              Prev.lock() == nullptr ? "null" : std::to_string(Prev.lock()->GetTag()),
-                              Next == nullptr ? "null" : std::to_string(Next->GetTag()),
-                              vert_data,
-                              Normals[0], Normals[1], Offset, IsNormalFlipped,
-                              FurthestVertex == nullptr ? "null" : FurthestVertex->GetString());*/
 
             KIRI_LOG_DEBUG("Tag = {0}; InList = {1}; Verts={2}; Normal={3},{4},{5}; Offset={6}; IsNormalFlipped={7}, FurthestVertex={8}",
                            mTag,

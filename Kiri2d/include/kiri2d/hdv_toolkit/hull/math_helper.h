@@ -116,7 +116,7 @@ namespace HDV::Hull
         /// The vertex is "over face" if the return value is > Constants.PlaneDistanceTolerance.
         /// </summary>
         /// <returns>The vertex is "over face" if the result is positive.</returns>
-        static double GetVertexDistance(const VERTEXPTR &v, const std::shared_ptr<SimplexWrap<VERTEXPTR>> &f)
+        static double GetVertexDistance(const VERTEXPTR &v, const std::shared_ptr<SimplexWrap> &f)
         {
             auto normal = f->Normals;
             auto p = v->GetPosition();

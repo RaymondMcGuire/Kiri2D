@@ -795,8 +795,8 @@ namespace HDV::Hull
         {
             auto initialPoints = FindInitialPoints();
 
-            std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> faces;
-            faces.assign(mDimension + 1, std::make_shared<SimplexWrap<VERTEXPTR>>());
+            std::vector<std::shared_ptr<SimplexWrap>> faces;
+            faces.assign(mDimension + 1, std::make_shared<SimplexWrap>());
 
             for (auto i = 0; i < mDimension + 1; i++)
             {
@@ -809,7 +809,7 @@ namespace HDV::Hull
                         vertices[k++] = initialPoints[j];
                 }
 
-                auto newFace = std::make_shared<SimplexWrap<VERTEXPTR>>(mDimension, std::make_shared<VertexBuffer<VERTEXPTR>>());
+                auto newFace = std::make_shared<SimplexWrap>(mDimension, std::vector<int>());
 
                 std::sort(vertices.begin(), vertices.end());
                 newFace->Vertices = vertices;
@@ -831,8 +831,8 @@ namespace HDV::Hull
             {
                 FindBeyondVertices(faces[i]);
 
-                // KIRI_LOG_DEBUG("faces[i]->VerticesBeyond->GetCount()={0}", faces[i]->VerticesBeyond->GetCount());
-                if (faces[i]->VerticesBeyond->GetCount() == 0)
+                // KIRI_LOG_DEBUG("faces[i]->VerticesBeyond.size()={0}", faces[i]->VerticesBeyond.size());
+                if (faces[i]->VerticesBeyond.size() == 0)
                     mBuffer->ConvexSimplexs.emplace_back(faces[i]); // The face is on the hull
                 else
                     mBuffer->UnprocessedFaces->Add(faces[i]);
@@ -933,7 +933,7 @@ namespace HDV::Hull
             mBuffer = nullptr;
         }
 
-        double GetVertexDistance(int v, const std::shared_ptr<SimplexWrap<VERTEXPTR>> &f)
+        double GetVertexDistance(int v, const std::shared_ptr<SimplexWrap> &f)
         {
             auto normal = f->Normals;
             auto x = v * mDimension;
@@ -974,7 +974,7 @@ namespace HDV::Hull
             return 0;
         }
 
-        void IsBeyond(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face, const std::shared_ptr<VertexBuffer<VERTEXPTR>> &beyondVertices, int v)
+        void IsBeyond(const std::shared_ptr<SimplexWrap> &face, std::vector<int> &beyondVertices, int v)
         {
             auto distance = GetVertexDistance(v, face);
             if (distance >= PLANE_DISTANCE_TOLERANCE)
@@ -996,7 +996,7 @@ namespace HDV::Hull
                         mBuffer->FurthestVertex = v;
                     }
                 }
-                beyondVertices->Add(v);
+                beyondVertices.emplace_back(v);
             }
         }
 
@@ -1104,7 +1104,7 @@ namespace HDV::Hull
         /// <summary>
         /// Calculates the normal and offset of the hyper-plane given by the face's vertices.
         /// </summary>
-        bool CalculateFacePlane(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)
+        bool CalculateFacePlane(const std::shared_ptr<SimplexWrap> &face)
         {
             auto vertices = face->Vertices;
             auto normal = face->Normals;
@@ -1149,7 +1149,7 @@ namespace HDV::Hull
         /// <summary>
         /// Check if 2 faces are adjacent and if so, update their AdjacentFaces array.
         /// </summary>
-        void UpdateAdjacency(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &l, const std::shared_ptr<SimplexWrap<VERTEXPTR>> &r)
+        void UpdateAdjacency(const std::shared_ptr<SimplexWrap> &l, const std::shared_ptr<SimplexWrap> &r)
         {
             auto lv = l->Vertices;
             auto rv = r->Vertices;
@@ -1194,7 +1194,7 @@ namespace HDV::Hull
         /// <summary>
         /// Used in the "initialization" code.
         /// </summary>
-        void FindBeyondVertices(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)
+        void FindBeyondVertices(const std::shared_ptr<SimplexWrap> &face)
         {
             mBuffer->MaxDistance = std::numeric_limits<double>::lowest();
             mBuffer->FurthestVertex = 0;
@@ -1216,7 +1216,7 @@ namespace HDV::Hull
         /// <summary>
         /// Tags all faces seen from the current vertex with 1.
         /// </summary>
-        void TagAffectedFaces(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &currentFace)
+        void TagAffectedFaces(const std::shared_ptr<SimplexWrap> &currentFace)
         {
             mBuffer->AffectedFaceBuffer.clear();
             mBuffer->AffectedFaceBuffer.emplace_back(currentFace);
@@ -1226,10 +1226,10 @@ namespace HDV::Hull
         /// <summary>
         /// Recursively traverse all the relevant faces.
         /// </summary>
-        void TraverseAffectedFaces(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &currentFace)
+        void TraverseAffectedFaces(const std::shared_ptr<SimplexWrap> &currentFace)
         {
 
-            mBuffer->TraverseStack = std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>>();
+            mBuffer->TraverseStack = std::stack<std::shared_ptr<SimplexWrap>>();
             mBuffer->TraverseStack.push(currentFace);
             currentFace->SetTag(1);
 
@@ -1362,12 +1362,12 @@ namespace HDV::Hull
         /// Creates a new deferred face.
         /// </summary>
 
-        std::shared_ptr<DeferredSimplex<VERTEXPTR>> MakeDeferredFace(
-            const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face,
+        std::shared_ptr<DeferredSimplex> MakeDeferredFace(
+            const std::shared_ptr<SimplexWrap> &face,
             int faceIndex,
-            const std::shared_ptr<SimplexWrap<VERTEXPTR>> &pivot,
+            const std::shared_ptr<SimplexWrap> &pivot,
             int pivotIndex,
-            const std::shared_ptr<SimplexWrap<VERTEXPTR>> &oldFace)
+            const std::shared_ptr<SimplexWrap> &oldFace)
         {
             auto ret = mBuffer->ObjManager->GetDeferredSimplex();
 
@@ -1410,7 +1410,7 @@ namespace HDV::Hull
                 }
 
                 //   This could slightly help...
-                if (mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond->GetCount() < mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond->GetCount())
+                if (mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond.size() < mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond.size())
                 {
                     FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond, mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond);
                 }
@@ -1420,7 +1420,7 @@ namespace HDV::Hull
                 }
 
                 // This face will definitely lie on the hull
-                if (mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond->GetCount() == 0)
+                if (mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond.size() == 0)
                 {
                     mBuffer->ConvexSimplexs.emplace_back(mBuffer->ConeFaceBuffer[i]->Face);
                     mBuffer->UnprocessedFaces->Remove(mBuffer->ConeFaceBuffer[i]->Face);
@@ -1449,16 +1449,16 @@ namespace HDV::Hull
         /// <summary>
         /// Connect faces using a connector->
         /// </summary>
-        void ConnectFace(const std::shared_ptr<SimplexConnector<VERTEXPTR>> &connector)
+        void ConnectFace(const std::shared_ptr<SimplexConnector> &connector)
         {
             auto index = connector->GetHashCode() % mBuffer->CONNECTOR_TABLE_SIZE;
 
             for (auto current = mBuffer->ConnectorTable[index]->First; current != nullptr; current = current->Next)
             {
-                if (SimplexConnector<VERTEXPTR>().AreConnectable(connector, current, mDimension))
+                if (SimplexConnector().AreConnectable(connector, current, mDimension))
                 {
                     mBuffer->ConnectorTable[index]->Remove(current);
-                    SimplexConnector<VERTEXPTR>().Connect(current, connector);
+                    SimplexConnector().Connect(current, connector);
 
                     mBuffer->ObjManager->DepositConnector(current);
                     mBuffer->ObjManager->DepositConnector(connector);
@@ -1470,9 +1470,9 @@ namespace HDV::Hull
         }
 
         void FindBeyondVertices(
-            const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face,
-            const std::shared_ptr<VertexBuffer<VERTEXPTR>> &beyond,
-            const std::shared_ptr<VertexBuffer<VERTEXPTR>> &beyond1)
+            const std::shared_ptr<SimplexWrap> &face,
+            const std::vector<int> &beyond,
+            const std::vector<int> &beyond1)
         {
             auto beyondVertices = mBuffer->BeyondBuffer;
 
@@ -1481,17 +1481,17 @@ namespace HDV::Hull
 
             int v;
 
-            auto count = beyond1->GetCount();
+            auto count = beyond1.size();
 
             for (auto i = 0; i < count; i++)
-                mVertexVisited[beyond1->GetItem(i)] = true;
+                mVertexVisited[beyond1[i]] = true;
 
             mVertexVisited[mBuffer->CurrentVertex] = false;
 
-            count = beyond->GetCount();
+            count = beyond.size();
             for (auto i = 0; i < count; i++)
             {
-                v = beyond->GetItem(i);
+                v = beyond[i];
 
                 if (v == mBuffer->CurrentVertex)
                     continue;
@@ -1499,10 +1499,10 @@ namespace HDV::Hull
                 IsBeyond(face, beyondVertices, v);
             }
 
-            count = beyond1->GetCount();
+            count = beyond1.size();
             for (auto i = 0; i < count; i++)
             {
-                v = beyond1->GetItem(i);
+                v = beyond1[i];
 
                 if (mVertexVisited[v])
                     IsBeyond(face, beyondVertices, v);
@@ -1513,8 +1513,8 @@ namespace HDV::Hull
             // Pull the old switch a roo
             auto temp = face->VerticesBeyond;
             face->VerticesBeyond = beyondVertices;
-            if (temp->GetCount() > 0)
-                temp->Clear();
+            if (temp.size() > 0)
+                temp.clear();
             mBuffer->BeyondBuffer = temp;
         }
 
@@ -1532,9 +1532,9 @@ namespace HDV::Hull
             // This means that all the affected faces must be on the hull and that all their "vertices beyond" are singular.
             for (auto fIndex = 0; fIndex < mBuffer->AffectedFaceBuffer.size(); fIndex++)
             {
-                for (auto i = 0; i < mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond->GetCount(); i++)
+                for (auto i = 0; i < mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond.size(); i++)
                 {
-                    mBuffer->SingularVertices.insert(mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond->GetItem(i));
+                    mBuffer->SingularVertices.insert(mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond[i]);
                 }
 
                 mBuffer->ConvexSimplexs.emplace_back(mBuffer->AffectedFaceBuffer[fIndex]);

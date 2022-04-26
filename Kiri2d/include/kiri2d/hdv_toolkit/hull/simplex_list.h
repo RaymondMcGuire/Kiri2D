@@ -14,7 +14,6 @@
 #include <kiri2d/hdv_toolkit/hull/simplex_wrap.h>
 namespace HDV::Hull
 {
-    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class SimplexList
     {
     public:
@@ -22,8 +21,8 @@ namespace HDV::Hull
 
         virtual ~SimplexList() noexcept {}
 
-        std::shared_ptr<SimplexWrap<VERTEXPTR>> First;
-        std::shared_ptr<SimplexWrap<VERTEXPTR>> Last;
+        std::shared_ptr<SimplexWrap> First;
+        std::shared_ptr<SimplexWrap> Last;
 
         void Clear()
         {
@@ -33,7 +32,7 @@ namespace HDV::Hull
             Last = nullptr;
         }
 
-        void AddFirst(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)
+        void AddFirst(const std::shared_ptr<SimplexWrap> &face)
         {
             face->SetInList(true);
             face->Next = First;
@@ -47,7 +46,7 @@ namespace HDV::Hull
 
         void RemoveAll()
         {
-            std::shared_ptr<SimplexWrap<VERTEXPTR>> tmp;
+            std::shared_ptr<SimplexWrap> tmp;
             while (First != nullptr)
             {
                 tmp = First;
@@ -59,7 +58,7 @@ namespace HDV::Hull
             }
         }
 
-        void Remove(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)
+        void Remove(const std::shared_ptr<SimplexWrap> &face)
         {
             if (!face->GetInList())
                 return;
@@ -70,7 +69,7 @@ namespace HDV::Hull
 
             if (face->Prev.lock() != nullptr)
             {
-                std::shared_ptr<SimplexWrap<VERTEXPTR>> prev{face->Prev};
+                std::shared_ptr<SimplexWrap> prev{face->Prev};
                 prev->Next = face->Next;
             }
             else if (face->Prev.lock() == nullptr)
@@ -80,7 +79,7 @@ namespace HDV::Hull
 
             if (face->Next != nullptr)
             {
-                std::shared_ptr<SimplexWrap<VERTEXPTR>> next{face->Next};
+                std::shared_ptr<SimplexWrap> next{face->Next};
                 next->Prev = face->Prev;
             }
             else if (face->Next == nullptr)
@@ -89,7 +88,7 @@ namespace HDV::Hull
                     Last = nullptr;
                 else
                 {
-                    std::shared_ptr<SimplexWrap<VERTEXPTR>> prev{face->Prev};
+                    std::shared_ptr<SimplexWrap> prev{face->Prev};
                     Last = prev;
                 }
             }
@@ -98,11 +97,11 @@ namespace HDV::Hull
             face->Prev.reset();
         }
 
-        void Add(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face)
+        void Add(const std::shared_ptr<SimplexWrap> &face)
         {
             if (face->GetInList())
             {
-                if (First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount())
+                if (First->VerticesBeyond.size() < face->VerticesBeyond.size())
                 {
                     Remove(face);
                     AddFirst(face);
@@ -112,7 +111,7 @@ namespace HDV::Hull
 
             face->SetInList(true);
 
-            if (First != nullptr && (First->VerticesBeyond->GetCount() < face->VerticesBeyond->GetCount()))
+            if (First != nullptr && (First->VerticesBeyond.size() < face->VerticesBeyond.size()))
             {
 
                 First->Prev = face;
@@ -139,7 +138,7 @@ namespace HDV::Hull
         void ToString()
         {
             KIRI_LOG_DEBUG("---Simplex List Start---");
-            std::shared_ptr<SimplexWrap<VERTEXPTR>> current{First};
+            std::shared_ptr<SimplexWrap> current{First};
             while (current != nullptr)
             {
                 current->ToString();

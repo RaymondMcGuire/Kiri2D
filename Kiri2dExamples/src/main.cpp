@@ -663,12 +663,12 @@ void main()
 {
     KIRI::KiriLog::Init();
 
-    // QuickHullVoronoi2d();
+    QuickHullVoronoi2d();
 
     // Sph2dExample();
 
     // BlueNoiseSampling();
-    BlueNoiseSamplingVisual();
+    // BlueNoiseSamplingVisual();
 
     // MSSampler2D();
     //  ExportParticleRadiusDist();

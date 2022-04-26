@@ -15,7 +15,6 @@
 
 namespace HDV::Hull
 {
-    template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
     class SimplexConnector
     {
     public:
@@ -26,10 +25,10 @@ namespace HDV::Hull
         }
         virtual ~SimplexConnector() noexcept {}
 
-        std::shared_ptr<SimplexConnector<VERTEXPTR>> Next;
-        std::weak_ptr<SimplexConnector<VERTEXPTR>> Prev;
+        std::shared_ptr<SimplexConnector> Next;
+        std::weak_ptr<SimplexConnector> Prev;
 
-        std::shared_ptr<SimplexWrap<VERTEXPTR>> Face;
+        std::shared_ptr<SimplexWrap> Face;
         std::vector<int> VerticeIndexes;
 
         void Clear()
@@ -39,7 +38,7 @@ namespace HDV::Hull
             Face = nullptr;
         }
 
-        void Update(const std::shared_ptr<SimplexWrap<VERTEXPTR>> &face, int edgeIndex, int dim)
+        void Update(const std::shared_ptr<SimplexWrap> &face, int edgeIndex, int dim)
         {
             Face = face;
             mEdgeIndex = edgeIndex;
@@ -63,8 +62,8 @@ namespace HDV::Hull
         }
 
         static bool AreConnectable(
-            const std::shared_ptr<SimplexConnector<VERTEXPTR>> &a,
-            const std::shared_ptr<SimplexConnector<VERTEXPTR>> &b,
+            const std::shared_ptr<SimplexConnector> &a,
+            const std::shared_ptr<SimplexConnector> &b,
             int dim)
         {
             if (a->GetHashCode() != b->GetHashCode())
@@ -81,8 +80,8 @@ namespace HDV::Hull
         }
 
         static void Connect(
-            const std::shared_ptr<SimplexConnector<VERTEXPTR>> &a,
-            const std::shared_ptr<SimplexConnector<VERTEXPTR>> &b)
+            const std::shared_ptr<SimplexConnector> &a,
+            const std::shared_ptr<SimplexConnector> &b)
         {
             // KIRI_LOG_DEBUG("a edge index={0}; b edge index={1}", a->GetEdgeIndex(), b->GetEdgeIndex());
             a->Face->AdjacentFaces[a->GetEdgeIndex()] = b->Face;

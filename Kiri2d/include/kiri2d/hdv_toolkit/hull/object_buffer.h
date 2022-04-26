@@ -25,54 +25,44 @@ namespace HDV::Hull
         {
             mDimension = dimension;
 
-            UpdateBuffer.assign(dimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
+            UpdateBuffer.assign(dimension, std::make_shared<SimplexWrap>());
             UpdateIndices.assign(dimension, -1);
 
-            ObjManager = std::make_shared<ObjectManager<VERTEXPTR>>(dimension);
-            EmptyBuffer = std::make_shared<VertexBuffer<VERTEXPTR>>();
-            BeyondBuffer = std::make_shared<VertexBuffer<VERTEXPTR>>();
+            ObjManager = std::make_shared<ObjectManager>(dimension);
+            UnprocessedFaces = std::make_shared<SimplexList>();
 
-            UnprocessedFaces = std::make_shared<SimplexList<VERTEXPTR>>();
-
-            ConnectorTable.assign(CONNECTOR_TABLE_SIZE, std::make_shared<ConnectorList<VERTEXPTR>>());
+            ConnectorTable.assign(CONNECTOR_TABLE_SIZE, std::make_shared<ConnectorList>());
         }
 
         virtual ~ObjectBuffer() noexcept {}
 
         const int CONNECTOR_TABLE_SIZE = 2017;
 
-        // VERTEXPTR CurrentVertex;
-        // VERTEXPTR FurthestVertex;
         int CurrentVertex;
         int FurthestVertex;
 
         double MaxDistance = -std::numeric_limits<double>::max();
 
-        std::shared_ptr<SimplexList<VERTEXPTR>> UnprocessedFaces;
-        std::shared_ptr<ObjectManager<VERTEXPTR>> ObjManager;
+        std::shared_ptr<SimplexList> UnprocessedFaces;
+        std::shared_ptr<ObjectManager> ObjManager;
 
-        std::shared_ptr<VertexBuffer<VERTEXPTR>> EmptyBuffer;
-        std::shared_ptr<VertexBuffer<VERTEXPTR>> BeyondBuffer;
+        std::vector<int> EmptyBuffer;
+        std::vector<int> BeyondBuffer;
 
         std::vector<VERTEXPTR> InputVertices;
-        std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> ConvexSimplexs;
-        std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> AffectedFaceBuffer;
-        std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>> TraverseStack;
+        std::vector<std::shared_ptr<SimplexWrap>> ConvexSimplexs;
+        std::vector<std::shared_ptr<SimplexWrap>> AffectedFaceBuffer;
+        std::stack<std::shared_ptr<SimplexWrap>> TraverseStack;
 
-        // std::unordered_set<VERTEXPTR> SingularVertices;
         std::unordered_set<int> SingularVertices;
 
-        std::vector<std::shared_ptr<DeferredSimplex<VERTEXPTR>>> ConeFaceBuffer;
-        std::vector<std::shared_ptr<SimplexWrap<VERTEXPTR>>> UpdateBuffer;
+        std::vector<std::shared_ptr<DeferredSimplex>> ConeFaceBuffer;
+        std::vector<std::shared_ptr<SimplexWrap>> UpdateBuffer;
         std::vector<int> UpdateIndices;
-        std::vector<std::shared_ptr<ConnectorList<VERTEXPTR>>> ConnectorTable;
+        std::vector<std::shared_ptr<ConnectorList>> ConnectorTable;
 
         void Clear()
         {
-
-            // UpdateBuffer.assign(mDimension, std::make_shared<SimplexWrap<VERTEXPTR>>());
-            // UpdateIndices.assign(mDimension, -1);
-
             for (auto i = 0; i < UpdateBuffer.size(); i++)
                 UpdateBuffer[i]->Clear();
 
@@ -94,7 +84,7 @@ namespace HDV::Hull
                 TraverseStack.pop();
             }
 
-            TraverseStack = std::stack<std::shared_ptr<SimplexWrap<VERTEXPTR>>>();
+            TraverseStack = std::stack<std::shared_ptr<SimplexWrap>>();
 
             UpdateBuffer.clear();
             UpdateIndices.clear();
@@ -109,16 +99,14 @@ namespace HDV::Hull
 
             ObjManager->Clear();
             UnprocessedFaces->Clear();
-            EmptyBuffer->Clear();
-            BeyondBuffer->Clear();
+            EmptyBuffer.clear();
+            BeyondBuffer.clear();
 
             CurrentVertex = -1;
             FurthestVertex = -1;
 
             ObjManager = nullptr;
             UnprocessedFaces = nullptr;
-            EmptyBuffer = nullptr;
-            BeyondBuffer = nullptr;
         }
 
         void AddInput(const std::vector<VERTEXPTR> &input, bool assignIds, bool checkInput)
