@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
  * @LastEditTime: 2021-06-10 21:54:28
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\geo\convex_clip2.cpp
  */
 
@@ -131,7 +131,7 @@ namespace KIRI
 
                 // adding the intersection to the result
                 mIntersectionList->Push(Vector2F(pqIntersec.start));
-                //Flag update
+                // Flag update
                 if (pInQ > 0)
                 {
                     flag = IF_PINSIDE;
@@ -154,7 +154,7 @@ namespace KIRI
             if (cross == 0 && pInQ < 0 && qInP < 0)
             {
                 return;
-                //vP and vQ are collinear
+                // vP and vQ are collinear
             }
             else if (cross == 0 && pInQ == 0 && qInP == 0)
             {
@@ -169,13 +169,13 @@ namespace KIRI
                     curP = curP->next;
                 }
                 /* Generic cases
-			 * cross  		halfplane condition   advance rule
-			 *  >0				qInP == 1			 p
-			 *  >0				qInP == 0			 q
-			 *  <0				pInQ == 1			 q
-			 *  <0				pInQ == 0			 p
-			 *  if p is advanced and inside flag = p then add curP to result (equivalent to q)
-			 */
+                 * cross  		halfplane condition   advance rule
+                 *  >0				qInP == 1			 p
+                 *  >0				qInP == 0			 q
+                 *  <0				pInQ == 1			 q
+                 *  <0				pInQ == 0			 p
+                 *  if p is advanced and inside flag = p then add curP to result (equivalent to q)
+                 */
             }
             else if (cross >= 0)
             {
@@ -196,7 +196,7 @@ namespace KIRI
                 }
             }
             else
-            { //cross < 0
+            { // cross < 0
                 if (pInQ > 0)
                 {
                     if (flag == IF_QINSIDE)
@@ -213,9 +213,9 @@ namespace KIRI
                 }
             }
             /*
-            * Termination condition: if ap >= n and aq >=m then both polygons traversed
-            * if ap >= 2*n or aq >= 2*m then p or q cycled twice and there will not be another intersection.
-            */
+             * Termination condition: if ap >= n and aq >=m then both polygons traversed
+             * if ap >= 2*n or aq >= 2*m then p or q cycled twice and there will not be another intersection.
+             */
         } while (((advP < p->Size()) || (advQ < q->Size())) && (advP < 2 * p->Size()) && (advQ < 2 * q->Size()));
     }
 
@@ -226,13 +226,13 @@ namespace KIRI
         a->Clone(p);
         b->Clone(q);
 
-        //q->PrintVertexList();
+        // q->PrintVertexList();
 
-        //KIRI_LOG_DEBUG("ComputeConvexPolygonIntersection: a size={0},b size={1},p size={2},q size={3}", a->Size(), b->Size(), p->Size(), q->Size());
+        // KIRI_LOG_DEBUG("ComputeConvexPolygonIntersection: a size={0},b size={1},p size={2},q size={3}", a->Size(), b->Size(), p->Size(), q->Size());
 
         if (!IsConvex(p))
-        {                           //Check for convexity
-            p->ReverseVertexList(); //If list is not oriented counterclockwise
+        {                           // Check for convexity
+            p->ReverseVertexList(); // If list is not oriented counterclockwise
             if (!IsConvex(p))
             {
                 // KIRI_LOG_ERROR("ComputeConvexPolygonIntersection: Polygons are not Convex");
@@ -240,8 +240,8 @@ namespace KIRI
             }
         }
         if (!IsConvex(q))
-        {                           //Check for convexity
-            q->ReverseVertexList(); //If list is not oriented counterclockwise
+        {                           // Check for convexity
+            q->ReverseVertexList(); // If list is not oriented counterclockwise
             if (!IsConvex(q))
             {
                 // KIRI_LOG_ERROR("ComputeConvexPolygonIntersection: Polygons are not Convex");
@@ -249,7 +249,7 @@ namespace KIRI
             }
         }
 
-        mIntersectionList->RemoveAll();
+        mIntersectionList->removeAll();
         ConvexIntersection(p, q);
 
         return true;

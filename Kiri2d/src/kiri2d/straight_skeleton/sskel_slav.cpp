@@ -23,7 +23,7 @@ namespace KIRI2D::SSKEL
             {
 
                 auto x = lav->GetHead();
-                auto len = lav->Length();
+                auto len = lav->length();
                 for (size_t i = 0; i < len; i++)
                 {
                     if (x == nullptr)
@@ -34,7 +34,7 @@ namespace KIRI2D::SSKEL
                     x = x->next.lock();
                 }
 
-                mLAVMaps.erase(lav->GetId());
+                mLAVMaps.erase(lav->id());
 
                 // //todo remove lav
                 // if (head != nullptr)
@@ -100,7 +100,7 @@ namespace KIRI2D::SSKEL
                 continue;
 
             auto x = _lav.second->GetHead();
-            auto len = _lav.second->Length();
+            auto len = _lav.second->length();
             for (size_t i = 0; i < len; i++)
             {
                 if (x == nullptr)
@@ -223,7 +223,7 @@ namespace KIRI2D::SSKEL
         if (cur_lav != nullptr)
             mLAVMaps.erase(splitEvent->GetVert()->GetLAVId());
 
-        if (cur_lav == nullptr || (cur_lav->GetId() != right_vertex->GetLAVId()))
+        if (cur_lav == nullptr || (cur_lav->id() != right_vertex->GetLAVId()))
         {
             mLAVMaps.erase(right_vertex->GetLAVId());
             new_lavs.emplace_back(std::make_shared<SSkelLAV>(mLAVCounter++, newVertex1));
@@ -239,9 +239,9 @@ namespace KIRI2D::SSKEL
         {
             auto elem_lav = new_lavs[i];
             auto elem_lav_head = elem_lav->GetHead();
-            if (elem_lav->Length() > 2)
+            if (elem_lav->length() > 2)
             {
-                mLAVMaps[elem_lav->GetId()] = elem_lav;
+                mLAVMaps[elem_lav->id()] = elem_lav;
                 event_vertices.emplace_back(elem_lav_head);
             }
             else
@@ -251,7 +251,7 @@ namespace KIRI2D::SSKEL
                 if (elem_lav_head != nullptr)
                 {
 
-                    auto len = elem_lav->Length();
+                    auto len = elem_lav->length();
                     auto x = elem_lav_head;
                     for (size_t i = 0; i < len; i++)
                     {
@@ -288,14 +288,14 @@ namespace KIRI2D::SSKEL
 
     void SSkelSLAV::HandleEvents()
     {
-        //KIRI_LOG_DEBUG("-------------HandleEvents------------");
+        // KIRI_LOG_DEBUG("-------------HandleEvents------------");
 
         while (!(mPriorityQueue.empty() || mLAVMaps.empty()))
         {
 
             auto event = mPriorityQueue.top();
             mPriorityQueue.pop();
-            //event->Print();
+            // event->Print();
 
             Vector<SSkelEventPtr> new_events;
             if (IsInstanceOf<SSkelEdgeEvent>(event))

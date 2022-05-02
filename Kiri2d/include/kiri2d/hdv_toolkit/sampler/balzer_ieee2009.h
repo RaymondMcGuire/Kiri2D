@@ -39,7 +39,7 @@ namespace HDV::Sampler
 
         void Init()
         {
-            Reset();
+            reset();
 
             ComputeBoundaryArea();
 
@@ -56,7 +56,7 @@ namespace HDV::Sampler
             // auto sites = mPowerDiagram->GetSites();
             // for (int i = 0; i < sites.size(); i++)
             // {
-            //     if (sites[i]->GetIsBoundaryVertex())
+            //     if (sites[i]->isBoundaryVertex())
             //         continue;
 
             //     auto siteI = std::dynamic_pointer_cast<Voronoi::CapacityVoronoiSite2>(sites[i]);
@@ -64,13 +64,13 @@ namespace HDV::Sampler
             //     auto area = 0.0;
             //     if (siteI->CellPolygon)
             //         area = siteI->CellPolygon->GetArea();
-            //     KIRI_LOG_DEBUG("site id={0}, area={1}", siteI->GetId(), area);
+            //     KIRI_LOG_DEBUG("site id={0}, area={1}", siteI->id(), area);
             // }
 
             return ComputeFalsePosition();
         }
 
-        void Reset()
+        void reset()
         {
             mStable = true;
             mCurIteration = 0;
@@ -91,7 +91,7 @@ namespace HDV::Sampler
 
         double DeltaC(const Voronoi::CapacityVoronoiSite2Ptr &site, double weight)
         {
-            site->SetWeight(weight);
+            site->setWeight(weight);
             mPowerDiagram->Compute();
 
             auto area = 0.0;
@@ -107,7 +107,7 @@ namespace HDV::Sampler
 
             for (int i = 0; i < sites.size(); i++)
             {
-                if (sites[i]->GetIsBoundaryVertex())
+                if (sites[i]->isBoundaryVertex())
                     continue;
 
                 auto siteI = std::dynamic_pointer_cast<Voronoi::CapacityVoronoiSite2>(sites[i]);
@@ -139,7 +139,7 @@ namespace HDV::Sampler
 
                 if (std::abs(DeltaC(siteI, c)) > 1e-6)
                     mStable = false;
-                siteI->SetWeight(c);
+                siteI->setWeight(c);
             }
 
             return mStable;
@@ -153,7 +153,7 @@ namespace HDV::Sampler
             for (int i = 0; i < sites.size(); i++)
             {
                 auto siteI = std::dynamic_pointer_cast<Voronoi::CapacityVoronoiSite2>(sites[i]);
-                if (siteI->GetIsBoundaryVertex())
+                if (siteI->isBoundaryVertex())
                     continue;
 
                 auto poly = siteI->CellPolygon;
@@ -164,13 +164,13 @@ namespace HDV::Sampler
                         poly->ComputeSSkel1998Convex();
 
                     auto mic = poly->ComputeMICByStraightSkeleton();
-                    circles.emplace_back(Vector4D(mic, siteI->GetRadius()));
-                    // KIRI_LOG_DEBUG("has poly: circle={0},{1},{2},{3}", mic.x, mic.y, mic.z, siteI->GetRadius());
+                    circles.emplace_back(Vector4D(mic, siteI->radius()));
+                    // KIRI_LOG_DEBUG("has poly: circle={0},{1},{2},{3}", mic.x, mic.y, mic.z, siteI->radius());
                 }
                 else
                 {
                     KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
-                    // remove.emplace_back(siteI->GetRadius());
+                    // remove.emplace_back(siteI->radius());
                 }
             }
 

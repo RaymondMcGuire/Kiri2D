@@ -22,7 +22,7 @@ namespace KIRI
     public:
         explicit KiriVoroPoroOptiTreeMapCore()
         {
-            Reset();
+            reset();
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
@@ -42,7 +42,7 @@ namespace KIRI
 
         void Init();
 
-        void Reset();
+        void reset();
 
         Vector3F ComputeMaxInscribedCircle() const { return mPowerDiagram->ComputeMaxInscribedCircle(); };
 

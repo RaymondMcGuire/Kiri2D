@@ -68,7 +68,7 @@ PolyClip::Polygon &PolyClip::Polygon::operator=(Polygon &poly)
 	}
 	// first, deallocate memory that 'this' used to hold
 	while (start_)
-		Remove(start_);
+		remove(start_);
 
 	// second, copy from poly by using copy constructor
 	Polygon *copy_poly = new Polygon(poly);
@@ -84,7 +84,7 @@ PolyClip::Polygon &PolyClip::Polygon::operator=(Polygon &poly)
 PolyClip::Polygon::~Polygon()
 {
 	while (start_)
-		Remove(start_);
+		remove(start_);
 }
 
 void PolyClip::Polygon::Insert(Vertex *new_v, Vertex *pos)
@@ -142,7 +142,7 @@ void PolyClip::Polygon::Insert(float x, float y, Vertex *pos)
 	vertexNum_++;
 }
 
-void PolyClip::Polygon::Remove(Vertex *pos)
+void PolyClip::Polygon::remove(Vertex *pos)
 {
 	if (vertexNum_ == 1)
 	{

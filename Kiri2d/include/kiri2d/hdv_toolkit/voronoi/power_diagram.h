@@ -42,10 +42,10 @@ namespace HDV::Voronoi
             auto site3 = std::make_shared<Voronoi::VoronoiSite2>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height());
             auto site4 = std::make_shared<Voronoi::VoronoiSite2>(mBBox.LowestPoint.x - mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height());
 
-            site1->SetAsBoundaryVertex();
-            site2->SetAsBoundaryVertex();
-            site3->SetAsBoundaryVertex();
-            site4->SetAsBoundaryVertex();
+            site1->setAsBoundaryVertex();
+            site2->setAsBoundaryVertex();
+            site3->setAsBoundaryVertex();
+            site4->setAsBoundaryVertex();
 
             AddSite(site1);
             AddSite(site2);
@@ -58,14 +58,14 @@ namespace HDV::Voronoi
 
             // for (auto i = 0; i < mSites.size(); i++)
             // {
-            //     if (mSites[i]->GetIsBoundaryVertex())
+            //     if (mSites[i]->isBoundaryVertex())
             //         continue;
 
             //     auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
 
             //     auto centroid = site->CellPolygon->GetCentroid();
             //     if (mMesh->mBoundaryPolygon->Contains(centroid))
-            //         site->Set(centroid.x, centroid.y);
+            //         site->set(centroid.x, centroid.y);
             // }
 
             mMesh->Generate(mSites, mAssignIds, mCheckInput);
@@ -78,7 +78,7 @@ namespace HDV::Voronoi
                                               mSites.end(),
                                               [=](const HDV::Primitives::Vertex2Ptr &site)
                                               {
-                                                  if (std::find(indexs.begin(), indexs.end(), site->GetId()) != indexs.end())
+                                                  if (std::find(indexs.begin(), indexs.end(), site->id()) != indexs.end())
                                                       return true;
                                                   else
                                                       return false;
@@ -92,7 +92,7 @@ namespace HDV::Voronoi
             //#pragma omp parallel for
             for (auto i = 0; i < mSites.size(); i++)
             {
-                if (mSites[i]->GetIsBoundaryVertex())
+                if (mSites[i]->isBoundaryVertex())
                     continue;
 
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
@@ -101,14 +101,14 @@ namespace HDV::Voronoi
                 {
                     auto centroid = site->CellPolygon->GetCentroid();
                     if (mMesh->mBoundaryPolygon->Contains(centroid))
-                        site->Set(centroid.x, centroid.y);
+                        site->set(centroid.x, centroid.y);
                 }
             }
         }
 
         void LloydIteration()
         {
-            Reset();
+            reset();
             Compute();
             Move2Centroid();
         }
@@ -121,15 +121,15 @@ namespace HDV::Voronoi
 
         std::vector<HDV::Primitives::Vertex2Ptr> mSites;
 
-        void Reset()
+        void reset()
         {
             for (auto i = 0; i < mSites.size(); i++)
             {
-                if (mSites[i]->GetIsBoundaryVertex())
+                if (mSites[i]->isBoundaryVertex())
                     continue;
 
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
-                site->Reset();
+                site->reset();
                 site->CellPolygon = nullptr;
             }
         }
@@ -154,7 +154,7 @@ namespace HDV::Voronoi
                                               mSites.end(),
                                               [=](const HDV::Primitives::Vertex3Ptr &site)
                                               {
-                                                  if (std::find(indexs.begin(), indexs.end(), site->GetId()) != indexs.end())
+                                                  if (std::find(indexs.begin(), indexs.end(), site->id()) != indexs.end())
                                                       return true;
                                                   else
                                                       return false;
@@ -226,14 +226,14 @@ namespace HDV::Voronoi
             auto site7 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y - mBBox.height(), mBBox.LowestPoint.z + 2.0 * mBBox.depth());
             auto site8 = std::make_shared<Voronoi::VoronoiSite3>(mBBox.LowestPoint.x + 2.0 * mBBox.width(), mBBox.LowestPoint.y + 2.0 * mBBox.height(), mBBox.LowestPoint.z - mBBox.depth());
 
-            site1->SetAsBoundaryVertex();
-            site2->SetAsBoundaryVertex();
-            site3->SetAsBoundaryVertex();
-            site4->SetAsBoundaryVertex();
-            site5->SetAsBoundaryVertex();
-            site6->SetAsBoundaryVertex();
-            site7->SetAsBoundaryVertex();
-            site8->SetAsBoundaryVertex();
+            site1->setAsBoundaryVertex();
+            site2->setAsBoundaryVertex();
+            site3->setAsBoundaryVertex();
+            site4->setAsBoundaryVertex();
+            site5->setAsBoundaryVertex();
+            site6->setAsBoundaryVertex();
+            site7->setAsBoundaryVertex();
+            site8->setAsBoundaryVertex();
 
             AddSite(site1);
             AddSite(site2);
@@ -257,11 +257,11 @@ namespace HDV::Voronoi
             for (auto i = 0; i < mSites.size(); i++)
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
-                if (site->GetIsBoundaryVertex())
+                if (site->isBoundaryVertex())
                     continue;
 
                 auto centroid = site->Polygon->GetCentroid();
-                site->Set(centroid.x, centroid.y, centroid.z);
+                site->set(centroid.x, centroid.y, centroid.z);
             }
         }
 
@@ -274,7 +274,7 @@ namespace HDV::Voronoi
 
         void LloydIteration()
         {
-            // Reset();
+            // reset();
             Compute();
             Move2Centroid();
         }
@@ -303,19 +303,19 @@ namespace HDV::Voronoi
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
 
-                if (site->Z() < (center.z + mBBox.depth() * 0.2))
-                    mConstrainSites.insert(site->GetId());
+                if (site->z() < (center.z + mBBox.depth() * 0.2))
+                    mConstrainSites.insert(site->id());
             }
 
             mMesh->mConstrainSites = mConstrainSites;
         }
 
-        void Reset()
+        void reset()
         {
             for (auto i = 0; i < mSites.size(); i++)
             {
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite3>(mSites[i]);
-                site->Reset();
+                site->reset();
             }
         }
     };

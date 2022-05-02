@@ -21,7 +21,7 @@ KiriModelTinyObjLoader::KiriModelTinyObjLoader(const String &name, const String 
 
     KIRI_LOG_INFO("Tiny Obj Loader Model Path={0:s}", filePath);
 
-    ClearData();
+    clearData();
     mMeshReady = Load(filePath);
 
     KIRI_LOG_INFO("Tiny Obj Loader Status={0:s}", mMeshReady ? "True" : "False");
@@ -31,7 +31,7 @@ KiriModelTinyObjLoader::KiriModelTinyObjLoader(const String &name, const String 
         ComputeFaceVertexData();
 };
 
-void KiriModelTinyObjLoader::ClearData()
+void KiriModelTinyObjLoader::clearData()
 {
     mMeshReady = false;
     mNumTriangles = 0;

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <kiri2d/hdv_toolkit/hull/simplex_wrap.h>
+#include <kiri2d/hdv_toolkit/hull/simplex_node.h>
 namespace HDV::Hull
 {
     class DeferredSimplex
@@ -21,18 +21,18 @@ namespace HDV::Hull
 
         virtual ~DeferredSimplex() {}
 
-        void Clear()
+        void clear()
         {
             Face = nullptr;
             Pivot = nullptr;
             OldFace = nullptr;
         }
 
-        std::shared_ptr<SimplexWrap> Face;
+        std::shared_ptr<SimplexNode> Face;
 
-        std::shared_ptr<SimplexWrap> Pivot;
+        std::shared_ptr<SimplexNode> Pivot;
 
-        std::shared_ptr<SimplexWrap> OldFace;
+        std::shared_ptr<SimplexNode> OldFace;
 
         int FaceIndex;
 

@@ -1,10 +1,11 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-02 13:32:18
+ * @LastEditTime: 2022-05-02 15:33:37
  * @LastEditors: Xu.WANG
  * @Description:
  */
+
 #ifndef _HDV_VORONOI_REGION_H_
 #define _HDV_VORONOI_REGION_H_
 
@@ -21,13 +22,13 @@ namespace HDV::Voronoi
         explicit VoronoiRegion() {}
         virtual ~VoronoiRegion() {}
 
-        void Clear()
+        void clear()
         {
             for (auto i = 0; i < Cells.size(); i++)
-                Cells[i]->Clear();
+                Cells[i]->clear();
 
             for (auto i = 0; i < Edges.size(); i++)
-                Edges[i]->Clear();
+                Edges[i]->clear();
 
             Cells.clear();
             Edges.clear();

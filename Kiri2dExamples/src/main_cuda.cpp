@@ -7,7 +7,7 @@
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
  */
 
-#if defined (KIRI_WINDOWS) && defined (ENABLE_CUDA)  
+#if defined(KIRI_WINDOWS) && defined(ENABLE_CUDA)
 
 #include <kiri2d/voronoi/voro_treemap_nocaj12.h>
 #include <kiri2d/renderer/renderer.h>
@@ -422,8 +422,8 @@ void VoronoiExample()
         renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -553,8 +553,8 @@ void VoronoiExample1()
         renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -844,8 +844,8 @@ void LloydRelaxationExample()
         renderer->DrawCanvas();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -924,8 +924,8 @@ void NOCAJ12Example()
         renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -1070,8 +1070,8 @@ void NOCAJ12Example1()
     //     renderer->DrawCanvas();
     //     cv::imshow("KIRI2D", renderer->GetCanvas());
     //     cv::waitKey(5);
-    //     renderer->ClearCanvas();
-    //     scene->Clear();
+    //     renderer->clearCanvas();
+    //     scene->clear();
     // }
 }
 
@@ -1139,7 +1139,7 @@ void VoroTestExample()
             // KIRI_LOG_DEBUG("idx={0}, radius={1}", cnt, radius);
             auto radius = pcdis(gen);
             auto site = std::make_shared<KiriVoroSite>(sitePos2);
-            site->SetRadius(20.f);
+            site->setRadius(20.f);
             voroPorOptiCore->AddSite(site);
             cnt++;
         }
@@ -1186,8 +1186,8 @@ void VoroTestExample()
         // renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -1338,8 +1338,8 @@ void VoroPorosityOptimizeConvexExample()
             renderer->DrawCanvas();
             renderer->SaveImages2File();
 
-            renderer->ClearCanvas();
-            scene->Clear();
+            renderer->clearCanvas();
+            scene->clear();
         }
 
         if (i % 100 == 1)
@@ -1468,8 +1468,8 @@ void VoroPorosityTreemapOptiExample()
         renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -1702,8 +1702,8 @@ void VoroPorosityOptimizeScaleExample()
             renderer->DrawCanvas();
             renderer->SaveImages2File();
 
-            renderer->ClearCanvas();
-            scene->Clear();
+            renderer->clearCanvas();
+            scene->clear();
         }
 
         // if ((i % 1000 == 1) || (i == maxIter - 1))
@@ -1995,8 +1995,8 @@ void LoadVoronoiExample()
     renderer->DrawCanvas();
     renderer->SaveImages2File();
 
-    renderer->ClearCanvas();
-    scene->Clear();
+    renderer->clearCanvas();
+    scene->clear();
 
     ExportNSData2CSVFile("ns_data.csv", ns_data);
 }
@@ -2032,7 +2032,7 @@ void UniPoissonDiskSampler()
 
     // Vector2F offset = Vector2F(windowwidth - bbox.width(), windowheight - bbox.height()) / 2.f;
     Vector2F offset = Vector2F(500.f, 0.f);
-    boundary.SetOffset(offset);
+    boundary.setOffset(offset);
 
     Vector<KiriPoint2> points;
     Vector<KiriLine2> lines;
@@ -2099,8 +2099,8 @@ void UniPoissonDiskSampler()
             cv::imshow("KIRI2D", renderer->GetCanvas());
             cv::waitKey(5);
 
-            renderer->ClearCanvas();
-            scene->Clear();
+            renderer->clearCanvas();
+            scene->clear();
         }
     }
 }
@@ -2204,8 +2204,8 @@ void DebugNSParticles()
     // cv::imshow("KIRI2D", renderer->GetCanvas());
     // cv::waitKey(5);
 
-    renderer->ClearCanvas();
-    scene->Clear();
+    renderer->clearCanvas();
+    scene->clear();
 }
 
 #include <kiri2d/voronoi/voro_ns_optimize.h>
@@ -2371,8 +2371,8 @@ void VoronoiNSOptimize()
         renderer->DrawCanvas();
         renderer->SaveImages2File();
 
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
 
         // debug g
         // scene->AddLines(glines);
@@ -2381,8 +2381,8 @@ void VoronoiNSOptimize()
         renderer->DrawCanvas();
         renderer->SaveImages2FileWithPrefix("group");
 
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
 
         auto error = ns_opti->ComputeIterate();
         KIRI_LOG_DEBUG("iter={0}, error={1}", iter_num++, error);
@@ -2451,8 +2451,8 @@ void TestPolygonUnion()
         // renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 #include <kiri2d/hdv_toolkit/primitives/vertex2.h>
@@ -2654,8 +2654,8 @@ void QuickHullConvexHull2d()
         // renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -2694,7 +2694,7 @@ void QuickHullDelaunayTriangulation2d()
 
     /*  for (size_t i = 0; i < vet2.size(); i++)
      {
-         vet2[i]->ToString();
+         vet2[i]->toString();
      }*/
 
     // scene renderer config
@@ -2711,9 +2711,9 @@ void QuickHullDelaunayTriangulation2d()
     for (size_t i = 0; i < res2.size(); i++)
     {
         auto simplex = res2[i]->mSimplex;
-        auto line1 = KiriLine2(Vector2F(simplex->Vertices[0]->X(), simplex->Vertices[0]->Y()) + offset, Vector2F(simplex->Vertices[1]->X(), simplex->Vertices[1]->Y()) + offset);
-        auto line2 = KiriLine2(Vector2F(simplex->Vertices[0]->X(), simplex->Vertices[0]->Y()) + offset, Vector2F(simplex->Vertices[2]->X(), simplex->Vertices[2]->Y()) + offset);
-        auto line3 = KiriLine2(Vector2F(simplex->Vertices[1]->X(), simplex->Vertices[1]->Y()) + offset, Vector2F(simplex->Vertices[2]->X(), simplex->Vertices[2]->Y()) + offset);
+        auto line1 = KiriLine2(Vector2F(simplex->vertices()[0]->X(), simplex->vertices()[0]->Y()) + offset, Vector2F(simplex->vertices()[1]->X(), simplex->vertices()[1]->Y()) + offset);
+        auto line2 = KiriLine2(Vector2F(simplex->vertices()[0]->X(), simplex->vertices()[0]->Y()) + offset, Vector2F(simplex->vertices()[2]->X(), simplex->vertices()[2]->Y()) + offset);
+        auto line3 = KiriLine2(Vector2F(simplex->vertices()[1]->X(), simplex->vertices()[1]->Y()) + offset, Vector2F(simplex->vertices()[2]->X(), simplex->vertices()[2]->Y()) + offset);
 
         line1.thick = 1.f;
         line2.thick = 1.f;
@@ -2745,8 +2745,8 @@ void QuickHullDelaunayTriangulation2d()
         renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -2806,7 +2806,7 @@ void QuickHullVoronoi2d()
         for (size_t i = 0; i < sites.size(); i++)
         {
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-            if (site->GetIsBoundaryVertex())
+            if (site->isBoundaryVertex())
                 continue;
 
             auto cellpolygon = site->CellPolygon;
@@ -2820,10 +2820,10 @@ void QuickHullVoronoi2d()
 
                 // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
             }
-            // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Verts.size());
-            precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->Verts.size());
+            precompute_points.emplace_back(Vector2F(site->x()(), site->y()()));
 
-            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
         std::vector<KiriLine2> lines;
@@ -2845,8 +2845,8 @@ void QuickHullVoronoi2d()
         // renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -2910,7 +2910,7 @@ void BalzerIEEE2009Example()
 
         for (size_t i = 0; i < sites.size(); i++)
         {
-            if (sites[i]->GetIsBoundaryVertex())
+            if (sites[i]->isBoundaryVertex())
                 continue;
 
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
@@ -2929,9 +2929,9 @@ void BalzerIEEE2009Example()
                     // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
                 }
             }
-            precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+            precompute_points.emplace_back(Vector2F(site->x()(), site->y()()));
 
-            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
         std::vector<KiriLine2> lines;
@@ -2954,8 +2954,8 @@ void BalzerIEEE2009Example()
         //     renderer->DrawCanvas();
         //     cv::imshow("KIRI2D", renderer->GetCanvas());
         //     cv::waitKey(5);
-        //     renderer->ClearCanvas();
-        //     scene->Clear();
+        //     renderer->clearCanvas();
+        //     scene->clear();
         // }
         // else
         // {
@@ -2966,8 +2966,8 @@ void BalzerIEEE2009Example()
         renderer->DrawCanvas();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -3091,7 +3091,7 @@ void MSSampler2D()
         for (size_t i = 0; i < sites.size(); i++)
         {
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-            if (site->GetIsBoundaryVertex())
+            if (site->isBoundaryVertex())
                 continue;
 
             auto cellpolygon = site->CellPolygon;
@@ -3109,10 +3109,10 @@ void MSSampler2D()
                 }
             }
 
-            // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Positions.size());
-            precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->Positions.size());
+            precompute_points.emplace_back(Vector2F(site->x()(), site->y()()));
 
-            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
         std::vector<KiriLine2> lines;
@@ -3160,8 +3160,8 @@ void MSSampler2D()
             renderer->SaveImages2File();
         // cv::imshow("KIRI2D", renderer->GetCanvas());
         // cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 

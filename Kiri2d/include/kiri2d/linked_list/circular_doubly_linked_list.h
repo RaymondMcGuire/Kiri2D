@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
  * @LastEditTime: 2021-07-22 15:36:50
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\linked_list\circular_doubly_linked_list.h
  */
 
@@ -92,7 +92,7 @@ namespace KIRI
             }
         }
 
-        void RemoveAll()
+        void removeAll()
         {
             if (mHead != NULL)
             {

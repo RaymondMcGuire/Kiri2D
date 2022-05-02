@@ -1,6 +1,13 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2022-05-02 14:06:13
+ * @LastEditors: Xu.WANG
+ * @Description:
+ */
+/***
+ * @Author: Xu.WANG
+ * @Date: 2021-12-23 17:57:21
  * @LastEditTime: 2022-01-12 14:49:13
  * @LastEditors: Xu.WANG
  * @Description:
@@ -17,51 +24,74 @@ namespace HDV::Primitives
     class Vertex3 : public Vertex
     {
     public:
-        explicit Vertex3() : Vertex(3) {}
-        explicit Vertex3(int id) : Vertex(3, id) {}
-        explicit Vertex3(double x, double y, double z) : Vertex(3)
+        explicit Vertex3()
+            : Vertex(3)
         {
-            mPosition[0] = x;
-            mPosition[1] = y;
-            mPosition[2] = z;
         }
-        explicit Vertex3(double x, double y, double z, int id) : Vertex(3, id)
-        {
-            mPosition[0] = x;
-            mPosition[1] = y;
-            mPosition[2] = z;
-        }
-        virtual ~Vertex3() {}
 
-        void Set(double x, double y, double z)
+        explicit Vertex3(int id)
+            : Vertex(3, id)
+        {
+        }
+
+        explicit Vertex3(double x, double y, double z)
+            : Vertex(3)
         {
             mPosition[0] = x;
             mPosition[1] = y;
             mPosition[2] = z;
         }
 
-        double Distance(std::shared_ptr<Vertex3> v)
+        explicit Vertex3(double x, double y, double z, int id)
+            : Vertex(3, id)
         {
-            return std::sqrtf(SqrDistance(v->X(), v->Y(), v->Z()));
+            mPosition[0] = x;
+            mPosition[1] = y;
+            mPosition[2] = z;
         }
 
-        double Distance(double px, double py, double pz)
+        virtual ~Vertex3()
         {
-            return std::sqrtf(SqrDistance(px, py, pz));
         }
 
-        double SqrDistance(double px, double py, double pz)
+        double x() const
         {
-            auto x = mPosition[0] - px;
-            auto y = mPosition[1] - py;
-            auto z = mPosition[2] - pz;
+            return mPosition[0];
+        }
+        double y() const
+        {
+            return mPosition[1];
+        }
+        double z() const
+        {
+            return mPosition[2];
+        }
+
+        void set(double x, double y, double z)
+        {
+            mPosition[0] = x;
+            mPosition[1] = y;
+            mPosition[2] = z;
+        }
+
+        double distanceTo(std::shared_ptr<Vertex3> v)
+        {
+            return std::sqrt(distanceSquaredTo(v->x(), v->y(), v->z()));
+        }
+
+        double distanceTo(double vx, double vy, double vz)
+        {
+            return std::sqrt(distanceSquaredTo(vx, vy, vz));
+        }
+
+        double distanceSquaredTo(double vx, double vy, double vz)
+        {
+            auto x = mPosition[0] - vx;
+            auto y = mPosition[1] - vy;
+            auto z = mPosition[2] - vz;
 
             return x * x + y * y + z * z;
         }
-
-        double X() const { return mPosition[0]; }
-        double Y() const { return mPosition[1]; }
-        double Z() const { return mPosition[2]; }
     };
     typedef std::shared_ptr<Vertex3> Vertex3Ptr;
 } // namespace HDV::Primitives

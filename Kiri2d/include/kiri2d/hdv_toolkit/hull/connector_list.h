@@ -24,22 +24,22 @@ namespace HDV::Hull
         std::shared_ptr<SimplexConnector> First;
         std::shared_ptr<SimplexConnector> Last;
 
-        void Clear()
+        void clear()
         {
 
-            RemoveAll();
+            removeAll();
             First = nullptr;
             Last = nullptr;
         }
 
-        void RemoveAll()
+        void removeAll()
         {
             std::shared_ptr<SimplexConnector> tmp;
             while (First != nullptr)
             {
                 tmp = First;
                 First = First->Next;
-                tmp->Clear();
+                tmp->clear();
                 tmp->Next = nullptr;
                 tmp->Prev.reset();
                 tmp = nullptr;
@@ -57,7 +57,7 @@ namespace HDV::Hull
             First = connector;
         }
 
-        void Remove(const std::shared_ptr<SimplexConnector> &connector)
+        void remove(const std::shared_ptr<SimplexConnector> &connector)
         {
 
             // KIRI_LOG_DEBUG("Connector list prev={0}; next={1}", connector->Prev.lock() == nullptr ? "null" : "has value", connector->Next == nullptr ? "null" : "has value");
@@ -93,7 +93,7 @@ namespace HDV::Hull
             connector->Prev.reset();
         }
 
-        void Add(const std::shared_ptr<SimplexConnector> &connector)
+        void add(const std::shared_ptr<SimplexConnector> &connector)
         {
 
             if (Last != nullptr)
@@ -110,13 +110,13 @@ namespace HDV::Hull
             }
         }
 
-        void ToString()
+        void toString()
         {
             KIRI_LOG_DEBUG("---Connector List Start---");
             std::shared_ptr<SimplexConnector> current{First};
             while (current != nullptr)
             {
-                current->ToString();
+                current->toString();
                 current = current->Next;
             }
             KIRI_LOG_DEBUG("---Connector List End---");

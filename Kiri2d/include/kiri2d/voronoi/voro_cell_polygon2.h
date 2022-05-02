@@ -50,10 +50,10 @@ namespace KIRI
 
         UInt GetLength() const { return mPolygonVertices2.size(); }
 
-        void Reset()
+        void reset()
         {
             mBBox2.reset();
-            mVoroSitesList->RemoveAll();
+            mVoroSitesList->removeAll();
             mPolygonVertices2.clear();
             mBisectors.clear();
             mShrinks.clear();

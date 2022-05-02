@@ -55,7 +55,7 @@ namespace KIRI
 
         void PrintVoroSites();
 
-        void Reset();
+        void reset();
         void ResetVoroSitesWeight();
 
         void ReGenVoroSites();

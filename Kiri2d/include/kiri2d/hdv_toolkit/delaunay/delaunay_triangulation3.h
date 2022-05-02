@@ -30,7 +30,7 @@ namespace HDV::Delaunay
 
         void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
         {
-            this->Clear();
+            this->clear();
 
             auto dim = this->Dimension;
             if (input.size() <= dim + 1)
@@ -39,11 +39,11 @@ namespace HDV::Delaunay
             auto count = input.size();
             for (auto i = 0; i < count; i++)
             {
-                auto v = input[i]->GetPosition();
+                auto v = input[i]->positions();
                 v.resize(dim + 1);
-                v[dim] = input[i]->SqrMagnitude() - input[i]->GetWeight();
+                v[dim] = input[i]->lengthSquared() - input[i]->weight();
 
-                input[i]->mPosition = v;
+                input[i]->positions() = v;
             }
 
             Hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
@@ -52,17 +52,17 @@ namespace HDV::Delaunay
 
             for (auto i = 0; i < count; i++)
             {
-                auto v = input[i]->GetPosition();
+                auto v = input[i]->positions();
                 v.resize(dim);
-                input[i]->mPosition = v;
+                input[i]->positions() = v;
             }
 
             this->Vertices = Hull->GetVertices();
             KIRI_LOG_DEBUG("Hull->GetVertices size={0}; input size={1}", this->Vertices.size(), count);
 
-            this->Centroid->mPosition[0] = Hull->GetCentroid()[0];
-            this->Centroid->mPosition[1] = Hull->GetCentroid()[1];
-            this->Centroid->mPosition[2] = Hull->GetCentroid()[2];
+            this->Centroid->positions()[0] = Hull->GetCentroid()[0];
+            this->Centroid->positions()[1] = Hull->GetCentroid()[1];
+            this->Centroid->positions()[2] = Hull->GetCentroid()[2];
 
             count = Hull->GetSimplexs().size();
 
@@ -71,13 +71,13 @@ namespace HDV::Delaunay
 
                 auto simplex = Hull->GetSimplexs()[i];
 
-                if (simplex->Normals[dim] >= 0.0f)
+                if (simplex->normals()[dim] >= 0.0f)
                 {
-                    for (auto j = 0; j < simplex->Adjacent.size(); j++)
+                    for (auto j = 0; j < simplex->adjacents().size(); j++)
                     {
-                        if (simplex->Adjacent[j] != nullptr)
+                        if (simplex->adjacents()[j] != nullptr)
                         {
-                            simplex->Adjacent[j]->Remove(simplex);
+                            simplex->adjacents()[j]->remove(simplex);
                         }
                     }
                 }
@@ -112,14 +112,14 @@ namespace HDV::Delaunay
         {
             // From MathWorld: http://mathworld.wolfram.com/Circumsphere.html
 
-            auto verts = simplex->Vertices;
+            auto verts = simplex->vertices();
 
             // x, y, z, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][0] = verts[i]->mPosition[0];
-                mMatrixBuffer[i][1] = verts[i]->mPosition[1];
-                mMatrixBuffer[i][2] = verts[i]->mPosition[2];
+                mMatrixBuffer[i][0] = verts[i]->positions()[0];
+                mMatrixBuffer[i][1] = verts[i]->positions()[1];
+                mMatrixBuffer[i][2] = verts[i]->positions()[2];
                 mMatrixBuffer[i][3] = 1;
             }
             auto a = Determinant();
@@ -127,28 +127,28 @@ namespace HDV::Delaunay
             // size, y, z, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][0] = verts[i]->SqrMagnitude() - verts[i]->GetWeight();
+                mMatrixBuffer[i][0] = verts[i]->lengthSquared() - verts[i]->weight();
             }
             auto dx = Determinant();
 
             // size, x, z, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][1] = verts[i]->mPosition[0];
+                mMatrixBuffer[i][1] = verts[i]->positions()[0];
             }
             auto dy = -Determinant();
 
             // size, x, y, 1
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][2] = verts[i]->mPosition[1];
+                mMatrixBuffer[i][2] = verts[i]->positions()[1];
             }
             auto dz = Determinant();
 
             // size, x, y, z
             for (auto i = 0; i < 4; i++)
             {
-                mMatrixBuffer[i][3] = verts[i]->mPosition[2];
+                mMatrixBuffer[i][3] = verts[i]->positions()[2];
             }
             auto c = Determinant();
 

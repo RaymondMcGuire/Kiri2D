@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:33:21
  * @LastEditTime: 2021-06-07 14:33:52
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\data\face3.cpp
  */
 
@@ -79,8 +79,8 @@ namespace KIRI
     //         return;
     //     }
 
-    //     if (cur_edge->GetId() == e->GetId())
-    //         KIRI_LOG_ERROR("LinkEdge ERROR:edge idx={0}, face idx={1}", cur_edge->GetId(), mIdx);
+    //     if (cur_edge->id() == e->id())
+    //         KIRI_LOG_ERROR("LinkEdge ERROR:edge idx={0}, face idx={1}", cur_edge->id(), mIdx);
 
     //     e->SetTwinEdge(cur_edge);
     //     cur_edge->SetTwinEdge(e);

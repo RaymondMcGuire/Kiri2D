@@ -38,11 +38,11 @@ namespace HDV::Delaunay
 
         std::shared_ptr<HDV::Hull::ConvexHull<VERTEXPTR>> Hull;
 
-        virtual void Clear()
+        virtual void clear()
         {
             for (auto i = 0; i < Cells.size(); i++)
             {
-                Cells[i]->Clear();
+                Cells[i]->clear();
             }
 
             Cells.clear();
@@ -50,7 +50,7 @@ namespace HDV::Delaunay
             Centroid = std::make_shared<VERTEX>();
 
             if (Hull != nullptr)
-                Hull->Clear();
+                Hull->clear();
         }
 
         virtual void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) = 0;

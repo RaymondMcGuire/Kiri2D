@@ -22,7 +22,7 @@ namespace KIRI
     public:
         explicit KiriVoroPoroOptiCore()
         {
-            Reset();
+            reset();
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
@@ -44,7 +44,7 @@ namespace KIRI
 
         void Init();
 
-        void Reset();
+        void reset();
 
         float ComputeMiniumPorosity();
         Vector<Vector4F> GetCellSSkel();

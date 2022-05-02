@@ -72,7 +72,7 @@ namespace KIRI
             Vector<Vector4F> sites_data;
             auto sites = mRootCore->GetSites();
             for (size_t i = 0; i < sites.size(); i++)
-                sites_data.emplace_back(Vector4F(sites[i]->GetValue().x, sites[i]->GetValue().y, sites[i]->GetWeight(), sites[i]->GetRadius()));
+                sites_data.emplace_back(Vector4F(sites[i]->GetValue().x, sites[i]->GetValue().y, sites[i]->weight(), sites[i]->radius()));
 
             return sites_data;
         }

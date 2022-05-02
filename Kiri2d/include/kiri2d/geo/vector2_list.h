@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
  * @LastEditTime: 2021-06-16 00:38:26
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\vector2_list.h
  */
 
@@ -63,7 +63,7 @@ namespace KIRI
         {
             auto list = std::make_shared<KiriVector2List>();
             Clone(list);
-            RemoveAll();
+            removeAll();
             if (list->GetHead() != NULL)
             {
                 auto x = list->GetHead();

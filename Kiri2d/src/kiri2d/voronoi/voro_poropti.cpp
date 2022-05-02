@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
  * @LastEditTime: 2021-10-07 02:23:26
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti.cpp
  */
 
@@ -76,7 +76,7 @@ namespace KIRI
             {
                 auto radius = pcdis(gen);
                 auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y);
-                site->SetRadius(radius);
+                site->setRadius(radius);
                 mRootCore->AddSite(site);
                 cnt++;
             }

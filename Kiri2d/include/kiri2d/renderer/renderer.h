@@ -31,10 +31,10 @@ namespace KIRI2D
             mWindowWidth = mScene->GetWindowWidth();
             mWindowHeight = mScene->GetWindowHeight();
             mCanvas = cv::Mat::zeros(mWindowHeight, mWindowWidth, CV_8UC3);
-            this->ClearCanvas();
+            this->clearCanvas();
         }
 
-        void ClearCanvas();
+        void clearCanvas();
         void DrawCanvas();
         void SaveImages2File();
         void SaveImages2FileWithPrefix(std::string prefix);

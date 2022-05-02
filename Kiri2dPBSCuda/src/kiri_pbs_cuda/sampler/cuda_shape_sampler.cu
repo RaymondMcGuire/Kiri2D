@@ -26,7 +26,7 @@ CudaShapeSampler::CudaShapeSampler(const LevelSetShapeInfo &info,
                         CuCeilDiv(info.GridSize.z, dim3BlockSize))
 
 {
-  if (mFaceVertices.Length() != mInfo.NumOfFaces * 3) {
+  if (mFaceVertices.length() != mInfo.NumOfFaces * 3) {
     printf("Loaded mesh data is not correct! \n");
     return;
   }

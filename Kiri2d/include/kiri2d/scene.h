@@ -65,7 +65,7 @@ namespace KIRI2D
         inline const auto GetWindowWidth() { return mWindowWidth; }
         inline const auto GetWindowHeight() { return mWindowHeight; }
 
-        void Clear()
+        void clear()
         {
             mSDFObjects.clear();
             mPoints.clear();

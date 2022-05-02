@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
  * @LastEditTime: 2021-06-04 15:38:37
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_treemap_core.cpp
  */
 
@@ -14,7 +14,7 @@ namespace KIRI
     void KiriVoroTreeMapCore::Init()
     {
 
-        Reset();
+        reset();
 
         ComputeBoundaryPolygonArea();
 
@@ -25,7 +25,7 @@ namespace KIRI
         mPowerDiagram->ComputeDiagram();
     }
 
-    void KiriVoroTreeMapCore::Reset()
+    void KiriVoroTreeMapCore::reset()
     {
         mCompleteArea = 0.f;
         mCurGlobalAreaError = 1.f;
@@ -103,8 +103,8 @@ namespace KIRI
                 if (voroSite[i]->GetIdx() != voroSite[j]->GetIdx())
                 {
                     auto distance = voroSite[i]->GetDistance2(voroSite[j]);
-                    if (std::sqrt(voroSite[i]->GetWeight()) >= distance)
-                        voroSite[j]->SetWeight(distance * distance);
+                    if (std::sqrt(voroSite[i]->weight()) >= distance)
+                        voroSite[j]->setWeight(distance * distance);
                 }
             }
         }
@@ -136,7 +136,7 @@ namespace KIRI
 
             auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
             auto step = 1.f * gAvg * errorTransform;
-            auto weight = voroSite[i]->GetWeight();
+            auto weight = voroSite[i]->weight();
 
             auto epsilon = 0.01f;
             if (increase < (1.f - epsilon))
@@ -144,7 +144,7 @@ namespace KIRI
             else if (increase > (1.f + epsilon))
                 weight += step;
 
-            voroSite[i]->SetWeight(weight);
+            voroSite[i]->setWeight(weight);
         }
     }
 
@@ -196,8 +196,8 @@ namespace KIRI
 
         for (size_t i = 0; i < voroSite.size(); i++)
         {
-            //KIRI_LOG_DEBUG("voro site pos={0},{1}", voroSite[i]->GetValue().x, voroSite[i]->GetValue().y);
-            // KIRI_LOG_ERROR("GetGlobalAvgDistance:: voro n num={0}", voroSite[i]->GetNeighborSites().size());
+            // KIRI_LOG_DEBUG("voro site pos={0},{1}", voroSite[i]->GetValue().x, voroSite[i]->GetValue().y);
+            //  KIRI_LOG_ERROR("GetGlobalAvgDistance:: voro n num={0}", voroSite[i]->GetNeighborSites().size());
             if (!voroSite[i]->GetNeighborSites().empty())
             {
                 for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
@@ -232,7 +232,7 @@ namespace KIRI
 
         // mCurGlobalAreaError = GetGlobalAreaError();
         // mCurMaxAreaError = GetMaxAreaError();
-        //KIRI_LOG_INFO("Iteration:{0}, Local max area error={1}, Global area error={2}", mCurIteration, mCurMaxAreaError, mCurGlobalAreaError);
+        // KIRI_LOG_INFO("Iteration:{0}, Local max area error={1}, Global area error={2}", mCurIteration, mCurMaxAreaError, mCurGlobalAreaError);
     }
 
     void KiriVoroTreeMapCore::Compute()

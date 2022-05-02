@@ -27,7 +27,7 @@ namespace HDV::Sampler
         void AddSite(double x, double y, double radius)
         {
             auto site = std::make_shared<Voronoi::VoronoiSite2>(x, y, mSiteCounter++);
-            site->SetRadius(radius);
+            site->setRadius(radius);
             mPowerDiagram->AddSite(site);
         }
 
@@ -53,7 +53,7 @@ namespace HDV::Sampler
 
         void Init()
         {
-            Reset();
+            reset();
 
             ComputeBoundaryArea();
 
@@ -71,16 +71,16 @@ namespace HDV::Sampler
             {
 
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-                if (siteI->GetIsBoundaryVertex())
+                if (siteI->isBoundaryVertex())
                     continue;
 
                 if (!siteI->CellPolygon)
-                    remove.emplace_back(siteI->GetId());
+                    remove.emplace_back(siteI->id());
                 else
                 {
                     auto centroid = siteI->CellPolygon->GetCentroid();
                     if (!mPowerDiagram->GetBoundary()->Contains(centroid))
-                        remove.emplace_back(siteI->GetId());
+                        remove.emplace_back(siteI->id());
                 }
             }
 
@@ -103,7 +103,7 @@ namespace HDV::Sampler
             if (needAddSites)
             {
                 mPowerDiagram->Compute();
-                // KIRI_LOG_DEBUG("Iter={0} : Add Sites!!!!", mCurIteration);
+                // KIRI_LOG_DEBUG("Iter={0} : add Sites!!!!", mCurIteration);
             }
             else
             {
@@ -137,7 +137,7 @@ namespace HDV::Sampler
             return mCurGlobalPorosity;
         }
 
-        void Reset()
+        void reset()
         {
             mCurIteration = 0;
             mCompleteArea = 0.0;
@@ -165,15 +165,15 @@ namespace HDV::Sampler
             for (int i = 0; i < sites.size(); i++)
             {
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-                if (siteI->GetIsBoundaryVertex())
+                if (siteI->isBoundaryVertex())
                     continue;
 
-                auto n = siteI->mNeighborSites.size();
+                auto n = siteI->neighbors().size();
                 if (n > 2)
                 {
                     auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->GetArea();
-                    auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
-                    // auto targetArea = siteI->GetRadius() * siteI->GetRadius() * kiri_math_mini::pi<double>();
+                    auto targetArea = n * siteI->radius() * siteI->radius() * std::tan(kiri_math_mini::pi<double>() / n);
+                    // auto targetArea = siteI->radius() * siteI->radius() * kiri_math_mini::pi<double>();
                     error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.0);
                 }
             }
@@ -190,15 +190,15 @@ namespace HDV::Sampler
                                    : sum, num)
             for (int i = 0; i < site.size(); i++)
             {
-                if (site[i]->GetIsBoundaryVertex())
+                if (site[i]->isBoundaryVertex())
                     continue;
 
-                if (!site[i]->mNeighborSites.empty())
+                if (!site[i]->neighbors().empty())
                 {
-                    for (auto neighbor : site[i]->mNeighborSites)
+                    for (auto neighbor : site[i]->neighbors())
                     {
                         auto sn = std::dynamic_pointer_cast<Primitives::Vertex2>(neighbor);
-                        auto distance = site[i]->Distance(sn);
+                        auto distance = site[i]->distanceTo(sn);
                         sum += distance;
                         num++;
                     }
@@ -245,7 +245,7 @@ namespace HDV::Sampler
             for (int i = 0; i < sites.size(); i++)
             {
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-                if (siteI->GetIsBoundaryVertex())
+                if (siteI->isBoundaryVertex())
                     continue;
 
                 auto poly = siteI->CellPolygon;
@@ -256,13 +256,13 @@ namespace HDV::Sampler
                         poly->ComputeSSkel1998Convex();
 
                     auto mic = poly->ComputeMICByStraightSkeleton();
-                    circles.emplace_back(Vector4D(mic, siteI->GetRadius()));
-                    // KIRI_LOG_DEBUG("has poly: circle={0},{1},{2},{3}", mic.x, mic.y, mic.z, siteI->GetRadius());
+                    circles.emplace_back(Vector4D(mic, siteI->radius()));
+                    // KIRI_LOG_DEBUG("has poly: circle={0},{1},{2},{3}", mic.x, mic.y, mic.z, siteI->radius());
                 }
                 else
                 {
                     KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
-                    // remove.emplace_back(siteI->GetRadius());
+                    // remove.emplace_back(siteI->radius());
                 }
             }
 
@@ -271,21 +271,21 @@ namespace HDV::Sampler
 
         double ComputeMiniumPorosity()
         {
-            auto maxCircleArray = this->GetMICBySSkel();
+            auto maxCirclearray = this->GetMICBySSkel();
 
             auto sum = 0.0;
 
 #pragma omp parallel for reduction(+ \
                                    : sum)
-            for (int i = 0; i < maxCircleArray.size(); i++)
+            for (int i = 0; i < maxCirclearray.size(); i++)
             {
-                auto circle = maxCircleArray[i];
+                auto circle = maxCirclearray[i];
                 sum += circle.z * circle.z * kiri_math_mini::pi<double>();
             }
 
             auto boundary = mPowerDiagram->GetBoundary();
 
-            // KIRI_LOG_DEBUG("boundary area ={0}, sum={1}, max circle size={2}", boundary->GetArea(), sum, maxCircleArray.size());
+            // KIRI_LOG_DEBUG("boundary area ={0}, sum={1}, max circle size={2}", boundary->GetArea(), sum, maxCirclearray.size());
             return (boundary->GetArea() - sum) / boundary->GetArea();
         }
 
@@ -297,7 +297,7 @@ namespace HDV::Sampler
             for (int i = 0; i < sites.size(); i++)
             {
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-                if (siteI->GetIsBoundaryVertex())
+                if (siteI->isBoundaryVertex())
                     continue;
 
                 auto poly = siteI->CellPolygon;
@@ -308,10 +308,10 @@ namespace HDV::Sampler
                         poly->ComputeSSkel1998Convex();
 
                     auto micI = poly->ComputeMICByStraightSkeleton();
-                    for (auto neighbor : siteI->mNeighborSites)
+                    for (auto neighbor : siteI->neighbors())
                     {
                         auto siteJ = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(neighbor);
-                        if (siteJ->GetIsBoundaryVertex())
+                        if (siteJ->isBoundaryVertex())
                             continue;
 
                         auto polyJ = siteJ->CellPolygon;
@@ -325,30 +325,30 @@ namespace HDV::Sampler
 
                             auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
                             // if ((disIJ < ((micI.z + micJ.z) / 2.f)) &&
-                            //     !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetId()) &&
-                            //     !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->GetId()))
-                            //     removeVoroIdxs.emplace_back(siteJ->GetId());
+                            //     !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->id()) &&
+                            //     !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteJ->id()))
+                            //     removeVoroIdxs.emplace_back(siteJ->id());
 
                             if ((disIJ < ((micI.z + micJ.z) / 2.f)))
-                                removeVoroIdxs.emplace_back(siteJ->GetId());
+                                removeVoroIdxs.emplace_back(siteJ->id());
                         }
                         else
                         {
                             KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
-                            // remove.emplace_back(siteI->GetRadius());
+                            // remove.emplace_back(siteI->radius());
                         }
                     }
                 }
                 else
                 {
                     KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
-                    // remove.emplace_back(siteI->GetRadius());
+                    // remove.emplace_back(siteI->radius());
                 }
             }
 
             if (!removeVoroIdxs.empty())
             {
-                KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
+                KIRI_LOG_DEBUG("remove overlapping cell, size={0}", removeVoroIdxs.size());
                 mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
                 return true;
             }
@@ -389,9 +389,9 @@ namespace HDV::Sampler
                             auto pos = mPowerDiagram->GetBoundary()->GetRndInnerPoint();
                             auto nSite = std::make_shared<Voronoi::VoronoiSite2>(pos.x, pos.y, mSiteCounter++);
 
-                            nSite->SetRadius(dist(gen));
+                            nSite->setRadius(dist(gen));
                             newVoroArrays.emplace_back(nSite);
-                            // KIRI_LOG_DEBUG("new site={0},{1};radius={2};id={3}", pos.x, pos.y, nSite->GetRadius(), mSiteCounter - 1);
+                            // KIRI_LOG_DEBUG("new site={0},{1};radius={2};id={3}", pos.x, pos.y, nSite->radius(), mSiteCounter - 1);
                         }
                     }
                 }
@@ -429,42 +429,42 @@ namespace HDV::Sampler
 #pragma omp parallel for
             for (int i = 0; i < site.size(); i++)
             {
-                if (site[i]->GetIsBoundaryVertex())
+                if (site[i]->isBoundaryVertex())
                     continue;
 
                 auto total = 0.0;
                 auto cnt = 0;
                 auto siteI = site[i];
 
-                if (!siteI->mNeighborSites.empty())
+                if (!siteI->neighbors().empty())
                 {
-                    auto radiusI = siteI->GetRadius();
+                    auto radiusI = siteI->radius();
 
-                    for (auto neighbor : siteI->mNeighborSites)
+                    for (auto neighbor : siteI->neighbors())
                     {
                         auto sn = std::dynamic_pointer_cast<Primitives::Vertex2>(neighbor);
-                        total += sn->GetWeight() - sn->GetRadius() * sn->GetRadius();
+                        total += sn->weight() - sn->radius() * sn->radius();
                         cnt++;
                     }
 
                     auto avg = total / cnt;
 
-                    for (auto neighbor : siteI->mNeighborSites)
+                    for (auto neighbor : siteI->neighbors())
                     {
                         auto sn = std::dynamic_pointer_cast<Primitives::Vertex2>(neighbor);
-                        auto distance = siteI->Distance(sn);
-                        auto minW = std::abs(std::sqrt(sn->GetWeight()) - std::sqrt(siteI->GetWeight()));
-                        auto maxW = std::sqrt(sn->GetWeight()) + std::sqrt(siteI->GetWeight());
+                        auto distance = site[i]->distanceTo(sn);
+                        auto minW = std::abs(std::sqrt(sn->weight()) - std::sqrt(siteI->weight()));
+                        auto maxW = std::sqrt(sn->weight()) + std::sqrt(siteI->weight());
                         if (distance < maxW && distance > minW)
                         {
-                            auto sum = sn->GetWeight() - sn->GetRadius() * sn->GetRadius();
+                            auto sum = sn->weight() - sn->radius() * sn->radius();
                             mWeightError[i] += avg - sum;
                             mWeightAbsError[i] += std::abs(avg - sum);
                             mCurGlobalWeightError += std::abs(avg - sum);
                         }
                         else
                         {
-                            auto pw = distance * distance - siteI->GetWeight();
+                            auto pw = distance * distance - siteI->weight();
                             mWeightError[i] += pw;
                             mWeightAbsError[i] += std::abs(pw);
                             mCurGlobalWeightError += std::abs(pw);
@@ -490,20 +490,20 @@ namespace HDV::Sampler
             {
 
                 auto siteI = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-                if (siteI->GetIsBoundaryVertex())
+                if (siteI->isBoundaryVertex())
                     continue;
 
-                auto weight = siteI->GetWeight();
+                auto weight = siteI->weight();
 
                 auto areaWeight = 0.0;
                 auto bcWeight = 0.0;
 
-                auto n = siteI->mNeighborSites.size();
+                auto n = siteI->neighbors().size();
                 if (n > 2)
                 {
                     auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->GetArea();
-                    auto targetArea = n * siteI->GetRadius() * siteI->GetRadius() * std::tan(kiri_math_mini::pi<double>() / n);
-                    // auto targetArea = kiri_math_mini::pi<double>() * siteI->GetRadius() * siteI->GetRadius();
+                    auto targetArea = n * siteI->radius() * siteI->radius() * std::tan(kiri_math_mini::pi<double>() / n);
+                    // auto targetArea = kiri_math_mini::pi<double>() * siteI->radius() * siteI->radius();
 
                     auto pArea = 2.0;
                     if (currentArea != 0.0)
@@ -526,7 +526,7 @@ namespace HDV::Sampler
                 else if (mWeightError[i] > 0.0)
                     bcWeight += step;
 
-                siteI->SetWeight(weight + areaWeight + bcWeight);
+                siteI->setWeight(weight + areaWeight + bcWeight);
             }
         }
 

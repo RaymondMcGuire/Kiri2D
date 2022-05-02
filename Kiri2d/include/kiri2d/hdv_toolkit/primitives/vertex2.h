@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-01-10 23:49:49
+ * @LastEditTime: 2022-05-02 14:05:04
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -17,46 +17,67 @@ namespace HDV::Primitives
     class Vertex2 : public Vertex
     {
     public:
-        explicit Vertex2() : Vertex(2) {}
-        explicit Vertex2(int id) : Vertex(2, id) {}
-        explicit Vertex2(double x, double y) : Vertex(2)
+        explicit Vertex2()
+            : Vertex(2)
+        {
+        }
+
+        explicit Vertex2(int id)
+            : Vertex(2, id)
+        {
+        }
+
+        explicit Vertex2(double x, double y)
+            : Vertex(2)
         {
             mPosition[0] = x;
             mPosition[1] = y;
         }
-        explicit Vertex2(double x, double y, int id) : Vertex(2, id)
-        {
-            mPosition[0] = x;
-            mPosition[1] = y;
-        }
-        virtual ~Vertex2() {}
 
-        void Set(double x, double y)
+        explicit Vertex2(double x, double y, int id)
+            : Vertex(2, id)
         {
             mPosition[0] = x;
             mPosition[1] = y;
         }
 
-        double Distance(std::shared_ptr<Vertex2> v)
+        virtual ~Vertex2()
         {
-            return std::sqrtf(SqrDistance(v->X(), v->Y()));
         }
 
-        double Distance(double px, double py)
+        double x() const
         {
-            return std::sqrtf(SqrDistance(px, py));
+            return mPosition[0];
         }
 
-        double SqrDistance(double px, double py)
+        double y() const
         {
-            auto x = mPosition[0] - px;
-            auto y = mPosition[1] - py;
+            return mPosition[1];
+        }
+
+        void set(double x, double y)
+        {
+            mPosition[0] = x;
+            mPosition[1] = y;
+        }
+
+        double distanceTo(std::shared_ptr<Vertex2> v)
+        {
+            return std::sqrt(distanceSquaredTo(v->x(), v->y()));
+        }
+
+        double distanceTo(double vx, double vy)
+        {
+            return std::sqrt(distanceSquaredTo(vx, vy));
+        }
+
+        double distanceSquaredTo(double vx, double vy)
+        {
+            auto x = mPosition[0] - vx;
+            auto y = mPosition[1] - vy;
 
             return x * x + y * y;
         }
-
-        double X() const { return mPosition[0]; }
-        double Y() const { return mPosition[1]; }
     };
     typedef std::shared_ptr<Vertex2> Vertex2Ptr;
 } // namespace HDV::Primitives

@@ -58,10 +58,10 @@ namespace KIRI2D
         const Int FindRegion(Vector2F p);
         const SDF2DInfo CalcClosestDistance(Vector2F p);
 
-        void SetOffset(const Vector2F &offset) { mOffset = offset; }
-        Vector2F GetOffset() { return mOffset; }
+        void setOffset(const Vector2F &offset) { mOffset = offset; }
+        Vector2F offset() { return mOffset; }
 
-        void Clear()
+        void clear()
         {
             mBBoxMin = Vector2F(Huge<float>());
             mBBoxMax = Vector2F(Tiny<float>());

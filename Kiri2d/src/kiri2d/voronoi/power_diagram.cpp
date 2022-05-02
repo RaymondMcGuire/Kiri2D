@@ -169,7 +169,7 @@ namespace KIRI
             if (!neighborSite->IsBoundarySite())
                 neighborSitesList.emplace_back(neighborSite);
 
-            auto facet = mConvexHull->GetFacets()[prevEdge->GetId() / 3];
+            auto facet = mConvexHull->GetFacets()[prevEdge->id() / 3];
             if (facet->IsVisibleFromBelow())
                 mFacetsAroundVertex.emplace_back(facet);
 
@@ -185,10 +185,10 @@ namespace KIRI
         // }
     }
 
-    void KiriPowerDiagram::Reset()
+    void KiriPowerDiagram::reset()
     {
-        mConvexHull->Reset();
-        mConvexClip->Reset();
+        mConvexHull->reset();
+        mConvexClip->reset();
         mVisitedVoroSites.clear();
         mFacetsAroundVertex.clear();
     }
@@ -342,9 +342,9 @@ namespace KIRI
         {
             // PermutateVoroSites();
 
-            Reset();
+            reset();
 
-            // Remove disabled voro sites
+            // remove disabled voro sites
             mVoroSites.erase(
                 std::remove_if(mVoroSites.begin(), mVoroSites.end(),
                                [](const KiriVoroSitePtr &site)

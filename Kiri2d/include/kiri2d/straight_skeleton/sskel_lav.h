@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
  * @LastEditTime: 2021-10-07 02:41:56
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_lav.h
  */
 
@@ -31,14 +31,14 @@ namespace KIRI2D::SSKEL
             mHead = head;
             if (mHead != nullptr)
             {
-                //FIXME
+                // FIXME
                 auto x = mHead;
                 auto head_point = mHead->GetPoint();
                 do
                 {
                     mCounter++;
                     x->SetLAVId(id);
-                    //KIRI_LOG_DEBUG("vertex={0},{1};head={0},{1}", x->GetPoint().x, x->GetPoint().y, mHead->GetPoint().x, mHead->GetPoint().y);
+                    // KIRI_LOG_DEBUG("vertex={0},{1};head={0},{1}", x->GetPoint().x, x->GetPoint().y, mHead->GetPoint().x, mHead->GetPoint().y);
                     x = x->next.lock();
                 } while ((x->GetPoint() - head_point).length() > std::numeric_limits<float>::epsilon());
             }
@@ -50,8 +50,8 @@ namespace KIRI2D::SSKEL
 
         ~SSkelLAV() {}
 
-        UInt GetId() { return mId; }
-        UInt Length() { return mCounter; }
+        UInt id() { return mId; }
+        UInt length() { return mCounter; }
 
         const SSkelVertexPtr &GetHead() { return mHead; }
         void SetHead(const SSkelVertexPtr &head) { mHead = head; }

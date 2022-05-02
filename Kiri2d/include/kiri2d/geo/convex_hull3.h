@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
  * @LastEditTime: 2021-06-10 17:10:18
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\convex_hull3.h
  */
 
@@ -56,7 +56,7 @@ namespace KIRI
 
         bool ComputeConvexHull();
 
-        void Reset();
+        void reset();
 
         void PrintVertexInfo();
         void PrintCurFacetsInfo();

@@ -21,7 +21,7 @@ namespace KIRI
     public:
         explicit KiriVoroNSOptimize()
         {
-            Reset();
+            reset();
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
@@ -47,7 +47,7 @@ namespace KIRI
 
         void Init();
 
-        void Reset();
+        void reset();
 
         void RemoveVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->RemoveVoroSitesByIndexArray(indexs); }
 

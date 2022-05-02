@@ -22,7 +22,7 @@ namespace KIRI
     public:
         explicit KiriVoroTreeMapCore()
         {
-            Reset();
+            reset();
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
@@ -43,7 +43,7 @@ namespace KIRI
 
         void Init();
 
-        void Reset();
+        void reset();
 
     private:
         void ComputeBoundaryPolygonArea();

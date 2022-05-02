@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <kiri2d/hdv_toolkit/hull/simplex_wrap.h>
+#include <kiri2d/hdv_toolkit/hull/simplex_node.h>
 namespace HDV::Hull
 {
     template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
@@ -22,7 +22,7 @@ namespace HDV::Hull
 
         virtual ~MathHelper() {}
 
-        static double LengthSquared(std::vector<double> x)
+        static double lengthSquared(std::vector<double> x)
         {
             auto norm = 0.0;
             for (int i = 0; i < x.size(); i++)
@@ -46,9 +46,9 @@ namespace HDV::Hull
 
         static void FindNormalVector4D(const std::vector<VERTEXPTR> &vertices, std::vector<double> &normal)
         {
-            auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
-            auto y = SubtractFast(vertices[2]->GetPosition(), vertices[1]->GetPosition());
-            auto z = SubtractFast(vertices[3]->GetPosition(), vertices[2]->GetPosition());
+            auto x = SubtractFast(vertices[1]->positions(), vertices[0]->positions());
+            auto y = SubtractFast(vertices[2]->positions(), vertices[1]->positions());
+            auto z = SubtractFast(vertices[3]->positions(), vertices[2]->positions());
 
             auto nx = x[3] * (y[2] * z[1] - y[1] * z[2]) + x[2] * (y[1] * z[3] - y[3] * z[1]) + x[1] * (y[3] * z[2] - y[2] * z[3]);
             auto ny = x[3] * (y[0] * z[2] - y[2] * z[0]) + x[2] * (y[3] * z[0] - y[0] * z[3]) + x[0] * (y[2] * z[3] - y[3] * z[2]);
@@ -66,8 +66,8 @@ namespace HDV::Hull
 
         static void FindNormalVector3D(const std::vector<VERTEXPTR> &vertices, std::vector<double> &normal)
         {
-            auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
-            auto y = SubtractFast(vertices[2]->GetPosition(), vertices[1]->GetPosition());
+            auto x = SubtractFast(vertices[1]->positions(), vertices[0]->positions());
+            auto y = SubtractFast(vertices[2]->positions(), vertices[1]->positions());
 
             auto nx = x[1] * y[2] - x[2] * y[1];
             auto ny = x[2] * y[0] - x[0] * y[2];
@@ -83,7 +83,7 @@ namespace HDV::Hull
 
         static void FindNormalVector2D(const std::vector<VERTEXPTR> &vertices, std::vector<double> &normal)
         {
-            auto x = SubtractFast(vertices[1]->GetPosition(), vertices[0]->GetPosition());
+            auto x = SubtractFast(vertices[1]->positions(), vertices[0]->positions());
 
             auto nx = -x[1];
             auto ny = x[0];
@@ -97,7 +97,7 @@ namespace HDV::Hull
 
         static void FindNormalVector(const std::vector<VERTEXPTR> &vertices, std::vector<double> &normalData)
         {
-            switch (vertices[0]->GetDimension())
+            switch (vertices[0]->dimension())
             {
             case 2:
                 FindNormalVector2D(vertices, normalData);
@@ -116,15 +116,15 @@ namespace HDV::Hull
         /// The vertex is "over face" if the return value is > Constants.PlaneDistanceTolerance.
         /// </summary>
         /// <returns>The vertex is "over face" if the result is positive.</returns>
-        static double GetVertexDistance(const VERTEXPTR &v, const std::shared_ptr<SimplexWrap> &f)
+        static double GetVertexDistance(const VERTEXPTR &v, const std::shared_ptr<SimplexNode> &f)
         {
             auto normal = f->Normals;
-            auto p = v->GetPosition();
+            auto p = v->positions();
             auto distance = f->Offset;
-            for (auto i = 0; i < v->GetDimension(); i++)
+            for (auto i = 0; i < v->dimension(); i++)
                 distance += normal[i] * p[i];
 
-            // KIRI_LOG_DEBUG("dim={0}; normal={1},{2}; p={3},{4};offset={5}, dis={6}", v->GetDimension(), normal[0], normal[1], p[0], p[1], f->Offset, distance);
+            // KIRI_LOG_DEBUG("dim={0}; normal={1},{2}; p={3},{4};offset={5}, dis={6}", v->dimension(), normal[0], normal[1], p[0], p[1], f->Offset, distance);
             return distance;
         }
     };

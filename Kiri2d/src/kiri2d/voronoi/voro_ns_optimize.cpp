@@ -20,7 +20,7 @@ namespace KIRI
 {
     void KiriVoroNSOptimize::Init()
     {
-        Reset();
+        reset();
 
         ComputeBoundaryPolygonArea();
 
@@ -29,7 +29,7 @@ namespace KIRI
         mPowerDiagram->ComputeDiagram();
     }
 
-    void KiriVoroNSOptimize::Reset()
+    void KiriVoroNSOptimize::reset()
     {
         mCurGlobalPorosity = 0.f;
         mCurIteration = 0;
@@ -107,7 +107,7 @@ namespace KIRI
             if (n > 2)
             {
                 auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
-                auto targetArea = n * voroSite[i]->GetRadius() * voroSite[i]->GetRadius() * std::tanf(KIRI_PI<float>() / n);
+                auto targetArea = n * voroSite[i]->radius() * voroSite[i]->radius() * std::tanf(KIRI_PI<float>() / n);
                 error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.f);
             }
         }
@@ -166,7 +166,7 @@ namespace KIRI
 
         if (!removeVoroIdxs.empty())
         {
-            // KIRI_LOG_DEBUG("Remove overlapping cell, size={0}", removeVoroIdxs.size());
+            // KIRI_LOG_DEBUG("remove overlapping cell, size={0}", removeVoroIdxs.size());
             mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
             AdaptPositionsWeights();
             // mPowerDiagram->ComputeDiagram();
@@ -191,7 +191,7 @@ namespace KIRI
             // if (voroSite[i]->GetIsFrozen())
             //     continue;
 
-            auto weight = voroSite[i]->GetWeight();
+            auto weight = voroSite[i]->weight();
 
             auto areaWeight = 0.f;
             auto bcWeight = 0.f;
@@ -201,7 +201,7 @@ namespace KIRI
             if (n > 2)
             {
                 auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
-                auto targetArea = n * voroSite[i]->GetRadius() * voroSite[i]->GetRadius() * std::tanf(KIRI_PI<float>() / n);
+                auto targetArea = n * voroSite[i]->radius() * voroSite[i]->radius() * std::tanf(KIRI_PI<float>() / n);
 
                 auto pArea = 2.f;
                 if (currentArea != 0.f)
@@ -238,7 +238,7 @@ namespace KIRI
 
             // KIRI_LOG_DEBUG("AdaptWeights: idx={0}, aw={1}, bw={2}", i, areaWeight, bcWeight);
 
-            voroSite[i]->SetWeight(weight + areaWeight + bcWeight + psWeight);
+            voroSite[i]->setWeight(weight + areaWeight + bcWeight + psWeight);
         }
 
         // KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
@@ -263,11 +263,11 @@ namespace KIRI
             if (!siteI->GetNeighborSites().empty())
             {
 
-                auto radiusI = siteI->GetRadius();
+                auto radiusI = siteI->radius();
                 for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
                 {
                     auto siteJ = siteI->GetNeighborSites()[j];
-                    total += siteJ->GetWeight() - siteJ->GetRadius() * siteJ->GetRadius();
+                    total += siteJ->weight() - siteJ->radius() * siteJ->radius();
                     cnt++;
                 }
 
@@ -278,11 +278,11 @@ namespace KIRI
                     auto siteJ = siteI->GetNeighborSites()[j];
 
                     auto distance = siteI->GetDistance2(siteJ);
-                    auto minW = std::abs(std::sqrt(siteJ->GetWeight()) - std::sqrt(siteI->GetWeight()));
-                    auto maxW = std::sqrt(siteJ->GetWeight()) + std::sqrt(siteI->GetWeight());
+                    auto minW = std::abs(std::sqrt(siteJ->weight()) - std::sqrt(siteI->weight()));
+                    auto maxW = std::sqrt(siteJ->weight()) + std::sqrt(siteI->weight());
                     if (distance < maxW && distance > minW)
                     {
-                        auto sum = siteJ->GetWeight() - siteJ->GetRadius() * siteJ->GetRadius();
+                        auto sum = siteJ->weight() - siteJ->radius() * siteJ->radius();
                         mVoroSitesWeightError[i] += avg - sum;
                         mVoroSitesWeightAbsError[i] += std::abs(avg - sum);
                         mCurGlobalWeightError += std::abs(avg - sum);
@@ -290,7 +290,7 @@ namespace KIRI
                     else
                     {
 
-                        auto pw = distance * distance - siteI->GetWeight();
+                        auto pw = distance * distance - siteI->weight();
                         mVoroSitesWeightError[i] += pw;
                         mVoroSitesWeightAbsError[i] += std::abs(pw);
                         mCurGlobalWeightError += std::abs(pw);
@@ -416,7 +416,7 @@ namespace KIRI
 
             if (!siteI->GetNeighborSites().empty())
             {
-                auto radiusI = siteI->GetRadius();
+                auto radiusI = siteI->radius();
                 for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
                 {
                     auto siteJ = siteI->GetNeighborSites()[j];
@@ -424,7 +424,7 @@ namespace KIRI
                         continue;
 
                     auto real_disij = siteI->GetDistance2(siteJ);
-                    auto idea_disij = 0.5f * (siteI->GetRadius() + siteJ->GetRadius());
+                    auto idea_disij = 0.5f * (siteI->radius() + siteJ->radius());
                     auto dis_weight = idea_disij != 0.f ? (real_disij / idea_disij - 1.f) : 0.f;
 
                     // if (dis_weight != 0.f && !siteI->GetIsFrozen() && !siteJ->GetIsFrozen())
@@ -439,7 +439,7 @@ namespace KIRI
 
                         gsite_i->SetFreeze(true);
                         gsite_j->SetFreeze(true);
-                        // gsite_j->SetRadius(gsite_i->GetRadius());
+                        // gsite_j->setRadius(gsite_i->radius());
                         break;
                     }
 
@@ -495,8 +495,8 @@ namespace KIRI
         auto total_rad = 0.f;
         for (int i = 0; i < voroSite.size(); i++)
         {
-            total_rad += voroSite[i]->GetRadius();
-            // KIRI_LOG_DEBUG(" rad={0}", voroSite[i]->GetRadius());
+            total_rad += voroSite[i]->radius();
+            // KIRI_LOG_DEBUG(" rad={0}", voroSite[i]->radius());
         }
         total_rad /= voroSite.size();
 
@@ -519,10 +519,10 @@ namespace KIRI
                 }
             }
 
-            // if (polyi->GetPolygonArea() < total_area * coef && siteI->GetRadius() < total_rad * 2.3f)
+            // if (polyi->GetPolygonArea() < total_area * coef && siteI->radius() < total_rad * 2.3f)
             //     continue;
 
-            if (siteI->GetRadius() < total_rad * 2.3f)
+            if (siteI->radius() < total_rad * 2.3f)
                 continue;
 
             // split event
@@ -543,14 +543,14 @@ namespace KIRI
             }
 
             auto nvs1 = std::make_shared<KiriVoroGroupSite>(new_vs1);
-            nvs1->SetWeight(siteI->GetWeight() / 1.2f);
-            nvs1->SetRadius(siteI->GetRadius() / std::sqrtf(2.f));
+            nvs1->setWeight(siteI->weight() / 1.2f);
+            nvs1->setRadius(siteI->radius() / std::sqrtf(2.f));
             nvs1->SetGroupColor(siteI->GetGroupColor());
             nvs1->SetGroupId(siteI->GetGroupId());
 
             auto nvs2 = std::make_shared<KiriVoroGroupSite>(new_vs2);
-            nvs2->SetWeight(siteI->GetWeight() / 1.2f);
-            nvs2->SetRadius(siteI->GetRadius() / std::sqrtf(2.f));
+            nvs2->setWeight(siteI->weight() / 1.2f);
+            nvs2->setRadius(siteI->radius() / std::sqrtf(2.f));
             nvs2->SetGroupColor(Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine)));
             nvs2->SetGroupId(mMaxGroupNum++);
             new_sites.emplace_back(nvs1);

@@ -25,13 +25,13 @@ namespace HDV::Delaunay
             mSimplex = simplex;
 
             CircumCenter = std::make_shared<VERTEX>();
-            CircumCenter->mPosition = circumCenter;
+            CircumCenter->positions() = circumCenter;
 
             Radius = radius;
         }
         virtual ~DelaunayCell() {}
 
-        void Clear()
+        void clear()
         {
             // CircumCenter = nullptr;
             // mSimplex = nullptr;

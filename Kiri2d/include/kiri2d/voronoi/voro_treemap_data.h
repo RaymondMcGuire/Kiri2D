@@ -33,7 +33,7 @@ namespace KIRI
 
         ~KiriVoroTreeMapData() {}
 
-        void Clear() { mData.clear(); }
+        void clear() { mData.clear(); }
         void AddNode(VoroTreeMapNode node)
         {
             mData[node.id] = node;

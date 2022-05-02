@@ -57,10 +57,10 @@ namespace HDV::Hull
             return mPositions[index * mDimension + dimension];
         }
 
-        void Clear()
+        void clear()
         {
             for (auto i = 0; i < mSimplexs.size(); i++)
-                mSimplexs[i]->Clear();
+                mSimplexs[i]->clear();
 
             mCentroid.assign(mDimension, 0.0);
             mSimplexs.clear();
@@ -86,9 +86,9 @@ namespace HDV::Hull
 
             for (auto i = 0; i < mSimplexs.size(); i++)
             {
-                auto from_i = mSimplexs[i]->Vertices[0];
-                auto to_i = mSimplexs[i]->Vertices[1];
-                pre_simplexs.emplace_back(Vector4F(from_i->X(), from_i->Y(), to_i->X(), to_i->Y()));
+                auto from_i = mSimplexs[i]->vertices()[0];
+                auto to_i = mSimplexs[i]->vertices()[1];
+                pre_simplexs.emplace_back(Vector4F(from_i->x(), from_i->y(), to_i->x(), to_i->y()));
             }
 
             // preprocess
@@ -172,8 +172,8 @@ namespace HDV::Hull
             for (auto i = 0; i < mNumberOfVertices; i++)
             {
                 auto vi = input[i];
-                for (auto j = 0; j < vi->GetDimension(); j++)
-                    mPositions.emplace_back(vi->mPosition[j]);
+                for (auto j = 0; j < vi->dimension(); j++)
+                    mPositions.emplace_back(vi->positions()[j]);
             }
 
             // KIRI_LOG_DEBUG("positions size={0}", mPositions.size());
@@ -414,32 +414,28 @@ namespace HDV::Hull
             }
         }
 
-        void FindNormalVector(std::vector<int> vertices, std::vector<double> &normalData)
+        void FindNormalVector(std::vector<int> Vertices, std::vector<double> &normalData)
         {
             switch (mDimension)
             {
             case 2:
-                FindNormalVector2D(vertices, normalData);
+                FindNormalVector2D(Vertices, normalData);
                 break;
             case 3:
-                FindNormalVector3D(vertices, normalData);
+                FindNormalVector3D(Vertices, normalData);
                 break;
             case 4:
-                FindNormalVector4D(vertices, normalData);
+                FindNormalVector4D(Vertices, normalData);
                 break;
             default:
-                FindNormalVectorND(vertices, normalData);
+                FindNormalVectorND(Vertices, normalData);
                 break;
             }
         }
-        /// <summary>
-        /// Finds 2D normal vector.
-        /// </summary>
-        /// <param name="vertices">The vertices.</param>
-        /// <param name="normal">The normal.</param>
-        void FindNormalVector2D(std::vector<int> vertices, std::vector<double> &normal)
+
+        void FindNormalVector2D(std::vector<int> Vertices, std::vector<double> &normal)
         {
-            auto ntX = VectorBetweenVertices(vertices[1], vertices[0]);
+            auto ntX = VectorBetweenVertices(Vertices[1], Vertices[0]);
 
             auto nx = -ntX[1];
             auto ny = ntX[0];
@@ -450,15 +446,11 @@ namespace HDV::Hull
             normal[0] = f * nx;
             normal[1] = f * ny;
         }
-        /// <summary>
-        /// Finds 3D normal vector.
-        /// </summary>
-        /// <param name="vertices">The vertices.</param>
-        /// <param name="normal">The normal.</param>
-        void FindNormalVector3D(std::vector<int> vertices, std::vector<double> &normal)
+
+        void FindNormalVector3D(std::vector<int> Vertices, std::vector<double> &normal)
         {
-            auto ntX = VectorBetweenVertices(vertices[1], vertices[0]);
-            auto ntY = VectorBetweenVertices(vertices[2], vertices[1]);
+            auto ntX = VectorBetweenVertices(Vertices[1], Vertices[0]);
+            auto ntY = VectorBetweenVertices(Vertices[2], Vertices[1]);
 
             auto nx = ntX[1] * ntY[2] - ntX[2] * ntY[1];
             auto ny = ntX[2] * ntY[0] - ntX[0] * ntY[2];
@@ -471,16 +463,12 @@ namespace HDV::Hull
             normal[1] = f * ny;
             normal[2] = f * nz;
         }
-        /// <summary>
-        /// Finds 4D normal vector.
-        /// </summary>
-        /// <param name="vertices">The vertices.</param>
-        /// <param name="normal">The normal.</param>
-        void FindNormalVector4D(std::vector<int> vertices, std::vector<double> &normal)
+
+        void FindNormalVector4D(std::vector<int> Vertices, std::vector<double> &normal)
         {
-            auto ntX = VectorBetweenVertices(vertices[1], vertices[0]);
-            auto ntY = VectorBetweenVertices(vertices[2], vertices[1]);
-            auto ntZ = VectorBetweenVertices(vertices[3], vertices[2]);
+            auto ntX = VectorBetweenVertices(Vertices[1], Vertices[0]);
+            auto ntY = VectorBetweenVertices(Vertices[2], Vertices[1]);
+            auto ntZ = VectorBetweenVertices(Vertices[3], Vertices[2]);
 
             auto x = ntX;
             auto y = ntY;
@@ -501,15 +489,10 @@ namespace HDV::Hull
             normal[3] = f * nw;
         }
 
-        /// <summary>
-        /// Finds the normal vector nd.
-        /// </summary>
-        /// <param name="vertices">The vertices.</param>
-        /// <param name="normal">The normal.</param>
-        void FindNormalVectorND(std::vector<int> vertices, std::vector<double> &normal)
+        void FindNormalVectorND(std::vector<int> Vertices, std::vector<double> &normal)
         {
             /* We need to solve the matrix A n = B where
-             *  - A contains coordinates of vertices as columns
+             *  - A contains coordinates of Vertices as columns
              *  - B is vector with all 1's. Really, it should be the distance of
              *      the plane from the origin, but - since we're not worried about that
              *      here and we will normalize the normal anyway - all 1's suffices.
@@ -529,7 +512,7 @@ namespace HDV::Hull
             {
                 for (auto i = 0; i < mDimension; i++)
                 {
-                    auto offset = vertices[i] * mDimension;
+                    auto offset = Vertices[i] * mDimension;
                     for (auto j = 0; j < mDimension; j++)
                     {
                         // maybe I got the i/j mixed up here regarding the representation Math.net uses...
@@ -568,7 +551,7 @@ namespace HDV::Hull
                         A[index++] = edgeVectors[i][j];
                     else
                         A[index] = (std::pow(-1, index) * index++) / bigNumber;
-            // this last term is used for all the vertices in the comparison for the yet determined vertices
+            // this last term is used for all the Vertices in the comparison for the yet determined Vertices
             // the idea is to come up with sets of numbers that are orthogonal so that an non-zero value will result
             // and to choose smallish numbers since the choice of vectors will affect what the end volume is.
             // A better way (todo?) is to solve a smaller matrix. However, cases were found in which the obvious smaller vector
@@ -594,7 +577,7 @@ namespace HDV::Hull
             auto bigNumber = std::accumulate(mAxisMaxma.begin(), mAxisMaxma.end(), decltype(mAxisMaxma)::value_type(0)) * mDimension * mNumberOfVertices;
             // KIRI_LOG_DEBUG("big number ={0}", bigNumber);
 
-            auto vertex1 = mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].front(); // these are min and max vertices along
+            auto vertex1 = mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].front(); // these are min and max Vertices along
             auto vertex2 = mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].back();  // the dimension that had the fewest points
             mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].erase(mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].begin() + 0);
             mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].erase(mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].begin() + mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].size() - 1);
@@ -769,7 +752,7 @@ namespace HDV::Hull
                 // auto myid = omp_get_thread_num();
                 // KIRI_LOG_DEBUG("thread id={0},cell count={1}", myid, cellCount);
 
-                auto vs = mBuffer->ConvexSimplexs[i]->Vertices;
+                auto vs = mBuffer->ConvexSimplexs[i]->vertices();
                 for (auto j = 0; j < vs.size(); j++)
                 {
                     auto v = vs[j];
@@ -795,24 +778,24 @@ namespace HDV::Hull
         {
             auto initialPoints = FindInitialPoints();
 
-            std::vector<std::shared_ptr<SimplexWrap>> faces;
-            faces.assign(mDimension + 1, std::make_shared<SimplexWrap>());
+            std::vector<std::shared_ptr<SimplexNode>> faces;
+            faces.assign(mDimension + 1, std::make_shared<SimplexNode>());
 
             for (auto i = 0; i < mDimension + 1; i++)
             {
-                std::vector<int> vertices;
-                vertices.assign(mDimension, -1);
+                std::vector<int> Vertices;
+                Vertices.assign(mDimension, -1);
 
                 for (auto j = 0, k = 0; j <= mDimension; j++)
                 {
                     if (i != j)
-                        vertices[k++] = initialPoints[j];
+                        Vertices[k++] = initialPoints[j];
                 }
 
-                auto newFace = std::make_shared<SimplexWrap>(mDimension, std::vector<int>());
+                auto newFace = std::make_shared<SimplexNode>(mDimension, std::vector<int>());
 
-                std::sort(vertices.begin(), vertices.end());
-                newFace->Vertices = vertices;
+                std::sort(Vertices.begin(), Vertices.end());
+                newFace->vertices() = Vertices;
 
                 CalculateFacePlane(newFace);
                 faces[i] = newFace;
@@ -822,7 +805,7 @@ namespace HDV::Hull
             for (auto i = 0; i < mDimension; i++)
             {
                 for (auto j = i + 1; j < mDimension + 1; j++)
-                    UpdateAdjacency(faces[i], faces[j]);
+                    updateAdjacency(faces[i], faces[j]);
             }
 
             auto numFaces = faces.size();
@@ -831,16 +814,16 @@ namespace HDV::Hull
             {
                 FindBeyondVertices(faces[i]);
 
-                // KIRI_LOG_DEBUG("faces[i]->VerticesBeyond.size()={0}", faces[i]->VerticesBeyond.size());
-                if (faces[i]->VerticesBeyond.size() == 0)
+                // KIRI_LOG_DEBUG("faces[i]->verticesBeyond().size()={0}", faces[i]->verticesBeyond().size());
+                if (faces[i]->verticesBeyond().size() == 0)
                     mBuffer->ConvexSimplexs.emplace_back(faces[i]); // The face is on the hull
                 else
-                    mBuffer->UnprocessedFaces->Add(faces[i]);
+                    mBuffer->UnprocessedFaces->add(faces[i]);
 
-                // faces[i]->ToString();
+                // faces[i]->toString();
             }
 
-            // Set all vertices to false (unvisited).
+            // Set all Vertices to false (unvisited).
             for (auto i = 0; i < initialPoints.size(); i++)
             {
                 mVertexVisited[initialPoints[i]] = false;
@@ -849,7 +832,7 @@ namespace HDV::Hull
 
         void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false)
         {
-            Clear();
+            clear();
 
             mBuffer = std::make_shared<ObjectBuffer<VERTEXPTR>>(mDimension);
 
@@ -867,7 +850,7 @@ namespace HDV::Hull
 
             while (mBuffer->UnprocessedFaces->First != nullptr)
             {
-                mBuffer->CurrentVertex = mBuffer->UnprocessedFaces->First->FurthestVertex;
+                mBuffer->CurrentVertex = mBuffer->UnprocessedFaces->First->furthestVertex();
 
                 UpdateCenter();
 
@@ -876,7 +859,7 @@ namespace HDV::Hull
                 // The affected faces get tagged
                 TagAffectedFaces(mBuffer->UnprocessedFaces->First);
 
-                // mBuffer->UnprocessedFaces->First->ToString();
+                // mBuffer->UnprocessedFaces->First->toString();
 
                 // Create the cone from the currentVertex and the affected faces horizon.
                 if ((mBuffer->SingularVertices.find(mBuffer->CurrentVertex) == mBuffer->SingularVertices.end()) && CreateCone())
@@ -888,12 +871,12 @@ namespace HDV::Hull
                 auto count = mBuffer->AffectedFaceBuffer.size();
 
                 for (auto i = 0; i < count; i++)
-                    mBuffer->AffectedFaceBuffer[i]->SetTag(0);
+                    mBuffer->AffectedFaceBuffer[i]->setTag(0);
             }
 
             for (auto i = 0; i < mBuffer->ConvexSimplexs.size(); i++)
             {
-                mBuffer->ConvexSimplexs[i]->SetTag(i);
+                mBuffer->ConvexSimplexs[i]->setTag(i);
                 mSimplexs.emplace_back(std::make_shared<HDV::Primitives::Simplex<VERTEXPTR>>(i, mDimension));
             }
 
@@ -902,42 +885,40 @@ namespace HDV::Hull
 
                 auto wrap = mBuffer->ConvexSimplexs[i];
 
-                mSimplexs[i]->SetNormalFlipped(wrap->IsNormalFlipped);
-                mSimplexs[i]->SetOffset(wrap->Offset);
+                mSimplexs[i]->setNormalFlipped(wrap->isNormalFlipped());
+                mSimplexs[i]->setOffset(wrap->offset());
 
                 for (auto j = 0; j < mDimension; j++)
                 {
-                    mSimplexs[i]->Normals[j] = wrap->Normals[j];
+                    mSimplexs[i]->normals()[j] = wrap->normals()[j];
 
-                    if (wrap->IsNormalFlipped)
-                        mSimplexs[i]->Vertices[j] = mInput[wrap->Vertices[mDimension - j - 1]];
+                    if (wrap->isNormalFlipped())
+                        mSimplexs[i]->vertices()[j] = mInput[wrap->vertices()[mDimension - j - 1]];
                     else
-                        mSimplexs[i]->Vertices[j] = mInput[wrap->Vertices[j]];
+                        mSimplexs[i]->vertices()[j] = mInput[wrap->vertices()[j]];
 
-                    if (wrap->AdjacentFaces[j] != nullptr)
+                    if (wrap->adjacentFaces()[j] != nullptr)
                     {
-                        if (wrap->IsNormalFlipped)
-                            mSimplexs[i]->Adjacent[j] = mSimplexs[wrap->AdjacentFaces[mDimension - j - 1]->GetTag()];
+                        if (wrap->isNormalFlipped())
+                            mSimplexs[i]->adjacents()[j] = mSimplexs[wrap->adjacentFaces()[mDimension - j - 1]->tag()];
                         else
-                            mSimplexs[i]->Adjacent[j] = mSimplexs[wrap->AdjacentFaces[j]->GetTag()];
+                            mSimplexs[i]->adjacents()[j] = mSimplexs[wrap->adjacentFaces()[j]->tag()];
                     }
                 }
-
-                // mSimplexs[i]->CalculateCentroid();
             }
 
             GetHullVertices();
 
             // release memory
-            mBuffer->Clear();
+            mBuffer->clear();
             mBuffer = nullptr;
         }
 
-        double GetVertexDistance(int v, const std::shared_ptr<SimplexWrap> &f)
+        double GetVertexDistance(int v, const std::shared_ptr<SimplexNode> &f)
         {
-            auto normal = f->Normals;
+            auto normal = f->normals();
             auto x = v * mDimension;
-            auto distance = f->Offset;
+            auto distance = f->offset();
             for (auto i = 0; i < normal.size(); i++)
                 distance += normal[i] * mPositions[x + i];
             return distance;
@@ -954,7 +935,7 @@ namespace HDV::Hull
         }
 
         /// <summary>
-        /// Compares the values of two vertices. The return value (-1, 0 or +1) are found
+        /// Compares the values of two Vertices. The return value (-1, 0 or +1) are found
         /// by first checking the first coordinate and then progressing through the rest.
         /// In this way {2, 8} will be a "-1" (less than) {3, 1}.
         /// </summary>
@@ -974,7 +955,7 @@ namespace HDV::Hull
             return 0;
         }
 
-        void IsBeyond(const std::shared_ptr<SimplexWrap> &face, std::vector<int> &beyondVertices, int v)
+        void IsBeyond(const std::shared_ptr<SimplexNode> &face, std::vector<int> &beyondVertices, int v)
         {
             auto distance = GetVertexDistance(v, face);
             if (distance >= PLANE_DISTANCE_TOLERANCE)
@@ -1045,7 +1026,7 @@ namespace HDV::Hull
 
                 for (auto j = 0; j < vCount; j++)
                 {
-                    auto v = mBuffer->InputVertices[j]->GetPosition()[i];
+                    auto v = mBuffer->InputVertices[j]->positions()[i];
 
                     if (v < min)
                     {
@@ -1093,7 +1074,7 @@ namespace HDV::Hull
 
                 for (auto j = 0; j < mDimension; j++)
                 {
-                    auto t = (initPt->GetPosition()[j] - pivot->GetPosition()[j]);
+                    auto t = (initPt->positions()[j] - pivot->positions()[j]);
                     sum += t * t;
                 }
             }
@@ -1102,16 +1083,16 @@ namespace HDV::Hull
         }
 
         /// <summary>
-        /// Calculates the normal and offset of the hyper-plane given by the face's vertices.
+        /// Calculates the normal and offset of the hyper-plane given by the face's Vertices.
         /// </summary>
-        bool CalculateFacePlane(const std::shared_ptr<SimplexWrap> &face)
+        bool CalculateFacePlane(const std::shared_ptr<SimplexNode> &face)
         {
-            auto vertices = face->Vertices;
-            auto normal = face->Normals;
+            auto Vertices = face->vertices();
+            auto normal = face->normals();
 
-            FindNormalVector(vertices, normal);
+            FindNormalVector(Vertices, normal);
 
-            face->Normals = normal;
+            face->normals() = normal;
 
             if (normal[0] != normal[0])
             {
@@ -1121,7 +1102,7 @@ namespace HDV::Hull
             auto offset = 0.0;
             auto centerDistance = 0.0;
 
-            auto fi = vertices[0] * mDimension;
+            auto fi = Vertices[0] * mDimension;
             for (auto i = 0; i < mDimension; i++)
             {
                 auto n = normal[i];
@@ -1129,19 +1110,19 @@ namespace HDV::Hull
                 centerDistance += n * mCentroid[i];
             }
 
-            face->Offset = -offset;
+            face->setOffset(-offset);
             centerDistance -= offset;
 
             if (centerDistance > 0)
             {
                 for (auto i = 0; i < mDimension; i++)
-                    face->Normals[i] = -face->Normals[i];
+                    face->normals()[i] = -face->normals()[i];
 
-                face->Offset = offset;
-                face->IsNormalFlipped = true;
+                face->setOffset(offset);
+                face->setIsNormalFlipped(true);
             }
             else
-                face->IsNormalFlipped = false;
+                face->setIsNormalFlipped(false);
 
             return true;
         }
@@ -1149,17 +1130,17 @@ namespace HDV::Hull
         /// <summary>
         /// Check if 2 faces are adjacent and if so, update their AdjacentFaces array.
         /// </summary>
-        void UpdateAdjacency(const std::shared_ptr<SimplexWrap> &l, const std::shared_ptr<SimplexWrap> &r)
+        void updateAdjacency(const std::shared_ptr<SimplexNode> &l, const std::shared_ptr<SimplexNode> &r)
         {
-            auto lv = l->Vertices;
-            auto rv = r->Vertices;
+            auto lv = l->vertices();
+            auto rv = r->vertices();
             auto i = 0;
 
             // reset marks on the 1st face
             for (i = 0; i < lv.size(); i++)
                 mVertexVisited[lv[i]] = false;
 
-            // mark all vertices on the 2nd face
+            // mark all Vertices on the 2nd face
             for (i = 0; i < rv.size(); i++)
                 mVertexVisited[rv[i]] = true;
 
@@ -1178,7 +1159,7 @@ namespace HDV::Hull
                     return;
 
             // if we are here, the two faces share an edge
-            l->AdjacentFaces[i] = r;
+            l->adjacentFaces()[i] = r;
 
             // update the adj. face on the other face - find the vertex that remains marked
             for (i = 0; i < lv.size(); i++)
@@ -1188,13 +1169,13 @@ namespace HDV::Hull
                 if (mVertexVisited[rv[i]])
                     break;
             }
-            r->AdjacentFaces[i] = l;
+            r->adjacentFaces()[i] = l;
         }
 
         /// <summary>
         /// Used in the "initialization" code.
         /// </summary>
-        void FindBeyondVertices(const std::shared_ptr<SimplexWrap> &face)
+        void FindBeyondVertices(const std::shared_ptr<SimplexNode> &face)
         {
             mBuffer->MaxDistance = std::numeric_limits<double>::lowest();
             mBuffer->FurthestVertex = 0;
@@ -1203,10 +1184,10 @@ namespace HDV::Hull
             {
                 if (mVertexVisited[i])
                     continue;
-                IsBeyond(face, face->VerticesBeyond, i);
+                IsBeyond(face, face->verticesBeyond(), i);
             }
 
-            face->FurthestVertex = mBuffer->FurthestVertex;
+            face->setFurthestVertex(mBuffer->FurthestVertex);
         }
 
 #pragma endregion Initilization
@@ -1216,7 +1197,7 @@ namespace HDV::Hull
         /// <summary>
         /// Tags all faces seen from the current vertex with 1.
         /// </summary>
-        void TagAffectedFaces(const std::shared_ptr<SimplexWrap> &currentFace)
+        void TagAffectedFaces(const std::shared_ptr<SimplexNode> &currentFace)
         {
             mBuffer->AffectedFaceBuffer.clear();
             mBuffer->AffectedFaceBuffer.emplace_back(currentFace);
@@ -1226,14 +1207,14 @@ namespace HDV::Hull
         /// <summary>
         /// Recursively traverse all the relevant faces.
         /// </summary>
-        void TraverseAffectedFaces(const std::shared_ptr<SimplexWrap> &currentFace)
+        void TraverseAffectedFaces(const std::shared_ptr<SimplexNode> &currentFace)
         {
 
-            mBuffer->TraverseStack = std::stack<std::shared_ptr<SimplexWrap>>();
+            mBuffer->TraverseStack = std::stack<std::shared_ptr<SimplexNode>>();
             mBuffer->TraverseStack.push(currentFace);
-            currentFace->SetTag(1);
+            currentFace->setTag(1);
 
-            // KIRI_LOG_DEBUG("travse top tag={0}", mBuffer->TraverseStack.top()->GetTag());
+            // KIRI_LOG_DEBUG("travse top tag={0}", mBuffer->TraverseStack.top()->tag());
 
             while (mBuffer->TraverseStack.size() > 0)
             {
@@ -1242,16 +1223,16 @@ namespace HDV::Hull
 
                 for (auto i = 0; i < mDimension; i++)
                 {
-                    auto adjFace = top->AdjacentFaces[i];
+                    auto adjFace = top->adjacentFaces()[i];
 
                     if (adjFace == nullptr)
                         throw std::invalid_argument("(2) Adjacent Face should never be nullptr");
 
-                    if (adjFace->GetTag() == 0 && GetVertexDistance(mBuffer->CurrentVertex, adjFace) >= PLANE_DISTANCE_TOLERANCE)
+                    if (adjFace->tag() == 0 && GetVertexDistance(mBuffer->CurrentVertex, adjFace) >= PLANE_DISTANCE_TOLERANCE)
                     {
-                        mBuffer->AffectedFaceBuffer.emplace_back(top->AdjacentFaces[i]);
-                        top->AdjacentFaces[i]->SetTag(1);
-                        mBuffer->TraverseStack.push(top->AdjacentFaces[i]);
+                        mBuffer->AffectedFaceBuffer.emplace_back(top->adjacentFaces()[i]);
+                        top->adjacentFaces()[i]->setTag(1);
+                        mBuffer->TraverseStack.push(top->adjacentFaces()[i]);
                     }
                 }
             }
@@ -1270,14 +1251,14 @@ namespace HDV::Hull
                 auto updateCount = 0;
                 for (auto i = 0; i < mDimension; i++)
                 {
-                    auto af = oldFace->AdjacentFaces[i];
+                    auto af = oldFace->adjacentFaces()[i];
 
                     if (af == nullptr)
                         throw std::invalid_argument("(3) Adjacent Face should never be nullptr");
 
-                    if (af->GetTag() == 0) // Tag == 0 when oldFaces does not contain af
+                    if (af->tag() == 0) // Tag == 0 when oldFaces does not contain af
                     {
-                        mBuffer->UpdateBuffer[updateCount] = mBuffer->AffectedFaceBuffer[fIndex]->AdjacentFaces[i];
+                        mBuffer->UpdateBuffer[updateCount] = mBuffer->AffectedFaceBuffer[fIndex]->adjacentFaces()[i];
                         mBuffer->UpdateIndices[updateCount] = i;
                         ++updateCount;
                     }
@@ -1293,7 +1274,7 @@ namespace HDV::Hull
                     for (auto j = 0; j < mDimension; j++)
                     {
                         //! TODO
-                        if (mBuffer->AffectedFaceBuffer[fIndex] == mBuffer->UpdateBuffer[i]->AdjacentFaces[j])
+                        if (mBuffer->AffectedFaceBuffer[fIndex] == mBuffer->UpdateBuffer[i]->adjacentFaces()[j])
                         {
                             oldFaceAdjacentIndex = j;
                             break;
@@ -1303,13 +1284,13 @@ namespace HDV::Hull
                     // Index of the face that corresponds to this adjacent face
                     auto forbidden = mBuffer->UpdateIndices[i];
 
-                    auto newFace = mBuffer->ObjManager->GetFace();
-                    auto vertices = newFace->Vertices;
+                    auto newFace = mBuffer->ObjManager->simplex();
+                    auto Vertices = newFace->vertices();
 
                     for (auto j = 0; j < mDimension; j++)
-                        vertices[j] = mBuffer->AffectedFaceBuffer[fIndex]->Vertices[j];
+                        Vertices[j] = mBuffer->AffectedFaceBuffer[fIndex]->vertices()[j];
 
-                    auto oldVertexIndex = vertices[forbidden];
+                    auto oldVertexIndex = Vertices[forbidden];
 
                     auto orderedPivotIndex = 0;
 
@@ -1319,8 +1300,8 @@ namespace HDV::Hull
                         orderedPivotIndex = 0;
                         for (auto j = forbidden - 1; j >= 0; j--)
                         {
-                            if (vertices[j] > currentVertexIndex)
-                                vertices[j + 1] = vertices[j];
+                            if (Vertices[j] > currentVertexIndex)
+                                Vertices[j + 1] = Vertices[j];
                             else
                             {
                                 orderedPivotIndex = j + 1;
@@ -1333,8 +1314,8 @@ namespace HDV::Hull
                         orderedPivotIndex = mDimension - 1;
                         for (auto j = forbidden + 1; j < mDimension; j++)
                         {
-                            if (vertices[j] < currentVertexIndex)
-                                vertices[j - 1] = vertices[j];
+                            if (Vertices[j] < currentVertexIndex)
+                                Vertices[j - 1] = Vertices[j];
                             else
                             {
                                 orderedPivotIndex = j - 1;
@@ -1343,8 +1324,8 @@ namespace HDV::Hull
                         }
                     }
 
-                    vertices[orderedPivotIndex] = mBuffer->CurrentVertex;
-                    newFace->Vertices = vertices;
+                    Vertices[orderedPivotIndex] = mBuffer->CurrentVertex;
+                    newFace->vertices() = Vertices;
 
                     if (!CalculateFacePlane(newFace))
                     {
@@ -1363,13 +1344,13 @@ namespace HDV::Hull
         /// </summary>
 
         std::shared_ptr<DeferredSimplex> MakeDeferredFace(
-            const std::shared_ptr<SimplexWrap> &face,
+            const std::shared_ptr<SimplexNode> &face,
             int faceIndex,
-            const std::shared_ptr<SimplexWrap> &pivot,
+            const std::shared_ptr<SimplexNode> &pivot,
             int pivotIndex,
-            const std::shared_ptr<SimplexWrap> &oldFace)
+            const std::shared_ptr<SimplexNode> &oldFace)
         {
-            auto ret = mBuffer->ObjManager->GetDeferredSimplex();
+            auto ret = mBuffer->ObjManager->deferredSimplex();
 
             ret->Face = face;
             ret->FaceIndex = faceIndex;
@@ -1393,84 +1374,84 @@ namespace HDV::Hull
                 // auto oldFace = face->OldFace;
                 auto orderedPivotIndex = mBuffer->ConeFaceBuffer[i]->FaceIndex;
 
-                mBuffer->ConeFaceBuffer[i]->Face->AdjacentFaces[orderedPivotIndex] = mBuffer->ConeFaceBuffer[i]->Pivot;
+                mBuffer->ConeFaceBuffer[i]->Face->adjacentFaces()[orderedPivotIndex] = mBuffer->ConeFaceBuffer[i]->Pivot;
 
-                mBuffer->ConeFaceBuffer[i]->Pivot->AdjacentFaces[mBuffer->ConeFaceBuffer[i]->PivotIndex] = mBuffer->ConeFaceBuffer[i]->Face;
+                mBuffer->ConeFaceBuffer[i]->Pivot->adjacentFaces()[mBuffer->ConeFaceBuffer[i]->PivotIndex] = mBuffer->ConeFaceBuffer[i]->Face;
 
                 //  let there be a connection.
                 for (auto j = 0; j < mDimension; j++)
                 {
                     if (j == orderedPivotIndex)
                         continue;
-                    auto connector = mBuffer->ObjManager->GetConnector();
-                    connector->Update(mBuffer->ConeFaceBuffer[i]->Face, j, mDimension);
-                    // connector->ToString();
+                    auto connector = mBuffer->ObjManager->connector();
+                    connector->update(mBuffer->ConeFaceBuffer[i]->Face, j, mDimension);
+                    // connector->toString();
 
                     ConnectFace(connector);
                 }
 
                 //   This could slightly help...
-                if (mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond.size() < mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond.size())
+                if (mBuffer->ConeFaceBuffer[i]->Pivot->verticesBeyond().size() < mBuffer->ConeFaceBuffer[i]->OldFace->verticesBeyond().size())
                 {
-                    FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond, mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond);
+                    FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->Pivot->verticesBeyond(), mBuffer->ConeFaceBuffer[i]->OldFace->verticesBeyond());
                 }
                 else
                 {
-                    FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->OldFace->VerticesBeyond, mBuffer->ConeFaceBuffer[i]->Pivot->VerticesBeyond);
+                    FindBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->OldFace->verticesBeyond(), mBuffer->ConeFaceBuffer[i]->Pivot->verticesBeyond());
                 }
 
                 // This face will definitely lie on the hull
-                if (mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond.size() == 0)
+                if (mBuffer->ConeFaceBuffer[i]->Face->verticesBeyond().size() == 0)
                 {
                     mBuffer->ConvexSimplexs.emplace_back(mBuffer->ConeFaceBuffer[i]->Face);
-                    mBuffer->UnprocessedFaces->Remove(mBuffer->ConeFaceBuffer[i]->Face);
-                    mBuffer->ObjManager->DepositVertexBuffer(mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond);
+                    mBuffer->UnprocessedFaces->remove(mBuffer->ConeFaceBuffer[i]->Face);
+                    mBuffer->ObjManager->depositVertexBuffer(mBuffer->ConeFaceBuffer[i]->Face->verticesBeyond());
 
-                    mBuffer->ConeFaceBuffer[i]->Face->VerticesBeyond = mBuffer->EmptyBuffer;
+                    mBuffer->ConeFaceBuffer[i]->Face->verticesBeyond() = mBuffer->EmptyBuffer;
                 }
-                else // Add the face to the list
+                else // add the face to the list
                 {
 
-                    mBuffer->UnprocessedFaces->Add(mBuffer->ConeFaceBuffer[i]->Face);
+                    mBuffer->UnprocessedFaces->add(mBuffer->ConeFaceBuffer[i]->Face);
                 }
 
                 // recycle the object.
-                mBuffer->ObjManager->DepositDeferredSimplex(mBuffer->ConeFaceBuffer[i]);
+                mBuffer->ObjManager->depositDeferredSimplex(mBuffer->ConeFaceBuffer[i]);
             }
 
             // Recycle the affected faces.
             for (auto fIndex = 0; fIndex < mBuffer->AffectedFaceBuffer.size(); fIndex++)
             {
-                mBuffer->UnprocessedFaces->Remove(mBuffer->AffectedFaceBuffer[fIndex]);
-                mBuffer->ObjManager->DepositFace(mBuffer->AffectedFaceBuffer[fIndex]);
+                mBuffer->UnprocessedFaces->remove(mBuffer->AffectedFaceBuffer[fIndex]);
+                mBuffer->ObjManager->depositSimplex(mBuffer->AffectedFaceBuffer[fIndex]);
             }
         }
 
         /// <summary>
-        /// Connect faces using a connector->
+        /// connect faces using a connector->
         /// </summary>
         void ConnectFace(const std::shared_ptr<SimplexConnector> &connector)
         {
-            auto index = connector->GetHashCode() % mBuffer->CONNECTOR_TABLE_SIZE;
+            auto index = connector->hashCode() % mBuffer->CONNECTOR_TABLE_SIZE;
 
             for (auto current = mBuffer->ConnectorTable[index]->First; current != nullptr; current = current->Next)
             {
-                if (SimplexConnector().AreConnectable(connector, current, mDimension))
+                if (SimplexConnector().connectable(connector, current, mDimension))
                 {
-                    mBuffer->ConnectorTable[index]->Remove(current);
-                    SimplexConnector().Connect(current, connector);
+                    mBuffer->ConnectorTable[index]->remove(current);
+                    SimplexConnector().connect(current, connector);
 
-                    mBuffer->ObjManager->DepositConnector(current);
-                    mBuffer->ObjManager->DepositConnector(connector);
+                    mBuffer->ObjManager->depositConnector(current);
+                    mBuffer->ObjManager->depositConnector(connector);
                     return;
                 }
             }
 
-            mBuffer->ConnectorTable[index]->Add(connector);
+            mBuffer->ConnectorTable[index]->add(connector);
         }
 
         void FindBeyondVertices(
-            const std::shared_ptr<SimplexWrap> &face,
+            const std::shared_ptr<SimplexNode> &face,
             const std::vector<int> &beyond,
             const std::vector<int> &beyond1)
         {
@@ -1508,11 +1489,11 @@ namespace HDV::Hull
                     IsBeyond(face, beyondVertices, v);
             }
 
-            face->FurthestVertex = mBuffer->FurthestVertex;
+            face->setFurthestVertex(mBuffer->FurthestVertex);
 
             // Pull the old switch a roo
-            auto temp = face->VerticesBeyond;
-            face->VerticesBeyond = beyondVertices;
+            auto temp = face->verticesBeyond();
+            face->verticesBeyond() = beyondVertices;
             if (temp.size() > 0)
                 temp.clear();
             mBuffer->BeyondBuffer = temp;
@@ -1529,19 +1510,19 @@ namespace HDV::Hull
             RollbackCenter();
             mBuffer->SingularVertices.insert(mBuffer->CurrentVertex);
 
-            // This means that all the affected faces must be on the hull and that all their "vertices beyond" are singular.
+            // This means that all the affected faces must be on the hull and that all their "Vertices beyond" are singular.
             for (auto fIndex = 0; fIndex < mBuffer->AffectedFaceBuffer.size(); fIndex++)
             {
-                for (auto i = 0; i < mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond.size(); i++)
+                for (auto i = 0; i < mBuffer->AffectedFaceBuffer[fIndex]->verticesBeyond().size(); i++)
                 {
-                    mBuffer->SingularVertices.insert(mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond[i]);
+                    mBuffer->SingularVertices.insert(mBuffer->AffectedFaceBuffer[fIndex]->verticesBeyond()[i]);
                 }
 
                 mBuffer->ConvexSimplexs.emplace_back(mBuffer->AffectedFaceBuffer[fIndex]);
-                mBuffer->UnprocessedFaces->Remove(mBuffer->AffectedFaceBuffer[fIndex]);
-                mBuffer->ObjManager->DepositVertexBuffer(mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond);
+                mBuffer->UnprocessedFaces->remove(mBuffer->AffectedFaceBuffer[fIndex]);
+                mBuffer->ObjManager->depositVertexBuffer(mBuffer->AffectedFaceBuffer[fIndex]->verticesBeyond());
 
-                mBuffer->AffectedFaceBuffer[fIndex]->VerticesBeyond = mBuffer->EmptyBuffer;
+                mBuffer->AffectedFaceBuffer[fIndex]->verticesBeyond() = mBuffer->EmptyBuffer;
             }
         }
 
@@ -1588,17 +1569,27 @@ namespace HDV::Hull
     class ConvexHull2 : public ConvexHull<HDV::Primitives::Vertex2Ptr>
     {
     public:
-        explicit ConvexHull2() : ConvexHull(2) {}
+        explicit ConvexHull2()
+            : ConvexHull(2)
+        {
+        }
 
-        ~ConvexHull2() {}
+        ~ConvexHull2()
+        {
+        }
     };
 
     class ConvexHull3 : public ConvexHull<HDV::Primitives::Vertex3Ptr>
     {
     public:
-        explicit ConvexHull3() : ConvexHull(3) {}
+        explicit ConvexHull3()
+            : ConvexHull(3)
+        {
+        }
 
-        ~ConvexHull3() {}
+        ~ConvexHull3()
+        {
+        }
     };
 } // namespace HDV::Hull
 

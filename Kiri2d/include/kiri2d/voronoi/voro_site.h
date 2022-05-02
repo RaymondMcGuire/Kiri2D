@@ -60,7 +60,7 @@ namespace KIRI
 
         virtual ~KiriVoroSite() {}
 
-        void SetWeight(float weight)
+        void setWeight(float weight)
         {
             auto v = GetValue();
             mWeight = weight;
@@ -68,15 +68,15 @@ namespace KIRI
         }
 
         void SetPercentage(float percent) { mPercentage = percent; }
-        void SetRadius(float radius) { mRadius = radius; }
+        void setRadius(float radius) { mRadius = radius; }
 
-        constexpr float GetWeight() const { return mWeight; }
+        constexpr float weight() const { return mWeight; }
         constexpr float GetPercentage() const { return mPercentage; }
-        constexpr float GetRadius() const { return mRadius; }
+        constexpr float radius() const { return mRadius; }
 
         const KiriVoroCellPolygon2Ptr &GetCellPolygon() const { return mVoroCellPolygon2; }
 
-        const Vector<SharedPtr<KiriVoroSite>> &GetNeighborSites() const { return mNeighborSites; }
+        const Vector<SharedPtr<KiriVoroSite>> &GetNeighborSites() const { return neighbors; }
 
         float GetDistance2(const SharedPtr<KiriVoroSite> &site)
         {
@@ -105,8 +105,8 @@ namespace KIRI
         void SetAsBoundarySite() { mBoundarySite = true; }
         void SetNeighborSites(const Vector<SharedPtr<KiriVoroSite>> &neighbor)
         {
-            SetLastNeighborSites(mNeighborSites);
-            mNeighborSites = neighbor;
+            SetLastNeighborSites(neighbors);
+            neighbors = neighbor;
         }
         void SetLastNeighborSites(const Vector<SharedPtr<KiriVoroSite>> &lastNeighbor) { mLastNeighborSites = lastNeighbor; }
 
@@ -135,7 +135,7 @@ namespace KIRI
         bool mIsFrozen = false;
         bool mBoundarySite = false;
 
-        Vector<SharedPtr<KiriVoroSite>> mNeighborSites;
+        Vector<SharedPtr<KiriVoroSite>> neighbors;
         Vector<SharedPtr<KiriVoroSite>> mLastNeighborSites;
 
         KiriVoroCellPolygon2Ptr mVoroCellPolygon2;

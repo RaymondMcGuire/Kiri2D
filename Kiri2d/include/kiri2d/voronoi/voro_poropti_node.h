@@ -24,7 +24,7 @@ namespace KIRI
         {
             mCore = std::make_shared<KiriVoroPoroOptiCore>();
             mSite = std::make_shared<KiriVoroSite>(pos.x, pos.y);
-            mSite->SetRadius(radius);
+            mSite->setRadius(radius);
         }
 
         ~KiriVoroPoroOptiNode() {}
@@ -37,7 +37,7 @@ namespace KIRI
 
         void ComputeIterate();
 
-        Vector4F ComputeMaxInscribedCircle() const { return Vector4F(mCore->ComputeMaxInscribedCircle(), mSite->GetRadius()); };
+        Vector4F ComputeMaxInscribedCircle() const { return Vector4F(mCore->ComputeMaxInscribedCircle(), mSite->radius()); };
 
     private:
         KiriVoroSitePtr mSite;

@@ -16,7 +16,7 @@
 class KiriModelTinyObjLoader
 {
 public:
-    KiriModelTinyObjLoader() { ClearData(); }
+    KiriModelTinyObjLoader() { clearData(); }
     KiriModelTinyObjLoader(const String &name, const String &folder, const String &ext);
 
     bool Load(const String &filePath);
@@ -100,7 +100,7 @@ public:
 
 private:
     void ComputeFaceVertexData();
-    void ClearData();
+    void clearData();
 
     String mName;
     String mExtension;

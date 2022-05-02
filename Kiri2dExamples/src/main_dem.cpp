@@ -7,7 +7,7 @@
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_dem.cpp
  */
 
-#if defined (KIRI_WINDOWS) && defined (ENABLE_CUDA)  
+#if defined(KIRI_WINDOWS) && defined(ENABLE_CUDA)
 
 #include <kiri_utils.h>
 #include <kiri2d/renderer/renderer.h>
@@ -392,8 +392,8 @@ void UpdateScene(const std::vector<KiriCircle2> &circles)
     cv::imshow("DEM", renderer->GetCanvas());
     cv::waitKey(5);
 
-    renderer->ClearCanvas();
-    scene->Clear();
+    renderer->clearCanvas();
+    scene->clear();
 }
 
 void Update()

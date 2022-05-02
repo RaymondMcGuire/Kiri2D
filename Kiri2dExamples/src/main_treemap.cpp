@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-21 18:37:46
  * @LastEditTime: 2021-06-25 01:13:50
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main_treemap.cpp
  */
 
@@ -41,8 +41,8 @@ int main_treemaplayout()
     std::vector<KiriPoint2> ppoints;
     std::vector<Vector2F> ptest;
     size_t testn;
-    //load_xy_file(ptest, testn, "D:/project/Kiri/export/xy/test.xy");
-    //load_xy_file(ptest, testn, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
+    // load_xy_file(ptest, testn, "D:/project/Kiri/export/xy/test.xy");
+    // load_xy_file(ptest, testn, "E:/PBCGLab/project/Kiri2D/scripts/alphashape/test.xy");
     load_xy_file(ptest, testn, "D:/project/Kiri2D/scripts/alphashape/test.xy");
 
     for (size_t i = 0; i < ptest.size(); i++)
@@ -84,7 +84,7 @@ int main_treemaplayout()
         nodes.emplace_back(TreemapNode("A", -1, -1, radius, 0));
     }
 
-    //TreemapNode topNode(tempNodeName, 35, 10, topRect);
+    // TreemapNode topNode(tempNodeName, 35, 10, topRect);
     TreemapNode topNode(tempNodeName, 0, -1, totalValue, totalNum, topRect);
 
     TreemapLayoutPtr treemap2d = std::make_shared<TreemapLayout>(topNode, tempNodeName);
@@ -114,13 +114,13 @@ int main_treemaplayout()
 
     auto scene = std::make_shared<KiriScene2D>((size_t)width, (size_t)height);
 
-    //scene->AddParticles(ppoints);
-    //scene->AddObject(boundary);
+    // scene->AddParticles(ppoints);
+    // scene->AddObject(boundary);
 
     // scene->AddLines(edges);
     // scene->AddParticles(points);
 
-    //scene->AddRects(treemap2d->GetTreemapLayoutRect());
+    // scene->AddRects(treemap2d->GetTreemapLayoutRect());
     scene->AddCircles(circles);
 
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
@@ -130,7 +130,7 @@ int main_treemaplayout()
         renderer->DrawCanvas();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
+        renderer->clearCanvas();
     }
 
     return 0;
@@ -162,7 +162,7 @@ int main111()
     {
         auto point = KiriPoint2(ptest[i] * 800.f + Vector2F(500.f, 100.f), Vector3F(1.f, 0.f, 0.f));
         ppoints.emplace_back(point);
-        //boundary.Append(point.pos, Vector2F(0.f));
+        // boundary.Append(point.pos, Vector2F(0.f));
         bunny2d.push_back(PolyClip::Point2d(ptest[i].x, ptest[i].y));
     }
 
@@ -219,7 +219,7 @@ int main111()
         renderer->DrawCanvas();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
+        renderer->clearCanvas();
     }
 
     return 0;
@@ -279,7 +279,7 @@ int main41()
         renderer->DrawCanvas();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
+        renderer->clearCanvas();
     }
 
     return 0;

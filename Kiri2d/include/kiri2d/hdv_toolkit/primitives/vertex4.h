@@ -1,6 +1,13 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2022-05-02 14:06:16
+ * @LastEditors: Xu.WANG
+ * @Description:
+ */
+/***
+ * @Author: Xu.WANG
+ * @Date: 2021-12-23 17:57:21
  * @LastEditTime: 2021-12-29 14:58:29
  * @LastEditors: Xu.WANG
  * @Description:
@@ -18,15 +25,25 @@ namespace HDV::Primitives
     class Vertex4 : public Vertex
     {
     public:
-        explicit Vertex4() : Vertex(4) {}
-        explicit Vertex4(int id) : Vertex(4, id) {}
-        explicit Vertex4(double x, double y, double z, double w) : Vertex(4)
+        explicit Vertex4()
+            : Vertex(4)
+        {
+        }
+
+        explicit Vertex4(int id)
+            : Vertex(4, id)
+        {
+        }
+
+        explicit Vertex4(double x, double y, double z, double w)
+            : Vertex(4)
         {
             mPosition[0] = x;
             mPosition[1] = y;
             mPosition[2] = z;
             mPosition[3] = w;
         }
+
         explicit Vertex4(double x, double y, double z, double w, int id) : Vertex(4, id)
         {
             mPosition[0] = x;
@@ -34,9 +51,30 @@ namespace HDV::Primitives
             mPosition[2] = z;
             mPosition[3] = w;
         }
+
         virtual ~Vertex4() {}
 
-        void Set(double x, double y, double z, double w)
+        double x() const
+        {
+            return mPosition[0];
+        }
+
+        double y() const
+        {
+            return mPosition[1];
+        }
+
+        double z() const
+        {
+            return mPosition[2];
+        }
+
+        double w() const
+        {
+            return mPosition[3];
+        }
+
+        void set(double x, double y, double z, double w)
         {
             mPosition[0] = x;
             mPosition[1] = y;
@@ -44,25 +82,25 @@ namespace HDV::Primitives
             mPosition[3] = w;
         }
 
-        double Distance(double px, double py, double pz, double pw)
+        double distanceTo(std::shared_ptr<Vertex4> v)
         {
-            return std::sqrtf(SqrDistance(px, py, pz, pw));
+            return std::sqrt(distanceSquaredTo(v->x(), v->y(), v->z(), v->w()));
         }
 
-        double SqrDistance(double px, double py, double pz, double pw)
+        double distanceTo(double vx, double vy, double vz, double vw)
         {
-            auto x = mPosition[0] - px;
-            auto y = mPosition[1] - py;
-            auto z = mPosition[2] - pz;
-            auto w = mPosition[3] - pw;
+            return std::sqrt(distanceSquaredTo(vx, vy, vz, vw));
+        }
+
+        double distanceSquaredTo(double vx, double vy, double vz, double vw)
+        {
+            auto x = mPosition[0] - vx;
+            auto y = mPosition[1] - vy;
+            auto z = mPosition[2] - vz;
+            auto w = mPosition[3] - vw;
 
             return x * x + y * y + z * z + w * w;
         }
-
-        double X() const { return mPosition[0]; }
-        double Y() const { return mPosition[1]; }
-        double Z() const { return mPosition[2]; }
-        double W() const { return mPosition[3]; }
     };
 
     typedef std::shared_ptr<Vertex4> Vertex4Ptr;

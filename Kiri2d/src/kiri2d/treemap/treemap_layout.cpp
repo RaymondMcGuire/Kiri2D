@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:56:27
  * @LastEditTime: 2021-06-24 18:18:28
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\treemap\treemap_layout.cpp
  */
 
@@ -29,7 +29,7 @@ namespace KIRI
 
     const KiriVoroTreeMapDataPtr &TreemapLayout::Convert2VoroTreeData()
     {
-        mVoroTreeMapData->Clear();
+        mVoroTreeMapData->clear();
 
         tree<TreemapNode>::iterator sibe = mTreemap.begin(mDataTree);
         tree<TreemapNode>::iterator end = mTreemap.end(mDataTree);

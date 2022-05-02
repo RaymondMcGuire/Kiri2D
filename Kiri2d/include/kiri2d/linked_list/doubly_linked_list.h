@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
  * @LastEditTime: 2021-05-24 10:42:14
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri\KiriCore\include\kiri2d\linked_list\doubly_linked_list.h
  */
 
@@ -70,7 +70,7 @@ namespace KIRI
             }
         }
 
-        void RemoveAll()
+        void removeAll()
         {
             while (mFirst != NULL)
             {
@@ -82,12 +82,12 @@ namespace KIRI
             mCounter = 0;
         }
 
-        /*** 
-         * @description: integer example for remove:  l.Remove([](int x) {return x%2 == 1;});
+        /***
+         * @description: integer example for remove:  l.remove([](int x) {return x%2 == 1;});
          * @param {function<bool(T)>} predicate
          * @return {*}
          */
-        void Remove(std::function<bool(T)> predicate)
+        void remove(std::function<bool(T)> predicate)
         {
             while (mFirst != NULL && predicate(mFirst->value))
             {
@@ -169,7 +169,7 @@ namespace KIRI
             }
             ~Node()
             {
-                //KIRI_LOG_DEBUG("destruct node value: {0}", this->value);
+                // KIRI_LOG_DEBUG("destruct node value: {0}", this->value);
             }
         };
         SharedPtr<Node> mFirst;

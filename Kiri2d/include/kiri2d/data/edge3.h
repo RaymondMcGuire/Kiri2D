@@ -34,8 +34,8 @@ namespace KIRI
 
         ~KiriEdge3() {}
 
-        constexpr UInt GetId() const { return mId; }
-        void SetId(UInt id) { mId = id; }
+        constexpr UInt id() const { return mId; }
+        void setId(UInt id) { mId = id; }
 
         // void SetNextEdge(SharedPtr<KiriEdge3> nxt) { mNext = nxt; }
         // void SetPrevEdge(SharedPtr<KiriEdge3> pre) { mPrev = pre; }
@@ -75,9 +75,9 @@ namespace KIRI
                            mDest->GetValue().x, mDest->GetValue().y, mDest->GetValue().z);
 
             // KIRI_LOG_DEBUG("prev edge id={0}, next edge id={1}, twin edge id={2},",
-            //                (mPrev != NULL) ? mPrev->GetId() : -1,
-            //                (mNext != NULL) ? mNext->GetId() : -1,
-            //                (mTwin != NULL) ? mTwin->GetId() : -1);
+            //                (mPrev != NULL) ? mPrev->id() : -1,
+            //                (mNext != NULL) ? mNext->id() : -1,
+            //                (mTwin != NULL) ? mTwin->id() : -1);
 
             KIRI_LOG_DEBUG("edge id={0}, prev edge id={1}, next edge id={2}, twin edge id={3};",
                            mId,

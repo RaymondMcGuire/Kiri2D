@@ -25,7 +25,7 @@ namespace HDV::Hull
         {
             mDimension = dimension;
 
-            UpdateBuffer.assign(dimension, std::make_shared<SimplexWrap>());
+            UpdateBuffer.assign(dimension, std::make_shared<SimplexNode>());
             UpdateIndices.assign(dimension, -1);
 
             ObjManager = std::make_shared<ObjectManager>(dimension);
@@ -36,7 +36,7 @@ namespace HDV::Hull
 
         virtual ~ObjectBuffer() {}
 
-        const int CONNECTOR_TABLE_SIZE = 2017;
+        const int CONNECTOR_TABLE_SIZE = 10;
 
         int CurrentVertex;
         int FurthestVertex;
@@ -50,41 +50,41 @@ namespace HDV::Hull
         std::vector<int> BeyondBuffer;
 
         std::vector<VERTEXPTR> InputVertices;
-        std::vector<std::shared_ptr<SimplexWrap>> ConvexSimplexs;
-        std::vector<std::shared_ptr<SimplexWrap>> AffectedFaceBuffer;
-        std::stack<std::shared_ptr<SimplexWrap>> TraverseStack;
+        std::vector<std::shared_ptr<SimplexNode>> ConvexSimplexs;
+        std::vector<std::shared_ptr<SimplexNode>> AffectedFaceBuffer;
+        std::stack<std::shared_ptr<SimplexNode>> TraverseStack;
 
         std::unordered_set<int> SingularVertices;
 
         std::vector<std::shared_ptr<DeferredSimplex>> ConeFaceBuffer;
-        std::vector<std::shared_ptr<SimplexWrap>> UpdateBuffer;
+        std::vector<std::shared_ptr<SimplexNode>> UpdateBuffer;
         std::vector<int> UpdateIndices;
         std::vector<std::shared_ptr<ConnectorList>> ConnectorTable;
 
-        void Clear()
+        void clear()
         {
             for (auto i = 0; i < UpdateBuffer.size(); i++)
-                UpdateBuffer[i]->Clear();
+                UpdateBuffer[i]->clear();
 
             for (auto i = 0; i < ConeFaceBuffer.size(); i++)
-                ConeFaceBuffer[i]->Clear();
+                ConeFaceBuffer[i]->clear();
 
             for (auto i = 0; i < AffectedFaceBuffer.size(); i++)
-                AffectedFaceBuffer[i]->Clear();
+                AffectedFaceBuffer[i]->clear();
 
             for (auto i = 0; i < ConvexSimplexs.size(); i++)
-                ConvexSimplexs[i]->Clear();
+                ConvexSimplexs[i]->clear();
 
             for (auto i = 0; i < CONNECTOR_TABLE_SIZE; i++)
-                ConnectorTable[i]->Clear();
+                ConnectorTable[i]->clear();
 
             for (auto i = 0; i < TraverseStack.size(); i++)
             {
-                TraverseStack.top()->Clear();
+                TraverseStack.top()->clear();
                 TraverseStack.pop();
             }
 
-            TraverseStack = std::stack<std::shared_ptr<SimplexWrap>>();
+            TraverseStack = std::stack<std::shared_ptr<SimplexNode>>();
 
             UpdateBuffer.clear();
             UpdateIndices.clear();
@@ -97,8 +97,8 @@ namespace HDV::Hull
             SingularVertices.clear();
             ConeFaceBuffer.clear();
 
-            ObjManager->Clear();
-            UnprocessedFaces->Clear();
+            ObjManager->clear();
+            UnprocessedFaces->clear();
             EmptyBuffer.clear();
             BeyondBuffer.clear();
 
@@ -117,7 +117,7 @@ namespace HDV::Hull
             if (assignIds)
             {
                 for (auto i = 0; i < count; i++)
-                    InputVertices[i]->SetId(i);
+                    InputVertices[i]->setId(i);
             }
 
             if (checkInput)
@@ -129,13 +129,13 @@ namespace HDV::Hull
                     if (input[i] == nullptr)
                         throw std::invalid_argument("Input has a null vertex!");
 
-                    if (input[i]->GetDimension() != mDimension)
+                    if (input[i]->dimension() != mDimension)
                         throw std::invalid_argument("Input vertex is not the correct dimension!");
 
-                    if (set.count(input[i]->GetId()))
+                    if (set.count(input[i]->id()))
                         throw std::invalid_argument("Input vertex id is not unique!");
                     else
-                        set.insert(input[i]->GetId());
+                        set.insert(input[i]->id());
                 }
             }
         }

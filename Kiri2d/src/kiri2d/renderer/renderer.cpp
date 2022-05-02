@@ -25,10 +25,10 @@ namespace KIRI2D
 
     void KiriRenderer2D::SaveImages2FileWithPrefix(std::string prefix)
     {
-        cv::imwrite(String(EXPORT_PATH) + "images/" + prefix + "_" + UInt2Str4Digit(counter) + ".png", mCanvas);
+        cv::imwrite(String(EXPORT_PATH) + "images/" + prefix + "_" + UInt2Str4Digit(counter++) + ".png", mCanvas);
     }
 
-    void KiriRenderer2D::ClearCanvas()
+    void KiriRenderer2D::clearCanvas()
     {
         for (int j = 0; j < mWindowHeight; j++)
         {
@@ -99,7 +99,7 @@ namespace KIRI2D
         for (size_t i = 0; i < sdfObjects.size(); i++)
         {
             auto points = sdfObjects[i].GetPoints();
-            auto offset = sdfObjects[i].GetOffset();
+            auto offset = sdfObjects[i].offset();
             for (int j = 0, k = points.size() - 1, l = points.size(); j < l; k = j++)
             {
                 Vector2F start_relate_position = mScene->GetCamera()->Project(points[k] + offset);

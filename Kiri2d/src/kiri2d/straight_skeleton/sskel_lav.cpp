@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-07-22 11:03:44
  * @LastEditTime: 2021-10-06 19:43:31
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\sskel_lav.cpp
  */
 #include <kiri2d/straight_skeleton/sskel_lav.h>
@@ -33,7 +33,7 @@ namespace KIRI2D::SSKEL
     void SSkelLAV::PrintSSkelLAV()
     {
         KIRI_LOG_DEBUG("----------SSkelLAV----------");
-        KIRI_LOG_DEBUG("LAV list number={0}", this->Length());
+        KIRI_LOG_DEBUG("LAV list number={0}", this->length());
 
         if (mHead != nullptr)
         {
@@ -109,7 +109,7 @@ namespace KIRI2D::SSKEL
         va->prev->next = newVertex;
         newVertex->prev = va->prev;
 
-        //FIXME
+        // FIXME
         if (vb->next.expired())
         {
             newVertex->next = va->prev;
@@ -200,7 +200,7 @@ namespace KIRI2D::SSKEL
                     b2,
                     vertex,
                     edge);
-                //split_event->Print();
+                // split_event->Print();
                 if (dis == dis)
                     events.emplace_back(split_event);
             }

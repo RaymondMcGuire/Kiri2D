@@ -23,48 +23,27 @@ namespace HDV::Primitives
         explicit Vertex(int dimension, int id) : Vertex(dimension) { mId = id; }
         virtual ~Vertex() {}
 
-        int GetId() const { return mId; }
-        int GetTag() const { return mTag; }
-        int GetDimension() { return (mPosition.empty()) ? 0 : mPosition.size(); }
-        double GetWeight() { return mWeight; }
-        double GetRadius() { return mRadius; }
-        const std::vector<double> &GetPosition() const { return mPosition; }
+        int id() const { return mId; }
+        int tag() const { return mTag; }
+        int dimension() const { return (mPosition.empty()) ? 0 : mPosition.size(); }
+        double weight() const { return mWeight; }
+        double radius() const { return mRadius; }
+        bool isBoundaryVertex() { return mIsBoundaryVertex; }
+        std::vector<double> &positions() { return mPosition; }
+        std::vector<std::shared_ptr<Vertex>> &neighbors() { return mNeighbors; }
 
-        void SetId(int id) { mId = id; }
-        void SetTag(int tag) { mTag = tag; }
-        void SetWeight(double weight) { mWeight = weight; }
-        void SetRadius(double radius) { mRadius = radius; }
+        void setId(int id) { mId = id; }
+        void setTag(int tag) { mTag = tag; }
+        void setWeight(double weight) { mWeight = weight; }
+        void setRadius(double radius) { mRadius = radius; }
+        void setAsBoundaryVertex() { mIsBoundaryVertex = true; }
 
-        std::string GetString()
+        double length() { return std::sqrt(lengthSquared()); }
+
+        double lengthSquared()
         {
-            auto dim = GetDimension();
-            std::string data = "";
-            for (auto i = 0; i < dim; i++)
-            {
-                data += std::to_string(mPosition[i]);
-                if (i != dim - 1)
-                    data += ",";
-            }
-
-            return "[Vertex: Id=" + std::to_string(mId) + ",Tag=" + std::to_string(mTag) + ", Dimension=" + std::to_string(dim) + ",Data=" + data + "]";
-        }
-
-        std::vector<double> mPosition;
-        std::vector<std::shared_ptr<Vertex>> mNeighborSites;
-
-        void SetAsBoundaryVertex() { mIsBoundaryVertex = true; }
-        bool GetIsBoundaryVertex() { return mIsBoundaryVertex; }
-
-        double Magnitude()
-        {
-            return std::sqrtf(SqrMagnitude());
-        }
-
-        double SqrMagnitude()
-        {
-
             auto sum = 0.0;
-            auto dim = GetDimension();
+            auto dim = dimension();
 
             for (auto i = 0; i < dim; i++)
                 sum += mPosition[i] * mPosition[i];
@@ -72,28 +51,37 @@ namespace HDV::Primitives
             return sum;
         }
 
-        double Distance(Vertex v)
+        double distanceTo(std::shared_ptr<Vertex> v)
         {
-            return std::sqrtf(SqrDistance(v));
+            return std::sqrt(distanceSquaredTo(v));
         }
 
-        double SqrDistance(Vertex v)
+        double distanceSquaredTo(std::shared_ptr<Vertex> v)
         {
-            auto dim = std::min(GetDimension(), v.GetDimension());
+            auto dim = std::min(dimension(), v->dimension());
             auto sum = 0.0;
 
             for (auto i = 0; i < dim; i++)
             {
-                double x = mPosition[i] - v.GetPosition()[i];
+                double x = mPosition[i] - v->positions()[i];
                 sum += x * x;
             }
 
             return sum;
         }
 
-        void ToString()
+        void reset()
         {
-            auto dim = GetDimension();
+            mTag = 0;
+            mId = -1;
+            mWeight = 0.0;
+            mRadius = 0.0;
+            mIsBoundaryVertex = false;
+        }
+
+        void toString()
+        {
+            auto dim = dimension();
             std::string data = "";
             for (auto i = 0; i < dim; i++)
             {
@@ -105,14 +93,15 @@ namespace HDV::Primitives
             KIRI_LOG_DEBUG("[Vertex: Id={0}, Dimension={1},  Data={2}, Tag={3}]", mId, dim, data, std::to_string(mTag));
         }
 
-        void Reset() { mTag = 0; }
-
     protected:
         int mId = -1;
         int mTag = 0;
         double mWeight = 0.0;
         double mRadius = 0.0;
         bool mIsBoundaryVertex = false;
+
+        std::vector<double> mPosition;
+        std::vector<std::shared_ptr<Vertex>> mNeighbors;
     };
     typedef std::shared_ptr<Vertex> VertexPtr;
 } // namespace HDV::Primitives

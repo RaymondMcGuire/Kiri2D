@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-07-22 10:58:21
  * @LastEditTime: 2021-10-04 13:50:30
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_slav.h
  */
 
@@ -25,7 +25,7 @@ namespace KIRI2D::SSKEL
 
             auto lav_poly = std::make_shared<KIRI2D::SSKEL::SSkelLAV>(mLAVCounter++);
 
-            mLAVMaps[lav_poly->GetId()] = lav_poly;
+            mLAVMaps[lav_poly->id()] = lav_poly;
 
             auto size = poly.size();
             for (size_t i = size; i < size + size; i++)
@@ -34,7 +34,7 @@ namespace KIRI2D::SSKEL
                 auto curr = poly[i % size];
                 auto next = poly[(i + 1) % size];
                 lav_poly->Push(std::make_shared<SSkelVertex>(
-                    lav_poly->GetId(),
+                    lav_poly->id(),
                     Vector4F(prev.x, prev.y, curr.x, curr.y),
                     curr,
                     Vector4F(curr.x, curr.y, next.x, next.y)));
@@ -53,13 +53,13 @@ namespace KIRI2D::SSKEL
             for (size_t i = 0; i < events.size(); i++)
                 mPriorityQueue.push(events[i]);
 
-            //debug prior queue
-            // while (!mPriorityQueue.empty())
-            // {
-            //     auto p = mPriorityQueue.top();
-            //     mPriorityQueue.pop();
-            //     p->Print();
-            // }
+            // debug prior queue
+            //  while (!mPriorityQueue.empty())
+            //  {
+            //      auto p = mPriorityQueue.top();
+            //      mPriorityQueue.pop();
+            //      p->Print();
+            //  }
 
             // KIRI_LOG_DEBUG("-----handle start-----");
             this->HandleEvents();

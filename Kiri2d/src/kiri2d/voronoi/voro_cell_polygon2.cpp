@@ -301,7 +301,7 @@ namespace KIRI
 
     void KiriVoroCellPolygon2::ComputeVoroSitesList()
     {
-        mVoroSitesList->RemoveAll();
+        mVoroSitesList->removeAll();
         for (size_t i = 0; i < mPolygonVertices2.size(); i++)
             mVoroSitesList->Push(Vector2F(mPolygonVertices2[mPolygonVertices2.size() - 1 - i]));
     }

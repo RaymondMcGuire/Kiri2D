@@ -40,7 +40,7 @@ namespace KIRI
                 }
 
                 auto mic = poly->ComputeMICByStraightSkeleton();
-                mMIC.emplace_back(Vector4F(mic, sites[i]->GetRadius()));
+                mMIC.emplace_back(Vector4F(mic, sites[i]->radius()));
             }
             else
             {

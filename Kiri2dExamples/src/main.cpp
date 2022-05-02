@@ -70,7 +70,7 @@ void QuickHullVoronoi2d()
         for (size_t i = 0; i < sites.size(); i++)
         {
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-            if (site->GetIsBoundaryVertex())
+            if (site->isBoundaryVertex())
                 continue;
 
             auto cellpolygon = site->CellPolygon;
@@ -84,10 +84,10 @@ void QuickHullVoronoi2d()
 
                 // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
             }
-            // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Verts.size());
-            precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->Verts.size());
+            precompute_points.emplace_back(Vector2F(site->x(), site->y()));
 
-            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
         std::vector<KiriLine2> lines;
@@ -109,8 +109,8 @@ void QuickHullVoronoi2d()
         // renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -263,7 +263,7 @@ void MSSampler2D()
         for (size_t i = 0; i < sites.size(); i++)
         {
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
-            if (site->GetIsBoundaryVertex())
+            if (site->isBoundaryVertex())
                 continue;
 
             auto cellpolygon = site->CellPolygon;
@@ -281,10 +281,10 @@ void MSSampler2D()
                 }
             }
 
-            // KIRI_LOG_DEBUG("site={0},size={1}", site->GetId(), cellpolygon->Positions.size());
-            precompute_points.emplace_back(Vector2F(site->X(), site->Y()));
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->Positions.size());
+            precompute_points.emplace_back(Vector2F(site->x(), site->y()));
 
-            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->X(), site->Y(), i);
+            // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
         std::vector<KiriLine2> lines;
@@ -333,8 +333,8 @@ void MSSampler2D()
         renderer->DrawCanvas();
 
         renderer->SaveImages2FileWithPrefix(boundaryFileName);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
 
         auto cur_rmsp = ComputeRMSPE(predictRadiusArray, realRadiusArray);
         min_rmsp = std::min(min_rmsp, cur_rmsp);
@@ -437,8 +437,8 @@ void Sph2dExample()
         // renderer->SaveImages2File();
         cv::imshow("KIRI2D::SPH2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -559,8 +559,8 @@ void BlueNoiseSamplingVisual()
         renderer->SaveImages2File();
         cv::imshow("KIRI2D::Blue Noise Sampling", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->ClearCanvas();
-        scene->Clear();
+        renderer->clearCanvas();
+        scene->clear();
     }
 }
 
@@ -663,13 +663,13 @@ void main()
 {
     KIRI::KiriLog::Init();
 
-    QuickHullVoronoi2d();
+    // QuickHullVoronoi2d();
 
     // Sph2dExample();
 
     // BlueNoiseSampling();
     // BlueNoiseSamplingVisual();
 
-    // MSSampler2D();
-    //  ExportParticleRadiusDist();
+    MSSampler2D();
+    //   ExportParticleRadiusDist();
 }

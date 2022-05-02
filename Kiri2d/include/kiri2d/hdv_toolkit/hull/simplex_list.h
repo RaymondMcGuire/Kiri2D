@@ -11,137 +11,140 @@
 
 #pragma once
 
-#include <kiri2d/hdv_toolkit/hull/simplex_wrap.h>
+#include <kiri2d/hdv_toolkit/hull/simplex_node.h>
 namespace HDV::Hull
 {
     class SimplexList
     {
     public:
-        explicit SimplexList() : First{nullptr}, Last{nullptr} {}
-
-        virtual ~SimplexList() {}
-
-        std::shared_ptr<SimplexWrap> First;
-        std::shared_ptr<SimplexWrap> Last;
-
-        void Clear()
+        explicit SimplexList()
+            : First{nullptr}, Last{nullptr}
         {
-            RemoveAll();
+        }
+
+        virtual ~SimplexList()
+        {
+        }
+
+        std::shared_ptr<SimplexNode> First;
+        std::shared_ptr<SimplexNode> Last;
+
+        void clear()
+        {
+            removeAll();
 
             First = nullptr;
             Last = nullptr;
         }
 
-        void AddFirst(const std::shared_ptr<SimplexWrap> &face)
+        void AddFirst(const std::shared_ptr<SimplexNode> &simplex)
         {
-            face->SetInList(true);
-            face->Next = First;
+            simplex->setInLinkList(true);
+            simplex->Next = First;
             if (First == nullptr)
-                Last = face;
+                Last = simplex;
             else
-                First->Prev = face;
+                First->Prev = simplex;
 
-            First = face;
+            First = simplex;
         }
 
-        void RemoveAll()
+        void removeAll()
         {
-            std::shared_ptr<SimplexWrap> tmp;
+            std::shared_ptr<SimplexNode> tmp;
             while (First != nullptr)
             {
                 tmp = First;
                 First = First->Next;
-                tmp->Clear();
+                tmp->clear();
                 tmp->Next = nullptr;
                 tmp->Prev.reset();
                 tmp = nullptr;
             }
         }
 
-        void Remove(const std::shared_ptr<SimplexWrap> &face)
+        void remove(const std::shared_ptr<SimplexNode> &simplex)
         {
-            if (!face->GetInList())
+            if (!simplex->inLinkList())
                 return;
 
-            // face->ToString();
+            simplex->setInLinkList(false);
 
-            face->SetInList(false);
-
-            if (face->Prev.lock() != nullptr)
+            if (simplex->Prev.lock() != nullptr)
             {
-                std::shared_ptr<SimplexWrap> prev{face->Prev};
-                prev->Next = face->Next;
+                std::shared_ptr<SimplexNode> prev{simplex->Prev};
+                prev->Next = simplex->Next;
             }
-            else if (face->Prev.lock() == nullptr)
+            else if (simplex->Prev.lock() == nullptr)
             {
-                First = face->Next;
+                First = simplex->Next;
             }
 
-            if (face->Next != nullptr)
+            if (simplex->Next != nullptr)
             {
-                std::shared_ptr<SimplexWrap> next{face->Next};
-                next->Prev = face->Prev;
+                std::shared_ptr<SimplexNode> next{simplex->Next};
+                next->Prev = simplex->Prev;
             }
-            else if (face->Next == nullptr)
+            else if (simplex->Next == nullptr)
             {
-                if (face->Prev.lock() == nullptr)
+                if (simplex->Prev.lock() == nullptr)
                     Last = nullptr;
                 else
                 {
-                    std::shared_ptr<SimplexWrap> prev{face->Prev};
+                    std::shared_ptr<SimplexNode> prev{simplex->Prev};
                     Last = prev;
                 }
             }
 
-            face->Next = nullptr;
-            face->Prev.reset();
+            simplex->Next = nullptr;
+            simplex->Prev.reset();
         }
 
-        void Add(const std::shared_ptr<SimplexWrap> &face)
+        void add(const std::shared_ptr<SimplexNode> &simplex)
         {
-            if (face->GetInList())
+            if (simplex->inLinkList())
             {
-                if (First->VerticesBeyond.size() < face->VerticesBeyond.size())
+                if (First->verticesBeyond().size() < simplex->verticesBeyond().size())
                 {
-                    Remove(face);
-                    AddFirst(face);
+                    remove(simplex);
+                    AddFirst(simplex);
                 }
                 return;
             }
 
-            face->SetInList(true);
+            simplex->setInLinkList(true);
 
-            if (First != nullptr && (First->VerticesBeyond.size() < face->VerticesBeyond.size()))
+            if (First != nullptr && (First->verticesBeyond().size() < simplex->verticesBeyond().size()))
             {
 
-                First->Prev = face;
-                face->Next = First;
-                First = face;
+                First->Prev = simplex;
+                simplex->Next = First;
+                First = simplex;
             }
             else
             {
                 if (Last != nullptr)
                 {
-                    Last->Next = face;
+                    Last->Next = simplex;
                 }
 
-                face->Prev = Last;
-                Last = face;
+                simplex->Prev = Last;
+                Last = simplex;
 
                 if (First == nullptr)
                 {
-                    First = face;
+                    First = simplex;
                 }
             }
         }
 
-        void ToString()
+        void toString()
         {
             KIRI_LOG_DEBUG("---Simplex List Start---");
-            std::shared_ptr<SimplexWrap> current{First};
+            std::shared_ptr<SimplexNode> current{First};
             while (current != nullptr)
             {
-                current->ToString();
+                current->toString();
                 current = current->Next;
             }
             KIRI_LOG_DEBUG("---Simplex List End---");

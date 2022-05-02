@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-06-24 20:20:19
  * @LastEditTime: 2021-06-24 20:21:09
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\poly\Polygon.h
  */
 #pragma once
@@ -25,12 +25,12 @@ namespace PolyClip
 		~Polygon();
 
 		/* IMPORTANT:
-		* Copy constructor and assignment constructor. All of them are depth copy implementation.
-		* Note: not all of vertices properties cannot be copied because some properties will be modified by polygon clipping operation.
-		* So we just implement to copy basic connection relationship and vertex position property.
-		* We also kick out intersection points which were added by polygon clipping operation.
-		* If you use these function to copy, REMEMBER do polygon clipping operation from scratch.
-		*/
+		 * Copy constructor and assignment constructor. All of them are depth copy implementation.
+		 * Note: not all of vertices properties cannot be copied because some properties will be modified by polygon clipping operation.
+		 * So we just implement to copy basic connection relationship and vertex position property.
+		 * We also kick out intersection points which were added by polygon clipping operation.
+		 * If you use these function to copy, REMEMBER do polygon clipping operation from scratch.
+		 */
 		Polygon(Polygon &poly);
 		Polygon &operator=(Polygon &poly);
 
@@ -39,7 +39,7 @@ namespace PolyClip
 		void Insert(const Point2d &vertex, Vertex *pos);
 		void Insert(float x, float y, Vertex *pos);
 		// delete vertex on specific pos
-		void Remove(Vertex *pos);
+		void remove(Vertex *pos);
 
 		// generate iterator
 		iterator begin()

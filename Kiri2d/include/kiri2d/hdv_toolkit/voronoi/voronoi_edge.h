@@ -26,10 +26,10 @@ namespace HDV::Voronoi
         }
         virtual ~VoronoiEdge() {}
 
-        void Clear()
+        void clear()
         {
-            From->Clear();
-            To->Clear();
+            From->clear();
+            To->clear();
             From = nullptr;
             To = nullptr;
         }
