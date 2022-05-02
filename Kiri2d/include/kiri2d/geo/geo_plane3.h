@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
  * @LastEditTime: 2021-05-21 02:35:06
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri\KiriCore\include\kiri2d\geo\geo_plane3.h
  */
 
@@ -28,7 +28,7 @@ namespace KIRI
             mCoefD = -1.f * (v1.x * (v2.y * v3.z - v3.y * v2.z) + v2.x * (v3.y * v1.z - v1.y * v3.z) + v3.x * (v1.y * v2.z - v2.y * v1.z));
         };
 
-        ~KiriGeoPlane3() noexcept {};
+        ~KiriGeoPlane3(){};
 
         Vector2F GetDualPointMappedToPlane() const
         {

@@ -23,7 +23,7 @@ namespace HDV::Hull
         {
             VerticeIndexes.assign(dimension - 1, 0);
         }
-        virtual ~SimplexConnector() noexcept {}
+        virtual ~SimplexConnector() {}
 
         std::shared_ptr<SimplexConnector> Next;
         std::weak_ptr<SimplexConnector> Prev;

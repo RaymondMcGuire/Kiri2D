@@ -40,33 +40,33 @@ namespace KIRI
             IsSame_Float<T>::value || IsSame_Double<T>::value,
             "data type is not correct");
 
-        explicit constexpr color3(T gray) noexcept : data{gray, gray, gray} {}
-        constexpr color3(T r, T g, T b) noexcept : data{r, g, b} {}
+        explicit constexpr color3(T gray)  : data{gray, gray, gray} {}
+        constexpr color3(T r, T g, T b)  : data{r, g, b} {}
 
         T data[3];
 
-        T &r() noexcept { return data[0]; }
-        T &g() noexcept { return data[1]; }
-        T &b() noexcept { return data[2]; }
-        constexpr T r() const noexcept { return data[0]; }
-        constexpr T g() const noexcept { return data[1]; }
-        constexpr T b() const noexcept { return data[2]; }
+        T &r()  { return data[0]; }
+        T &g()  { return data[1]; }
+        T &b()  { return data[2]; }
+        constexpr T r() const  { return data[0]; }
+        constexpr T g() const  { return data[1]; }
+        constexpr T b() const  { return data[2]; }
 
-        constexpr uint8_t ri() const noexcept { return static_cast<uint8_t>(data[0] * 255.f); }
-        constexpr uint8_t gi() const noexcept { return static_cast<uint8_t>(data[1] * 255.f); }
-        constexpr uint8_t bi() const noexcept { return static_cast<uint8_t>(data[2] * 255.f); }
+        constexpr uint8_t ri() const  { return static_cast<uint8_t>(data[0] * 255.f); }
+        constexpr uint8_t gi() const  { return static_cast<uint8_t>(data[1] * 255.f); }
+        constexpr uint8_t bi() const  { return static_cast<uint8_t>(data[2] * 255.f); }
 
-        T &operator[](std::size_t n) noexcept { return data[n]; }
-        constexpr T operator[](std::size_t n) const noexcept { return data[n]; }
-        T &operator()(std::size_t n) noexcept { return data[n]; }
-        constexpr T operator()(std::size_t n) const noexcept { return data[n]; }
+        T &operator[](std::size_t n)  { return data[n]; }
+        constexpr T operator[](std::size_t n) const  { return data[n]; }
+        T &operator()(std::size_t n)  { return data[n]; }
+        constexpr T operator()(std::size_t n) const  { return data[n]; }
 
-        friend constexpr color3 operator+(const color3 &c0, const color3 &c1) noexcept
+        friend constexpr color3 operator+(const color3 &c0, const color3 &c1) 
         {
             return {c0.r() + c1.r(), c0.g() + c1.g(), c0.b() + c1.b()};
         }
 
-        friend constexpr color3 operator*(T s, const color3 &c) noexcept
+        friend constexpr color3 operator*(T s, const color3 &c) 
         {
             return {s * c.r(), s * c.g(), s * c.b()};
         }
@@ -90,7 +90,7 @@ namespace KIRI
     template <typename T>
     inline __host__ __device__ color3<T> GetHotColor(T x);
     template <typename T>
-    inline __host__ __device__ constexpr color3<T> GetGrayColor(T x) noexcept;
+    inline __host__ __device__ constexpr color3<T> GetGrayColor(T x) ;
     template <typename T>
     inline __host__ __device__ color3<T> GetMagmaColor(T x);
     template <typename T>
@@ -141,7 +141,7 @@ namespace KIRI
     }
 
     template <typename T>
-    inline __host__ __device__ constexpr T clamp01(T x) noexcept
+    inline __host__ __device__ constexpr T clamp01(T x) 
     {
         return (x < 0.f)   ? 0.f
                : (x > 1.f) ? 1.f
@@ -753,7 +753,7 @@ namespace KIRI
     }
 
     template <typename T>
-    inline constexpr color3<T> GetGrayColor(T x) noexcept
+    inline constexpr color3<T> GetGrayColor(T x) 
     {
         return color3<T>{1.f - clamp01<T>(x)};
     }

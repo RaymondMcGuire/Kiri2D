@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
  * @LastEditTime: 2021-06-02 21:06:22
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_node.h
  */
 
@@ -27,7 +27,7 @@ namespace KIRI
             mSite = std::make_shared<KiriVoroSite>(pos, percent);
         }
 
-        ~KiriVoroTreeMapNode() noexcept {}
+        ~KiriVoroTreeMapNode() {}
 
         void InitCore();
         const KiriVoroSitePtr &GetSite() const { return mSite; }

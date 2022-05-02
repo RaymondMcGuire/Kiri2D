@@ -33,7 +33,7 @@ public:
   explicit CudaNonSphericalSolver(const size_t num, const size_t group_num)
       : CudaBaseSolver(num), mCudaGridGroupSize(CuCeilDiv(group_num, 8)) {}
 
-  virtual ~CudaNonSphericalSolver() noexcept {}
+  virtual ~CudaNonSphericalSolver()  {}
 
 protected:
   void ComputeNSDemLinearMomentum(

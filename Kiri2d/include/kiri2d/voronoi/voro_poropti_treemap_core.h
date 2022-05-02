@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
  * @LastEditTime: 2021-06-23 17:13:39
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_treemap_core.h
  */
 
@@ -26,7 +26,7 @@ namespace KIRI
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
-        ~KiriVoroPoroOptiTreeMapCore() noexcept {}
+        ~KiriVoroPoroOptiTreeMapCore() {}
 
         float ComputeIterate();
 

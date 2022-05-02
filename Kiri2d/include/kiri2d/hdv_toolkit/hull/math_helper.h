@@ -20,7 +20,7 @@ namespace HDV::Hull
     public:
         explicit MathHelper() {}
 
-        virtual ~MathHelper() noexcept {}
+        virtual ~MathHelper() {}
 
         static double LengthSquared(std::vector<double> x)
         {

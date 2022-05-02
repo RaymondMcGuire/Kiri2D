@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
  * @LastEditTime: 2021-06-04 16:37:36
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\data\vertex3.h
  */
 
@@ -29,7 +29,7 @@ namespace KIRI
             mValue = v;
         }
 
-        virtual ~KiriVertex3() noexcept {}
+        virtual ~KiriVertex3() {}
 
         void SetIdx(UInt idx) { mIdx = idx; }
         constexpr UInt GetIdx() { return mIdx; }

@@ -29,7 +29,7 @@ public:
   CudaGNBaseSearcher(const CudaGNBaseSearcher &) = delete;
   CudaGNBaseSearcher &operator=(const CudaGNBaseSearcher &) = delete;
 
-  virtual ~CudaGNBaseSearcher() noexcept {}
+  virtual ~CudaGNBaseSearcher()  {}
 
   float2 GetLowestPoint() const { return mLowestPoint; }
   float2 GetHighestPoint() const { return mHighestPoint; }
@@ -68,7 +68,7 @@ public:
   CudaGNSearcher(const CudaGNSearcher &) = delete;
   CudaGNSearcher &operator=(const CudaGNSearcher &) = delete;
 
-  virtual ~CudaGNSearcher() noexcept {}
+  virtual ~CudaGNSearcher()  {}
 
   inline constexpr SearcherParticleType GetSearcherType() const {
     return mSearcherParticleType;
@@ -89,7 +89,7 @@ public:
   CudaGNBoundarySearcher(const CudaGNBoundarySearcher &) = delete;
   CudaGNBoundarySearcher &operator=(const CudaGNBoundarySearcher &) = delete;
 
-  virtual ~CudaGNBoundarySearcher() noexcept {}
+  virtual ~CudaGNBoundarySearcher()  {}
 
 protected:
   virtual void SortData(const CudaParticlesPtr &particles) override final;

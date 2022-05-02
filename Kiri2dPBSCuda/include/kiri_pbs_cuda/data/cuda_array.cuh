@@ -53,7 +53,7 @@ namespace KIRI
             KIRI_CUCALL(cudaMemset(this->Data(), 0, sizeof(T) * this->Length()));
         }
 
-        ~CudaArray() noexcept {}
+        ~CudaArray()  {}
 
     private:
         const size_t mLen;

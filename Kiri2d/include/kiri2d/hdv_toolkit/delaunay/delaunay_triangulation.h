@@ -26,7 +26,7 @@ namespace HDV::Delaunay
             Dimension = dimension;
             Centroid = std::make_shared<VERTEX>();
         }
-        virtual ~DelaunayTriangulation() noexcept {}
+        virtual ~DelaunayTriangulation() {}
 
         int Dimension;
 

@@ -45,7 +45,7 @@ namespace HDV::Hull
             mPositions.clear();
         }
 
-        virtual ~ConvexHull() noexcept {}
+        virtual ~ConvexHull() {}
 
         void SetForPowerDiagram(bool enable)
         {
@@ -1590,7 +1590,7 @@ namespace HDV::Hull
     public:
         explicit ConvexHull2() : ConvexHull(2) {}
 
-        ~ConvexHull2() noexcept {}
+        ~ConvexHull2() {}
     };
 
     class ConvexHull3 : public ConvexHull<HDV::Primitives::Vertex3Ptr>
@@ -1598,7 +1598,7 @@ namespace HDV::Hull
     public:
         explicit ConvexHull3() : ConvexHull(3) {}
 
-        ~ConvexHull3() noexcept {}
+        ~ConvexHull3() {}
     };
 } // namespace HDV::Hull
 

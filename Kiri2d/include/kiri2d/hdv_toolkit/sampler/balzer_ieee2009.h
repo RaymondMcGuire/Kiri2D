@@ -20,7 +20,7 @@ namespace HDV::Sampler
     {
     public:
         explicit BalzerIEEE2009() { mPowerDiagram = std::make_shared<Voronoi::PowerDiagram2D>(); }
-        virtual ~BalzerIEEE2009() noexcept {}
+        virtual ~BalzerIEEE2009() {}
 
         std::vector<Primitives::Vertex2Ptr> GetSites() { return mPowerDiagram->GetSites(); }
 

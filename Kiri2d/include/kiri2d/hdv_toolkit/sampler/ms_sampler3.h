@@ -24,7 +24,7 @@ namespace HDV::Sampler
         {
             mPowerDiagram = std::make_shared<Voronoi::PowerDiagram3D>();
         }
-        virtual ~MultiSizeSampler3D() noexcept {}
+        virtual ~MultiSizeSampler3D() {}
 
         std::vector<Primitives::Vertex3Ptr> GetSites() { return mPowerDiagram->GetSites(); }
 

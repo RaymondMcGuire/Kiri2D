@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
  * @LastEditTime: 2021-06-24 15:42:59
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_data.h
  */
 
@@ -31,7 +31,7 @@ namespace KIRI
     public:
         KiriVoroTreeMapData() {}
 
-        ~KiriVoroTreeMapData() noexcept {}
+        ~KiriVoroTreeMapData() {}
 
         void Clear() { mData.clear(); }
         void AddNode(VoroTreeMapNode node)

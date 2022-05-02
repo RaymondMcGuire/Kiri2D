@@ -21,7 +21,7 @@ namespace HDV::Primitives
         explicit Vertex() {}
         explicit Vertex(int dimension) { mPosition.assign(dimension, 0.0); }
         explicit Vertex(int dimension, int id) : Vertex(dimension) { mId = id; }
-        virtual ~Vertex() noexcept {}
+        virtual ~Vertex() {}
 
         int GetId() const { return mId; }
         int GetTag() const { return mTag; }

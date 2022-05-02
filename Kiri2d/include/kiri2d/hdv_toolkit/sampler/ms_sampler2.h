@@ -20,7 +20,7 @@ namespace HDV::Sampler
     {
     public:
         explicit MultiSizeSampler2D() { mPowerDiagram = std::make_shared<Voronoi::PowerDiagram2D>(); }
-        virtual ~MultiSizeSampler2D() noexcept {}
+        virtual ~MultiSizeSampler2D() {}
 
         std::vector<Primitives::Vertex2Ptr> GetSites() { return mPowerDiagram->GetSites(); }
 

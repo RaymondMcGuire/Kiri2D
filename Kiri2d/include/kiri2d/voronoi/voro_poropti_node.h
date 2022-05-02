@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
  * @LastEditTime: 2021-06-15 13:27:53
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_node.h
  */
 
@@ -27,7 +27,7 @@ namespace KIRI
             mSite->SetRadius(radius);
         }
 
-        ~KiriVoroPoroOptiNode() noexcept {}
+        ~KiriVoroPoroOptiNode() {}
 
         void InitCore();
         const KiriVoroSitePtr &GetSite() const { return mSite; }

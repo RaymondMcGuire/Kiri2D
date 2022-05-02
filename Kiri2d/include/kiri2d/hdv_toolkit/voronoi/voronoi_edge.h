@@ -24,7 +24,7 @@ namespace HDV::Voronoi
             From = from;
             To = to;
         }
-        virtual ~VoronoiEdge() noexcept {}
+        virtual ~VoronoiEdge() {}
 
         void Clear()
         {

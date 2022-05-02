@@ -36,7 +36,7 @@ namespace KIRI
 		{
 			KIRI_CUCALL(cudaMemcpy(mRadius.Data(), &radius[0], sizeof(float) * radius.size(), cudaMemcpyHostToDevice));
 		}
-		virtual ~CudaMRDemParticles() noexcept {}
+		virtual ~CudaMRDemParticles()  {}
 		CudaMRDemParticles(const CudaMRDemParticles &) = delete;
 		CudaMRDemParticles &operator=(const CudaMRDemParticles &) = delete;
 

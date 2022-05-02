@@ -21,7 +21,7 @@ public:
       : mCudaGridSize(CuCeilDiv(num, KIRI_CUBLOCKSIZE)), mNumOfSubTimeSteps(1) {
   }
 
-  virtual ~CudaBaseSolver() noexcept {}
+  virtual ~CudaBaseSolver()  {}
   inline size_t GetNumOfSubTimeSteps() const { return mNumOfSubTimeSteps; }
 
 protected:

@@ -25,7 +25,7 @@ namespace KIRI
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
-        ~KiriVoroNSOptimize() noexcept {}
+        ~KiriVoroNSOptimize() {}
 
         void ComputeLloyd(UInt num);
         float ComputeIterate();

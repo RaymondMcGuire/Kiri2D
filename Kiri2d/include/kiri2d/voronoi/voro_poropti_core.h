@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
  * @LastEditTime: 2021-10-20 00:26:47
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_core.h
  */
 
@@ -26,7 +26,7 @@ namespace KIRI
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
-        ~KiriVoroPoroOptiCore() noexcept {}
+        ~KiriVoroPoroOptiCore() {}
 
         void ComputeLloyd(UInt num);
         float ComputeIterate();

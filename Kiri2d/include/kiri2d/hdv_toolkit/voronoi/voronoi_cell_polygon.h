@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include<kiri2d/straight_skeleton/sskel_slav.h>
+#include <kiri2d/straight_skeleton/sskel_slav.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_cell.h>
 #include <Mathematics/DistPointTriangle.h>
 namespace HDV::Voronoi
@@ -21,7 +21,7 @@ namespace HDV::Voronoi
     {
     public:
         explicit VoronoiCellPolygon() {}
-        virtual ~VoronoiCellPolygon() noexcept {}
+        virtual ~VoronoiCellPolygon() {}
 
         void AddVert2(Vector2D vert)
         {
@@ -237,7 +237,7 @@ namespace HDV::Voronoi
     {
     public:
         explicit VoronoiPolygon3() {}
-        virtual ~VoronoiPolygon3() noexcept {}
+        virtual ~VoronoiPolygon3() {}
 
         void AddVert3(Vector3D vert)
         {

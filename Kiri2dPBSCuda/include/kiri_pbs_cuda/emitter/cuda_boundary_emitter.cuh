@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-09-03 13:23:37
+ * @LastEditTime: 2022-05-02 13:33:20
  * @LastEditors: Xu.WANG
  * @Description: 
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\emitter\cuda_boundary_emitter.cuh
@@ -33,7 +33,7 @@ namespace KIRI
 
         CudaBoundaryEmitter(const CudaBoundaryEmitter &) = delete;
         CudaBoundaryEmitter &operator=(const CudaBoundaryEmitter &) = delete;
-        virtual ~CudaBoundaryEmitter() noexcept {}
+        virtual ~CudaBoundaryEmitter()  {}
 
         void BuildWorldBoundary(BoundaryData &data, const float2 &lowest, const float2 &highest, const float particleRadius);
         void BuildBoundaryShapeVolume(BoundaryData &data, Vec_Float2 shape);

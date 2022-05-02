@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:42:49
  * @LastEditTime: 2021-06-01 20:11:05
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\treemap\treemap_layout.h
  */
 
@@ -52,7 +52,7 @@ namespace KIRI
             mVoroTreeMapData = std::make_shared<KiriVoroTreeMapData>();
         }
 
-        ~TreemapLayout() noexcept {}
+        ~TreemapLayout() {}
 
         const KiriVoroTreeMapDataPtr &Convert2VoroTreeData();
 

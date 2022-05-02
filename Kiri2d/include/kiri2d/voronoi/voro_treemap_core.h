@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
  * @LastEditTime: 2021-06-02 20:00:37
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_core.h
  */
 
@@ -26,7 +26,7 @@ namespace KIRI
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
-        ~KiriVoroTreeMapCore() noexcept {}
+        ~KiriVoroTreeMapCore() {}
 
         void Compute();
         void ComputeIterate();

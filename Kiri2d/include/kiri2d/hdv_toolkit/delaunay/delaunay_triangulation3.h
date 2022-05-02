@@ -26,7 +26,7 @@ namespace HDV::Delaunay
                 mMatrixBuffer[i].assign(4, 0.0);
             }
         }
-        virtual ~DelaunayTriangulation3D() noexcept {}
+        virtual ~DelaunayTriangulation3D() {}
 
         void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
         {

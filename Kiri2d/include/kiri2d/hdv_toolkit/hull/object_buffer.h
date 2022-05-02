@@ -34,7 +34,7 @@ namespace HDV::Hull
             ConnectorTable.assign(CONNECTOR_TABLE_SIZE, std::make_shared<ConnectorList>());
         }
 
-        virtual ~ObjectBuffer() noexcept {}
+        virtual ~ObjectBuffer() {}
 
         const int CONNECTOR_TABLE_SIZE = 2017;
 

@@ -19,7 +19,7 @@ namespace HDV::Hull
     public:
         explicit DeferredSimplex() {}
 
-        virtual ~DeferredSimplex() noexcept {}
+        virtual ~DeferredSimplex() {}
 
         void Clear()
         {

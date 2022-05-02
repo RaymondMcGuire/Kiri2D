@@ -24,7 +24,7 @@ public:
                             const int attemptNum = 13,
                             const int dim3BlockSize = 8);
 
-  virtual ~CudaShapeSampler() noexcept {}
+  virtual ~CudaShapeSampler()  {}
 
   /**
    * @description: A safe shape sampling method which can deal with un-closed

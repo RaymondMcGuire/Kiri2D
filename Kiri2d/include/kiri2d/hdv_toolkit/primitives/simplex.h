@@ -32,7 +32,7 @@ namespace HDV::Primitives
             mCentroid.assign(dimension, 0.0);
             Adjacent.assign(dimension, std::make_shared<Simplex<VERTEXPTR>>());
         }
-        virtual ~Simplex() noexcept {}
+        virtual ~Simplex() {}
 
         void Clear()
         {

@@ -31,7 +31,7 @@ public:
 
   explicit CudaDemSolver(const size_t num) : CudaBaseSolver(num) {}
 
-  virtual ~CudaDemSolver() noexcept {}
+  virtual ~CudaDemSolver()  {}
 
 protected:
   virtual void ExtraForces(CudaDemParticlesPtr &sands, const float2 gravity);

@@ -1,11 +1,10 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-01-10 16:44:59
+ * @LastEditTime: 2022-05-02 13:32:18
  * @LastEditors: Xu.WANG
  * @Description:
  */
-
 #ifndef _HDV_VORONOI_REGION_H_
 #define _HDV_VORONOI_REGION_H_
 
@@ -20,7 +19,7 @@ namespace HDV::Voronoi
     {
     public:
         explicit VoronoiRegion() {}
-        virtual ~VoronoiRegion() noexcept {}
+        virtual ~VoronoiRegion() {}
 
         void Clear()
         {

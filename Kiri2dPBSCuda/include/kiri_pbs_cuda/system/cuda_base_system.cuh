@@ -28,7 +28,7 @@ namespace KIRI
 
         CudaBaseSystem(const CudaBaseSystem &) = delete;
         CudaBaseSystem &operator=(const CudaBaseSystem &) = delete;
-        virtual ~CudaBaseSystem() noexcept {}
+        virtual ~CudaBaseSystem()  {}
 
         float UpdateSystem(float timeIntervalInSeconds);
 

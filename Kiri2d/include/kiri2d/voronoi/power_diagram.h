@@ -27,7 +27,7 @@ namespace KIRI
             mConvexClip = std::make_shared<KiriConvexClip2>();
         }
 
-        ~KiriPowerDiagram() noexcept {}
+        ~KiriPowerDiagram() {}
 
         void SetRelaxIterNumber(UInt relaxNum) { mRelaxIterNumber = relaxNum; }
         const Vector<KiriVoroSitePtr> &GetVoroSites() const { return mVoroSites; }

@@ -58,7 +58,7 @@ namespace KIRI
             mRadius = std::numeric_limits<float>::epsilon();
         }
 
-        virtual ~KiriVoroSite() noexcept {}
+        virtual ~KiriVoroSite() {}
 
         void SetWeight(float weight)
         {

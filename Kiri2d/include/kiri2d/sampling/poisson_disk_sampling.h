@@ -1,4 +1,4 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-22 16:35:26
  * @LastEditTime: 2021-09-22 16:28:24
@@ -23,7 +23,7 @@ namespace KIRI2D
         {
         }
 
-        ~KiriPoissonDiskSampling2D() noexcept {}
+        ~KiriPoissonDiskSampling2D() {}
 
         void InitUniSampler(float radius, Vector2F boundarySize);
         void InitMultiRadiiSampler(float minRadius, float maxRadius, Vector2F boundarySize);

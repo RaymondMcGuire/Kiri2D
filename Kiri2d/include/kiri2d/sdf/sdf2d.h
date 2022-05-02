@@ -50,7 +50,7 @@ namespace KIRI2D
             mBBoxMax = Vector2F(Tiny<float>());
         }
 
-        ~KiriSDF2D() noexcept {}
+        ~KiriSDF2D() {}
 
         const Vec_Vec2F GetPoints() const { return mPoints; }
 

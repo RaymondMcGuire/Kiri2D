@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-22 13:41:44
  * @LastEditTime: 2021-02-22 14:44:00
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\camera\camera.h
  */
 
@@ -63,7 +63,7 @@ namespace KIRI2D
             return relPosition / mCameraData.WindowCellSize + mCameraData.WindowCenter;
         }
 
-        ~KiriCamera2D() noexcept {}
+        ~KiriCamera2D() {}
 
     private:
         struct Camera2DData

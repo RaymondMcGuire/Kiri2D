@@ -31,7 +31,7 @@ namespace HDV::Primitives
             mPosition[1] = y;
             mPosition[2] = z;
         }
-        virtual ~Vertex3() noexcept {}
+        virtual ~Vertex3() {}
 
         void Set(double x, double y, double z)
         {

@@ -23,7 +23,7 @@ namespace HDV::Hull
         explicit ObjectManager() {}
         explicit ObjectManager(int dimension) { mDimension = dimension; }
 
-        virtual ~ObjectManager() noexcept {}
+        virtual ~ObjectManager() {}
 
         void Clear()
         {

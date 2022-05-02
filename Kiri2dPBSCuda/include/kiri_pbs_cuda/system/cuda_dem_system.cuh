@@ -31,7 +31,7 @@ namespace KIRI
 
         CudaDemSystem(const CudaDemSystem &) = delete;
         CudaDemSystem &operator=(const CudaDemSystem &) = delete;
-        virtual ~CudaDemSystem() noexcept {}
+        virtual ~CudaDemSystem()  {}
 
         inline int GetNumofSandSize() const { return (*mSands).Size(); }
         inline CudaDemParticlesPtr GetParticles() const { return mSands; }

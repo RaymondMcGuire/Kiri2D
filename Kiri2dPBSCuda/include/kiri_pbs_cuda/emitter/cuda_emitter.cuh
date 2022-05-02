@@ -57,7 +57,7 @@ namespace KIRI
 
         CudaEmitter(const CudaEmitter &) = delete;
         CudaEmitter &operator=(const CudaEmitter &) = delete;
-        virtual ~CudaEmitter() noexcept {}
+        virtual ~CudaEmitter()  {}
 
         Vec_Float3 Emit();
 

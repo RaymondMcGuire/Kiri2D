@@ -42,7 +42,7 @@ namespace KIRI
 			KIRI_CUCALL(cudaMemcpy(mCol.Data(), &col[0], sizeof(float3) * col.size(), cudaMemcpyHostToDevice));
 			KIRI_CUCALL(cudaMemcpy(mMass.Data(), &mass[0], sizeof(float) * mass.size(), cudaMemcpyHostToDevice));
 		}
-		virtual ~CudaDemParticles() noexcept {}
+		virtual ~CudaDemParticles()  {}
 		CudaDemParticles(const CudaDemParticles &) = delete;
 		CudaDemParticles &operator=(const CudaDemParticles &) = delete;
 

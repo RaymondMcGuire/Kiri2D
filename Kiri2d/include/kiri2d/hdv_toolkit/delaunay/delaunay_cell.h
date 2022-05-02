@@ -29,7 +29,7 @@ namespace HDV::Delaunay
 
             Radius = radius;
         }
-        virtual ~DelaunayCell() noexcept {}
+        virtual ~DelaunayCell() {}
 
         void Clear()
         {

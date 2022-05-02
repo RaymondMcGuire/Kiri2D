@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
  * @LastEditTime: 2021-06-24 18:19:24
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_poropti_treemap.h
  */
 
@@ -28,7 +28,7 @@ namespace KIRI
             mBoundary = boundary;
         }
 
-        ~KiriVoroPoroOptiTreeMap() noexcept {}
+        ~KiriVoroPoroOptiTreeMap() {}
 
         void InitTreeMapNodes();
 

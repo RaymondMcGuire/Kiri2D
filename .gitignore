@@ -1,4 +1,5 @@
 build
+build_cuda
 .vscode
 /cmake/checkCUDA/compile/*
 !/cmake/checkCUDA/compile/.gitkeep

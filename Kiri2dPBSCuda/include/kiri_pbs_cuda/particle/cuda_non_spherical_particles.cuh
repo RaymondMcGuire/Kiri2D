@@ -48,7 +48,7 @@ public:
                            cudaMemcpyHostToDevice));
   }
 
-  virtual ~CudaNonSphericalParticles() noexcept {}
+  virtual ~CudaNonSphericalParticles()  {}
   CudaNonSphericalParticles(const CudaNonSphericalParticles &) = delete;
   CudaNonSphericalParticles &
   operator=(const CudaNonSphericalParticles &) = delete;

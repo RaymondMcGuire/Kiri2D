@@ -25,7 +25,7 @@ namespace KIRI
             mRootBoundary = std::make_shared<KiriVoroCellPolygon2>();
         }
 
-        ~KiriVoroPoroOpti() noexcept {}
+        ~KiriVoroPoroOpti() {}
 
         void SetRootBoundary2(const Vector<Vector2F> &boundary);
 

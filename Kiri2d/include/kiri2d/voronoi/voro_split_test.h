@@ -25,7 +25,7 @@ namespace KIRI
             mPowerDiagram = std::make_shared<KiriPowerDiagram>();
         }
 
-        ~KiriVoroSplit() noexcept {}
+        ~KiriVoroSplit() {}
 
         void AddSite(const KiriVoroGroupSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
         void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary) { mPowerDiagram->SetBoundaryPolygon2(boundary); }

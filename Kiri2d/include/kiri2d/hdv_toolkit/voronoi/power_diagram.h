@@ -18,7 +18,7 @@ namespace HDV::Voronoi
     {
     public:
         explicit PowerDiagram2D() { mMesh = std::make_shared<VoronoiMesh2>(); }
-        virtual ~PowerDiagram2D() noexcept {}
+        virtual ~PowerDiagram2D() {}
 
         void AddSite(const HDV::Primitives::Vertex2Ptr &site) { mSites.emplace_back(site); }
         std::vector<HDV::Primitives::Vertex2Ptr> GetSites() { return mSites; }
@@ -89,7 +89,7 @@ namespace HDV::Voronoi
 
         void Move2Centroid()
         {
-//#pragma omp parallel for
+            //#pragma omp parallel for
             for (auto i = 0; i < mSites.size(); i++)
             {
                 if (mSites[i]->GetIsBoundaryVertex())
@@ -139,7 +139,7 @@ namespace HDV::Voronoi
     {
     public:
         explicit PowerDiagram3D() { mMesh = std::make_shared<VoronoiMesh3>(); }
-        virtual ~PowerDiagram3D() noexcept {}
+        virtual ~PowerDiagram3D() {}
 
         void AddSite(const HDV::Primitives::Vertex3Ptr &site) { mSites.emplace_back(site); }
         std::vector<HDV::Primitives::Vertex3Ptr> GetSites() { return mSites; }

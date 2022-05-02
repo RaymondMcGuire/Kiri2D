@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-22 14:13:45
  * @LastEditTime: 2021-05-29 22:35:09
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\scene.h
  */
 
@@ -74,7 +74,7 @@ namespace KIRI2D
             mCircles.clear();
         }
 
-        ~KiriScene2D() noexcept {}
+        ~KiriScene2D() {}
 
     private:
         std::vector<KiriSDF2D> mSDFObjects;

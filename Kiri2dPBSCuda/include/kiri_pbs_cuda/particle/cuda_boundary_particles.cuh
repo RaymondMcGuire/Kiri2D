@@ -40,7 +40,7 @@ namespace KIRI
 		float *GetVolumePtr() const { return mVolume.Data(); }
 		size_t *GetLabelPtr() const { return mLabel.Data(); }
 
-		virtual ~CudaBoundaryParticles() noexcept {}
+		virtual ~CudaBoundaryParticles()  {}
 
 	protected:
 		CudaArray<float> mVolume;

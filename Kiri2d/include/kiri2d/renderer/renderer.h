@@ -40,7 +40,7 @@ namespace KIRI2D
         void SaveImages2FileWithPrefix(std::string prefix);
         inline auto GetCanvas() { return mCanvas; }
 
-        ~KiriRenderer2D() noexcept {}
+        ~KiriRenderer2D() {}
 
     private:
         cv::Mat mCanvas;

@@ -19,7 +19,7 @@ namespace HDV::Hull
     public:
         explicit SimplexList() : First{nullptr}, Last{nullptr} {}
 
-        virtual ~SimplexList() noexcept {}
+        virtual ~SimplexList() {}
 
         std::shared_ptr<SimplexWrap> First;
         std::shared_ptr<SimplexWrap> Last;

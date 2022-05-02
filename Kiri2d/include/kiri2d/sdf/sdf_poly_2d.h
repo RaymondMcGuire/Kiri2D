@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-22 18:16:11
  * @LastEditTime: 2021-09-21 17:58:14
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\sdf\sdf_poly_2d.h
  */
 #ifndef _KIRI2D_SDF_POLY2D_H_
@@ -31,7 +31,7 @@ namespace KIRI2D
         {
         }
 
-        ~KiriSDFPoly2D() noexcept {}
+        ~KiriSDFPoly2D() {}
     };
     typedef SharedPtr<KiriSDF2D> KiriSDF2DPtr;
 }

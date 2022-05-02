@@ -59,7 +59,7 @@ public:
 
   CudaVolumeEmitter(const CudaVolumeEmitter &) = delete;
   CudaVolumeEmitter &operator=(const CudaVolumeEmitter &) = delete;
-  virtual ~CudaVolumeEmitter() noexcept {}
+  virtual ~CudaVolumeEmitter()  {}
 
   void BuildSphVolume(SphVolumeData &data, float2 lowest, int2 vsize,
                       float particleRadius, float3 color);

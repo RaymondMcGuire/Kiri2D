@@ -47,7 +47,7 @@ namespace KIRI
         CudaParticles(const CudaParticles &) = delete;
         CudaParticles &operator=(const CudaParticles &) = delete;
 
-        virtual ~CudaParticles() noexcept {}
+        virtual ~CudaParticles()  {}
 
         inline size_t Size() const { return mNumOfParticles; }
         inline size_t MaxSize() const { return mNumOfMaxParticles; }

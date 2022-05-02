@@ -27,7 +27,7 @@ public:
 
   explicit CudaMRDemSolver(const size_t num) : CudaDemSolver(num) {}
 
-  virtual ~CudaMRDemSolver() noexcept {}
+  virtual ~CudaMRDemSolver()  {}
 
 protected:
   virtual void ComputeMRDemLinearMomentum(

@@ -43,7 +43,7 @@ namespace KIRI
         explicit KiriVoroGroupSite(float x, float y, float weight, float percent)
             : KiriVoroSite(x, y, weight, percent) {}
 
-        virtual ~KiriVoroGroupSite() noexcept {}
+        virtual ~KiriVoroGroupSite() {}
 
         bool GetIsGroup() { return mIsGroup; }
         UInt GetGroupId() { return mGroupId; }

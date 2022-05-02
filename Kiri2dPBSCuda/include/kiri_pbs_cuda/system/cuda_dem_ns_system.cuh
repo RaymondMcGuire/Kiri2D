@@ -29,7 +29,7 @@ public:
 
   CudaDemNSSystem(const CudaDemNSSystem &) = delete;
   CudaDemNSSystem &operator=(const CudaDemNSSystem &) = delete;
-  virtual ~CudaDemNSSystem() noexcept {}
+  virtual ~CudaDemNSSystem()  {}
 
   inline int GetNumofSandSize() const { return (*mSands).Size(); }
   inline CudaNonSphericalParticlesPtr GetParticles() const { return mSands; }

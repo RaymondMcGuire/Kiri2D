@@ -19,7 +19,7 @@ namespace HDV::Hull
     public:
         explicit ConnectorList() : First{nullptr}, Last{nullptr} {}
 
-        virtual ~ConnectorList() noexcept {}
+        virtual ~ConnectorList() {}
 
         std::shared_ptr<SimplexConnector> First;
         std::shared_ptr<SimplexConnector> Last;

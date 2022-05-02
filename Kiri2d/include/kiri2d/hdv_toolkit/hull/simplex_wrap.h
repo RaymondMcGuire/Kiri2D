@@ -29,7 +29,7 @@ namespace HDV::Hull
             AdjacentFaces.assign(dimension, std::make_shared<SimplexWrap>());
             BeyondList = beyondList;
         }
-        virtual ~SimplexWrap() noexcept
+        virtual ~SimplexWrap()
         {
         }
 

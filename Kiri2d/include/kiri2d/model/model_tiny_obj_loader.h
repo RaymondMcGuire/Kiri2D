@@ -82,17 +82,17 @@ public:
         return mFaceVertexTexCoord2D;
     }
 
-    auto GetNFaces() const noexcept
+    auto GetNFaces() const
     {
         KIRI_ASSERT(mMeshReady);
         return (mFaces.size() / 3);
     }
-    auto GetNVertices() const noexcept
+    auto GetNVertices() const
     {
         KIRI_ASSERT(mMeshReady);
         return (mVertices.size() / 3);
     }
-    auto GetNFaceVertices() const noexcept
+    auto GetNFaceVertices() const
     {
         KIRI_ASSERT(mMeshReady);
         return (mFaceVertices.size() / 3);

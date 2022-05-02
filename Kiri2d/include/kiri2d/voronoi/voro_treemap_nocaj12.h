@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-28 10:09:23
  * @LastEditTime: 2021-06-02 21:13:29
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_treemap_nocaj12.h
  */
 
@@ -26,7 +26,7 @@ namespace KIRI
             mRootBoundary = std::make_shared<KiriVoroCellPolygon2>();
         }
 
-        ~KiriVoroTreeMapNocaj12() noexcept {}
+        ~KiriVoroTreeMapNocaj12() {}
 
         void SetRootBoundary2(const Vector<Vector2F> &boundary);
 

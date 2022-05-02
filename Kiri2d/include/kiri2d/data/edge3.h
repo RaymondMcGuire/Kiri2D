@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-03-27 01:49:01
  * @LastEditTime: 2021-06-07 18:02:36
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri\KiriCore\include\kiri2d\data\edge3.h
  */
 
@@ -32,7 +32,7 @@ namespace KIRI
             mNextId = mPrevId = mTwinId = -1;
         }
 
-        ~KiriEdge3() noexcept {}
+        ~KiriEdge3() {}
 
         constexpr UInt GetId() const { return mId; }
         void SetId(UInt id) { mId = id; }

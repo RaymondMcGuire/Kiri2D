@@ -30,7 +30,7 @@ namespace KIRI
             mVoroSitesList = std::make_shared<KiriVector2List>();
         }
 
-        ~KiriVoroCellPolygon2() noexcept {}
+        ~KiriVoroCellPolygon2() {}
 
         const KiriVector2ListPtr &GetVoroSitesList() const { return mVoroSitesList; }
         const BoundingBox2F &GetBBox() const { return mBBox2; }
@@ -46,7 +46,7 @@ namespace KIRI
         void ComputeVoroSitesList();
 
         void SetColor(Vector3F color) { mColor = color; }
-        Vector3F GetColor(){return mColor;}
+        Vector3F GetColor() { return mColor; }
 
         UInt GetLength() const { return mPolygonVertices2.size(); }
 

@@ -29,7 +29,7 @@ namespace HDV::Voronoi
     {
     public:
         explicit VoronoiMesh(int dimension) { Dimension = dimension; }
-        virtual ~VoronoiMesh() noexcept {}
+        virtual ~VoronoiMesh() {}
 
         int Dimension;
         std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
@@ -172,7 +172,7 @@ namespace HDV::Voronoi
     {
     public:
         explicit VoronoiMesh2D() : VoronoiMesh<VERTEXPTR, VERTEX>(2) {}
-        virtual ~VoronoiMesh2D() noexcept {}
+        virtual ~VoronoiMesh2D() {}
 
         std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> mBoundaryPolygon;
 
@@ -301,7 +301,7 @@ namespace HDV::Voronoi
     {
     public:
         explicit VoronoiMesh3D() : VoronoiMesh<VERTEXPTR, VERTEX>(3) {}
-        virtual ~VoronoiMesh3D() noexcept {}
+        virtual ~VoronoiMesh3D() {}
 
         bool mNeedClipBoundary = true;
 
