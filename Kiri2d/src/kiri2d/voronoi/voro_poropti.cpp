@@ -72,19 +72,19 @@ namespace KIRI
         {
             auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
 
-            if (mRootBoundary->Contains(sitePos2))
+            if (mRootBoundary->contains(sitePos2))
             {
                 auto radius = pcdis(gen);
                 auto site = std::make_shared<KiriVoroSite>(sitePos2.x, sitePos2.y);
                 site->setRadius(radius);
-                mRootCore->AddSite(site);
+                mRootCore->addSite(site);
                 cnt++;
             }
         }
 
         mRootCore->SetMaxiumVorosite(static_cast<size_t>(total_num * 1.5f));
         mRootCore->SetBoundaryPolygon2(mRootBoundary);
-        mRootCore->Init();
+        mRootCore->init();
         mRootCore->ComputeIterate();
     }
 
@@ -95,7 +95,7 @@ namespace KIRI
 
     void KiriVoroPoroOpti::ComputeChildIterate()
     {
-        auto sites = mRootCore->GetSites();
+        auto sites = mRootCore->sites();
         for (size_t i = 0; i < mNodes.size(); i++)
         {
             mNodes[i]->SetSite(sites[i]);

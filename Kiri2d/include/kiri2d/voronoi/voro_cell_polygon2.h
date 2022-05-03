@@ -33,7 +33,7 @@ namespace KIRI
         ~KiriVoroCellPolygon2() {}
 
         const KiriVector2ListPtr &GetVoroSitesList() const { return mVoroSitesList; }
-        const BoundingBox2F &GetBBox() const { return mBBox2; }
+        const BoundingBox2F &bbox() const { return mBBox2; }
         const Vector<Vector2F> &GetPolygonVertices() const { return mPolygonVertices2; }
         void AddPolygonVertex2(const Vector2F &v2) { mPolygonVertices2.emplace_back(Vector2F(v2)); }
         void PopPolygonVertex2() { mPolygonVertices2.pop_back(); }
@@ -42,7 +42,7 @@ namespace KIRI
         void Print();
         void PrintPolyVertices();
         void PrintVoroSitesList();
-        void UpdateBBox();
+        void updateBBox();
         void ComputeVoroSitesList();
 
         void SetColor(Vector3F color) { mColor = color; }
@@ -60,10 +60,10 @@ namespace KIRI
             mSkeletons.clear();
         }
 
-        bool CheckBBox();
-        bool Contains(const Vector2F &v);
+        bool checkBBox();
+        bool contains(const Vector2F &v);
 
-        Vector2F GetRndInnerPoint();
+        Vector2F rndInnerPoint();
 
         /***
          * @description: Nürnberg, R. (2013). Calculating the volume and centroid of a polyhedron in 3d.
@@ -81,16 +81,16 @@ namespace KIRI
          */
         Vector2F GetPolygonCentroid();
 
-        float ComputeMinDisInPoly(const Vector2F &p);
+        float computeMinDisInPoly(const Vector2F &p);
 
-        bool IsClockwise(const Vector<Vector4F> &poly);
+        bool isClockwise(const Vector<Vector4F> &poly);
 
         const Vector<Vector4F> &GetSkeletons() const { return mSkeletons; }
 
         // SSkel_1998
-        void ComputeSSkel1998Convex();
+        void computeSSkel1998Convex();
 
-        Vector3F ComputeMICByStraightSkeleton();
+        Vector3F computeMICByStraightSkeleton();
         Vec_Vec3F ComputeMICByStraightSkeletonTest();
 
         Vec_Vec3F ComputeAllCByStraightSkeleton();

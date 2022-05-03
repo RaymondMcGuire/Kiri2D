@@ -47,7 +47,7 @@ namespace HDV::Hull
 
         virtual ~ConvexHull() {}
 
-        void SetForPowerDiagram(bool enable)
+        void enablePowerDiagram(bool enable)
         {
             mForPowerDiagram = enable;
         }
@@ -68,12 +68,12 @@ namespace HDV::Hull
             mPositions.clear();
         }
 
-        bool Contains(const VERTEXPTR &vertex)
+        bool contains(const VERTEXPTR &vertex)
         {
             auto count = mSimplexs.size();
             for (auto i = 0; i < count; i++)
             {
-                if (MathHelper<VERTEXPTR>().GetVertexDistance(vertex, mSimplexs[i]) >= PLANE_DISTANCE_TOLERANCE)
+                if (MathHelper<VERTEXPTR>().vertexDistanceToSimplex(vertex, mSimplexs[i]) >= PLANE_DISTANCE_TOLERANCE)
                     return false;
             }
 
@@ -382,7 +382,7 @@ namespace HDV::Hull
             }
         }
 
-        double Determinant(std::vector<double> A)
+        double determinant(std::vector<double> A)
         {
             switch (mDimension)
             {
@@ -414,18 +414,18 @@ namespace HDV::Hull
             }
         }
 
-        void FindNormalVector(std::vector<int> Vertices, std::vector<double> &normalData)
+        void findNormalVector(std::vector<int> Vertices, std::vector<double> &normalData)
         {
             switch (mDimension)
             {
             case 2:
-                FindNormalVector2D(Vertices, normalData);
+                findNormalVector2D(Vertices, normalData);
                 break;
             case 3:
-                FindNormalVector3D(Vertices, normalData);
+                findNormalVector3D(Vertices, normalData);
                 break;
             case 4:
-                FindNormalVector4D(Vertices, normalData);
+                findNormalVector4D(Vertices, normalData);
                 break;
             default:
                 FindNormalVectorND(Vertices, normalData);
@@ -433,7 +433,7 @@ namespace HDV::Hull
             }
         }
 
-        void FindNormalVector2D(std::vector<int> Vertices, std::vector<double> &normal)
+        void findNormalVector2D(std::vector<int> Vertices, std::vector<double> &normal)
         {
             auto ntX = VectorBetweenVertices(Vertices[1], Vertices[0]);
 
@@ -447,7 +447,7 @@ namespace HDV::Hull
             normal[1] = f * ny;
         }
 
-        void FindNormalVector3D(std::vector<int> Vertices, std::vector<double> &normal)
+        void findNormalVector3D(std::vector<int> Vertices, std::vector<double> &normal)
         {
             auto ntX = VectorBetweenVertices(Vertices[1], Vertices[0]);
             auto ntY = VectorBetweenVertices(Vertices[2], Vertices[1]);
@@ -464,7 +464,7 @@ namespace HDV::Hull
             normal[2] = f * nz;
         }
 
-        void FindNormalVector4D(std::vector<int> Vertices, std::vector<double> &normal)
+        void findNormalVector4D(std::vector<int> Vertices, std::vector<double> &normal)
         {
             auto ntX = VectorBetweenVertices(Vertices[1], Vertices[0]);
             auto ntY = VectorBetweenVertices(Vertices[2], Vertices[1]);
@@ -558,7 +558,7 @@ namespace HDV::Hull
             // (the upper left) had too many zeros. So, one would need to find the right subset. Indeed choosing a subset
             // biases the first dimensions of the others. Perhaps a larger volume would be created from a different vertex
             // if another subset of dimensions were used.
-            return std::abs(Determinant(A));
+            return std::abs(determinant(A));
         }
 
         void RandomOffsetToLift(int index, double maxHeight)
@@ -809,7 +809,7 @@ namespace HDV::Hull
             }
 
             auto numFaces = faces.size();
-            // Init the vertex beyond buffers.
+            // init the vertex beyond buffers.
             for (auto i = 0; i < numFaces; i++)
             {
                 FindBeyondVertices(faces[i]);
@@ -830,7 +830,7 @@ namespace HDV::Hull
             }
         }
 
-        void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false)
+        void generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false)
         {
             clear();
 
@@ -914,7 +914,7 @@ namespace HDV::Hull
             mBuffer = nullptr;
         }
 
-        double GetVertexDistance(int v, const std::shared_ptr<SimplexNode> &f)
+        double vertexDistanceToSimplex(int v, const std::shared_ptr<SimplexNode> &f)
         {
             auto normal = f->normals();
             auto x = v * mDimension;
@@ -957,7 +957,7 @@ namespace HDV::Hull
 
         void IsBeyond(const std::shared_ptr<SimplexNode> &face, std::vector<int> &beyondVertices, int v)
         {
-            auto distance = GetVertexDistance(v, face);
+            auto distance = vertexDistanceToSimplex(v, face);
             if (distance >= PLANE_DISTANCE_TOLERANCE)
             {
                 if (distance > mBuffer->MaxDistance)
@@ -1090,7 +1090,7 @@ namespace HDV::Hull
             auto Vertices = face->vertices();
             auto normal = face->normals();
 
-            FindNormalVector(Vertices, normal);
+            findNormalVector(Vertices, normal);
 
             face->normals() = normal;
 
@@ -1228,7 +1228,7 @@ namespace HDV::Hull
                     if (adjFace == nullptr)
                         throw std::invalid_argument("(2) Adjacent Face should never be nullptr");
 
-                    if (adjFace->tag() == 0 && GetVertexDistance(mBuffer->CurrentVertex, adjFace) >= PLANE_DISTANCE_TOLERANCE)
+                    if (adjFace->tag() == 0 && vertexDistanceToSimplex(mBuffer->CurrentVertex, adjFace) >= PLANE_DISTANCE_TOLERANCE)
                     {
                         mBuffer->AffectedFaceBuffer.emplace_back(top->adjacentFaces()[i]);
                         top->adjacentFaces()[i]->setTag(1);
@@ -1538,7 +1538,7 @@ namespace HDV::Hull
             return mVertices;
         }
 
-        std::vector<double> GetCentroid()
+        std::vector<double> centroid()
         {
             return mCentroid;
         }

@@ -19,53 +19,62 @@ namespace HDV::Sampler
     class MultiSizeSampler2D
     {
     public:
-        explicit MultiSizeSampler2D() { mPowerDiagram = std::make_shared<Voronoi::PowerDiagram2D>(); }
-        virtual ~MultiSizeSampler2D() {}
+        explicit MultiSizeSampler2D()
+        {
+            mPowerDiagram = std::make_shared<Voronoi::PowerDiagram2D>();
+        }
 
-        std::vector<Primitives::Vertex2Ptr> GetSites() { return mPowerDiagram->GetSites(); }
+        virtual ~MultiSizeSampler2D()
+        {
+        }
 
-        void AddSite(double x, double y, double radius)
+        std::vector<Primitives::Vertex2Ptr> sites()
+        {
+            return mPowerDiagram->sites();
+        }
+
+        void addSite(double x, double y, double radius)
         {
             auto site = std::make_shared<Voronoi::VoronoiSite2>(x, y, mSiteCounter++);
             site->setRadius(radius);
-            mPowerDiagram->AddSite(site);
+            mPowerDiagram->addSite(site);
         }
 
-        void SetMaxiumNum(int num)
+        void setMaxiumNum(int num)
         {
             mMaxiumNum = num;
         }
 
-        void SetBoundaryPolygon(const std::shared_ptr<Voronoi::VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
+        void setBoundaryPolygon(const std::shared_ptr<Voronoi::VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
         {
-            mPowerDiagram->SetBoundaryPolygon(boundary);
+            mPowerDiagram->setBoundaryPolygon(boundary);
         }
 
-        void SetRadiusDist(std::vector<double> dist)
+        void setRadiusDist(std::vector<double> dist)
         {
             mUsrDefinedRadiusDist = dist;
         }
 
-        void SetRadiusDistProb(std::vector<double> prob)
+        void setRadiusDistProb(std::vector<double> prob)
         {
             mUsrDefinedRadiusDistProb = prob;
         }
 
-        void Init()
+        void init()
         {
             reset();
 
-            ComputeBoundaryArea();
+            computeBoundaryArea();
 
             //! TODO check site position whether is inside boundary or not
-            mPowerDiagram->Compute();
+            mPowerDiagram->compute();
         }
 
-        bool CheckVoroCell()
+        bool checkVoroCell()
         {
             std::vector<int> remove;
 
-            auto sites = mPowerDiagram->GetSites();
+            auto sites = mPowerDiagram->sites();
 
             for (auto i = 0; i < sites.size(); i++)
             {
@@ -78,62 +87,50 @@ namespace HDV::Sampler
                     remove.emplace_back(siteI->id());
                 else
                 {
-                    auto centroid = siteI->CellPolygon->GetCentroid();
-                    if (!mPowerDiagram->GetBoundary()->Contains(centroid))
+                    auto centroid = siteI->CellPolygon->centroid();
+                    if (!mPowerDiagram->GetBoundary()->contains(centroid))
                         remove.emplace_back(siteI->id());
                 }
             }
 
             if (!remove.empty())
             {
-                mPowerDiagram->RemoveVoroSitesByIndexArray(remove);
+                mPowerDiagram->removeVoroSitesByIndexArray(remove);
                 return true;
             }
 
             return false;
         }
 
-        float Compute()
+        float compute()
         {
             mCurIteration++;
 
-            // KIRI_LOG_DEBUG("start A");
-            auto needAddSites = this->DynamicAddSites();
-            // KIRI_LOG_DEBUG("start B");
+            auto needAddSites = this->dynamicAddSites();
+
             if (needAddSites)
             {
-                mPowerDiagram->Compute();
+                mPowerDiagram->compute();
                 // KIRI_LOG_DEBUG("Iter={0} : add Sites!!!!", mCurIteration);
             }
             else
             {
-                mPowerDiagram->Move2Centroid();
-                this->ComputeWeightsError();
-                this->AdaptWeights();
-                mPowerDiagram->Compute();
+                mPowerDiagram->move2Centroid();
+                this->computeWeightsError();
+                this->adaptWeights();
+                mPowerDiagram->compute();
             }
-            // KIRI_LOG_DEBUG("start C");
 
-            if (CheckVoroCell())
+            if (checkVoroCell())
             {
-                mPowerDiagram->Compute();
+                mPowerDiagram->compute();
             }
 
-            // KIRI_LOG_DEBUG("start D");
-
-            // if (RemoveNoiseVoroSites())
-            // {
-            //     mPowerDiagram->Compute();
-            // }
-
-            // KIRI_LOG_DEBUG("start E");
-
-            mCurGlobalPorosity = this->ComputeMiniumPorosity();
+            mCurGlobalPorosity = this->computeMiniumPorosity();
             mGlobalPorosityArray.emplace_back(mCurGlobalPorosity);
             mGlobalErrorArray.emplace_back(mCurGlobalWeightError);
 
             // KIRI_LOG_DEBUG("porosity={0}; error={1}", mCurGlobalPorosity, mCurGlobalWeightError);
-            // KIRI_LOG_DEBUG("start F");
             return mCurGlobalPorosity;
         }
 
@@ -144,7 +141,7 @@ namespace HDV::Sampler
             mCurGlobalPorosity = 0.0;
         }
 
-        void ComputeBoundaryArea()
+        void computeBoundaryArea()
         {
             auto boundary = mPowerDiagram->GetBoundary();
             if (!boundary)
@@ -152,13 +149,13 @@ namespace HDV::Sampler
                 KIRI_LOG_ERROR("Not Set Boundary!");
                 return;
             }
-            mCompleteArea = mPowerDiagram->GetBoundary()->GetArea();
+            mCompleteArea = mPowerDiagram->GetBoundary()->area();
         }
 
-        double GetGlobalAreaError()
+        double globalAreaError()
         {
             auto error = 0.0;
-            auto sites = mPowerDiagram->GetSites();
+            auto sites = mPowerDiagram->sites();
 
 #pragma omp parallel for reduction(+ \
                                    : error)
@@ -171,7 +168,7 @@ namespace HDV::Sampler
                 auto n = siteI->neighbors().size();
                 if (n > 2)
                 {
-                    auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->GetArea();
+                    auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->area();
                     auto targetArea = n * siteI->radius() * siteI->radius() * std::tan(kiri_math_mini::pi<double>() / n);
                     // auto targetArea = siteI->radius() * siteI->radius() * kiri_math_mini::pi<double>();
                     error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.0);
@@ -180,11 +177,11 @@ namespace HDV::Sampler
             return error;
         }
 
-        double GetGlobalAvgDistance()
+        double globalAvgDistance()
         {
             double sum = 0.0;
             int num = 0;
-            auto site = mPowerDiagram->GetSites();
+            auto site = mPowerDiagram->sites();
 
 #pragma omp parallel for reduction(+ \
                                    : sum, num)
@@ -207,14 +204,14 @@ namespace HDV::Sampler
 
             if (num == 0)
             {
-                KIRI_LOG_ERROR("GetGlobalAvgDistance:: no neighbor site!!");
+                KIRI_LOG_ERROR("globalAvgDistance:: no neighbor site!!");
                 return 0.0;
             }
 
             return sum / num;
         }
 
-        Vector2D LineFitLeastSquares(std::vector<double> data)
+        Vector2D lineFitLeastSquares(std::vector<double> data)
         {
             double A = 0.0;
             double B = 0.0;
@@ -237,10 +234,10 @@ namespace HDV::Sampler
             return Vector2D(k, b);
         }
 
-        std::vector<Vector4D> GetMICBySSkel()
+        std::vector<Vector4D> computeMICBySSkel()
         {
             std::vector<Vector4D> circles;
-            auto sites = mPowerDiagram->GetSites();
+            auto sites = mPowerDiagram->sites();
 
             for (int i = 0; i < sites.size(); i++)
             {
@@ -253,15 +250,15 @@ namespace HDV::Sampler
                 {
 
                     if (poly->mSkeletons.empty())
-                        poly->ComputeSSkel1998Convex();
+                        poly->computeSSkel1998Convex();
 
-                    auto mic = poly->ComputeMICByStraightSkeleton();
+                    auto mic = poly->computeMICByStraightSkeleton();
                     circles.emplace_back(Vector4D(mic, siteI->radius()));
                     // KIRI_LOG_DEBUG("has poly: circle={0},{1},{2},{3}", mic.x, mic.y, mic.z, siteI->radius());
                 }
                 else
                 {
-                    KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
+                    KIRI_LOG_ERROR("computeMICBySSkel: No Polygon Data!!!");
                     // remove.emplace_back(siteI->radius());
                 }
             }
@@ -269,9 +266,9 @@ namespace HDV::Sampler
             return circles;
         }
 
-        double ComputeMiniumPorosity()
+        double computeMiniumPorosity()
         {
-            auto maxCirclearray = this->GetMICBySSkel();
+            auto maxCirclearray = this->computeMICBySSkel();
 
             auto sum = 0.0;
 
@@ -285,14 +282,14 @@ namespace HDV::Sampler
 
             auto boundary = mPowerDiagram->GetBoundary();
 
-            // KIRI_LOG_DEBUG("boundary area ={0}, sum={1}, max circle size={2}", boundary->GetArea(), sum, maxCirclearray.size());
-            return (boundary->GetArea() - sum) / boundary->GetArea();
+            // KIRI_LOG_DEBUG("boundary area ={0}, sum={1}, max circle size={2}", boundary->area(), sum, maxCirclearray.size());
+            return (boundary->area() - sum) / boundary->area();
         }
 
-        bool RemoveNoiseVoroSites()
+        bool removeNoiseVoroSites()
         {
             std::vector<int> removeVoroIdxs;
-            auto sites = mPowerDiagram->GetSites();
+            auto sites = mPowerDiagram->sites();
 
             for (int i = 0; i < sites.size(); i++)
             {
@@ -305,9 +302,9 @@ namespace HDV::Sampler
                 {
 
                     if (poly->mSkeletons.empty())
-                        poly->ComputeSSkel1998Convex();
+                        poly->computeSSkel1998Convex();
 
-                    auto micI = poly->ComputeMICByStraightSkeleton();
+                    auto micI = poly->computeMICByStraightSkeleton();
                     for (auto neighbor : siteI->neighbors())
                     {
                         auto siteJ = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(neighbor);
@@ -319,9 +316,9 @@ namespace HDV::Sampler
                         {
 
                             if (polyJ->mSkeletons.empty())
-                                polyJ->ComputeSSkel1998Convex();
+                                polyJ->computeSSkel1998Convex();
 
-                            auto micJ = polyJ->ComputeMICByStraightSkeleton();
+                            auto micJ = polyJ->computeMICByStraightSkeleton();
 
                             auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
                             // if ((disIJ < ((micI.z + micJ.z) / 2.f)) &&
@@ -334,14 +331,14 @@ namespace HDV::Sampler
                         }
                         else
                         {
-                            KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
+                            KIRI_LOG_ERROR("computeMICBySSkel: No Polygon Data!!!");
                             // remove.emplace_back(siteI->radius());
                         }
                     }
                 }
                 else
                 {
-                    KIRI_LOG_ERROR("GetMICBySSkel: No Polygon Data!!!");
+                    KIRI_LOG_ERROR("computeMICBySSkel: No Polygon Data!!!");
                     // remove.emplace_back(siteI->radius());
                 }
             }
@@ -349,16 +346,16 @@ namespace HDV::Sampler
             if (!removeVoroIdxs.empty())
             {
                 KIRI_LOG_DEBUG("remove overlapping cell, size={0}", removeVoroIdxs.size());
-                mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
+                mPowerDiagram->removeVoroSitesByIndexArray(removeVoroIdxs);
                 return true;
             }
 
             return false;
         }
 
-        bool DynamicAddSites()
+        bool dynamicAddSites()
         {
-            if (mPowerDiagram->GetSites().size() - 4 >= mMaxiumNum && bReachMaxuimNum == false)
+            if (mPowerDiagram->sites().size() - 4 >= mMaxiumNum && bReachMaxuimNum == false)
                 bReachMaxuimNum = true;
 
             if (bReachMaxuimNum)
@@ -375,7 +372,7 @@ namespace HDV::Sampler
             {
                 std::vector<Voronoi::VoronoiSite2Ptr> newVoroArrays;
                 std::vector<double> errorArray(mGlobalPorosityArray.end() - entityNum, mGlobalPorosityArray.end());
-                auto line = LineFitLeastSquares(errorArray);
+                auto line = lineFitLeastSquares(errorArray);
                 // KIRI_LOG_DEBUG("line k={0}", std::abs(line.x));
                 if (std::abs(line.x) < 1e-6)
                 {
@@ -383,10 +380,10 @@ namespace HDV::Sampler
 
                     if (!bReachMaxuimNum)
                     {
-                        auto voroSite = mPowerDiagram->GetSites();
+                        auto voroSite = mPowerDiagram->sites();
                         for (int i = 0; i < voroSite.size() - 4; i++)
                         {
-                            auto pos = mPowerDiagram->GetBoundary()->GetRndInnerPoint();
+                            auto pos = mPowerDiagram->GetBoundary()->rndInnerPoint();
                             auto nSite = std::make_shared<Voronoi::VoronoiSite2>(pos.x, pos.y, mSiteCounter++);
 
                             nSite->setRadius(dist(gen));
@@ -397,7 +394,7 @@ namespace HDV::Sampler
                 }
 
                 auto new_vorosite_num = newVoroArrays.size();
-                auto cur_vorosite_num = mPowerDiagram->GetSites().size() - 4;
+                auto cur_vorosite_num = mPowerDiagram->sites().size() - 4;
                 auto need_append_vorosite_num = new_vorosite_num;
 
                 if (!bReachMaxuimNum)
@@ -409,7 +406,7 @@ namespace HDV::Sampler
                     }
 
                     for (int i = 0; i < need_append_vorosite_num; i++)
-                        mPowerDiagram->AddSite(newVoroArrays[i]);
+                        mPowerDiagram->addSite(newVoroArrays[i]);
                 }
 
                 if (!newVoroArrays.empty())
@@ -419,10 +416,10 @@ namespace HDV::Sampler
             return false;
         }
 
-        void ComputeWeightsError()
+        void computeWeightsError()
         {
             mCurGlobalWeightError = 0.0;
-            auto site = mPowerDiagram->GetSites();
+            auto site = mPowerDiagram->sites();
             mWeightError.assign(site.size(), 0.0);
             mWeightAbsError.assign(site.size(), 0.0);
 
@@ -474,16 +471,16 @@ namespace HDV::Sampler
             }
         }
 
-        void AdaptWeights()
+        void adaptWeights()
         {
 
-            auto gAreaError = GetGlobalAreaError();
-            auto gAvgDistance = GetGlobalAvgDistance();
+            auto gAreaError = globalAreaError();
+            auto gAvgDistance = globalAvgDistance();
 
             auto gammaArea = 1.0;
             auto gammaBC = 1.0;
 
-            auto sites = mPowerDiagram->GetSites();
+            auto sites = mPowerDiagram->sites();
 
 #pragma omp parallel for
             for (int i = 0; i < sites.size(); i++)
@@ -501,7 +498,7 @@ namespace HDV::Sampler
                 auto n = siteI->neighbors().size();
                 if (n > 2)
                 {
-                    auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->GetArea();
+                    auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->area();
                     auto targetArea = n * siteI->radius() * siteI->radius() * std::tan(kiri_math_mini::pi<double>() / n);
                     // auto targetArea = kiri_math_mini::pi<double>() * siteI->radius() * siteI->radius();
 

@@ -7,7 +7,7 @@
  ***************************************************************************/
 
 #include <algorithm>
-#include <kiri2d/bop12/utilities.h>
+#include <bop12/utilities.h>
 
 using namespace cbop;
 

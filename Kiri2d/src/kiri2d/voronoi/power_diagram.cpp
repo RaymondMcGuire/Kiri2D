@@ -9,9 +9,9 @@
 
 #include <kiri2d/voronoi/power_diagram.h>
 #include <kiri2d/geo/geo_plane3.h>
-#include <kiri2d/poly/PolygonClipping.h>
+#include <polyclipper2d/PolygonClipping.h>
 #include <random>
-#include <kiri2d/bop12/booleanop.h>
+#include <bop12/booleanop.h>
 
 namespace KIRI
 {
@@ -31,7 +31,7 @@ namespace KIRI
         }
     }
 
-    void KiriPowerDiagram::RemoveVoroSitesByIndexArray(Vector<UInt> indexs)
+    void KiriPowerDiagram::removeVoroSitesByIndexArray(Vector<UInt> indexs)
     {
 
         auto removeSites = std::remove_if(mVoroSites.begin(),
@@ -58,9 +58,9 @@ namespace KIRI
                 auto polyVertices = mVoroSites[i]->GetCellPolygon()->GetPolygonVertices();
                 for (size_t j = 0; j < polyVertices.size(); j++)
                 {
-                    if (mBoundaryPolygon2->Contains(polyVertices[j]))
+                    if (mBoundaryPolygon2->contains(polyVertices[j]))
                     {
-                        auto minDis = mBoundaryPolygon2->ComputeMinDisInPoly(polyVertices[j]);
+                        auto minDis = mBoundaryPolygon2->computeMinDisInPoly(polyVertices[j]);
                         if (minDis > maxCirRad)
                         {
                             maxCirRad = minDis;
@@ -103,9 +103,9 @@ namespace KIRI
     void KiriPowerDiagram::SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary)
     {
         mBoundaryPolygon2 = boundary;
-        mBoundaryPolygon2->UpdateBBox();
+        mBoundaryPolygon2->updateBBox();
         mBoundaryPolygon2->ComputeVoroSitesList();
-        auto bbox = mBoundaryPolygon2->GetBBox();
+        auto bbox = mBoundaryPolygon2->bbox();
 
         if (bbox.width() < 0.f || bbox.height() < 0.f)
             KIRI_LOG_DEBUG("bbox low={0},{1}, high={2},{3}, width={4}, height={5}", bbox.LowestPoint.x, bbox.LowestPoint.y, bbox.HighestPoint.x, bbox.HighestPoint.y, bbox.width(), bbox.height());
@@ -207,8 +207,8 @@ namespace KIRI
             for (size_t i = 0; i < mVoroSites.size(); i++)
             {
                 auto pos = mVoroSites[i]->GetValue();
-                if (!mBoundaryPolygon2->Contains(Vector2F(pos.x, pos.y)))
-                    mVoroSites[i]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
+                if (!mBoundaryPolygon2->contains(Vector2F(pos.x, pos.y)))
+                    mVoroSites[i]->ResetValue(mBoundaryPolygon2->rndInnerPoint());
                 else
                 {
                     std::random_device seedGen;
@@ -226,7 +226,7 @@ namespace KIRI
         ComputeDiagram();
     }
 
-    bool KiriPowerDiagram::Move2Centroid()
+    bool KiriPowerDiagram::move2Centroid()
     {
         bool outside = false;
         // move sites to centroid
@@ -240,13 +240,13 @@ namespace KIRI
             if (poly != NULL)
             {
                 auto cen = poly->GetPolygonCentroid();
-                if (mBoundaryPolygon2->Contains(cen))
+                if (mBoundaryPolygon2->contains(cen))
                     mVoroSites[j]->ResetValue(cen);
                 else
                 {
                     outside = true;
                     // KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
-                    //  auto rndPos = mBoundaryPolygon2->GetRndInnerPoint();
+                    //  auto rndPos = mBoundaryPolygon2->rndInnerPoint();
                     //  mVoroSites[j]->ResetValue(rndPos);
                     mVoroSites[j]->SetCellPolygon(NULL);
                     mVoroSites[j]->Disable();
@@ -274,7 +274,7 @@ namespace KIRI
             if (poly != NULL)
             {
                 auto cen = poly->GetPolygonCentroid();
-                if (mBoundaryPolygon2->Contains(cen))
+                if (mBoundaryPolygon2->contains(cen))
                     mVoroSites[j]->ResetValue(cen);
                 else
                 {
@@ -290,7 +290,7 @@ namespace KIRI
         }
 
         if (!removeVoroIdxs.empty())
-            RemoveVoroSitesByIndexArray(removeVoroIdxs);
+            removeVoroSitesByIndexArray(removeVoroIdxs);
 
         return outside;
     }
@@ -304,12 +304,12 @@ namespace KIRI
             auto curPos = Vector2F(mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y);
             auto newPos = curPos + movement[j];
 
-            if (mBoundaryPolygon2->Contains(newPos))
+            if (mBoundaryPolygon2->contains(newPos))
                 mVoroSites[j]->ResetValue(newPos);
             else
             {
                 outside = true;
-                mVoroSites[j]->ResetValue(mBoundaryPolygon2->GetRndInnerPoint());
+                mVoroSites[j]->ResetValue(mBoundaryPolygon2->rndInnerPoint());
             }
         }
 
@@ -323,7 +323,7 @@ namespace KIRI
 
         for (size_t i = 0; i < mRelaxIterNumber; i++)
         {
-            Move2Centroid();
+            move2Centroid();
 
             ComputeDiagram();
         }
@@ -331,7 +331,7 @@ namespace KIRI
 
     void KiriPowerDiagram::LloydIterate()
     {
-        Move2Centroid();
+        move2Centroid();
 
         ComputeDiagram();
     }
@@ -376,26 +376,26 @@ namespace KIRI
 
     KiriVoroCellPolygon2Ptr KiriPowerDiagram::VoroCellPolygonClip(const KiriVoroCellPolygon2Ptr &vcp1, const KiriVoroCellPolygon2Ptr &vcp2)
     {
-        if (!vcp1->GetBBox().overlaps(vcp2->GetBBox()))
+        if (!vcp1->bbox().overlaps(vcp2->bbox()))
         {
             // vcp1->Print();
             // vcp2->Print();
             // KIRI_LOG_ERROR("VoroCellPolygonClip: vcp1 low={0},{1}; high={2},{3};vcp2 low={4},{5}; high={6},{7}",
-            //                vcp1->GetBBox().LowestPoint.x,
-            //                vcp1->GetBBox().LowestPoint.y,
-            //                vcp1->GetBBox().HighestPoint.x,
-            //                vcp1->GetBBox().HighestPoint.y,
-            //                vcp2->GetBBox().LowestPoint.x,
-            //                vcp2->GetBBox().LowestPoint.y,
-            //                vcp2->GetBBox().HighestPoint.x,
-            //                vcp2->GetBBox().HighestPoint.y);
+            //                vcp1->bbox().LowestPoint.x,
+            //                vcp1->bbox().LowestPoint.y,
+            //                vcp1->bbox().HighestPoint.x,
+            //                vcp1->bbox().HighestPoint.y,
+            //                vcp2->bbox().LowestPoint.x,
+            //                vcp2->bbox().LowestPoint.y,
+            //                vcp2->bbox().HighestPoint.x,
+            //                vcp2->bbox().HighestPoint.y);
             // KIRI_LOG_ERROR("VoroCellPolygonClip: Bounding box no overlap!!");
             return NULL;
         }
 
-        if (vcp1->GetBBox().contains(vcp2->GetBBox()))
+        if (vcp1->bbox().contains(vcp2->bbox()))
         {
-            // KIRI_LOG_DEBUG("Contains");
+            // KIRI_LOG_DEBUG("contains");
             return vcp2;
         }
 
@@ -451,14 +451,14 @@ namespace KIRI
                 }
             }
 
-            clipedPolygon->UpdateBBox();
+            clipedPolygon->updateBBox();
             clipedPolygon->ComputeVoroSitesList();
             // clipedPolygon->Print();
             return clipedPolygon;
         }
 
         // no intersection between the two polygons, so check if one is inside the other
-        if (vcp1->GetBBox().contains(vcp2->GetPolygonVertices()[0]))
+        if (vcp1->bbox().contains(vcp2->GetPolygonVertices()[0]))
             return vcp2;
 
         // no intersection between the polygons at all
@@ -525,14 +525,14 @@ namespace KIRI
 
                         if (!site->IsBoundarySite())
                         {
-                            cellPoly->UpdateBBox();
+                            cellPoly->updateBBox();
                             cellPoly->ComputeVoroSitesList();
 
                             if (cellPoly->GetLength() > 2)
                             {
-                                if (mBoundaryPolygon2->GetBBox().overlaps(cellPoly->GetBBox()))
+                                if (mBoundaryPolygon2->bbox().overlaps(cellPoly->bbox()))
                                 {
-                                    if (mBoundaryPolygon2->GetBBox().contains(cellPoly->GetBBox()))
+                                    if (mBoundaryPolygon2->bbox().contains(cellPoly->bbox()))
                                     {
                                         site->SetCellPolygon(cellPoly);
                                     }
@@ -599,7 +599,7 @@ namespace KIRI
                                             clipedPolygon->PopPolygonVertex2();
                                             clipedPolygon->ReversePolygonVertex2();
 
-                                            clipedPolygon->UpdateBBox();
+                                            clipedPolygon->updateBBox();
                                             clipedPolygon->ComputeVoroSitesList();
                                             // clipedPolygon->Print();
 
@@ -607,7 +607,7 @@ namespace KIRI
                                         }
                                         else
                                         {
-                                            if (mBoundaryPolygon2->GetBBox().contains(cellPoly->GetPolygonVertices()[0]))
+                                            if (mBoundaryPolygon2->bbox().contains(cellPoly->GetPolygonVertices()[0]))
                                             {
                                                 site->SetCellPolygon(cellPoly);
                                             }

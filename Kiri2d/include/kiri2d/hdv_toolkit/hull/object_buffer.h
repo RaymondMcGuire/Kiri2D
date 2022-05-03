@@ -14,6 +14,7 @@
 #include <kiri2d/hdv_toolkit/hull/simplex_list.h>
 #include <kiri2d/hdv_toolkit/hull/connector_list.h>
 #include <kiri2d/hdv_toolkit/hull/object_manager.h>
+
 namespace HDV::Hull
 {
     template <typename VERTEXPTR = HDV::Primitives::VertexPtr>
@@ -36,7 +37,7 @@ namespace HDV::Hull
 
         virtual ~ObjectBuffer() {}
 
-        const int CONNECTOR_TABLE_SIZE = 10;
+        const int CONNECTOR_TABLE_SIZE = 2022;
 
         int CurrentVertex;
         int FurthestVertex;
@@ -109,7 +110,7 @@ namespace HDV::Hull
             UnprocessedFaces = nullptr;
         }
 
-        void AddInput(const std::vector<VERTEXPTR> &input, bool assignIds, bool checkInput)
+        void addInput(const std::vector<VERTEXPTR> &input, bool assignIds, bool checkInput)
         {
             auto count = input.size();
             InputVertices = input;

@@ -1,4 +1,4 @@
-#include <kiri2d/poly/Polygon.h>
+#include <polyclipper2d/Polygon.h>
 
 PolyClip::Polygon::Polygon(std::vector<Point2d> vertices)
 {

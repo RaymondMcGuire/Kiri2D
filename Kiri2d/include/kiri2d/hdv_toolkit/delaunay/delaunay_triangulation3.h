@@ -18,7 +18,8 @@ namespace HDV::Delaunay
     class DelaunayTriangulation3D : public DelaunayTriangulation<VERTEXPTR, VERTEX>
     {
     public:
-        explicit DelaunayTriangulation3D() : DelaunayTriangulation<VERTEXPTR, VERTEX>(3)
+        explicit DelaunayTriangulation3D()
+            : DelaunayTriangulation<VERTEXPTR, VERTEX>(3)
         {
             mMatrixBuffer.assign(4, std::vector<double>());
             for (size_t i = 0; i < mMatrixBuffer.size(); i++)
@@ -26,9 +27,12 @@ namespace HDV::Delaunay
                 mMatrixBuffer[i].assign(4, 0.0);
             }
         }
-        virtual ~DelaunayTriangulation3D() {}
 
-        void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
+        virtual ~DelaunayTriangulation3D()
+        {
+        }
+
+        void generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
         {
             this->clear();
 
@@ -47,8 +51,8 @@ namespace HDV::Delaunay
             }
 
             Hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
-            Hull->SetForPowerDiagram(true);
-            Hull->Generate(input, assignIds, checkInput);
+            Hull->enablePowerDiagram(true);
+            Hull->generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)
             {
@@ -60,9 +64,9 @@ namespace HDV::Delaunay
             this->Vertices = Hull->GetVertices();
             KIRI_LOG_DEBUG("Hull->GetVertices size={0}; input size={1}", this->Vertices.size(), count);
 
-            this->Centroid->positions()[0] = Hull->GetCentroid()[0];
-            this->Centroid->positions()[1] = Hull->GetCentroid()[1];
-            this->Centroid->positions()[2] = Hull->GetCentroid()[2];
+            this->Centroid->positions()[0] = Hull->centroid()[0];
+            this->Centroid->positions()[1] = Hull->centroid()[1];
+            this->Centroid->positions()[2] = Hull->centroid()[2];
 
             count = Hull->GetSimplexs().size();
 
@@ -83,7 +87,7 @@ namespace HDV::Delaunay
                 }
                 else
                 {
-                    auto cell = CreateCell(simplex);
+                    auto cell = createCell(simplex);
                     // cell.CircumCenter.Id = i;
                     this->Cells.emplace_back(cell);
                 }
@@ -100,7 +104,7 @@ namespace HDV::Delaunay
                    mMatrixBuffer[r0][c2] * (mMatrixBuffer[r1][c0] * mMatrixBuffer[r2][c1] - mMatrixBuffer[r2][c0] * mMatrixBuffer[r1][c1]);
         }
 
-        double Determinant()
+        double determinant()
         {
             return (mMatrixBuffer[0][0] * MINOR(1, 2, 3, 1, 2, 3) -
                     mMatrixBuffer[0][1] * MINOR(1, 2, 3, 0, 2, 3) +
@@ -108,7 +112,7 @@ namespace HDV::Delaunay
                     mMatrixBuffer[0][3] * MINOR(1, 2, 3, 0, 1, 2));
         }
 
-        std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>> CreateCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex)
+        std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>> createCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex)
         {
             // From MathWorld: http://mathworld.wolfram.com/Circumsphere.html
 
@@ -122,35 +126,35 @@ namespace HDV::Delaunay
                 mMatrixBuffer[i][2] = verts[i]->positions()[2];
                 mMatrixBuffer[i][3] = 1;
             }
-            auto a = Determinant();
+            auto a = determinant();
 
             // size, y, z, 1
             for (auto i = 0; i < 4; i++)
             {
                 mMatrixBuffer[i][0] = verts[i]->lengthSquared() - verts[i]->weight();
             }
-            auto dx = Determinant();
+            auto dx = determinant();
 
             // size, x, z, 1
             for (auto i = 0; i < 4; i++)
             {
                 mMatrixBuffer[i][1] = verts[i]->positions()[0];
             }
-            auto dy = -Determinant();
+            auto dy = -determinant();
 
             // size, x, y, 1
             for (auto i = 0; i < 4; i++)
             {
                 mMatrixBuffer[i][2] = verts[i]->positions()[1];
             }
-            auto dz = Determinant();
+            auto dz = determinant();
 
             // size, x, y, z
             for (auto i = 0; i < 4; i++)
             {
                 mMatrixBuffer[i][3] = verts[i]->positions()[2];
             }
-            auto c = Determinant();
+            auto c = determinant();
 
             auto s = 1.0 / (2.0 * a);
             auto radius = std::abs(s) * std::sqrtf(dx * dx + dy * dy + dz * dz - 4 * a * c);

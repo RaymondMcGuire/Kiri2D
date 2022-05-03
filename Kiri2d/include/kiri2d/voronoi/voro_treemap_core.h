@@ -28,20 +28,20 @@ namespace KIRI
 
         ~KiriVoroTreeMapCore() {}
 
-        void Compute();
+        void compute();
         void ComputeIterate();
 
-        void AddSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
+        void addSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
         void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
         void SetMaxIterationNum(UInt num) { mMaxIterationNum = num; }
         void SetErrorThreshold(float error) { mErrorThreshold = error; }
 
-        const Vector<KiriVoroSitePtr> &GetSites() const { return mPowerDiagram->GetVoroSites(); }
+        const Vector<KiriVoroSitePtr> &sites() const { return mPowerDiagram->GetVoroSites(); }
 
         constexpr UInt GetMaxIterationNum() const { return mMaxIterationNum; }
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
 
-        void Init();
+        void init();
 
         void reset();
 
@@ -49,16 +49,16 @@ namespace KIRI
         void ComputeBoundaryPolygonArea();
         void ReComputePercentage();
 
-        float GetGlobalAvgDistance();
-        float GetGlobalAreaError();
+        float globalAvgDistance();
+        float globalAreaError();
         float GetMaxAreaError();
 
         void Iterate();
 
         void CorrectVoroSitePos();
         void CorrectWeights();
-        void AdaptPositionsWeights();
-        void AdaptWeights();
+        void adaptPositionsWeights();
+        void adaptWeights();
 
         KiriPowerDiagramPtr mPowerDiagram;
 

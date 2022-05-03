@@ -8,9 +8,9 @@
  */
 
 #include <kiri2d/voronoi/voro_ns_optimize.h>
-#include <kiri2d/poly/PolygonClipping.h>
+#include <polyclipper2d/PolygonClipping.h>
 #include <random>
-#include <kiri2d/bop12/booleanop.h>
+#include <bop12/booleanop.h>
 
 #ifdef KIRI_WINDOWS
 #include <omp.h>
@@ -18,7 +18,7 @@
 
 namespace KIRI
 {
-    void KiriVoroNSOptimize::Init()
+    void KiriVoroNSOptimize::init()
     {
         reset();
 
@@ -63,8 +63,8 @@ namespace KIRI
                 //     continue;
 
                 auto pos = voroSite[i]->GetValue();
-                if (!boundary->Contains(Vector2F(pos.x, pos.y)))
-                    voroSite[i]->ResetValue(boundary->GetRndInnerPoint());
+                if (!boundary->contains(Vector2F(pos.x, pos.y)))
+                    voroSite[i]->ResetValue(boundary->rndInnerPoint());
             }
         }
         else
@@ -89,12 +89,12 @@ namespace KIRI
         mPowerDiagram->SetBoundaryPolygon2(boundary);
     }
 
-    void KiriVoroNSOptimize::AdaptPositionsWeights()
+    void KiriVoroNSOptimize::adaptPositionsWeights()
     {
         auto outside = mPowerDiagram->Move2CentroidDisableSite();
     }
 
-    float KiriVoroNSOptimize::GetGlobalAreaError()
+    float KiriVoroNSOptimize::globalAreaError()
     {
         auto error = 0.f;
         auto voroSite = mPowerDiagram->GetVoroSites();
@@ -114,7 +114,7 @@ namespace KIRI
         return error;
     }
 
-    void KiriVoroNSOptimize::RemoveNoiseVoroSites()
+    void KiriVoroNSOptimize::removeNoiseVoroSites()
     {
         Vector<UInt> removeVoroIdxs;
         auto voroSite = mPowerDiagram->GetVoroSites();
@@ -128,7 +128,7 @@ namespace KIRI
             {
                 // check boundary
                 auto boundary_poly = mPowerDiagram->GetBoundaryPolygon2();
-                auto boundary_contain = boundary_poly->Contains(polyI->GetPolygonCentroid());
+                auto boundary_contain = boundary_poly->contains(polyI->GetPolygonCentroid());
                 if (!boundary_contain)
                 {
                     removeVoroIdxs.emplace_back(siteI->GetIdx());
@@ -136,9 +136,9 @@ namespace KIRI
                 }
 
                 if (polyI->GetSkeletons().empty())
-                    polyI->ComputeSSkel1998Convex();
+                    polyI->computeSSkel1998Convex();
 
-                auto micI = polyI->ComputeMICByStraightSkeleton();
+                auto micI = polyI->computeMICByStraightSkeleton();
 
                 auto neighbors = siteI->GetNeighborSites();
                 for (size_t j = 0; j < neighbors.size(); j++)
@@ -151,9 +151,9 @@ namespace KIRI
                     if (polyJ != NULL)
                     {
                         if (polyJ->GetSkeletons().empty())
-                            polyJ->ComputeSSkel1998Convex();
+                            polyJ->computeSSkel1998Convex();
 
-                        auto micJ = polyJ->ComputeMICByStraightSkeleton();
+                        auto micJ = polyJ->computeMICByStraightSkeleton();
                         auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
                         if ((disIJ < ((micI.z + micJ.z) / 2.f)) &&
                             !std::binary_search(removeVoroIdxs.begin(), removeVoroIdxs.end(), siteI->GetIdx()) &&
@@ -167,19 +167,19 @@ namespace KIRI
         if (!removeVoroIdxs.empty())
         {
             // KIRI_LOG_DEBUG("remove overlapping cell, size={0}", removeVoroIdxs.size());
-            mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
-            AdaptPositionsWeights();
+            mPowerDiagram->removeVoroSitesByIndexArray(removeVoroIdxs);
+            adaptPositionsWeights();
             // mPowerDiagram->ComputeDiagram();
         }
     }
 
-    void KiriVoroNSOptimize::AdaptWeights()
+    void KiriVoroNSOptimize::adaptWeights()
     {
         ComputeVoroSiteWeightError();
         ComputeVoroSitePosConstrains();
 
-        auto gAreaError = GetGlobalAreaError();
-        auto gAvgDistance = GetGlobalAvgDistance();
+        auto gAreaError = globalAreaError();
+        auto gAvgDistance = globalAvgDistance();
 
         auto gammaArea = 1.f;
         auto gammaBC = 1.f;
@@ -233,15 +233,15 @@ namespace KIRI
             else if (mVoroPosConstainWeightError[i] > 0.f)
                 psWeight += posstep;
 
-            // KIRI_LOG_DEBUG("AdaptWeights: error={0}, step={1}, weight={2}", error, step, weight);
-            //  // KIRI_LOG_DEBUG("AdaptWeights: mVoroSitesDisError={0}, mVoroSitesDisErrorAbs={1}, mCurGlobalDisError={2}", mVoroSitesDisError[i], mVoroSitesDisErrorAbs[i], mCurGlobalDisError);
+            // KIRI_LOG_DEBUG("adaptWeights: error={0}, step={1}, weight={2}", error, step, weight);
+            //  // KIRI_LOG_DEBUG("adaptWeights: mVoroSitesDisError={0}, mVoroSitesDisErrorAbs={1}, mCurGlobalDisError={2}", mVoroSitesDisError[i], mVoroSitesDisErrorAbs[i], mCurGlobalDisError);
 
-            // KIRI_LOG_DEBUG("AdaptWeights: idx={0}, aw={1}, bw={2}", i, areaWeight, bcWeight);
+            // KIRI_LOG_DEBUG("adaptWeights: idx={0}, aw={1}, bw={2}", i, areaWeight, bcWeight);
 
             voroSite[i]->setWeight(weight + areaWeight + bcWeight + psWeight);
         }
 
-        // KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
+        // KIRI_LOG_DEBUG("adaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
     }
 
     void KiriVoroNSOptimize::ComputeVoroSiteWeightError()
@@ -326,7 +326,7 @@ namespace KIRI
                 if (gsite_i->GetGroupId() != gsite_j->GetGroupId())
                     continue;
 
-                if ((!gsite_i->GetCellPolygon()->GetBBox().overlaps(gsite_j->GetCellPolygon()->GetBBox())) || (gsite_i->GetCellPolygon()->GetBBox().contains(gsite_j->GetCellPolygon()->GetBBox())))
+                if ((!gsite_i->GetCellPolygon()->bbox().overlaps(gsite_j->GetCellPolygon()->bbox())) || (gsite_i->GetCellPolygon()->bbox().contains(gsite_j->GetCellPolygon()->bbox())))
                 {
 
                     gsite_i->SetFreeze(false);
@@ -374,7 +374,7 @@ namespace KIRI
                     unionPolygon->PopPolygonVertex2();
                     unionPolygon->ReversePolygonVertex2();
 
-                    unionPolygon->UpdateBBox();
+                    unionPolygon->updateBBox();
                     unionPolygon->ComputeVoroSitesList();
 
                     mUnionPolygonArray.emplace_back(unionPolygon);
@@ -451,7 +451,7 @@ namespace KIRI
         }
     }
 
-    float KiriVoroNSOptimize::GetGlobalAvgDistance()
+    float KiriVoroNSOptimize::globalAvgDistance()
     {
         float sum = 0.f;
         UInt num = 0;
@@ -472,7 +472,7 @@ namespace KIRI
 
         if (num == 0)
         {
-            KIRI_LOG_ERROR("GetGlobalAvgDistance:: no neighbor site!!");
+            KIRI_LOG_ERROR("globalAvgDistance:: no neighbor site!!");
             return 0.f;
         }
 
@@ -536,7 +536,7 @@ namespace KIRI
 
             // KIRI_LOG_DEBUG("cen={0},{1}, new1={2},{3}, new2={4},{5}", centroid.x, centroid.y, new_vs1.x, new_vs1.y, new_vs2.x, new_vs2.y);
 
-            if (!polyi->Contains(new_vs1) || !polyi->Contains(new_vs2))
+            if (!polyi->contains(new_vs1) || !polyi->contains(new_vs2))
             {
                 KIRI_LOG_ERROR("New Voronoi Site Pos is ERROR!!!");
                 continue;
@@ -561,7 +561,7 @@ namespace KIRI
 
         if (!removeVoroIdxs.empty())
         {
-            mPowerDiagram->RemoveVoroSitesByIndexArray(removeVoroIdxs);
+            mPowerDiagram->removeVoroSitesByIndexArray(removeVoroIdxs);
             KIRI_LOG_DEBUG("remove sites num={0}, total num={1}", removeVoroIdxs.size(), mPowerDiagram->GetVoroSites().size());
 
             for (size_t idx = 0; idx < new_sites.size(); idx++)
@@ -577,11 +577,11 @@ namespace KIRI
     {
         mCurIteration++;
         SplitEventProcess();
-        AdaptPositionsWeights();
-        AdaptWeights();
+        adaptPositionsWeights();
+        adaptWeights();
 
         mPowerDiagram->ComputeDiagram();
-        RemoveNoiseVoroSites();
+        removeNoiseVoroSites();
     }
 
     float KiriVoroNSOptimize::ComputeIterate()

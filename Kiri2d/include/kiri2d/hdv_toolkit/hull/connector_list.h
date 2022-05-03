@@ -46,7 +46,7 @@ namespace HDV::Hull
             }
         }
 
-        void AddFirst(const std::shared_ptr<SimplexConnector> &connector)
+        void addFirst(const std::shared_ptr<SimplexConnector> &connector)
         {
             connector->Next = First;
             if (First == nullptr)

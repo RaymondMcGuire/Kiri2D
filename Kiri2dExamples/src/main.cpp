@@ -3,7 +3,7 @@
 #include <root_directory.h>
 #include <random>
 
-#include <kiri2d/lib/tinycolormap.hpp>
+#include <tinycolormap.hpp>
 
 using namespace KIRI;
 using namespace KIRI2D;
@@ -34,16 +34,16 @@ void QuickHullVoronoi2d()
         auto x = dist(rndEngine) * scale_size;
         auto y = dist(rndEngine) * scale_size;
 
-        pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(x, y, i));
+        pd2->addSite(std::make_shared<Voronoi::VoronoiSite2>(x, y, i));
     }
 
     // clip boundary
     auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
-    BoundaryPolygon->AddVert2(Vector2D(-scale_size, -scale_size));
-    BoundaryPolygon->AddVert2(Vector2D(-scale_size, scale_size));
-    BoundaryPolygon->AddVert2(Vector2D(scale_size, scale_size));
-    BoundaryPolygon->AddVert2(Vector2D(scale_size, -scale_size));
-    pd2->SetBoundaryPolygon(BoundaryPolygon);
+    BoundaryPolygon->add(Vector2D(-scale_size, -scale_size));
+    BoundaryPolygon->add(Vector2D(-scale_size, scale_size));
+    BoundaryPolygon->add(Vector2D(scale_size, scale_size));
+    BoundaryPolygon->add(Vector2D(scale_size, -scale_size));
+    pd2->setBoundaryPolygon(BoundaryPolygon);
 
     // scene renderer config
     float windowheight = 1080.f;
@@ -54,7 +54,7 @@ void QuickHullVoronoi2d()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    pd2->Compute();
+    pd2->compute();
 
     while (1)
     {
@@ -63,9 +63,9 @@ void QuickHullVoronoi2d()
         std::vector<KiriLine2> precompute_lines;
         std::vector<Vector2F> precompute_points;
 
-        pd2->LloydIteration();
+        pd2->lloydIteration();
 
-        auto sites = pd2->GetSites();
+        auto sites = pd2->sites();
 
         for (size_t i = 0; i < sites.size(); i++)
         {
@@ -175,8 +175,8 @@ void MSSampler2D()
     radiusRangeProb.push_back(0.4);
     radiusRangeProb.push_back(0.1);
 
-    multiSizeSampler->SetRadiusDist(radiusRange);
-    multiSizeSampler->SetRadiusDistProb(radiusRangeProb);
+    multiSizeSampler->setRadiusDist(radiusRange);
+    multiSizeSampler->setRadiusDistProb(radiusRangeProb);
 
     std::random_device engine;
     std::mt19937 gen(engine());
@@ -204,10 +204,10 @@ void MSSampler2D()
 
     // clip boundary : box
     auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
-    // BoundaryPolygon->AddVert2(Vector2D(-scale_size, -scale_size));
-    // BoundaryPolygon->AddVert2(Vector2D(-scale_size, scale_size));
-    // BoundaryPolygon->AddVert2(Vector2D(scale_size, scale_size));
-    // BoundaryPolygon->AddVert2(Vector2D(scale_size, -scale_size));
+    // BoundaryPolygon->add(Vector2D(-scale_size, -scale_size));
+    // BoundaryPolygon->add(Vector2D(-scale_size, scale_size));
+    // BoundaryPolygon->add(Vector2D(scale_size, scale_size));
+    // BoundaryPolygon->add(Vector2D(scale_size, -scale_size));
 
     // auto boundary_name_list = std::vector<String>
     //{"bunny", "alligator", "beast", "cheburashka", "cow", "homer", "horse", "lucy", "nefertiti", "spot", "teapot", "woody", "xyzrgb_dragon"};
@@ -222,12 +222,12 @@ void MSSampler2D()
     for (size_t i = 0; i < bunny2d.size(); i++)
     {
         auto newPos = Vector2D(bunny2d[i].x, bunny2d[i].y) * scale_size * 3.0;
-        BoundaryPolygon->AddVert2(newPos);
+        BoundaryPolygon->add(newPos);
     }
 
-    multiSizeSampler->SetBoundaryPolygon(BoundaryPolygon);
+    multiSizeSampler->setBoundaryPolygon(BoundaryPolygon);
 
-    auto total_area = BoundaryPolygon->GetArea();
+    auto total_area = BoundaryPolygon->area();
     auto total_num = total_area / (kiri_math_mini::pi<double>() * total_sum * total_sum);
     total_num *= 1.5f;
 
@@ -236,14 +236,14 @@ void MSSampler2D()
     auto maxcnt = 100;
     for (size_t i = 0; i < maxcnt; i++)
     {
-        auto pos = BoundaryPolygon->GetRndInnerPoint();
+        auto pos = BoundaryPolygon->rndInnerPoint();
         auto radius = pcdis(gen);
-        multiSizeSampler->AddSite(pos.x, pos.y, radius);
+        multiSizeSampler->addSite(pos.x, pos.y, radius);
     }
 
-    multiSizeSampler->SetMaxiumNum(static_cast<int>(total_num * 1.5));
+    multiSizeSampler->setMaxiumNum(static_cast<int>(total_num * 1.5));
 
-    multiSizeSampler->Init();
+    multiSizeSampler->init();
 
     std::vector<float> errorArray, porosityArray, radiusErrorArray;
     std::vector<Vector4D> lastMaxCircle;
@@ -253,12 +253,12 @@ void MSSampler2D()
     auto min_rmsp = std::numeric_limits<double>::max();
     for (size_t idx = 0; idx < 3000; idx++)
     {
-        auto porosity = multiSizeSampler->Compute();
+        auto porosity = multiSizeSampler->compute();
 
         std::vector<KiriLine2> precompute_lines;
         std::vector<Vector2F> precompute_points;
 
-        auto sites = multiSizeSampler->GetSites();
+        auto sites = multiSizeSampler->sites();
 
         for (size_t i = 0; i < sites.size(); i++)
         {
@@ -300,7 +300,7 @@ void MSSampler2D()
             lines.emplace_back(precompute_lines[i]);
         }
 
-        auto maxIC = multiSizeSampler->GetMICBySSkel();
+        auto maxIC = multiSizeSampler->computeMICBySSkel();
         lastMaxCircle = maxIC;
 
         Vec_Double predictRadiusArray, realRadiusArray;

@@ -30,7 +30,7 @@ namespace KIRI
         void ComputeLloyd(UInt num);
         float ComputeIterate();
 
-        void AddSite(const KiriVoroGroupSitePtr &site)
+        void addSite(const KiriVoroGroupSitePtr &site)
         {
             mPowerDiagram->AddVoroSite(site);
             mMaxGroupNum++;
@@ -45,11 +45,11 @@ namespace KIRI
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
         constexpr float GetCurGlobalPorosity() const { return mCurGlobalPorosity; }
 
-        void Init();
+        void init();
 
         void reset();
 
-        void RemoveVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->RemoveVoroSitesByIndexArray(indexs); }
+        void removeVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->removeVoroSitesByIndexArray(indexs); }
 
         void SetMaxiumVorosite(UInt num) { mMaxiumNum = num; }
 
@@ -59,17 +59,17 @@ namespace KIRI
         void ComputeVoroSiteWeightError();
         void ComputeBoundaryPolygonArea();
 
-        float GetGlobalAvgDistance();
-        float GetGlobalAreaError();
+        float globalAvgDistance();
+        float globalAreaError();
         void Iterate();
 
         void ComputeVoroSitePosConstrains();
         void CorrectVoroSitePos();
 
-        void AdaptPositionsWeights();
-        void AdaptWeights();
+        void adaptPositionsWeights();
+        void adaptWeights();
 
-        void RemoveNoiseVoroSites();
+        void removeNoiseVoroSites();
 
         void SplitEventProcess();
 

@@ -11,7 +11,7 @@
 namespace KIRI
 {
 
-    void KiriVoroPoroOptiTreeMapCore::Init()
+    void KiriVoroPoroOptiTreeMapCore::init()
     {
 
         reset();
@@ -48,8 +48,8 @@ namespace KIRI
             for (size_t i = 0; i < voroSite.size(); i++)
             {
                 auto pos = voroSite[i]->GetValue();
-                if (!boundary->Contains(Vector2F(pos.x, pos.y)))
-                    voroSite[i]->ResetValue(boundary->GetRndInnerPoint());
+                if (!boundary->contains(Vector2F(pos.x, pos.y)))
+                    voroSite[i]->ResetValue(boundary->rndInnerPoint());
             }
         }
         else
@@ -107,10 +107,10 @@ namespace KIRI
         }
     }
 
-    void KiriVoroPoroOptiTreeMapCore::AdaptPositionsWeights()
+    void KiriVoroPoroOptiTreeMapCore::adaptPositionsWeights()
     {
 
-        auto outside = mPowerDiagram->Move2Centroid();
+        auto outside = mPowerDiagram->move2Centroid();
 
         if (outside)
             CorrectWeights();
@@ -167,12 +167,12 @@ namespace KIRI
         }
     }
 
-    void KiriVoroPoroOptiTreeMapCore::AdaptWeights()
+    void KiriVoroPoroOptiTreeMapCore::adaptWeights()
     {
         ComputeVoroSiteWeightError();
 
-        auto gAreaError = GetGlobalAreaError();
-        // auto gAvgDistance = GetGlobalAvgDistance();
+        auto gAreaError = globalAreaError();
+        // auto gAvgDistance = globalAvgDistance();
 
         auto gammaArea = 1000.f;
         auto gammaBC = 1.f;
@@ -215,16 +215,16 @@ namespace KIRI
             voroSite[i]->setWeight(weight + areaWeight + bcWeight);
         }
 
-        // KIRI_LOG_DEBUG("AdaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
+        // KIRI_LOG_DEBUG("adaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
     }
 
-    float KiriVoroPoroOptiTreeMapCore::GetGlobalAreaError()
+    float KiriVoroPoroOptiTreeMapCore::globalAreaError()
     {
 
         auto error = 0.f;
         if (mCompleteArea == 0.f)
         {
-            KIRI_LOG_ERROR("GetGlobalAreaError::Please set boundary polygon!!");
+            KIRI_LOG_ERROR("globalAreaError::Please set boundary polygon!!");
             return error;
         }
 
@@ -238,7 +238,7 @@ namespace KIRI
         return error;
     }
 
-    float KiriVoroPoroOptiTreeMapCore::GetGlobalAvgDistance()
+    float KiriVoroPoroOptiTreeMapCore::globalAvgDistance()
     {
         float sum = 0.f;
         UInt num = 0;
@@ -247,7 +247,7 @@ namespace KIRI
         for (size_t i = 0; i < voroSite.size(); i++)
         {
             // KIRI_LOG_DEBUG("voro site pos={0},{1}", voroSite[i]->GetValue().x, voroSite[i]->GetValue().y);
-            //  KIRI_LOG_ERROR("GetGlobalAvgDistance:: voro n num={0}", voroSite[i]->GetNeighborSites().size());
+            //  KIRI_LOG_ERROR("globalAvgDistance:: voro n num={0}", voroSite[i]->GetNeighborSites().size());
             if (!voroSite[i]->GetNeighborSites().empty())
             {
                 for (size_t j = 0; j < voroSite[i]->GetNeighborSites().size(); j++)
@@ -262,7 +262,7 @@ namespace KIRI
 
         if (num == 0)
         {
-            KIRI_LOG_ERROR("GetGlobalAvgDistance:: no neighbor site!!");
+            KIRI_LOG_ERROR("globalAvgDistance:: no neighbor site!!");
             return 0.f;
         }
 
@@ -272,8 +272,8 @@ namespace KIRI
     float KiriVoroPoroOptiTreeMapCore::Iterate()
     {
 
-        AdaptPositionsWeights();
-        AdaptWeights();
+        adaptPositionsWeights();
+        adaptWeights();
         mPowerDiagram->ComputeDiagram();
 
         return mCurGlobalWeightError;

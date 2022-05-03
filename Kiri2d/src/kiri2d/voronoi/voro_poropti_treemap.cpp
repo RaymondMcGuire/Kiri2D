@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
  * @LastEditTime: 2021-06-24 17:27:16
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_treemap.cpp
  */
 
@@ -48,7 +48,7 @@ namespace KIRI
                     for (size_t k = 0; k < mNodes[nodeId]->GetChildNodes().size(); k++)
                     {
                         auto cnode = mNodes[nodeId]->GetChildNodes()[k];
-                        cnode->SetSitePos(mNodes[nodeId]->GetSiteBoundary()->GetRndInnerPoint());
+                        cnode->SetSitePos(mNodes[nodeId]->GetSiteBoundary()->rndInnerPoint());
                     }
 
                     mNodes[nodeId]->InitCore();

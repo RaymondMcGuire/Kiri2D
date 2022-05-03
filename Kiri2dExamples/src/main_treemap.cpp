@@ -136,7 +136,7 @@ int main_treemaplayout()
     return 0;
 }
 
-#include <kiri2d/poly/PolygonClipping.h>
+#include <polyclipper2d/PolygonClipping.h>
 
 int main111()
 {

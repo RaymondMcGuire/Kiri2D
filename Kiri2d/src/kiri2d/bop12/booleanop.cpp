@@ -10,7 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <kiri2d/bop12/booleanop.h>
+#include <bop12/booleanop.h>
 
 using namespace cbop;
 
@@ -162,11 +162,11 @@ bool BooleanOpImp::run()
 		{
 			// the line segment must be removed from sl
 			se = se->otherEvent; // we work with the left event
-			//next = prev = it = se->posSL; // se->posSL; is equal than sl.find (se); but faster
+			// next = prev = it = se->posSL; // se->posSL; is equal than sl.find (se); but faster
 			next = prev = it = sl.find(se);
 			(prev != sl.begin()) ? --prev : prev = sl.end();
 
-			if(next!=sl.end())
+			if (next != sl.end())
 				++next;
 
 #ifdef __STEPBYSTEP
@@ -180,7 +180,7 @@ bool BooleanOpImp::run()
 			// delete line segment associated to "se" from sl and check for intersection between the neighbors of "se" in sl
 			if (next != sl.end())
 				sl.erase(it);
-			
+
 			if (next != sl.end() && prev != sl.end())
 			{
 				auto res = possibleIntersection(*prev, *next);
@@ -515,7 +515,6 @@ void BooleanOpImp::connectEdges()
 			if (depth[contourId] & 1)
 				contour.changeOrientation();
 		}
-
 	}
 }
 

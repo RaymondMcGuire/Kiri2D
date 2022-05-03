@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
-#include <kiri2d/bop12/polygon.h>
+#include <bop12/polygon.h>
 
 using namespace cbop;
 

@@ -31,28 +31,28 @@ namespace KIRI
         void ComputeLloyd(UInt num);
         float ComputeIterate();
 
-        void AddSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
+        void addSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
         void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
         void SetMaxIterationNum(UInt num) { mMaxIterationNum = num; }
         void SetErrorThreshold(float error) { mErrorThreshold = error; }
 
-        const Vector<KiriVoroSitePtr> &GetSites() const { return mPowerDiagram->GetVoroSites(); }
+        const Vector<KiriVoroSitePtr> &sites() const { return mPowerDiagram->GetVoroSites(); }
 
         constexpr UInt GetMaxIterationNum() const { return mMaxIterationNum; }
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
         constexpr float GetCurGlobalPorosity() const { return mCurGlobalPorosity; }
 
-        void Init();
+        void init();
 
         void reset();
 
-        float ComputeMiniumPorosity();
+        float computeMiniumPorosity();
         Vector<Vector4F> GetCellSSkel();
-        Vector<Vector4F> GetMICBySSkel();
+        Vector<Vector4F> computeMICBySSkel();
 
         Vector3F ComputeMaxInscribedCircle() const { return mPowerDiagram->ComputeMaxInscribedCircle(); };
 
-        void RemoveVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->RemoveVoroSitesByIndexArray(indexs); }
+        void removeVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->removeVoroSitesByIndexArray(indexs); }
 
         void SetMaxiumVorosite(UInt num) { mMaxiumNum = num; }
 
@@ -60,17 +60,17 @@ namespace KIRI
         void ComputeVoroSiteWeightError();
         void ComputeBoundaryPolygonArea();
 
-        float GetGlobalAvgDistance();
-        float GetGlobalAreaError();
+        float globalAvgDistance();
+        float globalAreaError();
         float Iterate();
 
         void CorrectVoroSitePos();
         void CorrectWeights();
-        void AdaptPositionsWeights();
-        void AdaptWeights();
-        void DynamicAddSites();
+        void adaptPositionsWeights();
+        void adaptWeights();
+        void dynamicAddSites();
 
-        void RemoveNoiseVoroSites();
+        void removeNoiseVoroSites();
 
         KiriPowerDiagramPtr mPowerDiagram;
 

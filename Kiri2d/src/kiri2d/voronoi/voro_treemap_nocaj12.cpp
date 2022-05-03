@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
  * @LastEditTime: 2021-06-07 18:18:33
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_treemap_nocaj12.cpp
  */
 
@@ -27,7 +27,7 @@ namespace KIRI
         while (cnt < maxcnt)
         {
             auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
-            if (mRootBoundary->Contains(sitePos2))
+            if (mRootBoundary->contains(sitePos2))
             {
                 auto node = std::make_shared<KiriVoroTreeMapNode>(cnt, 1, sitePos2, dist(rndEngine));
                 mNodes.emplace_back(node);
@@ -36,15 +36,15 @@ namespace KIRI
         }
 
         for (size_t i = 0; i < mNodes.size(); i++)
-            mRootCore->AddSite(mNodes[i]->GetSite());
+            mRootCore->addSite(mNodes[i]->GetSite());
 
         mRootCore->SetBoundaryPolygon2(mRootBoundary);
-        mRootCore->Init();
+        mRootCore->init();
         mRootCore->ComputeIterate();
 
         for (size_t i = 0; i < mNodes.size(); i++)
         {
-            //if (i != mNodes.size() / 2)
+            // if (i != mNodes.size() / 2)
             mNodes[i]->AddChildNodes();
 
             mNodes[i]->InitCore();

@@ -37,7 +37,7 @@ namespace HDV::Hull
             Last = nullptr;
         }
 
-        void AddFirst(const std::shared_ptr<SimplexNode> &simplex)
+        void addFirst(const std::shared_ptr<SimplexNode> &simplex)
         {
             simplex->setInLinkList(true);
             simplex->Next = First;
@@ -107,7 +107,7 @@ namespace HDV::Hull
                 if (First->verticesBeyond().size() < simplex->verticesBeyond().size())
                 {
                     remove(simplex);
-                    AddFirst(simplex);
+                    addFirst(simplex);
                 }
                 return;
             }

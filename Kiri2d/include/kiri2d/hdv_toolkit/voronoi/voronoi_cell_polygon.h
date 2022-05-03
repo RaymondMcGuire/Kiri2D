@@ -14,51 +14,57 @@
 #include <kiri2d/straight_skeleton/sskel_slav.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_cell.h>
 #include <Mathematics/DistPointTriangle.h>
+
 namespace HDV::Voronoi
 {
     template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
     class VoronoiCellPolygon
     {
     public:
-        explicit VoronoiCellPolygon() {}
-        virtual ~VoronoiCellPolygon() {}
+        explicit VoronoiCellPolygon()
+        {
+        }
 
-        void AddVert2(Vector2D vert)
+        virtual ~VoronoiCellPolygon()
+        {
+        }
+
+        void add(Vector2D vert)
         {
             Positions.emplace_back(vert);
             BBox.merge(vert);
         }
 
-        void UpdateBBox()
+        void updateBBox()
         {
             BBox.reset();
             for (auto i = 0; i < Positions.size(); i++)
                 BBox.merge(Positions[i]);
         }
 
-        bool CheckBBox()
+        bool checkBBox()
         {
             if (BBox.isEmpty())
             {
                 if (!Positions.empty())
                 {
-                    UpdateBBox();
+                    updateBBox();
                     return true;
                 }
                 else
                 {
-                    KIRI_LOG_ERROR("Contains:: No polygon data!!");
+                    KIRI_LOG_ERROR("contains:: No polygon data!!");
                     return false;
                 }
             }
             return true;
         }
 
-        Vector2D GetRndInnerPoint()
+        Vector2D rndInnerPoint()
         {
-            if (!CheckBBox())
+            if (!checkBBox())
             {
-                KIRI_LOG_ERROR("GetRndInnerPoint:: Get inner point failed!!");
+                KIRI_LOG_ERROR("rndInnerPoint:: Get inner point failed!!");
                 return Vector2D(0.0);
             }
 
@@ -69,14 +75,14 @@ namespace HDV::Voronoi
             do
             {
                 inner = BBox.LowestPoint + Vector2D(dist(rndEngine) * BBox.width(), dist(rndEngine) * BBox.height());
-            } while (!Contains(inner));
+            } while (!contains(inner));
 
             return inner;
         }
 
-        bool Contains(const Vector2D &v)
+        bool contains(const Vector2D &v)
         {
-            if (!CheckBBox())
+            if (!checkBBox())
                 return false;
 
             if (!BBox.contains(v))
@@ -93,7 +99,7 @@ namespace HDV::Voronoi
             return contains;
         }
 
-        double GetArea()
+        double area()
         {
             auto area = 0.0;
             if (!Positions.empty())
@@ -103,7 +109,7 @@ namespace HDV::Voronoi
             return std::abs(area * 0.5);
         }
 
-        Vector2D GetCentroid()
+        Vector2D centroid()
         {
             std::vector<Vector2D> tmpPolygonVertices(Positions);
 
@@ -130,7 +136,7 @@ namespace HDV::Voronoi
             return Vector2D(x / f, y / f);
         }
 
-        bool IsClockwise(const std::vector<Vector4F> &poly)
+        bool isClockwise(const std::vector<Vector4F> &poly)
         {
             auto a = 0.f;
             auto polySize = poly.size();
@@ -144,7 +150,7 @@ namespace HDV::Voronoi
             return a < 0.f;
         }
 
-        void ComputeSSkel1998Convex()
+        void computeSSkel1998Convex()
         {
             mSkeletons.clear();
 
@@ -159,7 +165,7 @@ namespace HDV::Voronoi
                 rPolyVert.emplace_back(Vector2F(v1.x, v1.y));
             }
 
-            if (IsClockwise(poly))
+            if (isClockwise(poly))
                 std::reverse(rPolyVert.begin(), rPolyVert.end());
 
             auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelSLAV>(rPolyVert);
@@ -174,7 +180,7 @@ namespace HDV::Voronoi
             }
         }
 
-        double MinDis2LineSegment2(Vector2D v, Vector2D w, Vector2D p)
+        double minDis2LineSegment2(Vector2D v, Vector2D w, Vector2D p)
         {
             const double l2 = v.distanceSquaredTo(w);
             if (l2 == 0.f)
@@ -185,15 +191,15 @@ namespace HDV::Voronoi
             return p.distanceTo(projection);
         }
 
-        double ComputeMinDisInPoly(const Vector2D &p)
+        double computeMinDisInPoly(const Vector2D &p)
         {
             auto minDis = std::numeric_limits<double>::max();
             for (size_t i = 0; i < Positions.size(); i++)
-                minDis = std::min(minDis, MinDis2LineSegment2(Positions[i], Positions[(i + 1) % Positions.size()], p));
+                minDis = std::min(minDis, minDis2LineSegment2(Positions[i], Positions[(i + 1) % Positions.size()], p));
             return minDis;
         }
 
-        Vector3D ComputeMICByStraightSkeleton()
+        Vector3D computeMICByStraightSkeleton()
         {
             auto maxCirVec = Vector2D(0.0);
             auto maxCirRad = std::numeric_limits<double>::min();
@@ -204,9 +210,9 @@ namespace HDV::Voronoi
                     auto v1 = Vector2D(mSkeletons[i].x, mSkeletons[i].y);
                     auto v2 = Vector2D(mSkeletons[i].z, mSkeletons[i].w);
 
-                    if (Contains(v1))
+                    if (contains(v1))
                     {
-                        auto minDis = ComputeMinDisInPoly(v1);
+                        auto minDis = computeMinDisInPoly(v1);
                         if (minDis > maxCirRad)
                         {
                             maxCirRad = minDis;
@@ -214,9 +220,9 @@ namespace HDV::Voronoi
                         }
                     }
 
-                    if (Contains(v2))
+                    if (contains(v2))
                     {
-                        auto minDis = ComputeMinDisInPoly(v2);
+                        auto minDis = computeMinDisInPoly(v2);
                         if (minDis > maxCirRad)
                         {
                             maxCirRad = minDis;
@@ -236,53 +242,35 @@ namespace HDV::Voronoi
     class VoronoiPolygon3
     {
     public:
-        explicit VoronoiPolygon3() {}
-        virtual ~VoronoiPolygon3() {}
+        explicit VoronoiPolygon3()
+        {
+        }
 
-        void AddVert3(Vector3D vert)
+        virtual ~VoronoiPolygon3()
+        {
+        }
+
+        void add(Vector3D vert)
         {
             Positions.emplace_back(vert);
             BBox.merge(vert);
         }
 
-        void UpdateBBox()
+        void updateBBox()
         {
             BBox.reset();
             for (auto i = 0; i < Positions.size(); i++)
                 BBox.merge(Positions[i]);
         }
 
-        double ComputeVolume(Vector3D a, Vector3D b, Vector3D c)
+        double computeVolume(Vector3D a, Vector3D b, Vector3D c)
         {
             return b.cross(c).dot(a) / 6.0;
         }
 
-        double ComputeMinDisInPoly(Vector3D p)
+        double computeMinDisInPoly(Vector3D p)
         {
-            // std::vector<tmd::Vec3d> vertices;
-            // std::vector<std::array<int, 3>> triangles;
 
-            // for (auto i = 0; i < Positions.size(); i++)
-            // {
-            //     vertices.emplace_back(tmd::Vec3d(Positions[i].x, Positions[i].y, Positions[i].z));
-            // }
-
-            // for (auto i = 0; i < Indices.size() / 3; i++)
-            // {
-            //     std::array<int, 3> ind = {Indices[i * 3], Indices[i * 3 + 1], Indices[i * 3 + 2]};
-            //     triangles.emplace_back(ind);
-            // }
-
-            // // Initialize TriangleMeshDistance
-            // tmd::TriangleMeshDistance mesh_distance(vertices, triangles);
-
-            // // Query TriangleMeshDistance
-            // tmd::Result result = mesh_distance.signed_distance({p.x, p.y, p.z});
-            // auto minDis = std::abs(result.distance);
-            // KIRI_LOG_DEBUG("minDis={0}", minDis);
-
-            // KIRI_LOG_DEBUG("---------------------------------------------");
-            // IndexOffset = IsLoadedFromObj ? 1 : 0;
             auto minDis = std::numeric_limits<double>::max();
 
             for (size_t j = 0; j < Indices.size() / 3; j++)
@@ -290,16 +278,6 @@ namespace HDV::Voronoi
                 auto a = Positions[Indices[j * 3] - IndexOffset];
                 auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
                 auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
-                // // if indices loaded from a .obj file, index need -1
-                // auto l = equation_plane(a, b, c);
-                // auto dis = shortest_distance(p, l);
-
-                // auto da = a.distanceTo(p), db = b.distanceTo(p), dc = c.distanceTo(p);
-                // if (minDis > dis)
-                // {
-                //     KIRI_LOG_DEBUG("a={0},{1},{2};b={3},{4},{5};c={6},{7},{8}", a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
-                //     KIRI_LOG_DEBUG("current={0};p={1},{2},{3};da={4},db={5},dc={6}", dis, p.x, p.y, p.z, da, db, dc);
-                // }
 
                 gte::Vector<3, double> vec3 = {{p.x, p.y, p.z}};
                 gte::Vector<3, double> a3 = {{a.x, a.y, a.z}}, b3 = gte::Vector<3, double>{{b.x, b.y, b.z}}, c3 = gte::Vector<3, double>{{c.x, c.y, c.z}};
@@ -315,7 +293,7 @@ namespace HDV::Voronoi
             return minDis;
         }
 
-        double GetVolume()
+        double volume()
         {
             IndexOffset = IsLoadedFromObj ? 1 : 0;
 
@@ -327,7 +305,7 @@ namespace HDV::Voronoi
                 auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
                 auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
 
-                V += ComputeVolume(a, b, c);
+                V += computeVolume(a, b, c);
             }
 
             if (V < 0.0)
@@ -336,7 +314,7 @@ namespace HDV::Voronoi
             return V;
         }
 
-        Vector3D GetCentroid()
+        Vector3D centroid()
         {
             IndexOffset = IsLoadedFromObj ? 1 : 0;
 
@@ -350,7 +328,7 @@ namespace HDV::Voronoi
                 auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
                 auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
 
-                auto v = ComputeVolume(a, b, c);
+                auto v = computeVolume(a, b, c);
                 volume += v;
                 centroid += v * (a + b + c) / 4.0;
             }

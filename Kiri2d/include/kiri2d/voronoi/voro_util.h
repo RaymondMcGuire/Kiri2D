@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-14 14:43:27
  * @LastEditTime: 2021-06-25 01:30:34
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\voronoi\voro_util.h
  */
 
@@ -16,15 +16,15 @@
 namespace KIRI
 {
 
-    /*** 
-     * @description: 
+    /***
+     * @description:
      * @param {Vector2F} v
      * @param {Vector2F} w
      * @param {Vector2F} p
      * @return {float} minimum distance between line segment vw and point p
      * @reference: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
      */
-    static float MinDis2LineSegment2(Vector2F v, Vector2F w, Vector2F p)
+    static float minDis2LineSegment2(Vector2F v, Vector2F w, Vector2F p)
     {
         const float l2 = v.distanceSquaredTo(w);
         if (l2 == 0.f)
@@ -35,9 +35,9 @@ namespace KIRI
         return p.distanceTo(projection);
     }
 
-    /*** 
-     * @description: 
-     * @param {Vector2F} p1: start 
+    /***
+     * @description:
+     * @param {Vector2F} p1: start
      * @param {Vector2F} p2: mid
      * @param {Vector2F} p3: end
      * @param {bool} cw: clockwise
@@ -79,7 +79,7 @@ namespace KIRI
         return a;
     }
 
-    /*** 
+    /***
      * @description: shrinking direction for the vertex connecting the two edges
      * @idea: compute angle between the two lines and pick a vector that splits the angle evenly (bisector).
      * @reference: https://github.com/savannaos/straight-skeletons/blob/master/polygon.js
@@ -117,8 +117,8 @@ namespace KIRI
         return Vector2F(x / d * -1.f, y / d * -1.f);
     }
 
-    /*** 
-     * @description: check clockwise 
+    /***
+     * @description: check clockwise
      * @param {Vector2F} p1
      * @param {Vector2F} p2
      * @param {Vector2F} p3
@@ -135,7 +135,7 @@ namespace KIRI
             return -1;
     }
 
-    /*** 
+    /***
      * @description: compute the intersection point for line p and q
      * @param {Vector2F} p1
      * @param {Vector2F} p2
@@ -167,8 +167,8 @@ namespace KIRI
         return false;
     }
 
-    /*** 
-     * @description: 
+    /***
+     * @description:
      * @param {Vector2F} p1
      * @param {Vector2F} p2
      * @param {float} eps

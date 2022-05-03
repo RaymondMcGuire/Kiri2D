@@ -17,20 +17,33 @@ namespace HDV::Voronoi
     class PowerDiagram2D
     {
     public:
-        explicit PowerDiagram2D() { mMesh = std::make_shared<VoronoiMesh2>(); }
-        virtual ~PowerDiagram2D() {}
+        explicit PowerDiagram2D()
+        {
+            mMesh = std::make_shared<VoronoiMesh2>();
+        }
 
-        void AddSite(const HDV::Primitives::Vertex2Ptr &site) { mSites.emplace_back(site); }
-        std::vector<HDV::Primitives::Vertex2Ptr> GetSites() { return mSites; }
+        virtual ~PowerDiagram2D()
+        {
+        }
+
+        void addSite(const HDV::Primitives::Vertex2Ptr &site)
+        {
+            mSites.emplace_back(site);
+        }
+
+        std::vector<HDV::Primitives::Vertex2Ptr> sites()
+        {
+            return mSites;
+        }
 
         const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &GetBoundary()
         {
             return mMesh->mBoundaryPolygon;
         }
 
-        void SetBoundaryPolygon(const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
+        void setBoundaryPolygon(const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
         {
-            mMesh->SetBoundaryPolygon(boundary);
+            mMesh->setBoundaryPolygon(boundary);
 
             auto mBBox = boundary->BBox;
 
@@ -47,31 +60,18 @@ namespace HDV::Voronoi
             site3->setAsBoundaryVertex();
             site4->setAsBoundaryVertex();
 
-            AddSite(site1);
-            AddSite(site2);
-            AddSite(site3);
-            AddSite(site4);
+            addSite(site1);
+            addSite(site2);
+            addSite(site3);
+            addSite(site4);
         }
 
-        void Compute()
+        void compute()
         {
-
-            // for (auto i = 0; i < mSites.size(); i++)
-            // {
-            //     if (mSites[i]->isBoundaryVertex())
-            //         continue;
-
-            //     auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
-
-            //     auto centroid = site->CellPolygon->GetCentroid();
-            //     if (mMesh->mBoundaryPolygon->Contains(centroid))
-            //         site->set(centroid.x, centroid.y);
-            // }
-
-            mMesh->Generate(mSites, mAssignIds, mCheckInput);
+            mMesh->generate(mSites, mAssignIds, mCheckInput);
         }
 
-        void RemoveVoroSitesByIndexArray(std::vector<int> indexs)
+        void removeVoroSitesByIndexArray(std::vector<int> indexs)
         {
 
             auto removeSites = std::remove_if(mSites.begin(),
@@ -87,7 +87,7 @@ namespace HDV::Voronoi
             mSites.erase(removeSites, mSites.end());
         }
 
-        void Move2Centroid()
+        void move2Centroid()
         {
             //#pragma omp parallel for
             for (auto i = 0; i < mSites.size(); i++)
@@ -99,18 +99,18 @@ namespace HDV::Voronoi
 
                 if (site->CellPolygon)
                 {
-                    auto centroid = site->CellPolygon->GetCentroid();
-                    if (mMesh->mBoundaryPolygon->Contains(centroid))
+                    auto centroid = site->CellPolygon->centroid();
+                    if (mMesh->mBoundaryPolygon->contains(centroid))
                         site->set(centroid.x, centroid.y);
                 }
             }
         }
 
-        void LloydIteration()
+        void lloydIteration()
         {
             reset();
-            Compute();
-            Move2Centroid();
+            compute();
+            move2Centroid();
         }
 
         VoronoiMesh2Ptr mMesh;
@@ -138,16 +138,22 @@ namespace HDV::Voronoi
     class PowerDiagram3D
     {
     public:
-        explicit PowerDiagram3D() { mMesh = std::make_shared<VoronoiMesh3>(); }
-        virtual ~PowerDiagram3D() {}
+        explicit PowerDiagram3D()
+        {
+            mMesh = std::make_shared<VoronoiMesh3>();
+        }
 
-        void AddSite(const HDV::Primitives::Vertex3Ptr &site) { mSites.emplace_back(site); }
-        std::vector<HDV::Primitives::Vertex3Ptr> GetSites() { return mSites; }
+        virtual ~PowerDiagram3D()
+        {
+        }
+
+        void addSite(const HDV::Primitives::Vertex3Ptr &site) { mSites.emplace_back(site); }
+        std::vector<HDV::Primitives::Vertex3Ptr> sites() { return mSites; }
 
         int mCounter = 0;
         BoundingBox3D mBBox;
 
-        void RemoveVoroSitesByIndexArray(std::vector<int> indexs)
+        void removeVoroSitesByIndexArray(std::vector<int> indexs)
         {
 
             auto removeSites = std::remove_if(mSites.begin(),
@@ -168,7 +174,7 @@ namespace HDV::Voronoi
             return mBoundaryPolygon;
         }
 
-        void SetBoundaryPolygon(std::vector<csgjscpp::Polygon> boundary)
+        void setBoundaryPolygon(std::vector<csgjscpp::Polygon> boundary)
         {
             auto boundaryMesh = csgjscpp::modelfrompolygons(boundary);
 
@@ -207,12 +213,12 @@ namespace HDV::Voronoi
             mBoundaryPolygon->Positions = Positions;
             mBoundaryPolygon->Normals = Normals;
             mBoundaryPolygon->Indices = Indices;
-            mBoundaryPolygon->UpdateBBox();
+            mBoundaryPolygon->updateBBox();
 
             mBBox = mBoundaryPolygon->BBox;
 
-            mMesh->SetBoundaryPolygon(boundary);
-            mMesh->SetBoundaryBBox(mBBox);
+            mMesh->setBoundaryPolygon(boundary);
+            mMesh->setBoundaryBBox(mBBox);
 
             if (mBBox.width() < 0.0 || mBBox.height() < 0.0 || mBBox.depth() < 0.0)
                 KIRI_LOG_ERROR("mBBox low={0},{1}, high={2},{3}, width={4}, height={5}", mBBox.LowestPoint.x, mBBox.LowestPoint.y, mBBox.HighestPoint.x, mBBox.HighestPoint.y, mBBox.width(), mBBox.height());
@@ -235,24 +241,24 @@ namespace HDV::Voronoi
             site7->setAsBoundaryVertex();
             site8->setAsBoundaryVertex();
 
-            AddSite(site1);
-            AddSite(site2);
-            AddSite(site3);
-            AddSite(site4);
-            AddSite(site5);
-            AddSite(site6);
-            AddSite(site7);
-            AddSite(site8);
+            addSite(site1);
+            addSite(site2);
+            addSite(site3);
+            addSite(site4);
+            addSite(site5);
+            addSite(site6);
+            addSite(site7);
+            addSite(site8);
         }
 
-        void Compute()
+        void compute()
         {
-            mMesh->Generate(mSites, mAssignIds, mCheckInput);
-            // mMesh->ExportVoronoiMeshObj(mCounter++);
+            mMesh->generate(mSites, mAssignIds, mCheckInput);
+            // mMesh->exportVoronoiMeshObj(mCounter++);
             //   KIRI_LOG_DEBUG("resgion size={0}", mMesh->Regions.size());
         }
 
-        void Move2Centroid()
+        void move2Centroid()
         {
             for (auto i = 0; i < mSites.size(); i++)
             {
@@ -260,28 +266,28 @@ namespace HDV::Voronoi
                 if (site->isBoundaryVertex())
                     continue;
 
-                auto centroid = site->Polygon->GetCentroid();
+                auto centroid = site->Polygon->centroid();
                 site->set(centroid.x, centroid.y, centroid.z);
             }
         }
 
-        void Init()
+        void init()
         {
             mConstrainSites.clear();
-            Compute();
-            AddConstrain();
+            compute();
+            addConstrain();
         }
 
-        void LloydIteration()
+        void lloydIteration()
         {
             // reset();
-            Compute();
-            Move2Centroid();
+            compute();
+            move2Centroid();
         }
 
-        void ExportObj()
+        void exportObj()
         {
-            mMesh->ExportVoronoiMeshObj(mCounter++);
+            mMesh->exportVoronoiMeshObj(mCounter++);
         }
 
         VoronoiMesh3Ptr mMesh;
@@ -296,7 +302,7 @@ namespace HDV::Voronoi
 
         std::vector<HDV::Primitives::Vertex3Ptr> mSites;
 
-        void AddConstrain()
+        void addConstrain()
         {
             auto center = (mBBox.LowestPoint + mBBox.HighestPoint) / 2.0;
             for (auto i = 0; i < mSites.size(); i++)

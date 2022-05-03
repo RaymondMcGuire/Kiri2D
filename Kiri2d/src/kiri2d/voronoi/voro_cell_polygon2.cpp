@@ -16,7 +16,7 @@
 namespace KIRI
 {
 
-    bool KiriVoroCellPolygon2::IsClockwise(const Vector<Vector4F> &poly)
+    bool KiriVoroCellPolygon2::isClockwise(const Vector<Vector4F> &poly)
     {
         auto a = 0.f;
         auto polySize = poly.size();
@@ -30,7 +30,7 @@ namespace KIRI
         return a < 0.f;
     }
 
-    void KiriVoroCellPolygon2::ComputeSSkel1998Convex()
+    void KiriVoroCellPolygon2::computeSSkel1998Convex()
     {
         mSkeletons.clear();
         Vector<Vector4F> poly;
@@ -42,7 +42,7 @@ namespace KIRI
         }
 
         Vector<Vector2F> rPolyVert(mPolygonVertices2);
-        if (IsClockwise(poly))
+        if (isClockwise(poly))
             std::reverse(rPolyVert.begin(), rPolyVert.end());
 
         auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelSLAV>(rPolyVert);
@@ -68,15 +68,15 @@ namespace KIRI
                 auto v1 = Vector2F(mSkeletons[i].x, mSkeletons[i].y);
                 auto v2 = Vector2F(mSkeletons[i].z, mSkeletons[i].w);
 
-                if (Contains(v1))
+                if (contains(v1))
                 {
-                    auto minDis = ComputeMinDisInPoly(v1);
+                    auto minDis = computeMinDisInPoly(v1);
                     all_circles.emplace_back(v1.x, v1.y, minDis);
                 }
 
-                if (Contains(v2))
+                if (contains(v2))
                 {
-                    auto minDis = ComputeMinDisInPoly(v2);
+                    auto minDis = computeMinDisInPoly(v2);
                     all_circles.emplace_back(v1.x, v1.y, minDis);
                 }
             }
@@ -94,16 +94,16 @@ namespace KIRI
             {
                 auto v1 = Vector2F(mSkeletons[i].x, mSkeletons[i].y);
 
-                if (Contains(v1))
+                if (contains(v1))
                 {
-                    auto minDis = ComputeMinDisInPoly(v1);
+                    auto minDis = computeMinDisInPoly(v1);
                     mic.emplace_back(Vector3F(v1.x, v1.y, minDis));
                 }
 
                 auto v2 = Vector2F(mSkeletons[i].z, mSkeletons[i].w);
-                if (Contains(v2))
+                if (contains(v2))
                 {
-                    auto minDis = ComputeMinDisInPoly(v2);
+                    auto minDis = computeMinDisInPoly(v2);
                     mic.emplace_back(Vector3F(v2.x, v2.y, minDis));
                 }
             }
@@ -142,7 +142,7 @@ namespace KIRI
         return mic;
     }
 
-    Vector3F KiriVoroCellPolygon2::ComputeMICByStraightSkeleton()
+    Vector3F KiriVoroCellPolygon2::computeMICByStraightSkeleton()
     {
         auto maxCirVec = Vector2F(0.f);
         auto maxCirRad = Tiny<float>();
@@ -153,9 +153,9 @@ namespace KIRI
                 auto v1 = Vector2F(mSkeletons[i].x, mSkeletons[i].y);
                 auto v2 = Vector2F(mSkeletons[i].z, mSkeletons[i].w);
 
-                if (Contains(v1))
+                if (contains(v1))
                 {
-                    auto minDis = ComputeMinDisInPoly(v1);
+                    auto minDis = computeMinDisInPoly(v1);
                     if (minDis > maxCirRad)
                     {
                         maxCirRad = minDis;
@@ -163,9 +163,9 @@ namespace KIRI
                     }
                 }
 
-                if (Contains(v2))
+                if (contains(v2))
                 {
-                    auto minDis = ComputeMinDisInPoly(v2);
+                    auto minDis = computeMinDisInPoly(v2);
                     if (minDis > maxCirRad)
                     {
                         maxCirRad = minDis;
@@ -177,29 +177,29 @@ namespace KIRI
         return Vector3F(maxCirVec.x, maxCirVec.y, maxCirRad);
     }
 
-    bool KiriVoroCellPolygon2::CheckBBox()
+    bool KiriVoroCellPolygon2::checkBBox()
     {
         if (mBBox2.isEmpty())
         {
             if (!mPolygonVertices2.empty())
             {
-                UpdateBBox();
+                updateBBox();
                 return true;
             }
             else
             {
-                KIRI_LOG_ERROR("Contains:: No polygon data!!");
+                KIRI_LOG_ERROR("contains:: No polygon data!!");
                 return false;
             }
         }
         return true;
     }
 
-    Vector2F KiriVoroCellPolygon2::GetRndInnerPoint()
+    Vector2F KiriVoroCellPolygon2::rndInnerPoint()
     {
-        if (!CheckBBox())
+        if (!checkBBox())
         {
-            KIRI_LOG_ERROR("GetRndInnerPoint:: Get inner point failed!!");
+            KIRI_LOG_ERROR("rndInnerPoint:: Get inner point failed!!");
             return Vector2F(0.f);
         }
 
@@ -210,14 +210,14 @@ namespace KIRI
         do
         {
             inner = mBBox2.LowestPoint + Vector2F(dist(rndEngine) * mBBox2.width(), dist(rndEngine) * mBBox2.height());
-        } while (!Contains(inner));
+        } while (!contains(inner));
 
         return inner;
     }
 
-    bool KiriVoroCellPolygon2::Contains(const Vector2F &v)
+    bool KiriVoroCellPolygon2::contains(const Vector2F &v)
     {
-        if (!CheckBBox())
+        if (!checkBBox())
             return false;
 
         if (!mBBox2.contains(v))
@@ -285,15 +285,15 @@ namespace KIRI
         return Vector2F(x / f, y / f);
     }
 
-    float KiriVoroCellPolygon2::ComputeMinDisInPoly(const Vector2F &p)
+    float KiriVoroCellPolygon2::computeMinDisInPoly(const Vector2F &p)
     {
         auto minDis = Huge<float>();
         for (size_t i = 0; i < mPolygonVertices2.size(); i++)
-            minDis = std::min(minDis, MinDis2LineSegment2(mPolygonVertices2[i], mPolygonVertices2[(i + 1) % mPolygonVertices2.size()], p));
+            minDis = std::min(minDis, minDis2LineSegment2(mPolygonVertices2[i], mPolygonVertices2[(i + 1) % mPolygonVertices2.size()], p));
         return minDis;
     }
 
-    void KiriVoroCellPolygon2::UpdateBBox()
+    void KiriVoroCellPolygon2::updateBBox()
     {
         for (size_t i = 0; i < mPolygonVertices2.size(); i++)
             mBBox2.merge(Vector2F(mPolygonVertices2[i]));

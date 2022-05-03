@@ -48,7 +48,7 @@ namespace HDV::Voronoi
         return true;
     }
 
-    bool TinyObjWriter(const String &filename, const tinyobj::attrib_t &attributes, const std::vector<tinyobj::shape_t> &shapes, const std::vector<tinyobj::material_t> &materials, bool coordTransform = false)
+    bool yinyObjWriter(const String &filename, const tinyobj::attrib_t &attributes, const std::vector<tinyobj::shape_t> &shapes, const std::vector<tinyobj::material_t> &materials, bool coordTransform = false)
     {
         String exportPath = String(EXPORT_PATH) + "voro/" + filename + ".obj";
 

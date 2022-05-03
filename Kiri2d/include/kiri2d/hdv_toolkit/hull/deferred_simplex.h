@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-09 00:10:54
- * @LastEditTime: 2021-12-22 18:27:04
+ * @Date: 2022-05-02 13:22:27
+ * @LastEditTime: 2022-05-03 17:37:13
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -17,9 +17,13 @@ namespace HDV::Hull
     class DeferredSimplex
     {
     public:
-        explicit DeferredSimplex() {}
+        explicit DeferredSimplex()
+        {
+        }
 
-        virtual ~DeferredSimplex() {}
+        virtual ~DeferredSimplex()
+        {
+        }
 
         void clear()
         {

@@ -18,13 +18,13 @@ namespace KIRI
 
         if (poly->GetSkeletons().empty())
         {
-            poly->ComputeSSkel1998Convex();
+            poly->computeSSkel1998Convex();
         }
 
         return poly->ComputeMICByStraightSkeletonTest();
     }
 
-    Vector<Vector4F> KiriVoroSplit::GetMICBySSkel()
+    Vector<Vector4F> KiriVoroSplit::computeMICBySSkel()
     {
         auto sites = this->GetVoroSites();
 
@@ -36,10 +36,10 @@ namespace KIRI
             {
                 if (poly->GetSkeletons().empty())
                 {
-                    poly->ComputeSSkel1998Convex();
+                    poly->computeSSkel1998Convex();
                 }
 
-                auto mic = poly->ComputeMICByStraightSkeleton();
+                auto mic = poly->computeMICByStraightSkeleton();
                 mMIC.emplace_back(Vector4F(mic, sites[i]->radius()));
             }
             else
@@ -51,7 +51,7 @@ namespace KIRI
         return mMIC;
     }
 
-    void KiriVoroSplit::Init()
+    void KiriVoroSplit::init()
     {
         mMIC.clear();
         mPowerDiagram->ComputeDiagram();
@@ -81,7 +81,7 @@ namespace KIRI
             vi->SetGroupId(mGroupCounter);
             vi->SetGroupColor(group_col);
 
-            auto mic = GetMICBySSkel();
+            auto mic = computeMICBySSkel();
             auto micI = mic[i];
             auto tmp_num = 0;
             for (size_t j = 0; j < neighbors.size(); j++)

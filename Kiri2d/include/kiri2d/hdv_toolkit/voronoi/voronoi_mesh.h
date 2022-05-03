@@ -15,7 +15,7 @@
 #include <kiri2d/hdv_toolkit/voronoi/voronoi_site.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation2.h>
 #include <kiri2d/hdv_toolkit/delaunay/delaunay_triangulation3.h>
-#include <kiri2d/poly/PolygonClipping.h>
+#include <polyclipper2d/PolygonClipping.h>
 #include <kiri2d/hdv_toolkit/utils/tinyobj_utils.h>
 
 #define CSGJSCPP_IMPLEMENTATION
@@ -28,8 +28,14 @@ namespace HDV::Voronoi
     class VoronoiMesh
     {
     public:
-        explicit VoronoiMesh(int dimension) { Dimension = dimension; }
-        virtual ~VoronoiMesh() {}
+        explicit VoronoiMesh(int dimension)
+        {
+            Dimension = dimension;
+        }
+
+        virtual ~VoronoiMesh()
+        {
+        }
 
         int Dimension;
         std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
@@ -47,16 +53,16 @@ namespace HDV::Voronoi
             Regions.clear();
         }
 
-        virtual void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) = 0;
+        virtual void generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) = 0;
 
-        virtual void Region2Polygon() = 0;
+        virtual void region2Polygon() = 0;
 
     protected:
-        void GenerateVoronoi(std::vector<VERTEXPTR> input, const std::shared_ptr<HDV::Delaunay::DelaunayTriangulation<VERTEXPTR, VERTEX>> &delaunay, bool assignIds = true, bool checkInput = false)
+        void generateVoronoi(std::vector<VERTEXPTR> input, const std::shared_ptr<HDV::Delaunay::DelaunayTriangulation<VERTEXPTR, VERTEX>> &delaunay, bool assignIds = true, bool checkInput = false)
         {
             clear();
 
-            delaunay->Generate(input, assignIds, checkInput);
+            delaunay->generate(input, assignIds, checkInput);
 
             // #pragma omp parallel for
             for (auto i = 0; i < delaunay->Vertices.size(); i++)
@@ -161,7 +167,7 @@ namespace HDV::Voronoi
 
             // KIRI_LOG_DEBUG("Regions size={0}", Regions.size());
 
-            Region2Polygon();
+            region2Polygon();
 
             delaunay->clear();
         }
@@ -171,23 +177,28 @@ namespace HDV::Voronoi
     class VoronoiMesh2D : public VoronoiMesh<VERTEXPTR, VERTEX>
     {
     public:
-        explicit VoronoiMesh2D() : VoronoiMesh<VERTEXPTR, VERTEX>(2) {}
-        virtual ~VoronoiMesh2D() {}
+        explicit VoronoiMesh2D() : VoronoiMesh<VERTEXPTR, VERTEX>(2)
+        {
+        }
+
+        virtual ~VoronoiMesh2D()
+        {
+        }
 
         std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> mBoundaryPolygon;
 
-        void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
+        void generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
         {
             auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation2>();
-            this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
+            this->generateVoronoi(input, delaunay, assignIds, checkInput);
         }
 
-        void SetBoundaryPolygon(const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
+        void setBoundaryPolygon(const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
         {
             mBoundaryPolygon = boundary;
         }
 
-        void Region2Polygon() override
+        void region2Polygon() override
         {
 
             // #pragma omp parallel for
@@ -207,7 +218,7 @@ namespace HDV::Voronoi
                 }
 
                 auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
-                hull->Generate(Positions);
+                hull->generate(Positions);
 
                 auto simplexs = hull->GetSortSimplexsList();
 
@@ -216,10 +227,10 @@ namespace HDV::Voronoi
                 for (auto j = 0; j < simplexs.size(); j++)
                 {
                     if (j == 0)
-                        cell_polygon->AddVert2(Vector2D(simplexs[j].x, simplexs[j].y));
+                        cell_polygon->add(Vector2D(simplexs[j].x, simplexs[j].y));
 
                     if (j != simplexs.size() - 1)
-                        cell_polygon->AddVert2(Vector2D(simplexs[j].z, simplexs[j].w));
+                        cell_polygon->add(Vector2D(simplexs[j].z, simplexs[j].w));
 
                     // KIRI_LOG_DEBUG("simplexs = ({0},{1})-({2},{3})", simplexs[j].x, simplexs[j].y, simplexs[j].z, simplexs[j].w);
                 }
@@ -259,7 +270,7 @@ namespace HDV::Voronoi
                                     for (size_t ppp = 0; ppp < results[pp].size(); ppp++)
                                     {
                                         auto polyn = results[pp][ppp];
-                                        clipedPolygon->AddVert2(Vector2D(polyn.x_, polyn.y_));
+                                        clipedPolygon->add(Vector2D(polyn.x_, polyn.y_));
                                     }
                                 }
 
@@ -300,8 +311,14 @@ namespace HDV::Voronoi
     class VoronoiMesh3D : public VoronoiMesh<VERTEXPTR, VERTEX>
     {
     public:
-        explicit VoronoiMesh3D() : VoronoiMesh<VERTEXPTR, VERTEX>(3) {}
-        virtual ~VoronoiMesh3D() {}
+        explicit VoronoiMesh3D()
+            : VoronoiMesh<VERTEXPTR, VERTEX>(3)
+        {
+        }
+
+        virtual ~VoronoiMesh3D()
+        {
+        }
 
         bool mNeedClipBoundary = true;
 
@@ -315,12 +332,12 @@ namespace HDV::Voronoi
         std::vector<csgjscpp::Polygon> mBoundaryPolygon;
         BoundingBox3D mBoundaryBBox;
 
-        void ExportVoronoiMeshObj(int idx)
+        void exportVoronoiMeshObj(int idx)
         {
-            TinyObjWriter(UInt2Str4Digit(idx), mAttrib, mTinyObjShapes, mTinyObjmaterials);
+            yinyObjWriter(UInt2Str4Digit(idx), mAttrib, mTinyObjShapes, mTinyObjmaterials);
         }
 
-        void TinyObjclear()
+        void tinyObjClear()
         {
             mIndexOffset = 0;
             mTinyObjShapes.clear();
@@ -328,7 +345,7 @@ namespace HDV::Voronoi
             mAttrib = tinyobj::attrib_t();
         }
 
-        void TinyObjAppend(
+        void tinyObjAppend(
             std::vector<Vector3D> positions,
             std::vector<Vector3D> normals,
             std::vector<int> indices)
@@ -389,28 +406,28 @@ namespace HDV::Voronoi
             mTinyObjShapes.emplace_back(tinyObjShape);
         }
 
-        void Generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
+        void generate(std::vector<VERTEXPTR> input, bool assignIds = true, bool checkInput = false) override
         {
             auto delaunay = std::make_shared<HDV::Delaunay::DelaunayTriangulation3>();
-            this->GenerateVoronoi(input, delaunay, assignIds, checkInput);
+            this->generateVoronoi(input, delaunay, assignIds, checkInput);
         }
 
-        void SetBoundaryPolygon(std::vector<csgjscpp::Polygon> boundary)
+        void setBoundaryPolygon(std::vector<csgjscpp::Polygon> boundary)
         {
             mBoundaryPolygon = boundary;
         }
 
-        void SetBoundaryBBox(BoundingBox3D bbox)
+        void setBoundaryBBox(BoundingBox3D bbox)
         {
             mBoundaryBBox = bbox;
         }
 
-        void Region2Polygon() override
+        void region2Polygon() override
         {
             auto counter = 0;
             // clear obj writer
-            TinyObjclear();
-            // KIRI_LOG_DEBUG("----------Region2Polygon------------------");
+            tinyObjClear();
+            // KIRI_LOG_DEBUG("----------region2Polygon------------------");
             for (auto i = 0; i < Regions.size(); i++)
             {
                 std::vector<VERTEXPTR> Positions;
@@ -427,7 +444,7 @@ namespace HDV::Voronoi
                 }
 
                 auto hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(Dimension);
-                hull->Generate(Positions);
+                hull->generate(Positions);
 
                 auto simplexs = hull->GetSimplexs();
                 auto polygon = std::make_shared<VoronoiPolygon3>();
@@ -451,7 +468,7 @@ namespace HDV::Voronoi
                     polygon->Indices.emplace_back(j * 3 + 1);
                     polygon->Indices.emplace_back(j * 3 + 2);
                 }
-                polygon->UpdateBBox();
+                polygon->updateBBox();
                 hull->clear();
 
                 auto site = std::dynamic_pointer_cast<VoronoiSite3>(region->site);
@@ -459,11 +476,11 @@ namespace HDV::Voronoi
                 if (!mNeedClipBoundary)
                 {
                     // KIRI_LOG_DEBUG("xid={0}; pos={1},{2},{3}", site->id(), site->x()(), site->y()(), site->z()());
-                    TinyObjAppend(polygon->Positions, polygon->Normals, polygon->Indices);
+                    tinyObjAppend(polygon->Positions, polygon->Normals, polygon->Indices);
                 }
                 else
                 {
-                    TinyObjclear();
+                    tinyObjClear();
                     //    KIRI_LOG_DEBUG("start clipped mesh idx={0}", i);
                     std::vector<csgjscpp::Polygon> voroPolygons;
                     for (size_t j = 0; j < polygon->Indices.size() / 3; j++)
@@ -532,7 +549,7 @@ namespace HDV::Voronoi
                     polygon->Positions = clippedPositions;
                     polygon->Normals = clippedNormals;
                     polygon->Indices = clippedIndices;
-                    polygon->UpdateBBox();
+                    polygon->updateBBox();
 
                     site->Polygon = polygon;
 
@@ -541,9 +558,9 @@ namespace HDV::Voronoi
                     //     if (mConstrainSites.find(site->id()) == mConstrainSites.end())
                     //         continue;
 
-                    TinyObjAppend(clippedPositions, clippedNormals, clippedIndices);
+                    tinyObjAppend(clippedPositions, clippedNormals, clippedIndices);
 
-                    ExportVoronoiMeshObj(counter++);
+                    exportVoronoiMeshObj(counter++);
                 }
             }
         }

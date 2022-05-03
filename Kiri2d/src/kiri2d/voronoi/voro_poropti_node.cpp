@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-05-25 02:06:00
  * @LastEditTime: 2021-06-10 21:50:08
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\voronoi\voro_poropti_node.cpp
  */
 
@@ -17,7 +17,7 @@ namespace KIRI
         InitChildSites();
 
         mCore->SetBoundaryPolygon2(mSite->GetCellPolygon());
-        mCore->Init();
+        mCore->init();
     }
 
     void KiriVoroPoroOptiNode::ComputeIterate()
@@ -26,9 +26,9 @@ namespace KIRI
         // InitChildSites();
         mCore->SetBoundaryPolygon2(mSite->GetCellPolygon());
 
-        mCore->Init();
+        mCore->init();
 
-        //mCore->ComputeDiagram();
+        // mCore->ComputeDiagram();
         mCore->ComputeLloyd(10);
     }
 
@@ -41,8 +41,8 @@ namespace KIRI
         auto childcnt = 5;
         for (size_t i = 0; i < childcnt; i++)
         {
-            auto cpos = mSite->GetCellPolygon()->GetRndInnerPoint();
-            mCore->AddSite(std::make_shared<KiriVoroSite>(cpos));
+            auto cpos = mSite->GetCellPolygon()->rndInnerPoint();
+            mCore->addSite(std::make_shared<KiriVoroSite>(cpos));
         }
     }
 

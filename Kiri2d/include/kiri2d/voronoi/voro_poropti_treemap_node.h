@@ -33,7 +33,7 @@ namespace KIRI
         void InitCore();
         const KiriVoroSitePtr &GetSite() const { return mSite; }
 
-        const Vector<KiriVoroSitePtr> &GetChildSites() const { return mCore->GetSites(); }
+        const Vector<KiriVoroSitePtr> &GetChildSites() const { return mCore->sites(); }
         const Vector<SharedPtr<KiriVoroPoroOptiTreeMapNode>> &GetChildNodes() const { return mChildNodes; }
 
         void SetSiteBoundary(const KiriVoroCellPolygon2Ptr &boundary)

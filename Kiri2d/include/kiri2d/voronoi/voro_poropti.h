@@ -44,16 +44,16 @@ namespace KIRI
             if (porosity != 0.f)
                 return porosity;
             else
-                return mRootCore->ComputeMiniumPorosity();
+                return mRootCore->computeMiniumPorosity();
         }
         Vector<Vector4F> GetCellSSkel() { return mRootCore->GetCellSSkel(); }
-        Vector<Vector4F> GetMICBySSkel() { return mRootCore->GetMICBySSkel(); }
+        Vector<Vector4F> computeMICBySSkel() { return mRootCore->computeMICBySSkel(); }
 
         Vector<KiriVoroSitePtr> GetLeafNodeSites()
         {
             Vector<KiriVoroSitePtr> sites;
-            for (size_t i = 0; i < mRootCore->GetSites().size(); i++)
-                sites.emplace_back(mRootCore->GetSites()[i]);
+            for (size_t i = 0; i < mRootCore->sites().size(); i++)
+                sites.emplace_back(mRootCore->sites()[i]);
 
             return sites;
         }
@@ -70,7 +70,7 @@ namespace KIRI
         Vector<Vector4F> GetVoronoiSitesData()
         {
             Vector<Vector4F> sites_data;
-            auto sites = mRootCore->GetSites();
+            auto sites = mRootCore->sites();
             for (size_t i = 0; i < sites.size(); i++)
                 sites_data.emplace_back(Vector4F(sites[i]->GetValue().x, sites[i]->GetValue().y, sites[i]->weight(), sites[i]->radius()));
 

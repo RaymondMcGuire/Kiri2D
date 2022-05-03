@@ -18,27 +18,94 @@ namespace HDV::Primitives
     class Vertex
     {
     public:
-        explicit Vertex() {}
-        explicit Vertex(int dimension) { mPosition.assign(dimension, 0.0); }
-        explicit Vertex(int dimension, int id) : Vertex(dimension) { mId = id; }
-        virtual ~Vertex() {}
+        explicit Vertex()
+        {
+        }
 
-        int id() const { return mId; }
-        int tag() const { return mTag; }
-        int dimension() const { return (mPosition.empty()) ? 0 : mPosition.size(); }
-        double weight() const { return mWeight; }
-        double radius() const { return mRadius; }
-        bool isBoundaryVertex() { return mIsBoundaryVertex; }
-        std::vector<double> &positions() { return mPosition; }
-        std::vector<std::shared_ptr<Vertex>> &neighbors() { return mNeighbors; }
+        explicit Vertex(int dimension)
+        {
+            mPosition.assign(dimension, 0.0);
+        }
 
-        void setId(int id) { mId = id; }
-        void setTag(int tag) { mTag = tag; }
-        void setWeight(double weight) { mWeight = weight; }
-        void setRadius(double radius) { mRadius = radius; }
-        void setAsBoundaryVertex() { mIsBoundaryVertex = true; }
+        explicit Vertex(int dimension, int id)
+            : Vertex(dimension)
+        {
+            mId = id;
+        }
 
-        double length() { return std::sqrt(lengthSquared()); }
+        virtual ~Vertex()
+        {
+        }
+
+        int id() const
+        {
+            return mId;
+        }
+
+        int tag() const
+        {
+            return mTag;
+        }
+
+        int dimension() const
+        {
+            return (mPosition.empty()) ? 0 : mPosition.size();
+        }
+
+        double weight() const
+        {
+            return mWeight;
+        }
+
+        double radius() const
+        {
+            return mRadius;
+        }
+
+        bool isBoundaryVertex()
+        {
+            return mIsBoundaryVertex;
+        }
+
+        std::vector<double> &positions()
+        {
+            return mPosition;
+        }
+
+        std::vector<std::shared_ptr<Vertex>> &neighbors()
+        {
+            return mNeighbors;
+        }
+
+        void setId(int id)
+        {
+            mId = id;
+        }
+
+        void setTag(int tag)
+        {
+            mTag = tag;
+        }
+
+        void setWeight(double weight)
+        {
+            mWeight = weight;
+        }
+
+        void setRadius(double radius)
+        {
+            mRadius = radius;
+        }
+
+        void setAsBoundaryVertex()
+        {
+            mIsBoundaryVertex = true;
+        }
+
+        double length()
+        {
+            return std::sqrt(lengthSquared());
+        }
 
         double lengthSquared()
         {

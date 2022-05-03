@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2021-12-29 14:58:41
+ * @LastEditTime: 2022-05-03 18:04:02
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -19,7 +19,10 @@ namespace HDV::Delaunay
     class DelaunayCell
     {
     public:
-        explicit DelaunayCell() {}
+        explicit DelaunayCell()
+        {
+        }
+
         explicit DelaunayCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex, std::vector<double> circumCenter, double radius)
         {
             mSimplex = simplex;
@@ -29,19 +32,18 @@ namespace HDV::Delaunay
 
             Radius = radius;
         }
-        virtual ~DelaunayCell() {}
+
+        virtual ~DelaunayCell()
+        {
+        }
 
         void clear()
         {
-            // CircumCenter = nullptr;
-            // mSimplex = nullptr;
         }
 
-        std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> mSimplex;
-
-        VERTEXPTR CircumCenter;
-
         double Radius;
+        VERTEXPTR CircumCenter;
+        std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> mSimplex;
     };
 
 } // namespace HDV::Delaunay

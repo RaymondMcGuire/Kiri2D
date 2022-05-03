@@ -57,9 +57,9 @@ namespace KIRI
         Vector<KiriVoroSitePtr> GetLeafNodeSites()
         {
             Vector<KiriVoroSitePtr> sites;
-            for (size_t i = 0; i < mRootCore->GetSites().size(); i++)
+            for (size_t i = 0; i < mRootCore->sites().size(); i++)
                 if (mNodes[i]->IsNoChildNode())
-                    sites.emplace_back(mRootCore->GetSites()[i]);
+                    sites.emplace_back(mRootCore->sites()[i]);
 
             MergeLeafNodeVoroSites(sites, mNodes);
             return sites;

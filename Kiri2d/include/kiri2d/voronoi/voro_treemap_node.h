@@ -32,7 +32,7 @@ namespace KIRI
         void InitCore();
         const KiriVoroSitePtr &GetSite() const { return mSite; }
 
-        const Vector<KiriVoroSitePtr> &GetChildSites() const { return mCore->GetSites(); }
+        const Vector<KiriVoroSitePtr> &GetChildSites() const { return mCore->sites(); }
         const Vector<SharedPtr<KiriVoroTreeMapNode>> &GetChildNodes() const { return mChildNodes; }
 
         bool IsNoChildNode() const { return (mChildNodes.empty() ? true : false); }

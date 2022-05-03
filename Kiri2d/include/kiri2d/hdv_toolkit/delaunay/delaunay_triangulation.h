@@ -1,11 +1,10 @@
 /***
  * @Author: Xu.WANG
- * @Date: 2021-12-22 20:20:35
- * @LastEditTime: 2021-12-23 16:20:54
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditTime: 2022-05-03 17:40:35
  * @LastEditors: Xu.WANG
  * @Description:
  */
-
 #ifndef _HDV_DELAUNAY_TRIANGULATION_H_
 #define _HDV_DELAUNAY_TRIANGULATION_H_
 
@@ -20,13 +19,19 @@ namespace HDV::Delaunay
     class DelaunayTriangulation
     {
     public:
-        explicit DelaunayTriangulation() {}
+        explicit DelaunayTriangulation()
+        {
+        }
+
         explicit DelaunayTriangulation(int dimension)
         {
             Dimension = dimension;
             Centroid = std::make_shared<VERTEX>();
         }
-        virtual ~DelaunayTriangulation() {}
+
+        virtual ~DelaunayTriangulation()
+        {
+        }
 
         int Dimension;
 
@@ -53,7 +58,7 @@ namespace HDV::Delaunay
                 Hull->clear();
         }
 
-        virtual void Generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) = 0;
+        virtual void generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) = 0;
     };
 
 } // namespace HDV::Delaunay

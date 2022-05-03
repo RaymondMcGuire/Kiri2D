@@ -1,4 +1,4 @@
-#include <kiri2d/poly/PolygonClipping.h>
+#include <polyclipper2d/PolygonClipping.h>
 #include <algorithm>
 #include <cassert>
 

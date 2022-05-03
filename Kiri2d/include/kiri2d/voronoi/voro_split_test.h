@@ -27,12 +27,12 @@ namespace KIRI
 
         ~KiriVoroSplit() {}
 
-        void AddSite(const KiriVoroGroupSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
+        void addSite(const KiriVoroGroupSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
         void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary) { mPowerDiagram->SetBoundaryPolygon2(boundary); }
 
-        void Init();
+        void init();
         void ComputeGroup();
-        Vector<Vector4F> GetMICBySSkel();
+        Vector<Vector4F> computeMICBySSkel();
         const Vector<KiriVoroSitePtr> &GetVoroSites() const { return mPowerDiagram->GetVoroSites(); }
 
     private:

@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-02 15:33:37
+ * @LastEditTime: 2022-05-03 18:05:22
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -19,8 +19,13 @@ namespace HDV::Voronoi
     class VoronoiRegion
     {
     public:
-        explicit VoronoiRegion() {}
-        virtual ~VoronoiRegion() {}
+        explicit VoronoiRegion()
+        {
+        }
+
+        virtual ~VoronoiRegion()
+        {
+        }
 
         void clear()
         {
@@ -40,7 +45,7 @@ namespace HDV::Voronoi
         std::vector<std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>>> Edges;
         VERTEXPTR site;
 
-        BoundingBox2F GetBBox()
+        BoundingBox2F bbox()
         {
             BoundingBox2F bbox;
             for (size_t i = 0; i < Edges.size(); i++)

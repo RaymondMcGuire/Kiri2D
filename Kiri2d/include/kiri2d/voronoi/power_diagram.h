@@ -39,7 +39,7 @@ namespace KIRI
         void AddPowerSite(const Vector3F &data) { mVoroSites.emplace_back(std::make_shared<KiriVoroSite>(data.x, data.y, data.z)); }
 
         void RemoveVoroSitesByIndex(UInt idx);
-        void RemoveVoroSitesByIndexArray(Vector<UInt> indexs);
+        void removeVoroSitesByIndexArray(Vector<UInt> indexs);
 
         void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
         const KiriVoroCellPolygon2Ptr &GetBoundaryPolygon2() const { return mBoundaryPolygon2; };
@@ -48,7 +48,7 @@ namespace KIRI
         bool ComputeDiagram();
 
         bool MoveVoroSites(Vector<Vector2F> movement);
-        bool Move2Centroid();
+        bool move2Centroid();
         bool Move2CentroidDisableSite();
         void LloydRelaxation();
         void LloydIterate();

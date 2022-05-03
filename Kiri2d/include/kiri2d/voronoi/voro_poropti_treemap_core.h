@@ -30,23 +30,23 @@ namespace KIRI
 
         float ComputeIterate();
 
-        void AddSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
+        void addSite(const KiriVoroSitePtr &site) { mPowerDiagram->AddVoroSite(site); }
         void SetBoundaryPolygon2(const KiriVoroCellPolygon2Ptr &boundary);
         void SetMaxIterationNum(UInt num) { mMaxIterationNum = num; }
         void SetErrorThreshold(float error) { mErrorThreshold = error; }
 
-        const Vector<KiriVoroSitePtr> &GetSites() const { return mPowerDiagram->GetVoroSites(); }
+        const Vector<KiriVoroSitePtr> &sites() const { return mPowerDiagram->GetVoroSites(); }
 
         constexpr UInt GetMaxIterationNum() const { return mMaxIterationNum; }
         constexpr float GetErrorThreshold() const { return mErrorThreshold; }
 
-        void Init();
+        void init();
 
         void reset();
 
         Vector3F ComputeMaxInscribedCircle() const { return mPowerDiagram->ComputeMaxInscribedCircle(); };
 
-        void RemoveVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->RemoveVoroSitesByIndexArray(indexs); }
+        void removeVoroSitesByIndexArray(Vector<UInt> indexs) { mPowerDiagram->removeVoroSitesByIndexArray(indexs); }
 
     private:
         void ReComputePercentage();
@@ -54,14 +54,14 @@ namespace KIRI
         void ComputeVoroSiteWeightError();
         void ComputeBoundaryPolygonArea();
 
-        float GetGlobalAvgDistance();
-        float GetGlobalAreaError();
+        float globalAvgDistance();
+        float globalAreaError();
         float Iterate();
 
         void CorrectVoroSitePos();
         void CorrectWeights();
-        void AdaptPositionsWeights();
-        void AdaptWeights();
+        void adaptPositionsWeights();
+        void adaptWeights();
 
         KiriPowerDiagramPtr mPowerDiagram;
 
