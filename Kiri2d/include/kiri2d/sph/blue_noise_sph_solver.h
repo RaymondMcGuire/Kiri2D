@@ -97,6 +97,7 @@ namespace KIRI2D::SPH
         {
 
             findNeighborhoods();
+            computeAvgOverlap();
             calculateDensity();
             calculateNormals();
             calculatePressure();
@@ -266,6 +267,50 @@ namespace KIRI2D::SPH
             }
 
             // std::cout << "pressure force=" << particles[1000].force.x << "," << particles[1000].force.y << std::endl;
+        }
+
+        void computeAvgOverlap()
+        {
+            const int nbparticles = particles.size();
+
+            auto avgOverlap = 0.f;
+            auto totalCnt = 0;
+
+            for (int i = 0; i < numberParticles; i++)
+            {
+
+                auto overlapi = 0.f;
+                auto cnt = 0;
+
+                std::vector<int> neighbors = neighborhoods[i];
+                auto xi = particles[i].position;
+                for (int n = 0; n < neighbors.size(); n++)
+                {
+                    int j = neighbors[n];
+                    Vector2F x = xi - particles[j].position;
+
+                    const float datar = x.length();
+                    const float rij = kernelRadius / 2.f;
+
+                    if (rij > datar)
+                    {
+                        cnt++;
+                        overlapi += rij - datar;
+                    }
+                }
+
+                if (cnt != 0)
+                {
+                    overlapi /= (cnt * kernelRadius / 4.f);
+                    avgOverlap += overlapi;
+                    totalCnt++;
+                }
+            }
+
+            if (nbparticles != 0)
+                avgOverlap /= totalCnt;
+
+            std::cout << "Average Overlapping= " << avgOverlap << std::endl;
         }
 
         void calculateCohesion()

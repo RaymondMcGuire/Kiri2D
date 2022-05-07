@@ -491,7 +491,7 @@ void BlueNoiseSamplingVisual()
     // sdf sampling points
     std::vector<Vector2F> sdf_points;
     auto radius = 1.f / 140.f;
-    auto density_radius = 1.f * radius;
+    auto density_radius = 0.9f * radius;
     auto lower = boundary_bbox.LowestPoint;
     auto higher = boundary_bbox.HighestPoint;
     auto wn = UInt(((higher - lower) / (density_radius * 2.f)).x);
@@ -668,8 +668,8 @@ void main()
     // Sph2dExample();
 
     // BlueNoiseSampling();
-    // BlueNoiseSamplingVisual();
+    BlueNoiseSamplingVisual();
 
-    MSSampler2D();
-    //   ExportParticleRadiusDist();
+    // MSSampler2D();
+    //    ExportParticleRadiusDist();
 }
