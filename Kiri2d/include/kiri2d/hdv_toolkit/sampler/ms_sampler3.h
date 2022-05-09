@@ -80,12 +80,12 @@ namespace HDV::Sampler
                 if (siteI->isBoundaryVertex())
                     continue;
 
-                if (siteI->Polygon)
+                if (siteI->polygon())
                 {
-                    auto cen = siteI->Polygon->centroid();
+                    auto cen = siteI->polygon()->centroid();
                     if (mCudaSDF->checkPointsInside(make_float3(cen.x, cen.y, cen.z)))
                     {
-                        auto radius = siteI->Polygon->computeMinDisInPoly(cen);
+                        auto radius = siteI->polygon()->computeMinDisInPoly(cen);
                         data.emplace_back(Vector4D(cen.x, cen.y, cen.z, radius));
                     }
                     else
@@ -115,7 +115,7 @@ namespace HDV::Sampler
 
                 if (mCudaSDF->checkPointsInside(make_float3(siteI->X(), siteI->Y(), siteI->Z())))
                 {
-                    if (!siteI->Polygon)
+                    if (!siteI->polygon())
                     {
                         remove.emplace_back(siteI->id());
                         auto points = mCudaSDF->GetInsidePoints(1);
@@ -124,7 +124,7 @@ namespace HDV::Sampler
                     }
                     else
                     {
-                        auto centroid = siteI->Polygon->centroid();
+                        auto centroid = siteI->polygon()->centroid();
                         if (!mCudaSDF->checkPointsInside(make_float3(centroid.x, centroid.y, centroid.z)))
                         {
                             remove.emplace_back(siteI->id());
@@ -197,7 +197,7 @@ namespace HDV::Sampler
                 auto n = siteI->neighbors().size();
                 if (n > 0)
                 {
-                    auto currentArea = (!siteI->Polygon) ? 0.0 : siteI->Polygon->volume();
+                    auto currentArea = (!siteI->polygon()) ? 0.0 : siteI->polygon()->volume();
                     auto targetArea = 4.0 / 3.0 * kiri_math_mini::pi<double>() * std::pow(siteI->radius(), 3.0);
                     error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.0);
                     // KIRI_LOG_DEBUG("currentArea={0};targetArea={1},error={2}", currentArea, targetArea, error);
@@ -335,7 +335,7 @@ namespace HDV::Sampler
                 auto n = siteI->neighbors().size();
                 if (n > 0)
                 {
-                    auto currentArea = (!siteI->Polygon) ? 0.0 : siteI->Polygon->volume();
+                    auto currentArea = (!siteI->polygon()) ? 0.0 : siteI->polygon()->volume();
                     auto targetArea = 4.0 / 3.0 * kiri_math_mini::pi<double>() * std::pow(siteI->radius(), 3.0);
 
                     auto pArea = 2.0;

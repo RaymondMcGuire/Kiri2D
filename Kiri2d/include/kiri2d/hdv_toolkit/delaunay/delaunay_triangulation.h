@@ -1,10 +1,11 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-03 17:40:35
+ * @LastEditTime: 2022-05-09 11:46:43
  * @LastEditors: Xu.WANG
  * @Description:
  */
+
 #ifndef _HDV_DELAUNAY_TRIANGULATION_H_
 #define _HDV_DELAUNAY_TRIANGULATION_H_
 
@@ -25,40 +26,66 @@ namespace HDV::Delaunay
 
         explicit DelaunayTriangulation(int dimension)
         {
-            Dimension = dimension;
-            Centroid = std::make_shared<VERTEX>();
+            mDimension = dimension;
+            mCentroid = std::make_shared<VERTEX>();
         }
 
         virtual ~DelaunayTriangulation()
         {
         }
 
-        int Dimension;
-
-        std::vector<VERTEXPTR> Vertices;
-
-        std::vector<std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
-
-        VERTEXPTR Centroid;
-
-        std::shared_ptr<HDV::Hull::ConvexHull<VERTEXPTR>> Hull;
-
-        virtual void clear()
+        constexpr int dimension() const
         {
-            for (auto i = 0; i < Cells.size(); i++)
-            {
-                Cells[i]->clear();
-            }
+            return mDimension;
+        }
 
-            Cells.clear();
-            Vertices.clear();
-            Centroid = std::make_shared<VERTEX>();
+        VERTEXPTR &centroid()
+        {
+            return mCentroid;
+        }
 
-            if (Hull != nullptr)
-                Hull->clear();
+        std::vector<VERTEXPTR> &vertices()
+        {
+            return mVertices;
+        }
+
+        std::vector<std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>>> &cells()
+        {
+            return mCells;
+        }
+
+        std::shared_ptr<HDV::Hull::ConvexHull<VERTEXPTR>> &hull()
+        {
+            return mHull;
         }
 
         virtual void generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) = 0;
+
+        virtual void clear()
+        {
+            for (auto i = 0; i < mCells.size(); i++)
+            {
+                mCells[i]->clear();
+            }
+
+            mCells.clear();
+            mVertices.clear();
+            mCentroid = std::make_shared<VERTEX>();
+
+            if (mHull != nullptr)
+                mHull->clear();
+        }
+
+    protected:
+        int mDimension;
+
+        std::vector<VERTEXPTR> mVertices;
+
+        std::vector<std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>>> mCells;
+
+        VERTEXPTR mCentroid;
+
+        std::shared_ptr<HDV::Hull::ConvexHull<VERTEXPTR>> mHull;
     };
 
 } // namespace HDV::Delaunay

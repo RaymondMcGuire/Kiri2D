@@ -37,8 +37,8 @@ namespace HDV::Delaunay
         void generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
         {
 
-            this->clear();
-            auto dim = this->Dimension;
+            clear();
+            auto dim = mDimension;
 
             if (input.size() <= dim + 1)
                 return;
@@ -54,9 +54,9 @@ namespace HDV::Delaunay
                 input[i]->positions() = v;
             }
 
-            Hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
-            Hull->enablePowerDiagram(true);
-            Hull->generate(input, assignIds, checkInput);
+            mHull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
+            mHull->enablePowerDiagram(true);
+            mHull->generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)
             {
@@ -65,17 +65,17 @@ namespace HDV::Delaunay
                 input[i]->positions() = v;
             }
 
-            this->Vertices = Hull->GetVertices();
+            mVertices = mHull->GetVertices();
 
-            this->Centroid->positions()[0] = Hull->centroid()[0];
-            this->Centroid->positions()[1] = Hull->centroid()[1];
+            mCentroid->positions()[0] = mHull->centroid()[0];
+            mCentroid->positions()[1] = mHull->centroid()[1];
 
-            count = Hull->GetSimplexs().size();
+            count = mHull->GetSimplexs().size();
 
             for (auto i = 0; i < count; i++)
             {
 
-                auto simplex = Hull->GetSimplexs()[i];
+                auto simplex = mHull->GetSimplexs()[i];
 
                 if (simplex->normals()[dim] >= 0.0f)
                 {
@@ -91,7 +91,7 @@ namespace HDV::Delaunay
                 {
                     auto cell = createCell(simplex);
                     // cell.CircumCenter.Id = i;
-                    this->Cells.emplace_back(cell);
+                    mCells.emplace_back(cell);
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace HDV::Delaunay
     private:
         std::vector<std::vector<double>> mMatrixBuffer;
 
-        double determinant()
+        constexpr double determinant() const
         {
             auto fCofactor00 = mMatrixBuffer[1][1] * mMatrixBuffer[2][2] - mMatrixBuffer[1][2] * mMatrixBuffer[2][1];
             auto fCofactor10 = mMatrixBuffer[1][2] * mMatrixBuffer[2][0] - mMatrixBuffer[1][0] * mMatrixBuffer[2][2];

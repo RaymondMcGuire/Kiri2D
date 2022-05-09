@@ -79,8 +79,8 @@ namespace HDV::Sampler
             mPowerDiagram->compute();
 
             auto area = 0.0;
-            if (site->CellPolygon)
-                area = site->CellPolygon->area();
+            if (site->cellPolygon())
+                area = site->cellPolygon()->area();
 
             return area - kiri_math_mini::pi<double>() * site->capacity * site->capacity;
         }
@@ -140,7 +140,7 @@ namespace HDV::Sampler
                 if (siteI->isBoundaryVertex())
                     continue;
 
-                auto poly = siteI->CellPolygon;
+                auto poly = siteI->cellPolygon();
                 if (poly)
                 {
 

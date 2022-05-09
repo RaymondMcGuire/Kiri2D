@@ -2710,7 +2710,7 @@ void QuickHullDelaunayTriangulation2d()
 
     for (size_t i = 0; i < res2.size(); i++)
     {
-        auto simplex = res2[i]->mSimplex;
+        auto simplex = res2[i]->simplex();
         auto line1 = KiriLine2(Vector2F(simplex->vertices()[0]->X(), simplex->vertices()[0]->Y()) + offset, Vector2F(simplex->vertices()[1]->X(), simplex->vertices()[1]->Y()) + offset);
         auto line2 = KiriLine2(Vector2F(simplex->vertices()[0]->X(), simplex->vertices()[0]->Y()) + offset, Vector2F(simplex->vertices()[2]->X(), simplex->vertices()[2]->Y()) + offset);
         auto line3 = KiriLine2(Vector2F(simplex->vertices()[1]->X(), simplex->vertices()[1]->Y()) + offset, Vector2F(simplex->vertices()[2]->X(), simplex->vertices()[2]->Y()) + offset);
@@ -2809,7 +2809,7 @@ void QuickHullVoronoi2d()
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->CellPolygon;
+            auto cellpolygon = site->cellPolygon();
             for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
             {
                 auto vert = cellpolygon->Positions[j];
@@ -2915,7 +2915,7 @@ void BalzerIEEE2009Example()
 
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
 
-            auto cellpolygon = site->CellPolygon;
+            auto cellpolygon = site->cellPolygon();
             if (cellpolygon)
             {
                 for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
@@ -3094,7 +3094,7 @@ void MSSampler2D()
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->CellPolygon;
+            auto cellpolygon = site->cellPolygon();
             if (cellpolygon)
             {
                 for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
@@ -3171,10 +3171,10 @@ static void ExportVoroFile(
     const std::vector<int> &indices,
     const String fileName)
 {
-    String exportPath = String(EXPORT_PATH) + "voro/" + fileName + ".voro";
+    String export_path = String(EXPORT_PATH) + "voro/" + fileName + ".voro";
 
     std::fstream file;
-    file.open(exportPath.c_str(), std::ios_base::out);
+    file.open(export_path.c_str(), std::ios_base::out);
 
     file << position.size() << "  " << normal.size() << "  " << indices.size() << std::endl;
 
@@ -3195,7 +3195,7 @@ static void ExportVoroFile(
 #include <partio/Partio.h>
 void ExportBgeoFileFromCPU(String Folder, String FileName, std::vector<Vector4D> data)
 {
-    String exportPath = String(EXPORT_PATH) + "bgeo/" + Folder + "/" + FileName + ".bgeo";
+    String export_path = String(EXPORT_PATH) + "bgeo/" + Folder + "/" + FileName + ".bgeo";
 
     Partio::ParticlesDataMutable *p = Partio::create();
     Partio::ParticleAttribute positionAttr = p->addAttribute("position", Partio::VECTOR, 3);
@@ -3212,7 +3212,7 @@ void ExportBgeoFileFromCPU(String Folder, String FileName, std::vector<Vector4D>
 
         *pscale = data[i].w;
     }
-    Partio::write(exportPath.c_str(), *p);
+    Partio::write(export_path.c_str(), *p);
 
     p->release();
 }

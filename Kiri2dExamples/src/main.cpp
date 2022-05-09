@@ -73,7 +73,7 @@ void QuickHullVoronoi2d()
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->CellPolygon;
+            auto cellpolygon = site->cellPolygon();
             for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
             {
                 auto vert = cellpolygon->Positions[j];
@@ -266,7 +266,7 @@ void MSSampler2D()
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->CellPolygon;
+            auto cellpolygon = site->cellPolygon();
             if (cellpolygon)
             {
                 for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
@@ -491,7 +491,7 @@ void BlueNoiseSamplingVisual()
     // sdf sampling points
     std::vector<Vector2F> sdf_points;
     auto radius = 1.f / 140.f;
-    auto density_radius = 0.9f * radius;
+    auto density_radius = 0.95f * radius;
     auto lower = boundary_bbox.LowestPoint;
     auto higher = boundary_bbox.HighestPoint;
     auto wn = UInt(((higher - lower) / (density_radius * 2.f)).x);
@@ -534,12 +534,14 @@ void BlueNoiseSamplingVisual()
 
     // draw boundary
     auto boundaryRect = KiriRect2(offset - Vector2F(radius) * 2.f * scaleSize, (worldSize + 4.f * Vector2F(radius)) * scaleSize);
-
+    auto cnt = 0;
     while (1)
     {
 
         std::vector<KiriPoint2> points;
         blueNoiseSolver.update(timeStep);
+        std::cout << cnt++ << std::endl;
+
         auto particles = blueNoiseSolver.GetParticles();
         for (auto i = 0; i < particles.size(); i++)
         {
@@ -668,8 +670,8 @@ void main()
     // Sph2dExample();
 
     // BlueNoiseSampling();
-    BlueNoiseSamplingVisual();
+    // BlueNoiseSamplingVisual();
 
-    // MSSampler2D();
+    MSSampler2D();
     //    ExportParticleRadiusDist();
 }

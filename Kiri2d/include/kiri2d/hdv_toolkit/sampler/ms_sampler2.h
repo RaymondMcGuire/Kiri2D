@@ -83,11 +83,11 @@ namespace HDV::Sampler
                 if (siteI->isBoundaryVertex())
                     continue;
 
-                if (!siteI->CellPolygon)
+                if (!siteI->cellPolygon())
                     remove.emplace_back(siteI->id());
                 else
                 {
-                    auto centroid = siteI->CellPolygon->centroid();
+                    auto centroid = siteI->cellPolygon()->centroid();
                     if (!mPowerDiagram->GetBoundary()->contains(centroid))
                         remove.emplace_back(siteI->id());
                 }
@@ -168,7 +168,7 @@ namespace HDV::Sampler
                 auto n = siteI->neighbors().size();
                 if (n > 2)
                 {
-                    auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->area();
+                    auto currentArea = (!siteI->cellPolygon()) ? 0.0 : siteI->cellPolygon()->area();
                     auto targetArea = n * siteI->radius() * siteI->radius() * std::tan(kiri_math_mini::pi<double>() / n);
                     // auto targetArea = siteI->radius() * siteI->radius() * kiri_math_mini::pi<double>();
                     error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.0);
@@ -245,7 +245,7 @@ namespace HDV::Sampler
                 if (siteI->isBoundaryVertex())
                     continue;
 
-                auto poly = siteI->CellPolygon;
+                auto poly = siteI->cellPolygon();
                 if (poly)
                 {
 
@@ -297,7 +297,7 @@ namespace HDV::Sampler
                 if (siteI->isBoundaryVertex())
                     continue;
 
-                auto poly = siteI->CellPolygon;
+                auto poly = siteI->cellPolygon();
                 if (poly)
                 {
 
@@ -311,7 +311,7 @@ namespace HDV::Sampler
                         if (siteJ->isBoundaryVertex())
                             continue;
 
-                        auto polyJ = siteJ->CellPolygon;
+                        auto polyJ = siteJ->cellPolygon();
                         if (polyJ)
                         {
 
@@ -498,7 +498,7 @@ namespace HDV::Sampler
                 auto n = siteI->neighbors().size();
                 if (n > 2)
                 {
-                    auto currentArea = (!siteI->CellPolygon) ? 0.0 : siteI->CellPolygon->area();
+                    auto currentArea = (!siteI->cellPolygon()) ? 0.0 : siteI->cellPolygon()->area();
                     auto targetArea = n * siteI->radius() * siteI->radius() * std::tan(kiri_math_mini::pi<double>() / n);
                     // auto targetArea = kiri_math_mini::pi<double>() * siteI->radius() * siteI->radius();
 

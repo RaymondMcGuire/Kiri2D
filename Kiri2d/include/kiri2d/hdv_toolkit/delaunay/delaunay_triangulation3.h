@@ -34,9 +34,9 @@ namespace HDV::Delaunay
 
         void generate(const std::vector<VERTEXPTR> &input, bool assignIds = true, bool checkInput = false) override
         {
-            this->clear();
+            clear();
 
-            auto dim = this->Dimension;
+            auto dim = mDimension;
             if (input.size() <= dim + 1)
                 return;
 
@@ -50,9 +50,9 @@ namespace HDV::Delaunay
                 input[i]->positions() = v;
             }
 
-            Hull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
-            Hull->enablePowerDiagram(true);
-            Hull->generate(input, assignIds, checkInput);
+            mHull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
+            mHull->enablePowerDiagram(true);
+            mHull->generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)
             {
@@ -61,19 +61,19 @@ namespace HDV::Delaunay
                 input[i]->positions() = v;
             }
 
-            this->Vertices = Hull->GetVertices();
-            KIRI_LOG_DEBUG("Hull->GetVertices size={0}; input size={1}", this->Vertices.size(), count);
+            mVertices = mHull->GetVertices();
+            KIRI_LOG_DEBUG("Hull->GetVertices size={0}; input size={1}", mVertices.size(), count);
 
-            this->Centroid->positions()[0] = Hull->centroid()[0];
-            this->Centroid->positions()[1] = Hull->centroid()[1];
-            this->Centroid->positions()[2] = Hull->centroid()[2];
+            mCentroid->positions()[0] = mHull->centroid()[0];
+            mCentroid->positions()[1] = mHull->centroid()[1];
+            mCentroid->positions()[2] = mHull->centroid()[2];
 
-            count = Hull->GetSimplexs().size();
+            count = mHull->GetSimplexs().size();
 
             for (auto i = 0; i < count; i++)
             {
 
-                auto simplex = Hull->GetSimplexs()[i];
+                auto simplex = mHull->GetSimplexs()[i];
 
                 if (simplex->normals()[dim] >= 0.0f)
                 {
@@ -89,7 +89,7 @@ namespace HDV::Delaunay
                 {
                     auto cell = createCell(simplex);
                     // cell.CircumCenter.Id = i;
-                    this->Cells.emplace_back(cell);
+                    mCells.emplace_back(cell);
                 }
             }
         }
@@ -97,19 +97,19 @@ namespace HDV::Delaunay
     private:
         std::vector<std::vector<double>> mMatrixBuffer;
 
-        double MINOR(int r0, int r1, int r2, int c0, int c1, int c2)
+        constexpr double minor(int r0, int r1, int r2, int c0, int c1, int c2) const
         {
             return mMatrixBuffer[r0][c0] * (mMatrixBuffer[r1][c1] * mMatrixBuffer[r2][c2] - mMatrixBuffer[r2][c1] * mMatrixBuffer[r1][c2]) -
                    mMatrixBuffer[r0][c1] * (mMatrixBuffer[r1][c0] * mMatrixBuffer[r2][c2] - mMatrixBuffer[r2][c0] * mMatrixBuffer[r1][c2]) +
                    mMatrixBuffer[r0][c2] * (mMatrixBuffer[r1][c0] * mMatrixBuffer[r2][c1] - mMatrixBuffer[r2][c0] * mMatrixBuffer[r1][c1]);
         }
 
-        double determinant()
+        constexpr double determinant() const
         {
-            return (mMatrixBuffer[0][0] * MINOR(1, 2, 3, 1, 2, 3) -
-                    mMatrixBuffer[0][1] * MINOR(1, 2, 3, 0, 2, 3) +
-                    mMatrixBuffer[0][2] * MINOR(1, 2, 3, 0, 1, 3) -
-                    mMatrixBuffer[0][3] * MINOR(1, 2, 3, 0, 1, 2));
+            return (mMatrixBuffer[0][0] * minor(1, 2, 3, 1, 2, 3) -
+                    mMatrixBuffer[0][1] * minor(1, 2, 3, 0, 2, 3) +
+                    mMatrixBuffer[0][2] * minor(1, 2, 3, 0, 1, 3) -
+                    mMatrixBuffer[0][3] * minor(1, 2, 3, 0, 1, 2));
         }
 
         std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>> createCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex)

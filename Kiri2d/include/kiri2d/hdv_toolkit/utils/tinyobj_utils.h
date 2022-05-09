@@ -16,12 +16,12 @@
 
 namespace HDV::Voronoi
 {
-    bool WriteMat(const std::string &filename, const std::vector<tinyobj::material_t> &materials)
+    bool WriteMat(const std::string &fileName, const std::vector<tinyobj::material_t> &materials)
     {
-        FILE *fp = fopen(filename.c_str(), "w");
+        FILE *fp = fopen(fileName.c_str(), "w");
         if (!fp)
         {
-            fprintf(stderr, "Failed to open file [ %s ] for write.\n", filename.c_str());
+            fprintf(stderr, "Failed to open file [ %s ] for write.\n", fileName.c_str());
             return false;
         }
 
@@ -48,25 +48,25 @@ namespace HDV::Voronoi
         return true;
     }
 
-    bool yinyObjWriter(const String &filename, const tinyobj::attrib_t &attributes, const std::vector<tinyobj::shape_t> &shapes, const std::vector<tinyobj::material_t> &materials, bool coordTransform = false)
+    bool tinyObjWriter(const String &fileName, const tinyobj::attrib_t &attributes, const std::vector<tinyobj::shape_t> &shapes, const std::vector<tinyobj::material_t> &materials, bool coordTransform = false)
     {
-        String exportPath = String(EXPORT_PATH) + "voro/" + filename + ".obj";
+        String export_path = String(EXPORT_PATH) + "voro/" + fileName + ".obj";
 
-        FILE *fp = fopen(exportPath.c_str(), "w");
+        FILE *fp = fopen(export_path.c_str(), "w");
         if (!fp)
         {
-            fprintf(stderr, "Failed to open file [ %s ] for write.\n", exportPath.c_str());
+            fprintf(stderr, "Failed to open file [ %s ] for write.\n", export_path.c_str());
             return false;
         }
 
-        std::string basename = filename;
-        std::string material_filename = basename + ".mtl";
+        std::string base_name = fileName;
+        std::string material_filename = base_name + ".mtl";
 
         int prev_material_id = -1;
 
         fprintf(fp, "mtllib %s\n\n", material_filename.c_str());
 
-        // facevarying vtx
+        // vertices
         for (size_t k = 0; k < attributes.vertices.size(); k += 3)
         {
             if (coordTransform)
@@ -87,7 +87,7 @@ namespace HDV::Voronoi
 
         fprintf(fp, "\n");
 
-        // facevarying normal
+        // normal
         for (size_t k = 0; k < attributes.normals.size(); k += 3)
         {
             if (coordTransform)
@@ -108,7 +108,7 @@ namespace HDV::Voronoi
 
         fprintf(fp, "\n");
 
-        // facevarying texcoord
+        // texcoord
         for (size_t k = 0; k < attributes.texcoords.size(); k += 2)
         {
             fprintf(fp, "vt %f %f\n",

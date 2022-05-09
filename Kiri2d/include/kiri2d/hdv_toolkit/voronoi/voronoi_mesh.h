@@ -65,32 +65,32 @@ namespace HDV::Voronoi
             delaunay->generate(input, assignIds, checkInput);
 
             // #pragma omp parallel for
-            for (auto i = 0; i < delaunay->Vertices.size(); i++)
+            for (auto i = 0; i < delaunay->vertices().size(); i++)
             {
-                delaunay->Vertices[i]->setTag(i);
-                // KIRI_LOG_DEBUG("delaunay->Vertices id={0}, Vertices={1},{2},{3}", delaunay->Vertices[i]->id(), delaunay->Vertices[i]->positions()[0], delaunay->Vertices[i]->positions()[1], delaunay->Vertices[i]->positions()[2]);
+                delaunay->vertices()[i]->setTag(i);
+                // KIRI_LOG_DEBUG("delaunay->vertices() id={0}, Vertices={1},{2},{3}", delaunay->vertices()[i]->id(), delaunay->vertices()[i]->positions()[0], delaunay->vertices()[i]->positions()[1], delaunay->vertices()[i]->positions()[2]);
             }
 
-            for (auto i = 0; i < delaunay->Cells.size(); i++)
+            for (auto i = 0; i < delaunay->cells().size(); i++)
             {
-                delaunay->Cells[i]->CircumCenter->setId(i);
-                delaunay->Cells[i]->mSimplex->setTag(i);
-                Cells.emplace_back(delaunay->Cells[i]);
+                delaunay->cells()[i]->circumCenter()->setId(i);
+                delaunay->cells()[i]->simplex()->setTag(i);
+                Cells.emplace_back(delaunay->cells()[i]);
             }
 
             std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> cells;
             std::map<int, std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> neighbourCell;
             // KIRI_LOG_DEBUG("------region generate-------");
-            for (auto i = 0; i < delaunay->Vertices.size(); i++)
+            for (auto i = 0; i < delaunay->vertices().size(); i++)
             {
                 cells.clear();
 
-                auto vertex = delaunay->Vertices[i];
+                auto vertex = delaunay->vertices()[i];
                 vertex->neighbors().clear();
 
-                for (auto j = 0; j < delaunay->Cells.size(); j++)
+                for (auto j = 0; j < delaunay->cells().size(); j++)
                 {
-                    auto simplex = delaunay->Cells[j]->mSimplex;
+                    auto simplex = delaunay->cells()[j]->simplex();
 
                     for (auto k = 0; k < simplex->vertices().size(); k++)
                     {
@@ -98,7 +98,7 @@ namespace HDV::Voronoi
                         if (simplex->vertices()[k]->tag() == vertex->tag())
                         {
 
-                            cells.emplace_back(delaunay->Cells[j]);
+                            cells.emplace_back(delaunay->cells()[j]);
                             break;
                         }
                     }
@@ -113,7 +113,7 @@ namespace HDV::Voronoi
                     std::unordered_set<int> neighborsId;
                     for (auto j = 0; j < cells.size(); j++)
                     {
-                        auto simplex = cells[j]->mSimplex;
+                        auto simplex = cells[j]->simplex();
                         for (auto k = 0; k < simplex->vertices().size(); k++)
                         {
                             if (simplex->vertices()[k]->id() != vertex->id() && !simplex->vertices()[k]->isBoundaryVertex())
@@ -133,12 +133,12 @@ namespace HDV::Voronoi
 
                     for (auto j = 0; j < cells.size(); j++)
                     {
-                        neighbourCell.insert(std::pair<int, std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>>(cells[j]->CircumCenter->id(), cells[j]));
+                        neighbourCell.insert(std::pair<int, std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>>(cells[j]->circumCenter()->id(), cells[j]));
                     }
 
                     for (auto j = 0; j < cells.size(); j++)
                     {
-                        auto simplex = cells[j]->mSimplex;
+                        auto simplex = cells[j]->simplex();
 
                         for (auto k = 0; k < simplex->adjacents().size(); k++)
                         {
@@ -156,7 +156,7 @@ namespace HDV::Voronoi
                     }
 
                     region->Id = Regions.size();
-                    region->site = delaunay->Vertices[i];
+                    region->site = delaunay->vertices()[i];
 
                     // auto site = std::dynamic_pointer_cast<VoronoiSite3>(region->site);
                     // KIRI_LOG_DEBUG("id={0}; pos={1},{2},{3}; region id={4}", site->id(), site->x()(), site->y()(), site->z()(), region->Id);
@@ -213,7 +213,7 @@ namespace HDV::Voronoi
 
                 for (auto j = 0; j < region->Cells.size(); j++)
                 {
-                    auto vert = region->Cells[j]->CircumCenter;
+                    auto vert = region->Cells[j]->circumCenter();
                     Positions.emplace_back(std::make_shared<Primitives::Vertex2>(vert->x(), vert->y(), count++));
                 }
 
@@ -297,7 +297,7 @@ namespace HDV::Voronoi
                 }
 
                 auto site = std::dynamic_pointer_cast<VoronoiSite2>(Regions[i]->site);
-                site->CellPolygon = cell_polygon;
+                site->cellPolygon() = cell_polygon;
 
                 hull->clear();
 
@@ -334,7 +334,7 @@ namespace HDV::Voronoi
 
         void exportVoronoiMeshObj(int idx)
         {
-            yinyObjWriter(UInt2Str4Digit(idx), mAttrib, mTinyObjShapes, mTinyObjmaterials);
+            tinyObjWriter(UInt2Str4Digit(idx), mAttrib, mTinyObjShapes, mTinyObjmaterials);
         }
 
         void tinyObjClear()
@@ -439,7 +439,7 @@ namespace HDV::Voronoi
 
                 for (auto j = 0; j < region->Cells.size(); j++)
                 {
-                    auto vert = region->Cells[j]->CircumCenter;
+                    auto vert = region->Cells[j]->circumCenter();
                     Positions.emplace_back(std::make_shared<Primitives::Vertex3>(vert->x(), vert->y(), vert->z(), count++));
                 }
 
@@ -551,7 +551,7 @@ namespace HDV::Voronoi
                     polygon->Indices = clippedIndices;
                     polygon->updateBBox();
 
-                    site->Polygon = polygon;
+                    site->polygon() = polygon;
 
                     // clip condition
                     // if (!mConstrainSites.empty())

@@ -18,7 +18,8 @@
 
 namespace HDV::Voronoi
 {
-    class VoronoiSite2 : public HDV::Primitives::Vertex2
+    class VoronoiSite2
+        : public HDV::Primitives::Vertex2
     {
     public:
         explicit VoronoiSite2()
@@ -45,7 +46,13 @@ namespace HDV::Voronoi
         {
         }
 
-        std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> CellPolygon;
+        std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &cellPolygon()
+        {
+            return mCellPolygon;
+        }
+
+    private:
+        std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> mCellPolygon;
     };
     typedef std::shared_ptr<VoronoiSite2> VoronoiSite2Ptr;
 
@@ -53,7 +60,9 @@ namespace HDV::Voronoi
     {
     public:
         explicit CapacityVoronoiSite2()
-            : VoronoiSite2() {}
+            : VoronoiSite2()
+        {
+        }
 
         explicit CapacityVoronoiSite2(int id)
             : VoronoiSite2(id)
@@ -74,7 +83,13 @@ namespace HDV::Voronoi
         {
         }
 
-        double capacity = 0.0;
+        constexpr double capacity() const
+        {
+            return mCapacity;
+        }
+
+    private:
+        double mCapacity = 0.0;
     };
     typedef std::shared_ptr<CapacityVoronoiSite2> CapacityVoronoiSite2Ptr;
 
@@ -105,7 +120,13 @@ namespace HDV::Voronoi
         {
         }
 
-        std::shared_ptr<VoronoiPolygon3> Polygon;
+        std::shared_ptr<VoronoiPolygon3> &polygon()
+        {
+            return mPolygon;
+        }
+
+    private:
+        std::shared_ptr<VoronoiPolygon3> mPolygon;
     };
     typedef std::shared_ptr<VoronoiSite3> VoronoiSite3Ptr;
 } // namespace HDV::Voronoi

@@ -97,9 +97,9 @@ namespace HDV::Voronoi
 
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
 
-                if (site->CellPolygon)
+                if (site->cellPolygon())
                 {
-                    auto centroid = site->CellPolygon->centroid();
+                    auto centroid = site->cellPolygon()->centroid();
                     if (mMesh->mBoundaryPolygon->contains(centroid))
                         site->set(centroid.x, centroid.y);
                 }
@@ -130,7 +130,7 @@ namespace HDV::Voronoi
 
                 auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(mSites[i]);
                 site->reset();
-                site->CellPolygon = nullptr;
+                site->cellPolygon() = nullptr;
             }
         }
     };
@@ -266,7 +266,7 @@ namespace HDV::Voronoi
                 if (site->isBoundaryVertex())
                     continue;
 
-                auto centroid = site->Polygon->centroid();
+                auto centroid = site->polygon()->centroid();
                 site->set(centroid.x, centroid.y, centroid.z);
             }
         }

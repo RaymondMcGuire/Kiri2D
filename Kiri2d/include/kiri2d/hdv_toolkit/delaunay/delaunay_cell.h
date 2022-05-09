@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-03 18:04:02
+ * @LastEditTime: 2022-05-09 11:39:05
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -27,22 +27,38 @@ namespace HDV::Delaunay
         {
             mSimplex = simplex;
 
-            CircumCenter = std::make_shared<VERTEX>();
-            CircumCenter->positions() = circumCenter;
+            mCircumCenter = std::make_shared<VERTEX>();
+            mCircumCenter->positions() = circumCenter;
 
-            Radius = radius;
+            mRadius = radius;
         }
 
         virtual ~DelaunayCell()
         {
         }
 
+        constexpr double radius() const
+        {
+            return mRadius;
+        }
+
+        VERTEXPTR &circumCenter()
+        {
+            return mCircumCenter;
+        }
+
+        std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex()
+        {
+            return mSimplex;
+        }
+
         void clear()
         {
         }
 
-        double Radius;
-        VERTEXPTR CircumCenter;
+    private:
+        double mRadius;
+        VERTEXPTR mCircumCenter;
         std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> mSimplex;
     };
 
