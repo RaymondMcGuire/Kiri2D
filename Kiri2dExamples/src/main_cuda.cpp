@@ -2809,7 +2809,7 @@ void QuickHullVoronoi2d()
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->cellPolygon();
+            auto cellpolygon = site->polygon();
             for (size_t j = 0; j < cellpolygon->positions().size(); j++)
             {
                 auto vert = cellpolygon->positions()[j];
@@ -2915,7 +2915,7 @@ void BalzerIEEE2009Example()
 
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
 
-            auto cellpolygon = site->cellPolygon();
+            auto cellpolygon = site->polygon();
             if (cellpolygon)
             {
                 for (size_t j = 0; j < cellpolygon->positions().size(); j++)
@@ -3094,7 +3094,7 @@ void MSSampler2D()
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->cellPolygon();
+            auto cellpolygon = site->polygon();
             if (cellpolygon)
             {
                 for (size_t j = 0; j < cellpolygon->positions().size(); j++)

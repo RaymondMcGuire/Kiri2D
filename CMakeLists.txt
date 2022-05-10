@@ -6,9 +6,9 @@ message(STATUS "ENABLE_CUDA: ${ENABLE_CUDA}")
 
 # Project Name
 if(WIN32 AND ${ENABLE_CUDA})
-project(kiri2d LANGUAGES C CXX CUDA)
+project(KIRI LANGUAGES C CXX CUDA)
 else()
-project(kiri2d LANGUAGES C CXX)
+project(KIRI LANGUAGES C CXX)
 if(APPLE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -66,9 +66,14 @@ endif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 # Compile Type
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
-# Sub Projects
-add_subdirectory(Kiri2d)
-add_subdirectory(Kiri2dExamples)
+# Kiri2d
+add_subdirectory(core)
+
+# Examples
+add_subdirectory(demos/voronoi2d_scene1)
+add_subdirectory(demos/voronoi2d_scene2)
+add_subdirectory(demos/lloyd2d_scene1)
+add_subdirectory(demos/lloyd2d_scene2)
 
 if(NOT APPLE AND ${ENABLE_CUDA})
 add_subdirectory(kiri2dPBSCuda)
