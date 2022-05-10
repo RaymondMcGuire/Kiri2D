@@ -5,8 +5,8 @@ set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
 message(STATUS "Kiri2dExample ENABLE_CUDA: ${ENABLE_CUDA}")
 
 # Find Extra Library Package
-set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/KiriExtlib/include)
-set(EXTLIBS_LIB ${CMAKE_SOURCE_DIR}/KiriExtlib/lib)
+set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/external/KiriExtlib/include)
+set(EXTLIBS_LIB ${CMAKE_SOURCE_DIR}/external/KiriExtlib/lib)
 link_directories(${EXTLIBS_LIB})
 
 # Find PBS2D Library Package
@@ -86,4 +86,4 @@ set_target_properties(
 )
 
 #Copy DLLs
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/KiriExtlib/dlls" $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/external/KiriExtlib/dlls" $<TARGET_FILE_DIR:${PROJECT_NAME}>)

@@ -15,13 +15,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 endif()
 # KIRI Math Library
-set(KIRI_MATH_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/KiriMathMini/include)
+set(KIRI_MATH_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/external/KiriMathMini/include)
 
 # # KIRI PBS CUDA Library
 # set(KIRI_PBS_CUDA_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/KiriPBSCuda/include)
 
 # Extra Library
-set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/KiriExtlib/include)
+set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/external/KiriExtlib/include)
 set(CONFIGURATION_INCLUDE ${CMAKE_BINARY_DIR}/configuration)
 
 # KIRI 2d Library
