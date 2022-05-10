@@ -133,13 +133,13 @@ namespace KIRI
             return;
 
         auto num = mVoroSites.size();
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_int_distribution<> dist(0, num - 1);
 
         for (size_t i = 0; i < num; i++)
         {
-            auto rndIdx = dist(rndEngine);
+            auto rndIdx = dist(engine);
             auto tmp = mVoroSites[rndIdx];
             mVoroSites[rndIdx] = mVoroSites[i];
             mVoroSites[i] = tmp;
@@ -211,10 +211,10 @@ namespace KIRI
                     mVoroSites[i]->ResetValue(mBoundaryPolygon2->rndInnerPoint());
                 else
                 {
-                    std::random_device seedGen;
-                    std::default_random_engine rndEngine(seedGen());
+                    std::random_device seed;
+                    std::default_random_engine engine(seed());
                     std::uniform_real_distribution<float> dist(0.f, 0.1f);
-                    mVoroSites[i]->ResetValue(Vector2F(pos.x, pos.y) + Vector2F(dist(rndEngine), dist(rndEngine)));
+                    mVoroSites[i]->ResetValue(Vector2F(pos.x, pos.y) + Vector2F(dist(engine), dist(engine)));
 
                     // KIRI_LOG_INFO("ReGenVoroSites::pos={0},{1},{2}", pos.x, pos.y, pos.z);
                 }
@@ -261,7 +261,7 @@ namespace KIRI
 
     bool KiriPowerDiagram::Move2CentroidDisableSite()
     {
-        Vector<UInt> removeVoroIdxs;
+        Vector<UInt> remove_voro_idxs;
         bool outside = false;
         // move sites to centroid
         for (size_t j = 0; j < mVoroSites.size(); j++)
@@ -282,15 +282,15 @@ namespace KIRI
                     // KIRI_LOG_DEBUG("centroid is placed outside of polygon boundaries!! = {0},{1}", cen.x, cen.y);
                     mVoroSites[j]->SetCellPolygon(NULL);
                     mVoroSites[j]->Disable();
-                    removeVoroIdxs.emplace_back(mVoroSites[j]->GetIdx());
+                    remove_voro_idxs.emplace_back(mVoroSites[j]->GetIdx());
                 }
             }
 
             // KIRI_LOG_DEBUG("voro site idx={0}, value=({1},{2},{3})", mVoroSites[j]->GetIdx(), mVoroSites[j]->GetValue().x, mVoroSites[j]->GetValue().y, mVoroSites[j]->GetValue().z);
         }
 
-        if (!removeVoroIdxs.empty())
-            removeVoroSitesByIndexArray(removeVoroIdxs);
+        if (!remove_voro_idxs.empty())
+            removeVoroSitesByIndexArray(remove_voro_idxs);
 
         return outside;
     }

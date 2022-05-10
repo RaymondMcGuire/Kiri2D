@@ -34,8 +34,8 @@ namespace KIRI
         if (!bEnable)
             return;
 
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_real_distribution<> dist(-1.f, 1.f);
 
         float offset = 2.f * particleRadius;
@@ -45,7 +45,7 @@ namespace KIRI
             {
                 float2 p = make_float2(lowest.x + i * offset, lowest.y + j * offset);
 
-                data.pos.emplace_back(p + jitter * normalize(make_float2(dist(rndEngine), dist(rndEngine))));
+                data.pos.emplace_back(p + jitter * normalize(make_float2(dist(engine), dist(engine))));
                 // data.pos.emplace_back(p);
                 data.col.emplace_back(color);
                 data.mass.emplace_back(mass);
@@ -63,15 +63,15 @@ namespace KIRI
         if (!bEnable)
             return;
 
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_real_distribution<> dist(-1.f, 1.f);
 
         data.minRadius = Huge<size_t>();
         for (size_t i = 0; i < shape.size(); i++)
         {
             float radius = shape[i].z;
-            auto jitter = 1e-6f * normalize(make_float2(dist(rndEngine), dist(rndEngine)));
+            auto jitter = 1e-6f * normalize(make_float2(dist(engine), dist(engine)));
             data.pos.emplace_back(make_float2(shape[i].x, shape[i].y) + offset + jitter);
             data.col.emplace_back(color);
             data.radius.emplace_back(radius);
@@ -90,8 +90,8 @@ namespace KIRI
         if (!bEnable)
             return;
 
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_real_distribution<> dist(-1.f, 1.f);
 
         data.minRadius = Huge<float>();

@@ -19,17 +19,17 @@ namespace KIRI
 
     void KiriVoroTreeMapNocaj12::GenExample(float width, float height)
     {
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_real_distribution<float> dist(0.f, 1.f);
 
         auto cnt = 0, maxcnt = 10;
         while (cnt < maxcnt)
         {
-            auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+            auto sitePos2 = Vector2F(dist(engine) * width, dist(engine) * height);
             if (mRootBoundary->contains(sitePos2))
             {
-                auto node = std::make_shared<KiriVoroTreeMapNode>(cnt, 1, sitePos2, dist(rndEngine));
+                auto node = std::make_shared<KiriVoroTreeMapNode>(cnt, 1, sitePos2, dist(engine));
                 mNodes.emplace_back(node);
                 cnt++;
             }

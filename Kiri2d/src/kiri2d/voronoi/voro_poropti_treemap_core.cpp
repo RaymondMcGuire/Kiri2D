@@ -127,40 +127,40 @@ namespace KIRI
         {
             auto total = 0.f;
             auto cnt = 0;
-            auto siteI = voroSite[i];
+            auto site_i = voroSite[i];
 
-            if (!siteI->GetNeighborSites().empty())
+            if (!site_i->GetNeighborSites().empty())
             {
 
-                auto radiusI = siteI->radius();
-                for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
+                auto radius_i = site_i->radius();
+                for (size_t j = 0; j < site_i->GetNeighborSites().size(); j++)
                 {
-                    auto siteJ = siteI->GetNeighborSites()[j];
-                    total += siteJ->weight() - siteJ->radius() * siteJ->radius();
+                    auto site_j = site_i->GetNeighborSites()[j];
+                    total += site_j->weight() - site_j->radius() * site_j->radius();
                     cnt++;
                 }
 
                 auto avg = total / cnt;
 
-                for (size_t j = 0; j < siteI->GetNeighborSites().size(); j++)
+                for (size_t j = 0; j < site_i->GetNeighborSites().size(); j++)
                 {
-                    auto siteJ = siteI->GetNeighborSites()[j];
+                    auto site_j = site_i->GetNeighborSites()[j];
 
-                    auto distance = siteI->GetDistance2(siteJ);
-                    auto minW = std::abs(std::sqrt(siteJ->weight()) - std::sqrt(siteI->weight()));
-                    auto maxW = std::sqrt(siteJ->weight()) + std::sqrt(siteI->weight());
+                    auto distance = site_i->GetDistance2(site_j);
+                    auto minW = std::abs(std::sqrt(site_j->weight()) - std::sqrt(site_i->weight()));
+                    auto maxW = std::sqrt(site_j->weight()) + std::sqrt(site_i->weight());
                     if (distance < maxW && distance > minW)
                     {
-                        auto sum = siteJ->weight() - siteJ->radius() * siteJ->radius();
+                        auto sum = site_j->weight() - site_j->radius() * site_j->radius();
                         mVoroSitesWeightError[i] += avg - sum;
                         mVoroSitesWeightAbsError[i] += std::abs(avg - sum);
                         mCurGlobalWeightError += std::abs(avg - sum);
                     }
                     else
                     {
-                        mVoroSitesWeightError[i] += distance * distance - siteI->weight();
-                        mVoroSitesWeightAbsError[i] += std::abs(distance * distance - siteI->weight());
-                        mCurGlobalWeightError += std::abs(distance * distance - siteI->weight());
+                        mVoroSitesWeightError[i] += distance * distance - site_i->weight();
+                        mVoroSitesWeightAbsError[i] += std::abs(distance * distance - site_i->weight());
+                        mCurGlobalWeightError += std::abs(distance * distance - site_i->weight());
                     }
                 }
             }
@@ -171,48 +171,48 @@ namespace KIRI
     {
         ComputeVoroSiteWeightError();
 
-        auto gAreaError = globalAreaError();
-        // auto gAvgDistance = globalAvgDistance();
+        auto g_area_error = globalAreaError();
+        // auto g_avg_distance = globalAvgDistance();
 
-        auto gammaArea = 1000.f;
-        auto gammaBC = 1.f;
+        auto gamma_area = 1000.f;
+        auto gamma_bc = 1.f;
 
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (size_t i = 0; i < voroSite.size(); i++)
         {
             auto weight = voroSite[i]->weight();
 
-            auto areaWeight = 0.f;
-            auto bcWeight = 0.f;
+            auto weight_area = 0.f;
+            auto weight_bc = 0.f;
 
             // auto n = voroSite[i]->GetNeighborSites().size();
             // if (n > 2)
             //{
-            auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
-            auto targetArea = mCompleteArea * voroSite[i]->GetPercentage();
+            auto current_area = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+            auto target_area = mCompleteArea * voroSite[i]->GetPercentage();
 
-            auto pArea = 2.f;
-            if (currentArea != 0.f)
-                pArea = targetArea / currentArea;
+            auto area_percentage = 2.f;
+            if (current_area != 0.f)
+                area_percentage = target_area / current_area;
 
-            auto areaErrorTransform = (-(gAreaError - 1.f) * (gAreaError - 1.f) + 1.f);
-            auto areaStep = areaErrorTransform * gammaArea;
-            if (pArea < (1.f - std::numeric_limits<float>::epsilon()) && weight > 0.f)
-                areaWeight -= areaStep;
-            else if (pArea > (1.f + std::numeric_limits<float>::epsilon()))
-                areaWeight += areaStep;
+            auto area_error_transform = (-(g_area_error - 1.f) * (g_area_error - 1.f) + 1.f);
+            auto area_step = area_error_transform * gamma_area;
+            if (area_percentage < (1.f - std::numeric_limits<float>::epsilon()) && weight > 0.f)
+                weight_area -= area_step;
+            else if (area_percentage > (1.f + std::numeric_limits<float>::epsilon()))
+                weight_area += area_step;
             //}
 
             // auto error = mVoroSitesWeightAbsError[i] / (mCurGlobalWeightError + std::numeric_limits<float>::epsilon());
-            // auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
+            // auto error_transform = (-(error - 1.f) * (error - 1.f) + 1.f);
 
-            // auto step = errorTransform * gammaBC;
+            // auto step = error_transform * gamma_bc;
             // if (mVoroSitesWeightError[i] < 0.f)
-            //     bcWeight -= step;
+            //     weight_bc -= step;
             // else if (mVoroSitesWeightError[i] > 0.f)
-            //     bcWeight += step;
+            //     weight_bc += step;
 
-            voroSite[i]->setWeight(weight + areaWeight + bcWeight);
+            voroSite[i]->setWeight(weight + weight_area + weight_bc);
         }
 
         // KIRI_LOG_DEBUG("adaptWeights: mCurGlobalWeightError={0}", mCurGlobalWeightError);
@@ -231,9 +231,9 @@ namespace KIRI
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (size_t i = 0; i < voroSite.size(); i++)
         {
-            auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
-            auto targetArea = mCompleteArea * voroSite[i]->GetPercentage();
-            error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.f);
+            auto current_area = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+            auto target_area = mCompleteArea * voroSite[i]->GetPercentage();
+            error += std::abs(target_area - current_area) / (mCompleteArea * 2.f);
         }
         return error;
     }

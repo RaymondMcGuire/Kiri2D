@@ -22,8 +22,8 @@ void QuickHullVoronoi2d()
 
     auto pd2 = std::make_shared<Voronoi::PowerDiagram2D>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
     auto scale_size = 200.0;
@@ -31,14 +31,14 @@ void QuickHullVoronoi2d()
 
     for (auto i = 0; i < sampler_num; i++)
     {
-        auto x = dist(rndEngine) * scale_size;
-        auto y = dist(rndEngine) * scale_size;
+        auto x = dist(engine) * scale_size;
+        auto y = dist(engine) * scale_size;
 
         pd2->addSite(std::make_shared<Voronoi::VoronoiSite2>(x, y, i));
     }
 
     // clip boundary
-    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
+    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon2>();
     BoundaryPolygon->add(Vector2D(-scale_size, -scale_size));
     BoundaryPolygon->add(Vector2D(-scale_size, scale_size));
     BoundaryPolygon->add(Vector2D(scale_size, scale_size));
@@ -74,10 +74,10 @@ void QuickHullVoronoi2d()
                 continue;
 
             auto cellpolygon = site->cellPolygon();
-            for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+            for (size_t j = 0; j < cellpolygon->positions().size(); j++)
             {
-                auto vert = cellpolygon->Positions[j];
-                auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
+                auto vert = cellpolygon->positions()[j];
+                auto vert1 = cellpolygon->positions()[(j + 1) % (cellpolygon->positions().size())];
                 auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
                 line.thick = 1.f;
                 precompute_lines.emplace_back(line);
@@ -155,12 +155,12 @@ void MSSampler2D()
     auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
-    auto multiSizeSampler = std::make_shared<Sampler::MultiSizeSampler2D>();
+    auto multiSizeSampler = std::make_shared<Sampler::MultiSizedSampler2D>();
 
     auto scale_size = 1000.0;
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine dengine(seed());
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
     std::uniform_real_distribution<double> rdist(-1.0, 1.0);
 
@@ -203,7 +203,7 @@ void MSSampler2D()
     }
 
     // clip boundary : box
-    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
+    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon2>();
     // BoundaryPolygon->add(Vector2D(-scale_size, -scale_size));
     // BoundaryPolygon->add(Vector2D(-scale_size, scale_size));
     // BoundaryPolygon->add(Vector2D(scale_size, scale_size));
@@ -269,10 +269,10 @@ void MSSampler2D()
             auto cellpolygon = site->cellPolygon();
             if (cellpolygon)
             {
-                for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+                for (size_t j = 0; j < cellpolygon->positions().size(); j++)
                 {
-                    auto vert = cellpolygon->Positions[j];
-                    auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
+                    auto vert = cellpolygon->positions()[j];
+                    auto vert1 = cellpolygon->positions()[(j + 1) % (cellpolygon->positions().size())];
                     auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
                     line.thick = 1.f;
                     precompute_lines.emplace_back(line);
@@ -281,7 +281,7 @@ void MSSampler2D()
                 }
             }
 
-            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->Positions.size());
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->positions().size());
             precompute_points.emplace_back(Vector2F(site->x(), site->y()));
 
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
@@ -346,11 +346,6 @@ void MSSampler2D()
 void ExportParticleRadiusDist()
 {
     using namespace HDV;
-
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
-    std::uniform_real_distribution<double> dist(-1.0, 1.0);
-    std::uniform_real_distribution<double> rdist(-1.0, 1.0);
 
     std::vector<double> radiusRange;
     radiusRange.push_back(10.0);
@@ -673,5 +668,5 @@ void main()
     // BlueNoiseSamplingVisual();
 
     MSSampler2D();
-    //    ExportParticleRadiusDist();
+    //     ExportParticleRadiusDist();
 }

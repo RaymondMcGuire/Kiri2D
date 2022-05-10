@@ -28,7 +28,7 @@ namespace KIRI
     {
         auto sites = this->GetVoroSites();
 
-        Vector<UInt> removeVoroIdxs;
+        Vector<UInt> remove_voro_idxs;
         for (size_t i = 0; i < sites.size(); i++)
         {
             auto poly = sites[i]->GetCellPolygon();
@@ -61,8 +61,8 @@ namespace KIRI
     void KiriVoroSplit::ComputeGroup()
     {
 
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_real_distribution<float> dist(0.f, 1.f);
 
         auto voroSite = mPowerDiagram->GetVoroSites();
@@ -77,20 +77,20 @@ namespace KIRI
             if (neighbors.empty())
                 continue;
 
-            auto group_col = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
+            auto group_col = Vector3F(dist(engine), dist(engine), dist(engine));
             vi->SetGroupId(mGroupCounter);
             vi->SetGroupColor(group_col);
 
             auto mic = computeMICBySSkel();
-            auto micI = mic[i];
+            auto mic_i = mic[i];
             auto tmp_num = 0;
             for (size_t j = 0; j < neighbors.size(); j++)
             {
 
                 auto micJ = mic[neighbors[j]->GetIdx()];
                 // judge
-                auto disIJ = (Vector2F(micI.x, micI.y) - Vector2F(micJ.x, micJ.y)).length();
-                if (disIJ == (micI.z + micJ.z))
+                auto dist_ij = (Vector2F(mic_i.x, mic_i.y) - Vector2F(micJ.x, micJ.y)).length();
+                if (dist_ij == (mic_i.z + micJ.z))
                 {
                     auto nj = std::dynamic_pointer_cast<KiriVoroGroupSite>(neighbors[j]);
                     nj->SetGroupId(mGroupCounter);

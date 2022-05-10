@@ -84,7 +84,7 @@ namespace KIRI
         UInt mMaxiumNum = 1000;
         UInt mCurIteration, mMaxIterationNum;
 
-        bool bReachMaxuimNum = false;
+        bool bReachMaximumNum = false;
         float mLastMP = 1.f;
     };
 

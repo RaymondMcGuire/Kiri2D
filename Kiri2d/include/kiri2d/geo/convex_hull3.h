@@ -43,7 +43,7 @@ namespace KIRI
 
         const Vector<KiriFace3Ptr> &GetFacets() const { return mCurFacets; }
         const Vector<KiriEdge3Ptr> &GetEdges() const { return mEdges; }
-        const Vector<KiriVertex3Ptr> &GetVertices() const { return mVertices; }
+        const Vector<KiriVertex3Ptr> &vertices() const { return mVertices; }
         const Vector<KiriEdge3Ptr> &GetHorizonEdges() const { return mHorizonEdges; }
 
         const KiriEdge3Ptr &GetEdgeById(UInt id) const { return mEdges[id]; }

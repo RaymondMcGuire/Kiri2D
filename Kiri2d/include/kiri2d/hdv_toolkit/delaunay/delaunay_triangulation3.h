@@ -61,19 +61,19 @@ namespace HDV::Delaunay
                 input[i]->positions() = v;
             }
 
-            mVertices = mHull->GetVertices();
-            KIRI_LOG_DEBUG("Hull->GetVertices size={0}; input size={1}", mVertices.size(), count);
+            mVertices = mHull->vertices();
+            KIRI_LOG_DEBUG("Hull->vertices size={0}; input size={1}", mVertices.size(), count);
 
             mCentroid->positions()[0] = mHull->centroid()[0];
             mCentroid->positions()[1] = mHull->centroid()[1];
             mCentroid->positions()[2] = mHull->centroid()[2];
 
-            count = mHull->GetSimplexs().size();
+            count = mHull->simplexs().size();
 
             for (auto i = 0; i < count; i++)
             {
 
-                auto simplex = mHull->GetSimplexs()[i];
+                auto simplex = mHull->simplexs()[i];
 
                 if (simplex->normals()[dim] >= 0.0f)
                 {
@@ -111,11 +111,13 @@ namespace HDV::Delaunay
                     mMatrixBuffer[0][2] * minor(1, 2, 3, 0, 1, 3) -
                     mMatrixBuffer[0][3] * minor(1, 2, 3, 0, 1, 2));
         }
-
+        /**
+         * @reference MathWorld: http://mathworld.wolfram.com/Circumsphere.html
+         * @param  {std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>>} simplex :
+         * @return {std::shared_ptr<DelaunayCell<VERTEXPTR,}                      :
+         */
         std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>> createCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex)
         {
-            // From MathWorld: http://mathworld.wolfram.com/Circumsphere.html
-
             auto verts = simplex->vertices();
 
             // x, y, z, 1
@@ -159,13 +161,13 @@ namespace HDV::Delaunay
             auto s = 1.0 / (2.0 * a);
             auto radius = std::abs(s) * std::sqrtf(dx * dx + dy * dy + dz * dz - 4 * a * c);
 
-            std::vector<double> circumCenter;
-            circumCenter.assign(3, 0.0);
-            circumCenter[0] = s * dx;
-            circumCenter[1] = s * dy;
-            circumCenter[2] = s * dz;
+            std::vector<double> circum_center;
+            circum_center.assign(3, 0.0);
+            circum_center[0] = s * dx;
+            circum_center[1] = s * dy;
+            circum_center[2] = s * dz;
 
-            return std::make_shared<DelaunayCell<VERTEXPTR, VERTEX>>(simplex, circumCenter, radius);
+            return std::make_shared<DelaunayCell<VERTEXPTR, VERTEX>>(simplex, circum_center, radius);
         }
     };
 

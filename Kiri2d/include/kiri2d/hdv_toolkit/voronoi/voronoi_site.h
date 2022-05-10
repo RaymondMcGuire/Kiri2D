@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <kiri2d/hdv_toolkit/voronoi/voronoi_cell_polygon.h>
+#include <kiri2d/hdv_toolkit/voronoi/voronoi_polygon.h>
 #include <kiri2d/hdv_toolkit/primitives/vertex2.h>
 #include <kiri2d/hdv_toolkit/primitives/vertex3.h>
 
@@ -46,13 +46,13 @@ namespace HDV::Voronoi
         {
         }
 
-        std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &cellPolygon()
+        std::shared_ptr<Voronoi::VoronoiPolygon2> &cellPolygon()
         {
             return mCellPolygon;
         }
 
     private:
-        std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> mCellPolygon;
+        std::shared_ptr<Voronoi::VoronoiPolygon2> mCellPolygon;
     };
     typedef std::shared_ptr<VoronoiSite2> VoronoiSite2Ptr;
 

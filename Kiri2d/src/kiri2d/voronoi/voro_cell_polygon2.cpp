@@ -116,9 +116,9 @@ namespace KIRI
                 bool bRemoveContain = false;
                 for (size_t j = i + 1; j < mic.size(); j++)
                 {
-                    auto disIJ = (Vector2F(mic[i].x, mic[i].y) - Vector2F(mic[j].x, mic[j].y)).length();
+                    auto dist_ij = (Vector2F(mic[i].x, mic[i].y) - Vector2F(mic[j].x, mic[j].y)).length();
 
-                    if ((mic[j].z > (mic[i].z + disIJ)) || (mic[i] == mic[j]))
+                    if ((mic[j].z > (mic[i].z + dist_ij)) || (mic[i] == mic[j]))
                     {
                         bRemoveContain = true;
                         break;
@@ -204,12 +204,12 @@ namespace KIRI
         }
 
         Vector2F inner;
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_real_distribution<> dist(0.f, 1.f);
         do
         {
-            inner = mBBox2.LowestPoint + Vector2F(dist(rndEngine) * mBBox2.width(), dist(rndEngine) * mBBox2.height());
+            inner = mBBox2.LowestPoint + Vector2F(dist(engine) * mBBox2.width(), dist(engine) * mBBox2.height());
         } while (!contains(inner));
 
         return inner;

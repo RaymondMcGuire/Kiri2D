@@ -351,20 +351,20 @@ void VoronoiExample()
 
     auto pd = std::make_shared<KiriPowerDiagram>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     auto cnt = 0, maxcnt = 100;
     while (cnt < maxcnt)
     {
-        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        auto sitePos2 = Vector2F(dist(engine) * width, dist(engine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
             if (sitePos2.x < width / 2.f)
                 pd->AddPowerSite(sitePos2, 0.f);
             else
-                pd->AddPowerSite(sitePos2, dist(rndEngine) * 10000.f);
+                pd->AddPowerSite(sitePos2, dist(engine) * 10000.f);
             cnt++;
         }
     }
@@ -465,14 +465,14 @@ void VoronoiExample1()
 
     auto pd = std::make_shared<KiriPowerDiagram>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     // auto cnt = 0, maxcnt = 100;
     // while (cnt < maxcnt)
     // {
-    //     auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+    //     auto sitePos2 = Vector2F(dist(engine) * width, dist(engine) * height);
     //     if (boundary.FindRegion(sitePos2) < 0.f)
     //     {
     //         pd->AddPowerSite(sitePos2, 0.f);
@@ -611,14 +611,14 @@ void VoronoiExample2()
 
     auto pd = std::make_shared<KiriPowerDiagram>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     auto cnt = 0, maxcnt = 50;
     while (cnt < maxcnt)
     {
-        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        auto sitePos2 = Vector2F(dist(engine) * width, dist(engine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
             pd->AddVoroSite(sitePos2);
@@ -684,7 +684,7 @@ void VoronoiExample2()
             {
                 auto micPos = Transform2Original(Vector2F(amic[ic].x, amic[ic].y), height) + offsetVec2;
 
-                circles.emplace_back(KiriCircle2(micPos, Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine)), amic[ic].z, false));
+                circles.emplace_back(KiriCircle2(micPos, Vector3F(dist(engine), dist(engine), dist(engine)), amic[ic].z, false));
             }
 
             auto skeletons = poly->GetSkeletons();
@@ -784,14 +784,14 @@ void LloydRelaxationExample()
 
     auto pd = std::make_shared<KiriPowerDiagram>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     auto cnt = 0, maxcnt = 100;
     while (cnt < maxcnt)
     {
-        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        auto sitePos2 = Vector2F(dist(engine) * width, dist(engine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
             auto radius = 10.f;
@@ -981,7 +981,7 @@ void NOCAJ12Example1()
     // std::mt19937 gen(engine());
     // std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
-    // std::default_random_engine rndEngine(engine());
+    // std::default_random_engine engine(engine());
     // std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     // std::vector<TreemapNode> nodes;
@@ -1010,7 +1010,7 @@ void NOCAJ12Example1()
 
     // for (size_t i = 0; i < depth0nodes.size(); i++)
     // {
-    //     auto site = std::make_shared<KiriVoroSite>(dist(rndEngine) * width, dist(rndEngine) * height);
+    //     auto site = std::make_shared<KiriVoroSite>(dist(engine) * width, dist(engine) * height);
     //     site->SetPercentage(depth0nodes[i].weight / child0weight);
     //     nocaj12->AddSite(site);
     // }
@@ -1107,8 +1107,8 @@ void VoroTestExample()
 
     auto voroPorOptiCore = std::make_shared<KiriVoroPoroOptiCore>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
     // std::uniform_real_distribution<float> rdist(-1.f, 1.f);
 
@@ -1132,10 +1132,10 @@ void VoroTestExample()
     auto cnt = 0, maxcnt = 10;
     while (cnt < maxcnt)
     {
-        auto sitePos2 = Vector2F(dist(rndEngine) * width, dist(rndEngine) * height);
+        auto sitePos2 = Vector2F(dist(engine) * width, dist(engine) * height);
         if (boundary.FindRegion(sitePos2) < 0.f)
         {
-            // auto radius = avgRadius / 2.f * rdist(rndEngine) + avgRadius;
+            // auto radius = avgRadius / 2.f * rdist(engine) + avgRadius;
             // KIRI_LOG_DEBUG("idx={0}, radius={1}", cnt, radius);
             auto radius = pcdis(gen);
             auto site = std::make_shared<KiriVoroSite>(sitePos2);
@@ -1908,8 +1908,8 @@ void LoadVoronoiExample()
     Vector<KiriCircle2> circles;
     Vector<NSDataStruct> ns_data;
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     auto sites = spliter->GetVoroSites();
@@ -1948,7 +1948,7 @@ void LoadVoronoiExample()
             // auto mic = poly->ComputeMICByStraightSkeleton();
 
             auto mic = poly->ComputeMICByStraightSkeletonTest();
-            auto gcolor = Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine));
+            auto gcolor = Vector3F(dist(engine), dist(engine), dist(engine));
             // KIRI_LOG_DEBUG("g size={0}", mic.size());
 
             NSDataStruct ns;
@@ -2240,8 +2240,8 @@ void VoronoiNSOptimize()
     auto voro_data = LoadCSVFile2VoronoiSites("bunny_sites_3821.csv");
     auto ns_opti = std::make_shared<KiriVoroNSOptimize>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     auto avg_radius = 0.f;
@@ -2256,7 +2256,7 @@ void VoronoiNSOptimize()
         // auto group_site = std::make_shared<KiriVoroGroupSite>(voro_data[i]);
         auto group_site = std::make_shared<KiriVoroGroupSite>(Vector4F(voro_data[i].x, voro_data[i].y, voro_data[i].z, avg_radius));
         group_site->SetGroupId(i);
-        group_site->SetGroupColor(Vector3F(dist(rndEngine), dist(rndEngine), dist(rndEngine)));
+        group_site->SetGroupColor(Vector3F(dist(engine), dist(engine), dist(engine)));
         ns_opti->AddSite(group_site);
     }
 
@@ -2581,15 +2581,15 @@ void QuickHullConvexHull3d()
     // auto cv3 = std::make_shared<Hull::ConvexHull3>();
     // cv3->Generate(vet3);
 
-    // KIRI_LOG_DEBUG("size={0}, eps={1}", cv3->GetSimplexs().size(), std::numeric_limits<double>::epsilon());
+    // KIRI_LOG_DEBUG("size={0}, eps={1}", cv3->simplexs().size(), std::numeric_limits<double>::epsilon());
 }
 
 void QuickHullConvexHull2d()
 {
     using namespace HDV;
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
     auto scale_size = 200.0;
@@ -2598,8 +2598,8 @@ void QuickHullConvexHull2d()
 
     for (auto i = 0; i < sampler_num; i++)
     {
-        auto x = dist(rndEngine) * scale_size;
-        auto y = dist(rndEngine) * scale_size;
+        auto x = dist(engine) * scale_size;
+        auto y = dist(engine) * scale_size;
 
         auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
         vet2.emplace_back(v2);
@@ -2620,7 +2620,7 @@ void QuickHullConvexHull2d()
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     std::vector<KiriLine2> precompute_lines;
-    auto simplexs = cv2->GetSortSimplexsList();
+    auto simplexs = cv2->computeSortSimplexsList();
     for (size_t i = 0; i < simplexs.size(); i++)
     {
         // auto line = KiriLine2(Vector2F(res2[i]->Vertices[0]->X(), res2[i]->Vertices[0]->Y()) + offset, Vector2F(res2[i]->Vertices[1]->X(), res2[i]->Vertices[1]->Y()) + offset);
@@ -2663,8 +2663,8 @@ void QuickHullDelaunayTriangulation2d()
 {
     using namespace HDV;
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
     auto scale_size = 200.0;
@@ -2673,8 +2673,8 @@ void QuickHullDelaunayTriangulation2d()
 
     for (auto i = 0; i < sampler_num; i++)
     {
-        auto x = dist(rndEngine) * scale_size;
-        auto y = dist(rndEngine) * scale_size;
+        auto x = dist(engine) * scale_size;
+        auto y = dist(engine) * scale_size;
 
         auto v2 = std::make_shared<Primitives::Vertex2>(x, y, i);
         vet2.emplace_back(v2);
@@ -2758,8 +2758,8 @@ void QuickHullVoronoi2d()
 
     auto pd2 = std::make_shared<Voronoi::PowerDiagram2D>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
     auto scale_size = 200.0;
@@ -2767,14 +2767,14 @@ void QuickHullVoronoi2d()
 
     for (auto i = 0; i < sampler_num; i++)
     {
-        auto x = dist(rndEngine) * scale_size;
-        auto y = dist(rndEngine) * scale_size;
+        auto x = dist(engine) * scale_size;
+        auto y = dist(engine) * scale_size;
 
         pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>(x, y, i));
     }
 
     // clip boundary
-    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
+    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon2>();
     BoundaryPolygon->AddVert2(Vector2D(-scale_size, -scale_size));
     BoundaryPolygon->AddVert2(Vector2D(-scale_size, scale_size));
     BoundaryPolygon->AddVert2(Vector2D(scale_size, scale_size));
@@ -2810,10 +2810,10 @@ void QuickHullVoronoi2d()
                 continue;
 
             auto cellpolygon = site->cellPolygon();
-            for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+            for (size_t j = 0; j < cellpolygon->positions().size(); j++)
             {
-                auto vert = cellpolygon->Positions[j];
-                auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
+                auto vert = cellpolygon->positions()[j];
+                auto vert1 = cellpolygon->positions()[(j + 1) % (cellpolygon->positions().size())];
                 auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
                 line.thick = 1.f;
                 precompute_lines.emplace_back(line);
@@ -2858,15 +2858,15 @@ void BalzerIEEE2009Example()
 
     auto sampler = std::make_shared<Sampler::BalzerIEEE2009>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
     auto scale_size = 200.0;
     auto sampler_num = 20;
 
     // clip boundary
-    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
+    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon2>();
     BoundaryPolygon->AddVert2(Vector2D(-scale_size, -scale_size));
     BoundaryPolygon->AddVert2(Vector2D(-scale_size, scale_size));
     BoundaryPolygon->AddVert2(Vector2D(scale_size, scale_size));
@@ -2877,8 +2877,8 @@ void BalzerIEEE2009Example()
 
     for (auto i = 0; i < sampler_num; i++)
     {
-        auto x = dist(rndEngine) * scale_size;
-        auto y = dist(rndEngine) * scale_size;
+        auto x = dist(engine) * scale_size;
+        auto y = dist(engine) * scale_size;
 
         sampler->AddSite(x, y, avg_radius);
     }
@@ -2918,10 +2918,10 @@ void BalzerIEEE2009Example()
             auto cellpolygon = site->cellPolygon();
             if (cellpolygon)
             {
-                for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+                for (size_t j = 0; j < cellpolygon->positions().size(); j++)
                 {
-                    auto vert = cellpolygon->Positions[j];
-                    auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
+                    auto vert = cellpolygon->positions()[j];
+                    auto vert1 = cellpolygon->positions()[(j + 1) % (cellpolygon->positions().size())];
                     auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
                     line.thick = 1.f;
                     precompute_lines.emplace_back(line);
@@ -2978,12 +2978,12 @@ void MSSampler2D()
     // omp_set_num_threads(20);
     // KIRI_LOG_INFO("OpenMP max threads number ={0}; ", omp_get_max_threads());
 
-    auto multiSizeSampler = std::make_shared<Sampler::MultiSizeSampler2D>();
+    auto multiSizeSampler = std::make_shared<Sampler::MultiSizedSampler2D>();
 
     auto scale_size = 1000.0;
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
     std::uniform_real_distribution<double> rdist(-1.0, 1.0);
 
@@ -3026,7 +3026,7 @@ void MSSampler2D()
     }
 
     // clip boundary : box
-    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiCellPolygon<Primitives::Vertex2Ptr, Primitives::Vertex2>>();
+    auto BoundaryPolygon = std::make_shared<Voronoi::VoronoiPolygon2>();
     // BoundaryPolygon->AddVert2(Vector2D(-scale_size, -scale_size));
     // BoundaryPolygon->AddVert2(Vector2D(-scale_size, scale_size));
     // BoundaryPolygon->AddVert2(Vector2D(scale_size, scale_size));
@@ -3097,10 +3097,10 @@ void MSSampler2D()
             auto cellpolygon = site->cellPolygon();
             if (cellpolygon)
             {
-                for (size_t j = 0; j < cellpolygon->Positions.size(); j++)
+                for (size_t j = 0; j < cellpolygon->positions().size(); j++)
                 {
-                    auto vert = cellpolygon->Positions[j];
-                    auto vert1 = cellpolygon->Positions[(j + 1) % (cellpolygon->Positions.size())];
+                    auto vert = cellpolygon->positions()[j];
+                    auto vert1 = cellpolygon->positions()[(j + 1) % (cellpolygon->positions().size())];
                     auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
                     line.thick = 1.f;
                     precompute_lines.emplace_back(line);
@@ -3109,7 +3109,7 @@ void MSSampler2D()
                 }
             }
 
-            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->Positions.size());
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->positions().size());
             precompute_points.emplace_back(Vector2F(site->x()(), site->y()()));
 
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
@@ -3266,11 +3266,11 @@ void QuickHullVoronoi3d()
     KIRI_LOG_INFO("Generated Initial Points!");
     // ############################################################################# for boundary mesh
 
-    auto multiSizeSampler3 = std::make_shared<Sampler::MultiSizeSampler3D>(cudaSampler);
+    auto multiSizeSampler3 = std::make_shared<Sampler::MultiSizedSampler3D>(cudaSampler);
     auto voro3 = std::make_shared<Voronoi::VoronoiMesh3>();
 
-    std::random_device seedGen;
-    std::default_random_engine rndEngine(seedGen());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
     std::uniform_real_distribution<double> rdist(-1.0, 1.0);
 

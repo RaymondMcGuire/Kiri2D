@@ -36,16 +36,16 @@ namespace HDV::Voronoi
             return mSites;
         }
 
-        const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &GetBoundary()
+        const std::shared_ptr<Voronoi::VoronoiPolygon2> &GetBoundary()
         {
-            return mMesh->mBoundaryPolygon;
+            return mMesh->boundaryPolygon();
         }
 
-        void setBoundaryPolygon(const std::shared_ptr<VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
+        void setBoundaryPolygon(const std::shared_ptr<Voronoi::VoronoiPolygon2> &boundary)
         {
             mMesh->setBoundaryPolygon(boundary);
 
-            auto mBBox = boundary->BBox;
+            auto mBBox = boundary->bbox();
 
             if (mBBox.width() < 0.0 || mBBox.height() < 0.0)
                 KIRI_LOG_ERROR("mBBox low={0},{1}, high={2},{3}, width={4}, height={5}", mBBox.LowestPoint.x, mBBox.LowestPoint.y, mBBox.HighestPoint.x, mBBox.HighestPoint.y, mBBox.width(), mBBox.height());
@@ -74,17 +74,17 @@ namespace HDV::Voronoi
         void removeVoroSitesByIndexArray(std::vector<int> indexs)
         {
 
-            auto removeSites = std::remove_if(mSites.begin(),
-                                              mSites.end(),
-                                              [=](const HDV::Primitives::Vertex2Ptr &site)
-                                              {
-                                                  if (std::find(indexs.begin(), indexs.end(), site->id()) != indexs.end())
-                                                      return true;
-                                                  else
-                                                      return false;
-                                              });
+            auto remove_array = std::remove_if(mSites.begin(),
+                                               mSites.end(),
+                                               [=](const HDV::Primitives::Vertex2Ptr &site)
+                                               {
+                                                   if (std::find(indexs.begin(), indexs.end(), site->id()) != indexs.end())
+                                                       return true;
+                                                   else
+                                                       return false;
+                                               });
 
-            mSites.erase(removeSites, mSites.end());
+            mSites.erase(remove_array, mSites.end());
         }
 
         void move2Centroid()
@@ -100,7 +100,7 @@ namespace HDV::Voronoi
                 if (site->cellPolygon())
                 {
                     auto centroid = site->cellPolygon()->centroid();
-                    if (mMesh->mBoundaryPolygon->contains(centroid))
+                    if (mMesh->boundaryPolygon()->contains(centroid))
                         site->set(centroid.x, centroid.y);
                 }
             }
@@ -113,11 +113,11 @@ namespace HDV::Voronoi
             move2Centroid();
         }
 
-        VoronoiMesh2Ptr mMesh;
-
     private:
         bool mAssignIds = true;
         bool mCheckInput = false;
+
+        VoronoiMesh2Ptr mMesh;
 
         std::vector<HDV::Primitives::Vertex2Ptr> mSites;
 
@@ -150,23 +150,20 @@ namespace HDV::Voronoi
         void addSite(const HDV::Primitives::Vertex3Ptr &site) { mSites.emplace_back(site); }
         std::vector<HDV::Primitives::Vertex3Ptr> sites() { return mSites; }
 
-        int mCounter = 0;
-        BoundingBox3D mBBox;
-
         void removeVoroSitesByIndexArray(std::vector<int> indexs)
         {
 
-            auto removeSites = std::remove_if(mSites.begin(),
-                                              mSites.end(),
-                                              [=](const HDV::Primitives::Vertex3Ptr &site)
-                                              {
-                                                  if (std::find(indexs.begin(), indexs.end(), site->id()) != indexs.end())
-                                                      return true;
-                                                  else
-                                                      return false;
-                                              });
+            auto remove_array = std::remove_if(mSites.begin(),
+                                               mSites.end(),
+                                               [=](const HDV::Primitives::Vertex3Ptr &site)
+                                               {
+                                                   if (std::find(indexs.begin(), indexs.end(), site->id()) != indexs.end())
+                                                       return true;
+                                                   else
+                                                       return false;
+                                               });
 
-            mSites.erase(removeSites, mSites.end());
+            mSites.erase(remove_array, mSites.end());
         }
 
         const std::shared_ptr<VoronoiPolygon3> &GetBoundary()
@@ -176,46 +173,46 @@ namespace HDV::Voronoi
 
         void setBoundaryPolygon(std::vector<csgjscpp::Polygon> boundary)
         {
-            auto boundaryMesh = csgjscpp::modelfrompolygons(boundary);
+            auto boundary_mesh = csgjscpp::modelfrompolygons(boundary);
 
-            std::vector<Vector3D> Positions;
-            std::vector<Vector3D> Normals;
-            std::vector<int> Indices;
+            std::vector<Vector3D> positions;
+            std::vector<Vector3D> normals;
+            std::vector<int> indices;
 
-            for (auto idx = 0; idx < boundaryMesh.indices.size(); idx += 3)
+            for (auto idx = 0; idx < boundary_mesh.indices.size(); idx += 3)
             {
-                auto indIdx1 = boundaryMesh.indices[idx];
-                auto indIdx2 = boundaryMesh.indices[idx + 1];
-                auto indIdx3 = boundaryMesh.indices[idx + 2];
+                auto index1 = boundary_mesh.indices[idx];
+                auto index2 = boundary_mesh.indices[idx + 1];
+                auto index3 = boundary_mesh.indices[idx + 2];
 
-                auto faceVert1 = boundaryMesh.vertices[indIdx1].pos;
-                auto faceVert2 = boundaryMesh.vertices[indIdx2].pos;
-                auto faceVert3 = boundaryMesh.vertices[indIdx3].pos;
+                auto face_vert1 = boundary_mesh.vertices[index1].pos;
+                auto face_vert2 = boundary_mesh.vertices[index2].pos;
+                auto face_vert3 = boundary_mesh.vertices[index3].pos;
 
-                auto faceNorm1 = boundaryMesh.vertices[indIdx1].normal;
-                auto faceNorm2 = boundaryMesh.vertices[indIdx2].normal;
-                auto faceNorm3 = boundaryMesh.vertices[indIdx3].normal;
+                auto face_norm1 = boundary_mesh.vertices[index1].normal;
+                auto face_norm2 = boundary_mesh.vertices[index2].normal;
+                auto face_norm3 = boundary_mesh.vertices[index3].normal;
 
-                Positions.emplace_back(Vector3D(faceVert1.x, faceVert1.y, faceVert1.z));
-                Positions.emplace_back(Vector3D(faceVert2.x, faceVert2.y, faceVert2.z));
-                Positions.emplace_back(Vector3D(faceVert3.x, faceVert3.y, faceVert3.z));
+                positions.emplace_back(Vector3D(face_vert1.x, face_vert1.y, face_vert1.z));
+                positions.emplace_back(Vector3D(face_vert2.x, face_vert2.y, face_vert2.z));
+                positions.emplace_back(Vector3D(face_vert3.x, face_vert3.y, face_vert3.z));
 
-                Normals.emplace_back(Vector3D(faceNorm1.x, faceNorm1.y, faceNorm1.z));
-                Normals.emplace_back(Vector3D(faceNorm2.x, faceNorm2.y, faceNorm2.z));
-                Normals.emplace_back(Vector3D(faceNorm3.x, faceNorm3.y, faceNorm3.z));
+                normals.emplace_back(Vector3D(face_norm1.x, face_norm1.y, face_norm1.z));
+                normals.emplace_back(Vector3D(face_norm2.x, face_norm2.y, face_norm2.z));
+                normals.emplace_back(Vector3D(face_norm3.x, face_norm3.y, face_norm3.z));
 
-                Indices.emplace_back(idx);
-                Indices.emplace_back(idx + 1);
-                Indices.emplace_back(idx + 2);
+                indices.emplace_back(idx);
+                indices.emplace_back(idx + 1);
+                indices.emplace_back(idx + 2);
             }
 
             mBoundaryPolygon = std::make_shared<VoronoiPolygon3>();
-            mBoundaryPolygon->Positions = Positions;
-            mBoundaryPolygon->Normals = Normals;
-            mBoundaryPolygon->Indices = Indices;
+            mBoundaryPolygon->positions() = positions;
+            mBoundaryPolygon->normals() = normals;
+            mBoundaryPolygon->indices() = indices;
             mBoundaryPolygon->updateBBox();
 
-            mBBox = mBoundaryPolygon->BBox;
+            mBBox = mBoundaryPolygon->bbox();
 
             mMesh->setBoundaryPolygon(boundary);
             mMesh->setBoundaryBBox(mBBox);
@@ -290,11 +287,13 @@ namespace HDV::Voronoi
             mMesh->exportVoronoiMeshObj(mCounter++);
         }
 
-        VoronoiMesh3Ptr mMesh;
-
     private:
+        int mCounter = 0;
         bool mAssignIds = true;
         bool mCheckInput = false;
+
+        BoundingBox3D mBBox;
+        VoronoiMesh3Ptr mMesh;
 
         std::unordered_set<int> mConstrainSites;
 
@@ -313,7 +312,7 @@ namespace HDV::Voronoi
                     mConstrainSites.insert(site->id());
             }
 
-            mMesh->mConstrainSites = mConstrainSites;
+            mMesh->constainSites() = mConstrainSites;
         }
 
         void reset()

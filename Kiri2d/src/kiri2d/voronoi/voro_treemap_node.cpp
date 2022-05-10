@@ -34,11 +34,11 @@ namespace KIRI
 
     void KiriVoroTreeMapNode::AddChildNodes()
     {
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_real_distribution<float> dist(0.f, 1.f);
 
-        auto childcnt = static_cast<UInt>(dist(rndEngine) * 50) + 2;
+        auto childcnt = static_cast<UInt>(dist(engine) * 50) + 2;
         for (size_t i = 0; i < childcnt; i++)
         {
             auto cpos = mSite->GetCellPolygon()->rndInnerPoint();

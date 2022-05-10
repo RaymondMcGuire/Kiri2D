@@ -188,9 +188,6 @@ namespace HDV::Voronoi
 
         fclose(fp);
 
-        //
-        // Write material file
-        //
         bool ret = WriteMat(material_filename, materials);
 
         return ret;

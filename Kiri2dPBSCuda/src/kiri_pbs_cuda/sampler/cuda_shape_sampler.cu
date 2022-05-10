@@ -94,16 +94,16 @@ bool CudaShapeSampler::CheckPointsInside(float3 p) {
 }
 
 Vec_Float3 CudaShapeSampler::GetInsidePoints(int num) {
-  std::random_device seedGen;
-  std::default_random_engine rndEngine(seedGen());
+  std::random_device seed;
+  std::default_random_engine engine(seed());
   std::uniform_real_distribution<float> dist(0.f, 1.f);
 
   int counter = 0;
   Vec_Float3 posArray;
   while (counter < num) {
-    float3 pos = mInfo.BBox.Min + make_float3(dist(rndEngine), dist(rndEngine),
-                                              dist(rndEngine)) *
-                                      (mInfo.BBox.Max - mInfo.BBox.Min);
+    float3 pos =
+        mInfo.BBox.Min + make_float3(dist(engine), dist(engine), dist(engine)) *
+                             (mInfo.BBox.Max - mInfo.BBox.Min);
 
     if (this->CheckPointsInside(pos)) {
       posArray.emplace_back(pos);

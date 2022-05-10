@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-09 11:46:43
+ * @LastEditTime: 2022-05-10 09:35:42
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -34,7 +34,7 @@ namespace HDV::Delaunay
         {
         }
 
-        constexpr int dimension() const
+        const int dimension() const
         {
             return mDimension;
         }

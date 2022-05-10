@@ -1,11 +1,10 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-03 18:05:22
+ * @LastEditTime: 2022-05-10 11:14:17
  * @LastEditors: Xu.WANG
  * @Description:
  */
-
 #ifndef _HDV_VORONOI_REGION_H_
 #define _HDV_VORONOI_REGION_H_
 
@@ -29,34 +28,60 @@ namespace HDV::Voronoi
 
         void clear()
         {
-            for (auto i = 0; i < Cells.size(); i++)
-                Cells[i]->clear();
+            for (auto i = 0; i < mCells.size(); i++)
+                mCells[i]->clear();
 
-            for (auto i = 0; i < Edges.size(); i++)
-                Edges[i]->clear();
+            for (auto i = 0; i < mEdges.size(); i++)
+                mEdges[i]->clear();
 
-            Cells.clear();
-            Edges.clear();
-            site = nullptr;
+            mCells.clear();
+            mEdges.clear();
+            mSite = nullptr;
         }
 
-        int Id;
-        std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> Cells;
-        std::vector<std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>>> Edges;
-        VERTEXPTR site;
+        const int id() const
+        {
+            return mId;
+        }
+
+        void setId(int id)
+        {
+            mId = id;
+        }
+
+        VERTEXPTR &site()
+        {
+            return mSite;
+        }
+
+        std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> &cells()
+        {
+            return mCells;
+        }
+
+        std::vector<std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>>> &edges()
+        {
+            return mEdges;
+        }
 
         BoundingBox2F bbox()
         {
-            BoundingBox2F bbox;
+            BoundingBox2F bounding_box;
             for (size_t i = 0; i < Edges.size(); i++)
             {
-                auto from = Edges[i]->From->CircumCenter;
-                auto to = Edges[i]->To->CircumCenter;
-                bbox.merge(Vector2D(from->X(), from->Y()));
-                bbox.merge(Vector2D(to->X(), to->Y()));
+                auto from = Edges[i]->from()->circumCenter();
+                auto to = Edges[i]->to()->circumCenter();
+                bounding_box.merge(Vector2D(from->X(), from->Y()));
+                bounding_box.merge(Vector2D(to->X(), to->Y()));
             }
-            return bbox;
+            return bounding_box;
         }
+
+    private:
+        int mId;
+        std::vector<std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>>> mCells;
+        std::vector<std::shared_ptr<VoronoiEdge<VERTEXPTR, VERTEX>>> mEdges;
+        VERTEXPTR mSite;
     };
 
 } // namespace HDV::Voronoi

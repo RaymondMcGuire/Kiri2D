@@ -6,8 +6,8 @@
  * @Description:
  */
 
-#ifndef _HDV_VORONOI_CELL_POLYGON_H_
-#define _HDV_VORONOI_CELL_POLYGON_H_
+#ifndef _HDV_VORONOI_POLYGON_H_
+#define _HDV_VORONOI_POLYGON_H_
 
 #pragma once
 
@@ -17,36 +17,35 @@
 
 namespace HDV::Voronoi
 {
-    template <typename VERTEXPTR = HDV::Primitives::VertexPtr, typename VERTEX = HDV::Primitives::Vertex>
-    class VoronoiCellPolygon
+    class VoronoiPolygon2
     {
     public:
-        explicit VoronoiCellPolygon()
+        explicit VoronoiPolygon2()
         {
         }
 
-        virtual ~VoronoiCellPolygon()
+        virtual ~VoronoiPolygon2()
         {
         }
 
         void add(Vector2D vert)
         {
-            Positions.emplace_back(vert);
-            BBox.merge(vert);
+            mPositions.emplace_back(vert);
+            mBBox.merge(vert);
         }
 
         void updateBBox()
         {
-            BBox.reset();
-            for (auto i = 0; i < Positions.size(); i++)
-                BBox.merge(Positions[i]);
+            mBBox.reset();
+            for (auto i = 0; i < mPositions.size(); i++)
+                mBBox.merge(mPositions[i]);
         }
 
         bool checkBBox()
         {
-            if (BBox.isEmpty())
+            if (mBBox.isEmpty())
             {
-                if (!Positions.empty())
+                if (!mPositions.empty())
                 {
                     updateBBox();
                     return true;
@@ -69,12 +68,12 @@ namespace HDV::Voronoi
             }
 
             Vector2D inner;
-            std::random_device seedGen;
-            std::default_random_engine rndEngine(seedGen());
+            std::random_device seed;
+            std::default_random_engine engine(seed());
             std::uniform_real_distribution<double> dist(0.0, 1.0);
             do
             {
-                inner = BBox.LowestPoint + Vector2D(dist(rndEngine) * BBox.width(), dist(rndEngine) * BBox.height());
+                inner = mBBox.LowestPoint + Vector2D(dist(engine) * mBBox.width(), dist(engine) * mBBox.height());
             } while (!contains(inner));
 
             return inner;
@@ -85,15 +84,15 @@ namespace HDV::Voronoi
             if (!checkBBox())
                 return false;
 
-            if (!BBox.contains(v))
+            if (!mBBox.contains(v))
                 return false;
 
             bool contains = false;
-            for (size_t i = 0, j = Positions.size() - 1; i < Positions.size(); j = i++)
+            for (size_t i = 0, j = mPositions.size() - 1; i < mPositions.size(); j = i++)
             {
-                auto verti = Positions[i];
-                auto vertj = Positions[j];
-                if ((((verti.y <= v.y) && (v.y < vertj.y) || ((vertj.y <= v.y) && (v.y < verti.y))) && (v.x < (vertj.x - verti.x) * (v.y - verti.y) / (vertj.y - verti.y) + verti.x)))
+                auto vert_i = mPositions[i];
+                auto vert_j = mPositions[j];
+                if ((((vert_i.y <= v.y) && (v.y < vert_j.y) || ((vert_j.y <= v.y) && (v.y < vert_i.y))) && (v.x < (vert_j.x - vert_i.x) * (v.y - vert_i.y) / (vert_j.y - vert_i.y) + vert_i.x)))
                     contains = !contains;
             }
             return contains;
@@ -102,36 +101,36 @@ namespace HDV::Voronoi
         double area()
         {
             auto area = 0.0;
-            if (!Positions.empty())
-                for (size_t i = 0; i < Positions.size(); i++)
-                    area += Positions[i].cross(Positions[(i + 1) % Positions.size()]);
+            if (!mPositions.empty())
+                for (size_t i = 0; i < mPositions.size(); i++)
+                    area += mPositions[i].cross(mPositions[(i + 1) % mPositions.size()]);
 
             return std::abs(area * 0.5);
         }
 
         Vector2D centroid()
         {
-            std::vector<Vector2D> tmpPolygonVertices(Positions);
+            std::vector<Vector2D> tmp_poly(mPositions);
 
-            auto first = tmpPolygonVertices[0], last = tmpPolygonVertices[tmpPolygonVertices.size() - 1];
+            auto first = tmp_poly[0], last = tmp_poly[tmp_poly.size() - 1];
             if (first.x != last.x || first.y != last.y)
-                tmpPolygonVertices.emplace_back(first);
+                tmp_poly.emplace_back(first);
 
-            auto twicearea = 0.0,
+            auto twice_area = 0.0,
                  x = 0.0, y = 0.0, f = 0.0;
-            auto nPts = tmpPolygonVertices.size();
+            auto num = tmp_poly.size();
             Vector2D p1, p2;
 
-            for (size_t i = 0, j = nPts - 1; i < nPts; j = i++)
+            for (size_t i = 0, j = num - 1; i < num; j = i++)
             {
-                p1 = tmpPolygonVertices[i];
-                p2 = tmpPolygonVertices[j];
+                p1 = tmp_poly[i];
+                p2 = tmp_poly[j];
                 f = p1.x * p2.y - p2.x * p1.y;
-                twicearea += f;
+                twice_area += f;
                 x += (p1.x + p2.x) * f;
                 y += (p1.y + p2.y) * f;
             }
-            f = twicearea * 3.0;
+            f = twice_area * 3.0;
 
             return Vector2D(x / f, y / f);
         }
@@ -155,20 +154,20 @@ namespace HDV::Voronoi
             mSkeletons.clear();
 
             std::vector<Vector4F> poly;
-            std::vector<Vector2F> rPolyVert;
+            std::vector<Vector2F> reverse_poly;
 
-            for (size_t i = 0; i < Positions.size(); i++)
+            for (size_t i = 0; i < mPositions.size(); i++)
             {
-                auto v1 = Positions[i];
-                auto v2 = Positions[(i + 1) % Positions.size()];
+                auto v1 = mPositions[i];
+                auto v2 = mPositions[(i + 1) % mPositions.size()];
                 poly.emplace_back(Vector4F(v1.x, v1.y, v2.x, v2.y));
-                rPolyVert.emplace_back(Vector2F(v1.x, v1.y));
+                reverse_poly.emplace_back(Vector2F(v1.x, v1.y));
             }
 
             if (isClockwise(poly))
-                std::reverse(rPolyVert.begin(), rPolyVert.end());
+                std::reverse(reverse_poly.begin(), reverse_poly.end());
 
-            auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelSLAV>(rPolyVert);
+            auto sskel_convex = std::make_shared<KIRI2D::SSKEL::SSkelSLAV>(reverse_poly);
 
             auto skeletons = sskel_convex->GetSkeletons();
 
@@ -182,27 +181,27 @@ namespace HDV::Voronoi
 
         double minDis2LineSegment2(Vector2D v, Vector2D w, Vector2D p)
         {
-            const double l2 = v.distanceSquaredTo(w);
+            auto l2 = v.distanceSquaredTo(w);
             if (l2 == 0.f)
                 return p.distanceTo(v);
 
-            const double t = std::clamp(((p - v).dot(w - v)) / l2, 0.0, 1.0);
-            const Vector2D projection = v + t * (w - v);
+            auto t = std::clamp(((p - v).dot(w - v)) / l2, 0.0, 1.0);
+            auto projection = v + t * (w - v);
             return p.distanceTo(projection);
         }
 
         double computeMinDisInPoly(const Vector2D &p)
         {
-            auto minDis = std::numeric_limits<double>::max();
-            for (size_t i = 0; i < Positions.size(); i++)
-                minDis = std::min(minDis, minDis2LineSegment2(Positions[i], Positions[(i + 1) % Positions.size()], p));
-            return minDis;
+            auto min_dist = std::numeric_limits<double>::max();
+            for (size_t i = 0; i < mPositions.size(); i++)
+                min_dist = std::min(min_dist, minDis2LineSegment2(mPositions[i], mPositions[(i + 1) % mPositions.size()], p));
+            return min_dist;
         }
 
         Vector3D computeMICByStraightSkeleton()
         {
-            auto maxCirVec = Vector2D(0.0);
-            auto maxCirRad = std::numeric_limits<double>::min();
+            auto max_circle_pos = Vector2D(0.0);
+            auto max_circle_radius = std::numeric_limits<double>::min();
             if (!mSkeletons.empty())
             {
                 for (size_t i = 0; i < mSkeletons.size(); i++)
@@ -212,30 +211,46 @@ namespace HDV::Voronoi
 
                     if (contains(v1))
                     {
-                        auto minDis = computeMinDisInPoly(v1);
-                        if (minDis > maxCirRad)
+                        auto min_dist = computeMinDisInPoly(v1);
+                        if (min_dist > max_circle_radius)
                         {
-                            maxCirRad = minDis;
-                            maxCirVec = v1;
+                            max_circle_radius = min_dist;
+                            max_circle_pos = v1;
                         }
                     }
 
                     if (contains(v2))
                     {
-                        auto minDis = computeMinDisInPoly(v2);
-                        if (minDis > maxCirRad)
+                        auto min_dist = computeMinDisInPoly(v2);
+                        if (min_dist > max_circle_radius)
                         {
-                            maxCirRad = minDis;
-                            maxCirVec = v2;
+                            max_circle_radius = min_dist;
+                            max_circle_pos = v2;
                         }
                     }
                 }
             }
-            return Vector3D(maxCirVec.x, maxCirVec.y, maxCirRad);
+            return Vector3D(max_circle_pos.x, max_circle_pos.y, max_circle_radius);
         }
 
-        BoundingBox2D BBox;
-        std::vector<Vector2D> Positions;
+        const BoundingBox2D bbox() const
+        {
+            return mBBox;
+        }
+
+        std::vector<Vector2D> &positions()
+        {
+            return mPositions;
+        }
+
+        std::vector<Vector4F> &skeletons()
+        {
+            return mSkeletons;
+        }
+
+    private:
+        BoundingBox2D mBBox;
+        std::vector<Vector2D> mPositions;
         std::vector<Vector4F> mSkeletons;
     };
 
@@ -252,15 +267,15 @@ namespace HDV::Voronoi
 
         void add(Vector3D vert)
         {
-            Positions.emplace_back(vert);
-            BBox.merge(vert);
+            mPositions.emplace_back(vert);
+            mBBox.merge(vert);
         }
 
         void updateBBox()
         {
-            BBox.reset();
-            for (auto i = 0; i < Positions.size(); i++)
-                BBox.merge(Positions[i]);
+            mBBox.reset();
+            for (auto i = 0; i < mPositions.size(); i++)
+                mBBox.merge(mPositions[i]);
         }
 
         double computeVolume(Vector3D a, Vector3D b, Vector3D c)
@@ -271,13 +286,13 @@ namespace HDV::Voronoi
         double computeMinDisInPoly(Vector3D p)
         {
 
-            auto minDis = std::numeric_limits<double>::max();
+            auto min_dist = std::numeric_limits<double>::max();
 
-            for (size_t j = 0; j < Indices.size() / 3; j++)
+            for (size_t j = 0; j < mIndices.size() / 3; j++)
             {
-                auto a = Positions[Indices[j * 3] - IndexOffset];
-                auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
-                auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
+                auto a = mPositions[mIndices[j * 3] - mIndexOffset];
+                auto b = mPositions[mIndices[j * 3 + 1] - mIndexOffset];
+                auto c = mPositions[mIndices[j * 3 + 2] - mIndexOffset];
 
                 gte::Vector<3, double> vec3 = {{p.x, p.y, p.z}};
                 gte::Vector<3, double> a3 = {{a.x, a.y, a.z}}, b3 = gte::Vector<3, double>{{b.x, b.y, b.z}}, c3 = gte::Vector<3, double>{{c.x, c.y, c.z}};
@@ -286,24 +301,24 @@ namespace HDV::Voronoi
                 gte::DCPPoint3Triangle3<double> dpt3;
                 auto res = dpt3(vec3, tri3);
                 auto dis = res.distance * 2.0;
-                minDis = std::min(minDis, dis);
+                min_dist = std::min(min_dist, dis);
             }
 
-            KIRI_LOG_DEBUG("minDis={0}", minDis);
-            return minDis;
+            KIRI_LOG_DEBUG("min_dist={0}", min_dist);
+            return min_dist;
         }
 
         double volume()
         {
-            IndexOffset = IsLoadedFromObj ? 1 : 0;
+            mIndexOffset = mIsLoadedFromObj ? 1 : 0;
 
             auto V = 0.0;
-            for (size_t j = 0; j < Indices.size() / 3; j++)
+            for (size_t j = 0; j < mIndices.size() / 3; j++)
             {
                 // if indices loaded from a .obj file, index need -1
-                auto a = Positions[Indices[j * 3] - IndexOffset];
-                auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
-                auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
+                auto a = mPositions[mIndices[j * 3] - mIndexOffset];
+                auto b = mPositions[mIndices[j * 3 + 1] - mIndexOffset];
+                auto c = mPositions[mIndices[j * 3 + 2] - mIndexOffset];
 
                 V += computeVolume(a, b, c);
             }
@@ -316,17 +331,17 @@ namespace HDV::Voronoi
 
         Vector3D centroid()
         {
-            IndexOffset = IsLoadedFromObj ? 1 : 0;
+            mIndexOffset = mIsLoadedFromObj ? 1 : 0;
 
             auto volume = 0.0;
             Vector3D centroid;
-            for (size_t j = 0; j < Indices.size() / 3; j++)
+            for (size_t j = 0; j < mIndices.size() / 3; j++)
             {
 
                 // if indices loaded from a .obj file, index need -1
-                auto a = Positions[Indices[j * 3] - IndexOffset];
-                auto b = Positions[Indices[j * 3 + 1] - IndexOffset];
-                auto c = Positions[Indices[j * 3 + 2] - IndexOffset];
+                auto a = mPositions[mIndices[j * 3] - mIndexOffset];
+                auto b = mPositions[mIndices[j * 3 + 1] - mIndexOffset];
+                auto c = mPositions[mIndices[j * 3 + 2] - mIndexOffset];
 
                 auto v = computeVolume(a, b, c);
                 volume += v;
@@ -339,14 +354,35 @@ namespace HDV::Voronoi
             return centroid / volume;
         }
 
-        bool IsLoadedFromObj = false;
-        int IndexOffset = 0;
-        BoundingBox3D BBox;
-        std::vector<Vector3D> Positions;
-        std::vector<Vector3D> Normals;
-        std::vector<int> Indices;
+        std::vector<Vector3D> &positions()
+        {
+            return mPositions;
+        }
+
+        std::vector<Vector3D> &normals()
+        {
+            return mNormals;
+        }
+
+        std::vector<int> &indices()
+        {
+            return mIndices;
+        }
+
+        const BoundingBox3D bbox() const
+        {
+            return mBBox;
+        }
+
+    private:
+        bool mIsLoadedFromObj = false;
+        int mIndexOffset = 0;
+        BoundingBox3D mBBox;
+        std::vector<Vector3D> mPositions;
+        std::vector<Vector3D> mNormals;
+        std::vector<int> mIndices;
     };
 
 } // namespace HDV::Voronoi
 
-#endif /* _HDV_VORONOI_CELL_POLYGON_H_ */
+#endif /* _HDV_VORONOI_POLYGON_H_ */

@@ -127,15 +127,15 @@ namespace KIRI
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (size_t i = 0; i < voroSite.size(); i++)
         {
-            auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
-            auto targetArea = mCompleteArea * voroSite[i]->GetPercentage();
+            auto current_area = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+            auto target_area = mCompleteArea * voroSite[i]->GetPercentage();
 
             auto increase = 2.f;
-            if (currentArea != 0.f)
-                increase = targetArea / currentArea;
+            if (current_area != 0.f)
+                increase = target_area / current_area;
 
-            auto errorTransform = (-(error - 1.f) * (error - 1.f) + 1.f);
-            auto step = 1.f * gAvg * errorTransform;
+            auto error_transform = (-(error - 1.f) * (error - 1.f) + 1.f);
+            auto step = 1.f * gAvg * error_transform;
             auto weight = voroSite[i]->weight();
 
             auto epsilon = 0.01f;
@@ -161,9 +161,9 @@ namespace KIRI
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (size_t i = 0; i < voroSite.size(); i++)
         {
-            auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
-            auto targetArea = mCompleteArea * voroSite[i]->GetPercentage();
-            error += std::abs(targetArea - currentArea) / (mCompleteArea * 2.f);
+            auto current_area = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+            auto target_area = mCompleteArea * voroSite[i]->GetPercentage();
+            error += std::abs(target_area - current_area) / (mCompleteArea * 2.f);
         }
         return error;
     }
@@ -180,9 +180,9 @@ namespace KIRI
         auto voroSite = mPowerDiagram->GetVoroSites();
         for (size_t i = 0; i < voroSite.size(); i++)
         {
-            auto currentArea = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
-            auto targetArea = mCompleteArea * voroSite[i]->GetPercentage();
-            auto error = std::abs(targetArea - currentArea) / (mCompleteArea * 2.f);
+            auto current_area = (voroSite[i]->GetCellPolygon() == NULL) ? 0.f : voroSite[i]->GetCellPolygon()->GetPolygonArea();
+            auto target_area = mCompleteArea * voroSite[i]->GetPercentage();
+            auto error = std::abs(target_area - current_area) / (mCompleteArea * 2.f);
             maxError = std::max(maxError, error);
         }
         return maxError;

@@ -34,8 +34,8 @@ namespace KIRI
 
     void KiriVoroPoroOptiNode::InitChildSites()
     {
-        std::random_device seedGen;
-        std::default_random_engine rndEngine(seedGen());
+        std::random_device seed;
+        std::default_random_engine engine(seed());
         std::uniform_real_distribution<float> dist(0.f, 1.f);
 
         auto childcnt = 5;

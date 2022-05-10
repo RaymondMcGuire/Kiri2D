@@ -32,7 +32,7 @@ namespace HDV::Sampler
             mPowerDiagram->addSite(site);
         }
 
-        void setBoundaryPolygon(const std::shared_ptr<Voronoi::VoronoiCellPolygon<HDV::Primitives::Vertex2Ptr, HDV::Primitives::Vertex2>> &boundary)
+        void setBoundaryPolygon(const std::shared_ptr<Voronoi::VoronoiPolygon2> &boundary)
         {
             mPowerDiagram->setBoundaryPolygon(boundary);
         }
@@ -94,9 +94,9 @@ namespace HDV::Sampler
                 if (sites[i]->isBoundaryVertex())
                     continue;
 
-                auto siteI = std::dynamic_pointer_cast<Voronoi::CapacityVoronoiSite2>(sites[i]);
+                auto site_i = std::dynamic_pointer_cast<Voronoi::CapacityVoronoiSite2>(sites[i]);
                 double a = mFPMA, b = mFPMB;
-                auto fa = deltaC(siteI, a), fb = deltaC(siteI, b);
+                auto fa = deltaC(site_i, a), fb = deltaC(site_i, b);
                 if (fa * fb >= 0.0)
                 {
                     KIRI_LOG_ERROR("Assumed A and B is Not Right!: f(a)={0}, f(b)={1}", fa, fb);
@@ -108,22 +108,22 @@ namespace HDV::Sampler
                 for (int i = 0; i < mMaximumIteration; i++)
                 {
                     // Find the point that touches x axis
-                    c = (a * deltaC(siteI, b) - b * deltaC(siteI, a)) / (deltaC(siteI, b) - deltaC(siteI, a));
+                    c = (a * deltaC(site_i, b) - b * deltaC(site_i, a)) / (deltaC(site_i, b) - deltaC(site_i, a));
 
                     // Check if the above found point is root
-                    if (deltaC(siteI, c) < 1e-6)
+                    if (deltaC(site_i, c) < 1e-6)
                         break;
 
                     // Decide the side to repeat the steps
-                    else if (deltaC(siteI, c) * deltaC(siteI, a) < 0.0)
+                    else if (deltaC(site_i, c) * deltaC(site_i, a) < 0.0)
                         b = c;
                     else
                         a = c;
                 }
 
-                if (std::abs(deltaC(siteI, c)) > 1e-6)
+                if (std::abs(deltaC(site_i, c)) > 1e-6)
                     mStable = false;
-                siteI->setWeight(c);
+                site_i->setWeight(c);
             }
 
             return mStable;
@@ -136,25 +136,25 @@ namespace HDV::Sampler
 
             for (int i = 0; i < sites.size(); i++)
             {
-                auto siteI = std::dynamic_pointer_cast<Voronoi::CapacityVoronoiSite2>(sites[i]);
-                if (siteI->isBoundaryVertex())
+                auto site_i = std::dynamic_pointer_cast<Voronoi::CapacityVoronoiSite2>(sites[i]);
+                if (site_i->isBoundaryVertex())
                     continue;
 
-                auto poly = siteI->cellPolygon();
+                auto poly = site_i->cellPolygon();
                 if (poly)
                 {
 
-                    if (poly->mSkeletons.empty())
+                    if (poly->skeletons().empty())
                         poly->computeSSkel1998Convex();
 
                     auto mic = poly->computeMICByStraightSkeleton();
-                    circles.emplace_back(Vector4D(mic, siteI->radius()));
-                    // KIRI_LOG_DEBUG("has poly: circle={0},{1},{2},{3}", mic.x, mic.y, mic.z, siteI->radius());
+                    circles.emplace_back(Vector4D(mic, site_i->radius()));
+                    // KIRI_LOG_DEBUG("has poly: circle={0},{1},{2},{3}", mic.x, mic.y, mic.z, site_i->radius());
                 }
                 else
                 {
                     KIRI_LOG_ERROR("computeMICBySSkel: No Polygon Data!!!");
-                    // remove.emplace_back(siteI->radius());
+                    // remove.emplace_back(site_i->radius());
                 }
             }
 

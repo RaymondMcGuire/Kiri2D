@@ -1,7 +1,7 @@
 /***
  * @Author: Xu.WANG
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-03 18:08:03
+ * @LastEditTime: 2022-05-10 11:15:40
  * @LastEditors: Xu.WANG
  * @Description:
  */
@@ -27,8 +27,8 @@ namespace HDV::Voronoi
             const std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> &from,
             const std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> &to)
         {
-            From = from;
-            To = to;
+            mFrom = from;
+            mTo = to;
         }
 
         virtual ~VoronoiEdge()
@@ -37,14 +37,25 @@ namespace HDV::Voronoi
 
         void clear()
         {
-            From->clear();
-            To->clear();
-            From = nullptr;
-            To = nullptr;
+            mFrom->clear();
+            mTo->clear();
+            mFrom = nullptr;
+            mTo = nullptr;
         }
 
-        std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> From;
-        std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> To;
+        std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> &from()
+        {
+            return mFrom;
+        }
+
+        std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> &to()
+        {
+            return mTo;
+        }
+
+    private:
+        std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> mFrom;
+        std::shared_ptr<HDV::Delaunay::DelaunayCell<VERTEXPTR, VERTEX>> mTo;
     };
 
 } // namespace HDV::Voronoi

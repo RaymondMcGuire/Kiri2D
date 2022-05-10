@@ -62,7 +62,7 @@ namespace HDV::Primitives
             return mRadius;
         }
 
-        bool isBoundaryVertex()
+        bool isBoundaryVertex() const
         {
             return mIsBoundaryVertex;
         }
@@ -118,12 +118,12 @@ namespace HDV::Primitives
             return sum;
         }
 
-        double distanceTo(std::shared_ptr<Vertex> v)
+        double distanceTo(std::shared_ptr<Vertex> v) const
         {
             return std::sqrt(distanceSquaredTo(v));
         }
 
-        double distanceSquaredTo(std::shared_ptr<Vertex> v)
+        double distanceSquaredTo(std::shared_ptr<Vertex> v) const
         {
             auto dim = std::min(dimension(), v->dimension());
             auto sum = 0.0;

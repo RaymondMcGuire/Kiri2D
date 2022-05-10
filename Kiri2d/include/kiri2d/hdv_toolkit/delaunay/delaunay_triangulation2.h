@@ -65,17 +65,17 @@ namespace HDV::Delaunay
                 input[i]->positions() = v;
             }
 
-            mVertices = mHull->GetVertices();
+            mVertices = mHull->vertices();
 
             mCentroid->positions()[0] = mHull->centroid()[0];
             mCentroid->positions()[1] = mHull->centroid()[1];
 
-            count = mHull->GetSimplexs().size();
+            count = mHull->simplexs().size();
 
             for (auto i = 0; i < count; i++)
             {
 
-                auto simplex = mHull->GetSimplexs()[i];
+                auto simplex = mHull->simplexs()[i];
 
                 if (simplex->normals()[dim] >= 0.0f)
                 {
@@ -90,7 +90,6 @@ namespace HDV::Delaunay
                 else
                 {
                     auto cell = createCell(simplex);
-                    // cell.CircumCenter.Id = i;
                     mCells.emplace_back(cell);
                 }
             }
@@ -101,19 +100,20 @@ namespace HDV::Delaunay
 
         constexpr double determinant() const
         {
-            auto fCofactor00 = mMatrixBuffer[1][1] * mMatrixBuffer[2][2] - mMatrixBuffer[1][2] * mMatrixBuffer[2][1];
-            auto fCofactor10 = mMatrixBuffer[1][2] * mMatrixBuffer[2][0] - mMatrixBuffer[1][0] * mMatrixBuffer[2][2];
-            auto fCofactor20 = mMatrixBuffer[1][0] * mMatrixBuffer[2][1] - mMatrixBuffer[1][1] * mMatrixBuffer[2][0];
+            auto factor00 = mMatrixBuffer[1][1] * mMatrixBuffer[2][2] - mMatrixBuffer[1][2] * mMatrixBuffer[2][1];
+            auto factor10 = mMatrixBuffer[1][2] * mMatrixBuffer[2][0] - mMatrixBuffer[1][0] * mMatrixBuffer[2][2];
+            auto factor20 = mMatrixBuffer[1][0] * mMatrixBuffer[2][1] - mMatrixBuffer[1][1] * mMatrixBuffer[2][0];
 
-            auto fDet = mMatrixBuffer[0][0] * fCofactor00 + mMatrixBuffer[0][1] * fCofactor10 + mMatrixBuffer[0][2] * fCofactor20;
-
-            return fDet;
+            return mMatrixBuffer[0][0] * factor00 + mMatrixBuffer[0][1] * factor10 + mMatrixBuffer[0][2] * factor20;
         }
 
+        /**
+         * @reference MathWorld: http://mathworld.wolfram.com/Circumcircle.html
+         * @param  {std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>>} simplex :
+         * @return {std::shared_ptr<DelaunayCell<VERTEXPTR,}                      :
+         */
         std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>> createCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex)
         {
-            // From MathWorld: http://mathworld.wolfram.com/Circumcircle.html
-
             auto verts = simplex->vertices();
 
             // x, y, 1
@@ -151,14 +151,14 @@ namespace HDV::Delaunay
 
             auto s = -1.0 / (2.0 * a);
 
-            std::vector<double> circumCenter;
-            circumCenter.assign(2, 0.0);
-            circumCenter[0] = s * dx;
-            circumCenter[1] = s * dy;
+            std::vector<double> circum_center;
+            circum_center.assign(2, 0.0);
+            circum_center[0] = s * dx;
+            circum_center[1] = s * dy;
 
             auto radius = std::abs(s) * std::sqrtf(dx * dx + dy * dy - 4.0 * a * c);
 
-            return std::make_shared<DelaunayCell<VERTEXPTR, VERTEX>>(simplex, circumCenter, radius);
+            return std::make_shared<DelaunayCell<VERTEXPTR, VERTEX>>(simplex, circum_center, radius);
         }
     };
 

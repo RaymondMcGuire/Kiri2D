@@ -5,13 +5,6 @@
  * @LastEditors: Xu.WANG
  * @Description:
  */
-/***
- * @Author: Xu.WANG
- * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2021-12-29 14:58:29
- * @LastEditors: Xu.WANG
- * @Description:
- */
 
 #ifndef _HDV_Vertex4_H_
 #define _HDV_Vertex4_H_
@@ -82,17 +75,17 @@ namespace HDV::Primitives
             mPosition[3] = w;
         }
 
-        double distanceTo(std::shared_ptr<Vertex4> v)
+        double distanceTo(std::shared_ptr<Vertex4> v) const
         {
             return std::sqrt(distanceSquaredTo(v->x(), v->y(), v->z(), v->w()));
         }
 
-        double distanceTo(double vx, double vy, double vz, double vw)
+        double distanceTo(double vx, double vy, double vz, double vw) const
         {
             return std::sqrt(distanceSquaredTo(vx, vy, vz, vw));
         }
 
-        double distanceSquaredTo(double vx, double vy, double vz, double vw)
+        double distanceSquaredTo(double vx, double vy, double vz, double vw) const
         {
             auto x = mPosition[0] - vx;
             auto y = mPosition[1] - vy;
