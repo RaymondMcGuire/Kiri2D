@@ -8,10 +8,10 @@
 
 #include <kiri_pbs_cuda/data/cuda_dem_params.h>
 
-namespace KIRI
+namespace KIRI2D
 {
     CudaDemParams CUDA_DEM_PARAMS;
     CudaDemAppParams CUDA_DEM_APP_PARAMS;
 
     CudaDemNonSphericalParams CUDA_DEM_NS_PARAMS;
-} // namespace KIRI
+} // namespace KIRI2D

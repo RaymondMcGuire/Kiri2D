@@ -8,7 +8,7 @@
  */
 #include <random>
 #include <kiri_pbs_cuda/emitter/cuda_volume_emitter.cuh>
-namespace KIRI
+namespace KIRI2D
 {
 
     void CudaVolumeEmitter::BuildSphVolume(SphVolumeData &data, float2 lowest, int2 vsize, float particleRadius, float3 color)
@@ -29,7 +29,7 @@ namespace KIRI
         }
     }
 
-    void CudaVolumeEmitter::BuildUniDemVolume(DemVolumeData &data, float2 lowest, int2 vsize, float particleRadius, float3 color, float mass, float jitter)
+    void CudaVolumeEmitter::BuildUniDemVolume(MRDemVolumeData &data, float2 lowest, int2 vsize, float particleRadius, float3 color, float mass, float jitter)
     {
         if (!bEnable)
             return;
@@ -46,7 +46,7 @@ namespace KIRI
                 float2 p = make_float2(lowest.x + i * offset, lowest.y + j * offset);
 
                 data.pos.emplace_back(p + jitter * normalize(make_float2(dist(engine), dist(engine))));
-                // data.pos.emplace_back(p);
+                data.radius.emplace_back(particleRadius);
                 data.col.emplace_back(color);
                 data.mass.emplace_back(mass);
             }
@@ -383,4 +383,4 @@ namespace KIRI
             data.ns_data.emplace_back(ns_packs_data);
         }
     }
-} // namespace KIRI
+} // namespace KIRI2D

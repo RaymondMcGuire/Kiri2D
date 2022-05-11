@@ -251,7 +251,7 @@ void DEM_SetupParams()
 
     auto boundary_particles = std::make_shared<CudaBoundaryParticles>(boundaryData.pos, boundaryData.label);
     KIRI_LOG_INFO("Number of Boundary Particles = {0}", boundary_particles->Size());
-    // ExportBgeoFileCUDA(
+    // Write2BGEO(
     //     CUDA_DEM_APP_PARAMS.bgeo_export_folder,
     //     "boundary",
     //     boundary_particles->GetPosPtr(),
@@ -417,7 +417,7 @@ void Update()
 
         if (CUDA_DEM_APP_PARAMS.bgeo_export)
         {
-            ExportBgeoFileCUDA(
+            Write2BGEO(
                 CUDA_DEM_APP_PARAMS.bgeo_export_folder,
                 UInt2Str4Digit(SimCount - RunLiquidNumber),
                 particles->GetPosPtr(),
@@ -644,7 +644,7 @@ void UpdateNSSystem()
 
         if (CUDA_DEM_APP_PARAMS.bgeo_export)
         {
-            ExportBgeoFileCUDA(
+            Write2BGEO(
                 CUDA_DEM_APP_PARAMS.bgeo_export_folder,
                 UInt2Str4Digit(SimCount - RunLiquidNumber),
                 particles->GetPosPtr(),

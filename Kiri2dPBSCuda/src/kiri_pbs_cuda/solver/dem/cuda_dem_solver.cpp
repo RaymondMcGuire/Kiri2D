@@ -1,15 +1,15 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-03-15 22:37:26
  * @LastEditTime: 2021-09-13 16:19:05
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\solver\dem\cuda_dem_solver.cpp
  */
 
 #include <kiri_pbs_cuda/solver/dem/cuda_dem_solver.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     void CudaDemSolver::UpdateSolver(
         CudaDemParticlesPtr &sands,
@@ -45,4 +45,4 @@ namespace KIRI
             params.damping);
     }
 
-} // namespace KIRI
+} // namespace KIRI2D

@@ -15,7 +15,7 @@
 
 #include <kiri_pbs_cuda/sampler/cuda_shape_sampler_common_gpu.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 __global__ void ShapeSamplerMMT_CUDA(LevelSetShapeInfo info,
                                      float3 *faceVertices, size_t *samplerTable,
                                      int attempts, curandState *state) {
@@ -57,6 +57,6 @@ __global__ void ShapeSamplerMMT_CUDA(LevelSetShapeInfo info,
       setBitXor(samplerTable, gridIdx);
   }
 }
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_SHAPE_SAMPLER_GPU_CUH_ */

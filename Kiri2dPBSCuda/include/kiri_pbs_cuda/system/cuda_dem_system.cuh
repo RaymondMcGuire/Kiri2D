@@ -17,7 +17,7 @@
 #include <kiri_pbs_cuda/particle/cuda_boundary_particles.cuh>
 #include <kiri_pbs_cuda/searcher/cuda_neighbor_searcher.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     class CudaDemSystem : public CudaBaseSystem
     {
@@ -46,6 +46,6 @@ namespace KIRI
     };
 
     typedef SharedPtr<CudaDemSystem> CudaDemSystemPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

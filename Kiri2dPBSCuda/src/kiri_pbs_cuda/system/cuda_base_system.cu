@@ -9,7 +9,7 @@
 
 #include <kiri_pbs_cuda/system/cuda_base_system.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     CudaBaseSystem::CudaBaseSystem(
         CudaBoundaryParticlesPtr &boundaryParticles,
@@ -54,4 +54,4 @@ namespace KIRI
         KIRI_CUCALL(cudaEventDestroy(stop));
         return milliseconds;
     }
-} // namespace KIRI
+} // namespace KIRI2D

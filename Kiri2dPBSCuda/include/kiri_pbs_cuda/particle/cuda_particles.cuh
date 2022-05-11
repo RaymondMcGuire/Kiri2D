@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/data/cuda_array.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     class CudaParticles
     {
@@ -60,6 +60,6 @@ namespace KIRI
     };
 
     typedef SharedPtr<CudaParticles> CudaParticlesPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

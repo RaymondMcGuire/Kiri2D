@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
 
     static __global__ void TransferGPUData2VBO_CUDA(float4 *pos, float4 *col, float3 *lpos, float3 *lcol, const float radius, const size_t num, const size_t type)
@@ -50,6 +50,6 @@ namespace KIRI
         return;
     }
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_BASE_SYSTEM_GPU_CUH_ */

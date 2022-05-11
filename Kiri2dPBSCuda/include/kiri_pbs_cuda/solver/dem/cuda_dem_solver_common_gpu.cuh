@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2022-02-20 20:55:12
+ * @LastEditTime: 2022-05-11 17:24:32
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath:
+ * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
  * \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_dem_solver_common_gpu.cuh
@@ -17,7 +17,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 static __device__ void ComputeDemForces(float2 *f, float2 dij, float2 vij,
                                         float rij, float kn, float ks,
@@ -182,7 +182,6 @@ static __device__ void ComputeDemWorldBoundaryForces(
 
   // FIXME
   float rij = boundaryRadius + radiusi;
-  float ri2 = radiusi + radiusi;
   float kn = young * radiusi;
   float ks = kn * poisson;
 
@@ -265,6 +264,6 @@ static __device__ void ComputeNSDemWorldBoundaryForces(
   return;
 }
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_DEM_SOLVER_COMMON_GPU_CUH_ */

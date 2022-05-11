@@ -8,7 +8,7 @@
 
 #include <kiri_pbs_cuda/solver/dem/cuda_non_spherical_solver.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     void CudaNonSphericalSolver::UpdateSolver(
         CudaNonSphericalParticlesPtr &sands,
@@ -39,4 +39,4 @@ namespace KIRI
                                              bparams.highest_point);
     }
 
-} // namespace KIRI
+} // namespace KIRI2D

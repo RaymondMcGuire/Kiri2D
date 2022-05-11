@@ -15,7 +15,7 @@
 
 #include <kiri_pbs_cuda/cuda_helper/helper_math.h>
 
-namespace KIRI
+namespace KIRI2D
 {
     enum class ColormapType
     {

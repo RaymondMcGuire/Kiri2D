@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     struct CudaBoundaryParams
     {
@@ -29,6 +29,6 @@ namespace KIRI
 
     extern CudaBoundaryParams CUDA_BOUNDARY_PARAMS;
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

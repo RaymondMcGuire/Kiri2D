@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 class CudaBaseSolver {
 public:
   explicit CudaBaseSolver(const size_t num)
@@ -30,6 +30,6 @@ protected:
 };
 
 typedef SharedPtr<CudaBaseSolver> CudaBaseSolverPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

@@ -9,7 +9,7 @@
 
 #include <kiri_pbs_cuda/solver/dem/cuda_mr_dem_solver.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     void CudaMRDemSolver::UpdateSolver(
         CudaDemParticlesPtr &sands,
@@ -45,4 +45,4 @@ namespace KIRI
             params.damping);
     }
 
-} // namespace KIRI
+} // namespace KIRI2D

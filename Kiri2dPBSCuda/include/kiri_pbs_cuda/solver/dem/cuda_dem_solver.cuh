@@ -21,7 +21,7 @@
 
 #include <kiri_pbs_cuda/particle/cuda_dem_particles.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 class CudaDemSolver : public CudaBaseSolver {
 public:
   virtual void UpdateSolver(CudaDemParticlesPtr &sands,
@@ -49,6 +49,6 @@ protected:
 };
 
 typedef SharedPtr<CudaDemSolver> CudaDemSolverPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_DEM_SOLVER_CUH_ */

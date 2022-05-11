@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2020-07-04 14:48:23
- * @LastEditTime: 2021-11-19 16:35:35
+ * @LastEditTime: 2022-05-11 17:23:37
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\solver\dem\cuda_mr_dem_solver_gpu.cuh
@@ -15,7 +15,7 @@
 
 #include <kiri_pbs_cuda/solver/dem/cuda_dem_solver_common_gpu.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 /**
  * @description: Multi-radius DEM method: normal force
@@ -104,6 +104,6 @@ __global__ void ComputeMRDemLinearMomentum_CUDA(
   return;
 }
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_DEM_SOLVER_GPU_CUH_ */

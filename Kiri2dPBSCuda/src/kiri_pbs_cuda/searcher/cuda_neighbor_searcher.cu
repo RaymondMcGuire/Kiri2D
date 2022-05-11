@@ -15,7 +15,7 @@
 #include <kiri_pbs_cuda/particle/cuda_mr_dem_particles.cuh>
 #include <kiri_pbs_cuda/particle/cuda_non_spherical_particles.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 CudaGNBaseSearcher::CudaGNBaseSearcher(const float2 lowestPoint,
                                        const float2 highestPoint,
@@ -106,4 +106,4 @@ void CudaGNBoundarySearcher::SortData(const CudaParticlesPtr &particles) {
   KIRI_CUKERNAL();
 }
 
-} // namespace KIRI
+} // namespace KIRI2D

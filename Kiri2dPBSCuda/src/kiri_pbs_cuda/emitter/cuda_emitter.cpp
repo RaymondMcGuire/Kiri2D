@@ -1,14 +1,14 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-03-19 22:04:26
  * @LastEditTime: 2021-03-19 22:34:27
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri\KiriPBSCuda\src\kiri_pbs_cuda\emitter\cuda_emitter.cpp
  */
 
 #include <kiri_pbs_cuda/emitter/cuda_emitter.cuh>
-namespace KIRI
+namespace KIRI2D
 {
 
     Vec_Float3 CudaEmitter::Emit()
@@ -78,4 +78,4 @@ namespace KIRI
             bBuild = true;
     }
 
-} // namespace KIRI
+} // namespace KIRI2D

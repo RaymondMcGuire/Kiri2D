@@ -13,7 +13,7 @@
 #pragma once
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
-namespace KIRI {
+namespace KIRI2D {
 
 __global__ void CountingInCell_CUDA(size_t *cellStart, size_t *particle2cell,
                                     const size_t num) {
@@ -23,5 +23,5 @@ __global__ void CountingInCell_CUDA(size_t *cellStart, size_t *particle2cell,
   atomicAdd(&cellStart[particle2cell[i]], 1);
   return;
 }
-} // namespace KIRI
+} // namespace KIRI2D
 #endif /* _CUDA_NEIGHBOR_SEARCHER_GPU_CUH_ */

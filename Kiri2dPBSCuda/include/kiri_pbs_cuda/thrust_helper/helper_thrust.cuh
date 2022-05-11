@@ -44,7 +44,7 @@ namespace ThrustHelper
     struct CompareLengthCuda
     {
         static_assert(
-            KIRI::IsSame_Float2<T>::value || KIRI::IsSame_Float3<T>::value || KIRI::IsSame_Float4<T>::value,
+            KIRI2D::IsSame_Float2<T>::value || KIRI2D::IsSame_Float3<T>::value || KIRI2D::IsSame_Float4<T>::value,
             "data type is not correct");
 
         __host__ __device__ bool operator()(T f1, T f2)

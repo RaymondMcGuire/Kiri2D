@@ -7,7 +7,7 @@
  */
 
 #include <kiri_pbs_cuda/data/cuda_ns_pack.h>
-namespace KIRI
+namespace KIRI2D
 {
 
     NSPack::NSPack() {}

@@ -1,7 +1,7 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-11-19 15:17:58
+ * @LastEditTime: 2022-05-11 17:04:24
  * @LastEditors: Xu.WANG
  * @Description:
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\include\kiri_pbs_cuda\emitter\cuda_volume_emitter.cuh
@@ -16,7 +16,7 @@
 #include <kiri_pbs_cuda/data/cuda_ns_pack.h>
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 struct SphVolumeData {
   Vec_Float2 pos;
@@ -63,7 +63,7 @@ public:
 
   void BuildSphVolume(SphVolumeData &data, float2 lowest, int2 vsize,
                       float particleRadius, float3 color);
-  void BuildUniDemVolume(DemVolumeData &data, float2 lowest, int2 vsize,
+  void BuildUniDemVolume(MRDemVolumeData &data, float2 lowest, int2 vsize,
                          float particleRadius, float3 color, float mass,
                          float jitter = 0.001f);
   void BuildDemUniShapeVolume(DemShapeVolumeData &data, Vec_Float3 shape,
@@ -90,6 +90,6 @@ private:
 };
 
 typedef SharedPtr<CudaVolumeEmitter> CudaVolumeEmitterPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

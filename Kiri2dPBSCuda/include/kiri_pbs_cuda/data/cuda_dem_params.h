@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
 #define MAX_SUB_SPHERICAL_NUM 50
 
@@ -125,6 +125,6 @@ namespace KIRI
 
     extern CudaDemNonSphericalParams CUDA_DEM_NS_PARAMS;
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

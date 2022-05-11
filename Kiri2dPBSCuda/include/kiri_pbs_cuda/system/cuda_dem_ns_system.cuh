@@ -18,7 +18,7 @@
 #include <kiri_pbs_cuda/searcher/cuda_neighbor_searcher.cuh>
 #include <kiri_pbs_cuda/solver/dem/cuda_non_spherical_solver.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 class CudaDemNSSystem : public CudaBaseSystem {
 public:
   explicit CudaDemNSSystem(CudaNonSphericalParticlesPtr &sandParticles,
@@ -44,6 +44,6 @@ private:
 };
 
 typedef SharedPtr<CudaDemNSSystem> CudaDemNSSystemPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

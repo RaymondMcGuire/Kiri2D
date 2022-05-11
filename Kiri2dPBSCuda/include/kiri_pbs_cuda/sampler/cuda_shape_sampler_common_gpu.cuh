@@ -17,7 +17,7 @@
 #include <curand_kernel.h>
 #include <kiri_pbs_cuda/sampler/cuda_sampler_struct.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 // generates a random float between 0 and 1
 static __device__ float RndFloat(curandState *globalState, int ind) {
@@ -161,6 +161,6 @@ static __device__ bool intersects(float3 V1, float3 V2, float3 V3, float3 dir,
   return false;
 }
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_SHAPE_SAMPLER_COMMON_GPU_CUH_ */

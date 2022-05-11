@@ -15,7 +15,7 @@
 #include <kiri_pbs_cuda/solver/dem/cuda_non_spherical_solver_gpu.cuh>
 #include <kiri_pbs_cuda/thrust_helper/helper_thrust.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 void CudaNonSphericalSolver::ComputeNSDemLinearMomentum(
     CudaNonSphericalParticlesPtr &sands, const float young, const float poisson,
@@ -64,4 +64,4 @@ void CudaNonSphericalSolver::NonSphericalParticlesTimeIntegration(
   KIRI_CUKERNAL();
 }
 
-} // namespace KIRI
+} // namespace KIRI2D

@@ -1,10 +1,10 @@
 /*
  * @Author: Xu.WANG
  * @Date: 2021-02-04 12:36:10
- * @LastEditTime: 2021-04-19 00:26:19
+ * @LastEditTime: 2022-05-11 18:23:42
  * @LastEditors: Xu.WANG
  * @Description:
- * @FilePath: \Kiri\KiriPBSCuda\include\kiri_pbs_cuda\data\cuda_array.cuh
+ * @FilePath: \Kiri2dPBSCuda\include\kiri_pbs_cuda\data\cuda_array.cuh
  */
 
 #ifndef _CUDA_ARRAY_CUH_
@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 template <typename T> class CudaArray {
   // static_assert(
   //     IsSame_Float<T>::value || IsSame_Float2<T>::value ||
@@ -53,6 +53,6 @@ private:
   const size_t mLen;
   const SharedPtr<T> mArray;
 };
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

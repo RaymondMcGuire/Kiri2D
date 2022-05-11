@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/particle/cuda_particles.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
 	class CudaBoundaryParticles final : public CudaParticles
 	{
@@ -48,6 +48,6 @@ namespace KIRI
 	};
 
 	typedef SharedPtr<CudaBoundaryParticles> CudaBoundaryParticlesPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

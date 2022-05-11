@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     template <typename T>
     struct CudaAxisAlignedBox

@@ -15,7 +15,7 @@
 
 #include <kiri_pbs_cuda/particle/cuda_boundary_particles.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 enum SearcherParticleType { DEM = 0, MRDEM = 1, NON_SPHERICAL = 2 };
 
@@ -98,6 +98,6 @@ protected:
 typedef SharedPtr<CudaGNBaseSearcher> CudaGNBaseSearcherPtr;
 typedef SharedPtr<CudaGNSearcher> CudaGNSearcherPtr;
 typedef SharedPtr<CudaGNBoundarySearcher> CudaGNBoundarySearcherPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* CudaNeighborSearcher */

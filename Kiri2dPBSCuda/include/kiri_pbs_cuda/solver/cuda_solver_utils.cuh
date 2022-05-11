@@ -5,7 +5,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 struct LinearAttenCoeff {
   float c0, csat;
   __host__ __device__ LinearAttenCoeff(const float c0, const float csat)
@@ -51,6 +51,6 @@ struct QuadraticBezierCoeff {
     }
   }
 };
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

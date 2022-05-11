@@ -15,7 +15,7 @@
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 #include <curand.h>
 #include <curand_kernel.h>
-namespace KIRI
+namespace KIRI2D
 {
 
     // generates a random float between 0 and 1
@@ -33,6 +33,6 @@ namespace KIRI
         curand_init(seed, id, 0, &state[id]);
     }
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_SOLVER_COMMON_GPU_CUH_ */

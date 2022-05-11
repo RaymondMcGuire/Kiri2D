@@ -16,7 +16,7 @@
 #include <kiri_pbs_cuda/data/cuda_dem_params.h>
 #include <kiri_pbs_cuda/particle/cuda_particles.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 class CudaNonSphericalParticles : public CudaParticles {
 public:
@@ -76,6 +76,6 @@ protected:
 };
 
 typedef SharedPtr<CudaNonSphericalParticles> CudaNonSphericalParticlesPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif

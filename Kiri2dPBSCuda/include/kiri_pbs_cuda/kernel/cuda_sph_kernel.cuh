@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/kiri_pbs_pch.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
     struct CubicKernel
     {
@@ -202,6 +202,6 @@ namespace KIRI
         }
     };
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_SPH_KERNEL_CUH_ */

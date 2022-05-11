@@ -15,7 +15,7 @@
 #include <kiri_pbs_cuda/solver/dem/cuda_dem_solver_gpu.cuh>
 #include <kiri_pbs_cuda/thrust_helper/helper_thrust.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 void CudaDemSolver::Advect(CudaDemParticlesPtr &sands, const float dt,
                            const float damping) {
   size_t num = sands->Size();
@@ -54,4 +54,4 @@ void CudaDemSolver::ComputeDemLinearMomentum(
   KIRI_CUKERNAL();
 }
 
-} // namespace KIRI
+} // namespace KIRI2D

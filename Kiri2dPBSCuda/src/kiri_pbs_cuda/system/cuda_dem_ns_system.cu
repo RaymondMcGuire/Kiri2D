@@ -11,7 +11,7 @@
 #include <kiri_pbs_cuda/system/cuda_dem_ns_system.cuh>
 #include <kiri_pbs_cuda/thrust_helper/helper_thrust.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 CudaDemNSSystem::CudaDemNSSystem(CudaNonSphericalParticlesPtr &sandParticles,
                                  CudaBoundaryParticlesPtr &boundaryParticles,
@@ -34,4 +34,4 @@ void CudaDemNSSystem::OnUpdateSolver(float renderInterval) {
   cudaDeviceSynchronize();
   KIRI_CUKERNAL();
 }
-} // namespace KIRI
+} // namespace KIRI2D

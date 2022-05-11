@@ -71,7 +71,7 @@
 // MultiSPH Max Phase Num
 #define MULTISPH_MAX_PHASE_NUM 2
 
-namespace KIRI {
+namespace KIRI2D {
 // Helper Function
 static inline __host__ __device__ uint CuCeilDiv(const uint a, const uint b) {
   return (a % b != 0) ? (a / b + 1) : (a / b);
@@ -113,5 +113,5 @@ template <class T> constexpr auto Huge() {
   return std::numeric_limits<T>::max();
 }
 
-} // namespace KIRI
+} // namespace KIRI2D
 #endif

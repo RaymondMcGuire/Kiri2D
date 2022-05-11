@@ -17,7 +17,7 @@
 #include <kiri_pbs_cuda/data/cuda_dem_params.h>
 #include <kiri_pbs_cuda/solver/dem/cuda_dem_solver_common_gpu.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 static __device__ void
 ComputeNSDemForces(float2 *f, float *torque, const size_t i,
@@ -190,6 +190,6 @@ NSTimeIntegration_CUDA(float2 *pos, float2 *vel, float *ang_vel,
   // }
   }
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_DEM_SOLVER_GPU_CUH_ */

@@ -11,7 +11,7 @@
 
 #include <kiri_pbs_cuda/data/cuda_dem_params.h>
 #include <thrust/host_vector.h>
-namespace KIRI
+namespace KIRI2D
 {
     class NSPack
     {
@@ -67,6 +67,6 @@ namespace KIRI
     };
 
     typedef std::shared_ptr<NSPack> NSPackPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_NS_PACK_H_ */

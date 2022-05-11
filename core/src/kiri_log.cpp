@@ -10,7 +10,7 @@
 #include <kiri_log.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-namespace KIRI
+namespace KIRI2D
 {
     std::shared_ptr<spdlog::logger> KiriLog::mLogger;
 

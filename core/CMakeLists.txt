@@ -17,11 +17,12 @@ endif()
 # KIRI Math Library
 set(KIRI_MATH_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/external/KiriMathMini/include)
 
-# # KIRI PBS CUDA Library
-# set(KIRI_PBS_CUDA_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/KiriPBSCuda/include)
-
 # Extra Library
 set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/external/KiriExtlib/include)
+set(EXTLIBS_LIB ${CMAKE_SOURCE_DIR}/external/KiriExtlib/lib)
+link_directories(${EXTLIBS_LIB})
+
+# Configuration
 set(CONFIGURATION_INCLUDE ${CMAKE_BINARY_DIR}/configuration)
 
 # KIRI 2d Library

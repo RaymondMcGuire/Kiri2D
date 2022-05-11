@@ -10,7 +10,7 @@
 #include <kiri_pbs_cuda/thrust_helper/helper_thrust.cuh>
 #include <kiri_pbs_cuda/system/cuda_dem_system.cuh>
 #include <kiri_pbs_cuda/system/cuda_base_system_gpu.cuh>
-namespace KIRI
+namespace KIRI2D
 {
 
     CudaDemSystem::CudaDemSystem(
@@ -46,4 +46,4 @@ namespace KIRI
         cudaDeviceSynchronize();
         KIRI_CUKERNAL();
     }
-} // namespace KIRI
+} // namespace KIRI2D

@@ -16,7 +16,7 @@
 #include <kiri_pbs_cuda/data/cuda_array.cuh>
 #include <kiri_pbs_cuda/sampler/cuda_sampler_struct.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 class CudaShapeSampler {
 public:
   explicit CudaShapeSampler(const LevelSetShapeInfo &info,
@@ -58,6 +58,6 @@ private:
 };
 
 typedef SharedPtr<CudaShapeSampler> CudaShapeSamplerPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_SHAPE_SAMPLER_CUH_ */

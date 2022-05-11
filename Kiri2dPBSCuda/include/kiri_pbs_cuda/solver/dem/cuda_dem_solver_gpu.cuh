@@ -16,7 +16,7 @@
 
 #include <kiri_pbs_cuda/solver/dem/cuda_dem_solver_common_gpu.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 
 /**
  * @description: Uniform radius DEM method: normal force + shear force
@@ -97,6 +97,6 @@ __global__ void ComputeDemLinearMomentum_CUDA(
   return;
 }
 
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_DEM_SOLVER_GPU_CUH_ */

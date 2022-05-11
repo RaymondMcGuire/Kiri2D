@@ -8,7 +8,7 @@
  */
 
 #include <kiri_pbs_cuda/particle/cuda_dem_particles.cuh>
-namespace KIRI
+namespace KIRI2D
 {
     void CudaDemParticles::Advect(const float dt, const float damping)
     {
@@ -41,4 +41,4 @@ namespace KIRI
     }
   
 
-} // namespace KIRI
+} // namespace KIRI2D

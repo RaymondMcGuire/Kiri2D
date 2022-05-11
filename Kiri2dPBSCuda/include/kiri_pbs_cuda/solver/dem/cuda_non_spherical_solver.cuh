@@ -21,7 +21,7 @@
 
 #include <kiri_pbs_cuda/particle/cuda_non_spherical_particles.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 class CudaNonSphericalSolver : public CudaBaseSolver {
 public:
   virtual void UpdateSolver(CudaNonSphericalParticlesPtr &sands,
@@ -56,6 +56,6 @@ protected:
 };
 
 typedef SharedPtr<CudaNonSphericalSolver> CudaNonSphericalSolverPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif /* _CUDA_NON_SPHERICAL_SOLVER_CUH_ */

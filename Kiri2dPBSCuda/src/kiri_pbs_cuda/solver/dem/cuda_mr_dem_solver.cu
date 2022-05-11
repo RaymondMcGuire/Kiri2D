@@ -13,7 +13,7 @@
 #include <kiri_pbs_cuda/solver/dem/cuda_mr_dem_solver_gpu.cuh>
 #include <kiri_pbs_cuda/thrust_helper/helper_thrust.cuh>
 
-namespace KIRI {
+namespace KIRI2D {
 void CudaMRDemSolver::ComputeMRDemLinearMomentum(
     CudaMRDemParticlesPtr &sands, const float young, const float poisson,
     const float tanFrictionAngle, const float c0, const float dt,const float boundaryRadius,
@@ -30,4 +30,4 @@ void CudaMRDemSolver::ComputeMRDemLinearMomentum(
   KIRI_CUKERNAL();
 }
 
-} // namespace KIRI
+} // namespace KIRI2D

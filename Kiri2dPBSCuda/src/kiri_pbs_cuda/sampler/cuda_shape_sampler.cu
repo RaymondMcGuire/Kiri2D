@@ -11,7 +11,7 @@
 #include <kiri_pbs_cuda/sampler/cuda_shape_sampler_gpu.cuh>
 #include <random>
 
-namespace KIRI {
+namespace KIRI2D {
 CudaShapeSampler::CudaShapeSampler(const LevelSetShapeInfo &info,
                                    const Vec_Float3 &faceVertices,
                                    const int attemptNum,
@@ -112,4 +112,4 @@ Vec_Float3 CudaShapeSampler::GetInsidePoints(int num) {
   }
   return posArray;
 }
-} // namespace KIRI
+} // namespace KIRI2D

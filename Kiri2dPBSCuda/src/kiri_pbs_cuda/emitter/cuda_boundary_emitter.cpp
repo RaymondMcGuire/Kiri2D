@@ -1,13 +1,13 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-03-19 22:04:26
  * @LastEditTime: 2021-09-03 13:23:32
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2dPBSCuda\src\kiri_pbs_cuda\emitter\cuda_boundary_emitter.cpp
  */
 #include <kiri_pbs_cuda/emitter/cuda_boundary_emitter.cuh>
-namespace KIRI
+namespace KIRI2D
 {
     void CudaBoundaryEmitter::BuildWorldBoundary(BoundaryData &data, const float2 &lowest, const float2 &highest, const float particleRadius)
     {
@@ -55,4 +55,4 @@ namespace KIRI
         }
     }
 
-} // namespace KIRI
+} // namespace KIRI2D

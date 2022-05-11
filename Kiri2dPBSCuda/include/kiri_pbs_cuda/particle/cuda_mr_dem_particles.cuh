@@ -14,7 +14,7 @@
 
 #include <kiri_pbs_cuda/particle/cuda_dem_particles.cuh>
 
-namespace KIRI
+namespace KIRI2D
 {
 	class CudaMRDemParticles : public CudaDemParticles
 	{
@@ -47,6 +47,6 @@ namespace KIRI
 	};
 
 	typedef SharedPtr<CudaMRDemParticles> CudaMRDemParticlesPtr;
-} // namespace KIRI
+} // namespace KIRI2D
 
 #endif
