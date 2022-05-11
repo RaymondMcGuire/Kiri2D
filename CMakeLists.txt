@@ -74,6 +74,7 @@ add_subdirectory(demos/voronoi2d_scene1)
 add_subdirectory(demos/voronoi2d_scene2)
 add_subdirectory(demos/lloyd2d_scene1)
 add_subdirectory(demos/lloyd2d_scene2)
+add_subdirectory(demos/test_bayesian)
 
 if(NOT APPLE AND ${ENABLE_CUDA})
 add_subdirectory(kiri2dPBSCuda)
