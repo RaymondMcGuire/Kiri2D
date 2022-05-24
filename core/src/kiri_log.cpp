@@ -14,7 +14,7 @@ namespace KIRI2D
 {
     std::shared_ptr<spdlog::logger> KiriLog::mLogger;
 
-    void KiriLog::Init()
+    void KiriLog::init()
     {
         spdlog::set_pattern("%^[%T] %n: %v%$");
 

@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2022-05-10 18:06:21
- * @LastEditTime: 2022-05-10 18:09:15
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-05-10 18:52:05
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 09:38:36
+ * @FilePath: \Kiri2D\demos\lloyd2d_scene2\src\main.cpp
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #include <kiri2d.h>
 
@@ -13,12 +15,12 @@ using namespace HDV;
 int main(int argc, char *argv[])
 {
     // log system
-    KIRI::KiriLog::Init();
+    KiriLog::init();
 
     // scene renderer config
     auto window_height = 500.f;
     auto window_width = 500.f;
-    auto offset = Vector2F(window_width, window_height) / 2.f;
+    auto offset = Vector2F((size_t)window_width, (size_t)window_height) / 2.f;
     auto scene = std::make_shared<KiriScene2D>((size_t)window_width, (size_t)window_height);
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
@@ -63,17 +65,17 @@ int main(int argc, char *argv[])
 
         // voronoi sites
         auto sites = voronoi2d->sites();
-        for (size_t i = 0; i < sites.size(); i++)
+        for (auto i = 0; i < sites.size(); i++)
         {
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->polygon();
-            for (size_t j = 0; j < cellpolygon->positions().size(); j++)
+            auto cell_polygon = site->polygon();
+            for (auto j = 0; j < cell_polygon->positions().size(); j++)
             {
-                auto vert = cellpolygon->positions()[j];
-                auto vert1 = cellpolygon->positions()[(j + 1) % (cellpolygon->positions().size())];
+                auto vert = cell_polygon->positions()[j];
+                auto vert1 = cell_polygon->positions()[(j + 1) % (cell_polygon->positions().size())];
                 auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
                 line.thick = 1.f;
                 precompute_lines.emplace_back(line);
@@ -82,7 +84,7 @@ int main(int argc, char *argv[])
         }
 
         // draw voronoi sites and cells
-        for (size_t i = 0; i < precompute_points.size(); i++)
+        for (auto i = 0; i < precompute_points.size(); i++)
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
 
         for (auto i = 0; i < precompute_lines.size(); ++i)

@@ -234,7 +234,7 @@ Vector2F transform1(Vector2F a)
 
 int main41()
 {
-    KIRI::KiriLog::Init();
+    KiriLog::init();
 
     float height = 1080.f;
     float width = 1920.f;

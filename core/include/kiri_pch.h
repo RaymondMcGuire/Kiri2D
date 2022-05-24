@@ -1,11 +1,13 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2020-10-19 01:37:05
- * @LastEditTime: 2021-09-13 14:17:38
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-09-13 18:42:14
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 09:45:13
+ * @FilePath: \Kiri2D\core\include\kiri_pch.h
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri_pch.h
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
+
 #ifndef _KIRI_PCH_H_
 #define _KIRI_PCH_H_
 

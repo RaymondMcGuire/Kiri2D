@@ -1,9 +1,11 @@
-/***
- * @Author: Xu.WANG
+/*** 
+ * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-10 10:12:50
- * @LastEditors: Xu.WANG
- * @Description:
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 10:12:02
+ * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\primitives\vertex2.h
+ * @Description: 
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
  */
 
 #ifndef _HDV_VERTEX2_H_

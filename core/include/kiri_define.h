@@ -1,26 +1,18 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2022-02-19 10:59:26
- * @LastEditTime: 2022-02-20 19:48:02
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-05-12 12:49:56
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 09:45:47
+ * @FilePath: \Kiri2D\core\include\kiri_define.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-/***
- * @Author: Xu.WANG
- * @Date: 2020-10-18 01:04:15
- * @LastEditTime: 2021-02-20 19:41:33
- * @LastEditors: Xu.WANG
- * @Description:
- * @FilePath: \KiriCore\include\kiri_define.h
- */
-
 #ifndef _KIRI_DEFINE_H_
 #define _KIRI_DEFINE_H_
 #pragma once
 
 #if defined(_WIN32) || defined(_WIN64)
 #define KIRI_WINDOWS
-//#define ENABLE_CUDA
 #elif defined(__APPLE__)
 #define KIRI_APPLE
 #endif

@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-12-05 19:44:04
- * @LastEditTime: 2021-12-05 19:47:34
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-05-02 13:22:27
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 10:22:59
+ * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\hull\convex_hull.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _HDV_CONVEX_HULL_H_
@@ -491,12 +493,12 @@ namespace HDV::Hull
 
         void findNormalVectorND(std::vector<int> Vertices, std::vector<double> &normal)
         {
-            /* We need to solve the matrix A n = B where
-             *  - A contains coordinates of Vertices as columns
-             *  - B is vector with all 1's. Really, it should be the distance of
-             *      the plane from the origin, but - since we're not worried about that
-             *      here and we will normalize the normal anyway - all 1's suffices.
-             */
+            // We need to solve the matrix A n = B where
+            //   - A contains coordinates of Vertices as columns
+            //   - B is vector with all 1's. Really, it should be the distance of
+            //       the plane from the origin, but - since we're not worried about that
+            //       here and we will normalize the normal anyway - all 1's suffices.
+            //
             std::vector<int> iPiv;
             std::vector<double> data;
             std::vector<double> nDNormalHelperVector;
@@ -934,14 +936,6 @@ namespace HDV::Hull
                 return 0;
         }
 
-        /**
-         * Compares the values of two Vertices. The return value (-1, 0 or +1) are found
-         * by first checking the first coordinate and then progressing through the rest.
-         * In this way {2, 8} will be a "-1" (less than) {3, 1}.
-         * @param  {int} u : vertex index
-         * @param  {int} v : compared vertex index
-         * @return {int}   : compared result
-         */
         int lexCompare(int u, int v)
         {
             int uOffset = u * mDimension, vOffset = v * mDimension;
@@ -1061,12 +1055,6 @@ namespace HDV::Hull
             return extremes;
         }
 
-        /**
-         * Computes the sum of square distances to the initial points
-         * @param  {VERTEXPTR} pivot                      :
-         * @param  {std::vector<VERTEXPTR>} initialPoints :
-         * @return {double}                               :
-         */
         double squaredDistanceSum(const VERTEXPTR &pivot, const std::vector<VERTEXPTR> &initialPoints)
         {
             auto initPtsNum = initialPoints.size();
@@ -1088,11 +1076,6 @@ namespace HDV::Hull
             return sum;
         }
 
-        /**
-         * Calculates the normal and offset of the hyper-plane given by the face's Vertices
-         * @param  {std::shared_ptr<SimplexNode>} face :
-         * @return {bool}                              :
-         */
         bool calculateFacePlane(const std::shared_ptr<SimplexNode> &face)
         {
             auto Vertices = face->vertices();
@@ -1135,11 +1118,6 @@ namespace HDV::Hull
             return true;
         }
 
-        /**
-         * Check if 2 faces are adjacent and if so, update their AdjacentFaces array
-         * @param  {std::shared_ptr<SimplexNode>} l :
-         * @param  {std::shared_ptr<SimplexNode>} r :
-         */
         void updateAdjacency(const std::shared_ptr<SimplexNode> &l, const std::shared_ptr<SimplexNode> &r)
         {
             auto lv = l->vertices();
@@ -1201,10 +1179,6 @@ namespace HDV::Hull
 
 #pragma region Process
 
-        /**
-         * Tags all faces seen from the current vertex with 1
-         * @param  {std::shared_ptr<SimplexNode>} currentFace :
-         */
         void tagAffectedFaces(const std::shared_ptr<SimplexNode> &currentFace)
         {
             mBuffer->AffectedFaceBuffer.clear();
@@ -1212,10 +1186,6 @@ namespace HDV::Hull
             traverseAffectedFaces(currentFace);
         }
 
-        /**
-         * Recursively traverse all the relevant faces
-         * @param  {std::shared_ptr<SimplexNode>} currentFace :
-         */
         void traverseAffectedFaces(const std::shared_ptr<SimplexNode> &currentFace)
         {
 
@@ -1348,11 +1318,6 @@ namespace HDV::Hull
             return true;
         }
 
-        /**
-         * Creates a new deferred face
-         * @param  {std::shared_ptr<DeferredSimplex>} MakeDeferredFace( :
-         * @return {std::shared_ptr<DeferredSimplex>}                   :
-         */
         std::shared_ptr<DeferredSimplex> MakeDeferredFace(
             const std::shared_ptr<SimplexNode> &face,
             int faceIndex,

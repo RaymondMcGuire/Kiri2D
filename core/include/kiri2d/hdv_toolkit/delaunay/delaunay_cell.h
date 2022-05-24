@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2022-05-09 11:39:05
- * @LastEditors: Xu.WANG
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 10:01:15
+ * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\delaunay\delaunay_cell.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _HDV_DELAUNAY_CELL_H_

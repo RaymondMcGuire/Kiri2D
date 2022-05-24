@@ -1,10 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2020-10-20 12:06:00
- * @LastEditTime: 2021-02-20 19:41:59
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-05-12 12:49:56
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 09:42:15
+ * @FilePath: \Kiri2D\core\include\kiri_timer.h
  * @Description:
- * @FilePath: \KiriCore\include\kiri_timer.h
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI_TIMER_H_
@@ -24,9 +25,9 @@ namespace KIRI2D
 
         operator float() const { return mTime; }
 
-        inline const float GetSeconds() const { return mTime; }
-        inline const float GetMilliSeconds() const { return mTime * 1000.0f; }
-        inline const float GetFps() const { return 1.f / mTime; }
+        inline const float seconds() const { return mTime; }
+        inline const float milliSeconds() const { return mTime * 1000.0f; }
+        inline const float fps() const { return 1.f / mTime; }
 
     private:
         float mTime;
@@ -37,31 +38,31 @@ namespace KIRI2D
     public:
         KiriTimer() : mName("Default")
         {
-            Restart();
+            restart();
         }
 
         explicit KiriTimer(const String &name) : mName(name)
         {
-            Restart();
+            restart();
         }
 
-        inline void Restart()
+        inline void restart()
         {
             mStartTime = std::chrono::steady_clock::now();
         }
 
-        inline double Elapsed(bool restart = false)
+        inline double elapsed(bool restart = false)
         {
             mEndTime = std::chrono::steady_clock::now();
             std::chrono::duration<double> diff = mEndTime - mStartTime;
             if (restart)
-                this->Restart();
+                this->restart();
             return diff.count();
         }
 
-        void Rlog(const String &tip = "", bool unitMs = false)
+        void resetLog(const String &tip = "", bool unitMs = false)
         {
-            Log(true, tip, unitMs, false);
+            log(true, tip, unitMs, false);
         }
 
         /***
@@ -69,26 +70,26 @@ namespace KIRI2D
          * @param {reset:reset timer or not; unitMs: print ms / sec; tip: print extra info; kill: after print timer, kill thread or not}
          * @return {void}
          */
-        void Log(bool reset = false, const String &tip = "",
+        void log(bool reset = false, const String &tip = "",
                  bool unitMs = true, bool kill = false)
         {
             if (unitMs)
             {
                 if (tip.length() > 0)
-                    KIRI_LOG_INFO("KiriTimer({0}) Time elapsed:{1} ms", tip, Elapsed() * 1000.f);
+                    KIRI_LOG_INFO("KiriTimer({0}) Time elapsed:{1} ms", tip, elapsed() * 1000.f);
                 else
-                    KIRI_LOG_INFO("KiriTimer({0}) Time elapsed:{1} ms", mName, Elapsed() * 1000.f);
+                    KIRI_LOG_INFO("KiriTimer({0}) Time elapsed:{1} ms", mName, elapsed() * 1000.f);
             }
             else
             {
                 if (tip.length() > 0)
-                    KIRI_LOG_INFO("KiriTimer({0}) Time elapsed:{1} s", tip, Elapsed());
+                    KIRI_LOG_INFO("KiriTimer({0}) Time elapsed:{1} s", tip, elapsed());
                 else
-                    KIRI_LOG_INFO("KiriTimer({0}) Time elapsed:{1} s", mName, Elapsed());
+                    KIRI_LOG_INFO("KiriTimer({0}) Time elapsed:{1} s", mName, elapsed());
             }
 
             if (reset)
-                this->Restart();
+                this->restart();
 
             if (kill)
                 exit(5);

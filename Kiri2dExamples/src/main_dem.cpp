@@ -404,15 +404,15 @@ void Update()
         auto numOfSubTimeSteps = DEMSystem->GetNumOfSubTimeSteps();
         KIRI_LOG_INFO("Simulation Frame={0}, Sub-Simulation Total Number={1}", ++SimCount, numOfSubTimeSteps);
 
-        PerFrameTimer.Restart();
+        PerFrameTimer.restart();
         for (size_t i = 0; i < numOfSubTimeSteps; i++)
         {
             // KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
             DEMSystem->UpdateSystem(RenderInterval);
         }
 
-        // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
-        TotalFrameTime += PerFrameTimer.Elapsed();
+        // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.elapsed());
+        TotalFrameTime += PerFrameTimer.elapsed();
         auto particles = DEMSystem->GetParticles();
 
         if (CUDA_DEM_APP_PARAMS.bgeo_export)
@@ -631,15 +631,15 @@ void UpdateNSSystem()
         auto numOfSubTimeSteps = DEMNSSystem->GetNumOfSubTimeSteps();
         KIRI_LOG_INFO("Simulation Frame={0}, Sub-Simulation Total Number={1}", ++SimCount, numOfSubTimeSteps);
 
-        PerFrameTimer.Restart();
+        PerFrameTimer.restart();
         for (size_t i = 0; i < numOfSubTimeSteps; i++)
         {
             KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
             DEMNSSystem->UpdateSystem(RenderInterval);
         }
 
-        // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
-        TotalFrameTime += PerFrameTimer.Elapsed();
+        // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.elapsed());
+        TotalFrameTime += PerFrameTimer.elapsed();
         auto particles = DEMNSSystem->GetParticles();
 
         if (CUDA_DEM_APP_PARAMS.bgeo_export)
@@ -691,15 +691,15 @@ void UpdateNSSystemRealTime()
     auto numOfSubTimeSteps = DEMNSSystem->GetNumOfSubTimeSteps();
     KIRI_LOG_INFO("Simulation Frame={0}, Sub-Simulation Total Number={1}", ++SimCount, numOfSubTimeSteps);
 
-    PerFrameTimer.Restart();
+    PerFrameTimer.restart();
     for (size_t i = 0; i < numOfSubTimeSteps; i++)
     {
         KIRI_LOG_INFO("Current Sub-Simulation/ Total Number ={0}/{1}", i + 1, numOfSubTimeSteps);
         DEMNSSystem->UpdateSystem(RenderInterval);
     }
 
-    // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.Elapsed());
-    TotalFrameTime += PerFrameTimer.Elapsed();
+    // KIRI_LOG_INFO("Time Per Frame={0}", PerFrameTimer.elapsed());
+    TotalFrameTime += PerFrameTimer.elapsed();
     auto particles = DEMNSSystem->GetParticles();
 
     std::vector<KiriCircle2> circles;
@@ -730,7 +730,7 @@ void UpdateNSSystemRealTime()
 
 void main_dem()
 {
-    KiriLog::Init();
+    KiriLog::init();
 
     CUDA_DEM_APP_PARAMS.run = true;
 

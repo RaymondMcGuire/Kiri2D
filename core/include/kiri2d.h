@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-05-10 17:38:37
- * @LastEditTime: 2022-05-10 17:46:20
- * @LastEditors: Xu.WANG
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 09:42:06
+ * @FilePath: \Kiri2D\core\include\kiri2d.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #ifndef _KIRI2D_H_
 #define _KIRI2D_H_

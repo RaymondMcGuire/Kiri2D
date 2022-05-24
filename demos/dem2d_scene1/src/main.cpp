@@ -11,7 +11,7 @@ using namespace KIRI2D;
 
 void main(int argc, char *argv[])
 {
-    KiriLog::Init();
+    KiriLog::init();
 
     auto app = std::make_shared<UniDEM2DExample>();
 

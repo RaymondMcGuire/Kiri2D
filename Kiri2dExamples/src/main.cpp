@@ -73,18 +73,18 @@ void QuickHullVoronoi2d()
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->polygon();
-            for (size_t j = 0; j < cellpolygon->positions().size(); j++)
+            auto cell_polygon = site->polygon();
+            for (size_t j = 0; j < cell_polygon->positions().size(); j++)
             {
-                auto vert = cellpolygon->positions()[j];
-                auto vert1 = cellpolygon->positions()[(j + 1) % (cellpolygon->positions().size())];
+                auto vert = cell_polygon->positions()[j];
+                auto vert1 = cell_polygon->positions()[(j + 1) % (cell_polygon->positions().size())];
                 auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
                 line.thick = 1.f;
                 precompute_lines.emplace_back(line);
 
                 // KIRI_LOG_DEBUG("vert={0},{1}-----vert1={2},{3}", vert.x, vert.y, vert1.x, vert1.y);
             }
-            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->Verts.size());
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cell_polygon->Verts.size());
             precompute_points.emplace_back(Vector2F(site->x(), site->y()));
 
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
@@ -266,13 +266,13 @@ void MSSampler2D()
             if (site->isBoundaryVertex())
                 continue;
 
-            auto cellpolygon = site->polygon();
-            if (cellpolygon)
+            auto cell_polygon = site->polygon();
+            if (cell_polygon)
             {
-                for (size_t j = 0; j < cellpolygon->positions().size(); j++)
+                for (size_t j = 0; j < cell_polygon->positions().size(); j++)
                 {
-                    auto vert = cellpolygon->positions()[j];
-                    auto vert1 = cellpolygon->positions()[(j + 1) % (cellpolygon->positions().size())];
+                    auto vert = cell_polygon->positions()[j];
+                    auto vert1 = cell_polygon->positions()[(j + 1) % (cell_polygon->positions().size())];
                     auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
                     line.thick = 1.f;
                     precompute_lines.emplace_back(line);
@@ -281,7 +281,7 @@ void MSSampler2D()
                 }
             }
 
-            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cellpolygon->positions().size());
+            // KIRI_LOG_DEBUG("site={0},size={1}", site->id(), cell_polygon->positions().size());
             precompute_points.emplace_back(Vector2F(site->x(), site->y()));
 
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
@@ -658,7 +658,7 @@ void BlueNoiseSampling()
 
 void main()
 {
-    KIRI::KiriLog::Init();
+    KiriLog::init();
 
     // QuickHullVoronoi2d();
 

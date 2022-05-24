@@ -1,10 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2022-05-11 18:04:25
- * @LastEditTime: 2022-05-11 18:04:26
- * @LastEditors: Xu.WANG
- * @Description:
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-05-12 12:49:56
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-24 09:39:17
  * @FilePath: \Kiri2D\demos\dem2d_scene1\src\uni_dem_example.cpp
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #include <uni_dem_example.h>
@@ -18,7 +19,7 @@ namespace KIRI2D
         mWorldSize = Vector2F(2.f);
         mRenderOffset = Vector2F(WINDOW_WIDTH - mWorldSize.x * PARTICLES_RENDER_SCALE, WINDOW_HEIGHT - mWorldSize.y * PARTICLES_RENDER_SCALE) / 2.f;
 
-        mScene = std::make_shared<KiriScene2D>((size_t)WINDOW_WIDTH, (size_t)WINDOW_HEIGHT);
+        mScene = std::make_shared<KiriScene2D>((auto)WINDOW_WIDTH, (auto)WINDOW_HEIGHT);
         mRenderer = std::make_shared<KiriRenderer2D>(mScene);
     }
 
@@ -128,25 +129,25 @@ namespace KIRI2D
         {
             auto substep_num = mSystem->GetNumOfSubTimeSteps();
 
-            mPerFrameTimer.Restart();
-            for (size_t i = 0; i < substep_num; i++)
+            mPerFrameTimer.restart();
+            for (auto i = 0; i < substep_num; i++)
                 mSystem->UpdateSystem(mRenderInterval);
 
-            // KIRI_LOG_INFO("Time Per Frame={0}", mPerFrameTimer.Elapsed());
-            mTotalFrameTime += mPerFrameTimer.Elapsed();
+            // KIRI_LOG_INFO("Time Per Frame={0}", mPerFrameTimer.elapsed());
+            mTotalFrameTime += mPerFrameTimer.elapsed();
 
             mSystem->UpdateSystem(mRenderInterval);
             auto particles = std::dynamic_pointer_cast<CudaMRDemParticles>(mSystem->GetParticles());
             auto particles_num = particles->Size();
-            size_t float_bytes = particles_num * sizeof(float);
-            size_t float2_bytes = particles_num * sizeof(float2);
+            auto float_bytes = particles_num * sizeof(float);
+            auto float2_bytes = particles_num * sizeof(float2);
             float2 *particle_positions = (float2 *)malloc(float2_bytes);
             float *particle_radius = (float *)malloc(float_bytes);
             cudaMemcpy(particle_positions, particles->GetPosPtr(), float2_bytes, cudaMemcpyDeviceToHost);
             cudaMemcpy(particle_radius, particles->GetRadiusPtr(), float_bytes, cudaMemcpyDeviceToHost);
 
             std::vector<KiriCircle2> render_particles;
-            for (size_t i = 0; i < particles_num; i++)
+            for (auto i = 0; i < particles_num; i++)
             {
                 auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) * PARTICLES_RENDER_SCALE + mRenderOffset, Vector3F(0.88f, 0.79552f, 0.5984f), particle_radius[i] * PARTICLES_RENDER_SCALE);
                 render_particles.emplace_back(p);
