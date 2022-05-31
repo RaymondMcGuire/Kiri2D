@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2021-12-29 15:01:19
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-02-19 10:59:26
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-05-31 10:13:11
+ * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\voronoi\voronoi_polygon.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _HDV_VORONOI_POLYGON_H_
@@ -28,10 +30,10 @@ namespace HDV::Voronoi
         {
         }
 
-        void add(Vector2D vert)
+        void add(Vector2D vertices)
         {
-            mPositions.emplace_back(vert);
-            mBBox.merge(vert);
+            mPositions.emplace_back(vertices);
+            mBBox.merge(vertices);
         }
 
         void updateBBox()
@@ -262,10 +264,10 @@ namespace HDV::Voronoi
         {
         }
 
-        void add(Vector3D vert)
+        void add(Vector3D vertices)
         {
-            mPositions.emplace_back(vert);
-            mBBox.merge(vert);
+            mPositions.emplace_back(vertices);
+            mBBox.merge(vertices);
         }
 
         void updateBBox()

@@ -13,6 +13,7 @@
 #pragma once
 
 #include <kiri2d/renderer/renderer.h>
+#include <kiri2d/hdv_toolkit/sampler/poisson_disk_sampler.h>
 #include <kiri2d/hdv_toolkit/sampler/ms_sampler2.h>
 
 #endif

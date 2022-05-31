@@ -1,5 +1,5 @@
 # Project Name
-set(PROJECT_NAME Lloyd2dScene1)
+set(PROJECT_NAME Lloyd2DScene1)
 
 # Enable CUDA
 set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
@@ -62,11 +62,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 if(WIN32 AND ${ENABLE_CUDA})
-    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio kiri2d kiri2d_pbs_cuda)
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D kiri2d_pbs_cuda)
 elseif(WIN32)
-    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio kiri2d)
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D)
 elseif(APPLE)
-    target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui kiri2d)
+    target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui KIRI2D)
 endif()
 
 # WorkSpace
@@ -75,7 +75,7 @@ set(WD_RELEASE_FILE_PATH ${CMAKE_BINARY_DIR}/demos/bin/Release/)
 
 set_target_properties(
     ${PROJECT_NAME} PROPERTIES
-    OUTPUT_NAME_DEBUG ${PROJECT_NAME}d
+    OUTPUT_NAME_DEBUG ${PROJECT_NAME}D
     OUTPUT_NAME_RELEASE ${PROJECT_NAME}
     VS_DEBUGGER_WORKING_DIRECTORY "$<$<CONFIG:debug>:${WD_DEBUG_FILE_PATH}>$<$<CONFIG:release>:${WD_RELEASE_FILE_PATH}>"
 )

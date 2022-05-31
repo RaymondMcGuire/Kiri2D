@@ -1,5 +1,5 @@
 # Project Name
-set(PROJECT_NAME DEM2DScene1)
+set(PROJECT_NAME PoissonDiskSampler2D)
 
 # Enable CUDA
 set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
@@ -58,10 +58,15 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     include
     ${CONFIGURATION_INCLUDE}
     ${KIRI2D_LIB_INLCUDE}
+    ${EXTLIBS_INCLUDE}
 )
 
 if(WIN32 AND ${ENABLE_CUDA})
     target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D kiri2d_pbs_cuda)
+elseif(WIN32)
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D)
+elseif(APPLE)
+    target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui KIRI2D)
 endif()
 
 # WorkSpace

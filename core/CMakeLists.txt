@@ -1,5 +1,5 @@
 # Project Name
-set(PROJECT_NAME kiri2d)
+set(PROJECT_NAME KIRI2D)
 
 if(WIN32)
     find_package(OpenMP REQUIRED)
