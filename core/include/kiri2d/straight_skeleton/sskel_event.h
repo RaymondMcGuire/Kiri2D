@@ -1,10 +1,11 @@
-/*** 
- * @Author: Xu.WANG
- * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-24 16:50:46
- * @LastEditors: Xu.WANG
- * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_event.h
+/***
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-07-27 19:42:45
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 17:18:46
+ * @FilePath: \core\include\kiri2d\straight_skeleton\sskel_event.h
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_SSKEL_EVENT_H_
@@ -29,10 +30,10 @@ namespace KIRI2D::SSKEL
         SSkelEvent() = default;
         ~SSkelEvent() {}
 
-        float GetDistance() { return mDistance; }
-        Vector2F GetIntersectPoint() { return mIntersect; }
+        float dist() { return mDistance; }
+        Vector2F intersectPoint() { return mIntersect; }
 
-        virtual void Print() = 0;
+        virtual void print() = 0;
 
     protected:
         float mDistance;
@@ -56,10 +57,10 @@ namespace KIRI2D::SSKEL
         SSkelEdgeEvent() = default;
         ~SSkelEdgeEvent() {}
 
-        const SSkelVertexPtr &GetVertA() const { return mVertA; }
-        const SSkelVertexPtr &GetVertB() const { return mVertB; }
+        const SSkelVertexPtr &vertA() const { return mVertA; }
+        const SSkelVertexPtr &vertB() const { return mVertB; }
 
-        virtual void Print() override;
+        virtual void print() override;
 
     private:
         SSkelVertexPtr mVertA, mVertB;
@@ -82,10 +83,10 @@ namespace KIRI2D::SSKEL
         SSkelSplitEvent() = default;
         ~SSkelSplitEvent() {}
 
-        const SSkelVertexPtr &GetVert() const { return mVert; }
-        Vector4F GetOppositeEdge() { return mOppositeEdge; }
+        const SSkelVertexPtr &vert() const { return mVert; }
+        Vector4F oppositeEdge() { return mOppositeEdge; }
 
-        virtual void Print() override;
+        virtual void print() override;
 
     private:
         SSkelVertexPtr mVert;
@@ -100,7 +101,7 @@ namespace KIRI2D::SSKEL
     {
         bool operator()(const SSkelEventPtr &e1, const SSkelEventPtr &e2)
         {
-            return e1->GetDistance() > e2->GetDistance();
+            return e1->dist() > e2->dist();
         }
     };
 }

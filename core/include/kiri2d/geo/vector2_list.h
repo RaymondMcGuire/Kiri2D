@@ -23,7 +23,7 @@ namespace KIRI
         KiriVector2List() : KiriCircularDoublyLinkedList<Vector2F>(){};
         ~KiriVector2List(){};
 
-        void Push(const Vector2F &x)
+        void push(const Vector2F &x)
         {
 
             if (mHead == NULL)
@@ -53,7 +53,7 @@ namespace KIRI
                 auto x = mHead;
                 do
                 {
-                    list->Push(Vector2F(x->value.x, x->value.y));
+                    list->push(Vector2F(x->value.x, x->value.y));
                     x = x->next;
                 } while (x != mHead);
             }
@@ -64,14 +64,14 @@ namespace KIRI
             auto list = std::make_shared<KiriVector2List>();
             Clone(list);
             removeAll();
-            if (list->GetHead() != NULL)
+            if (list->head() != NULL)
             {
-                auto x = list->GetHead();
+                auto x = list->head();
                 do
                 {
-                    Push(Vector2F(x->value.x, x->value.y));
+                    push(Vector2F(x->value.x, x->value.y));
                     x = x->prev;
-                } while (x != list->GetHead());
+                } while (x != list->head());
             }
         }
 

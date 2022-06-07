@@ -110,7 +110,7 @@ namespace KIRI
 
         constexpr UInt Size() const { return mCounter; }
 
-        void Print()
+        void print()
         {
             String printStr = "";
             if (mHead != NULL)
@@ -144,7 +144,7 @@ namespace KIRI
             KIRI_LOG_DEBUG("circular doubly linked list reverse= [ {0}]", printStr);
         }
 
-        const SharedPtr<Node> &GetHead() const { return mHead; }
+        const SharedPtr<Node> &head() const { return mHead; }
     };
 }
 #endif

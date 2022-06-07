@@ -1,16 +1,16 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-07-22 11:03:44
  * @LastEditTime: 2021-10-04 20:19:32
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\straight_skeleton\sskel_event.cpp
  */
 
 #include <kiri2d/straight_skeleton/sskel_event.h>
 namespace KIRI2D::SSKEL
 {
-    void SSkelEdgeEvent::Print()
+    void SSkelEdgeEvent::print()
     {
         KIRI_LOG_DEBUG("Edge Event: distance={0}, intersect=({1},{2}), between VertA={3},{4} and VertB={5},{6}",
                        mDistance, mIntersect.x, mIntersect.y,
@@ -18,7 +18,7 @@ namespace KIRI2D::SSKEL
                        mVertB->GetPoint().x, mVertB->GetPoint().y);
     }
 
-    void SSkelSplitEvent::Print()
+    void SSkelSplitEvent::print()
     {
         KIRI_LOG_DEBUG("Split Event: distance={0}, intersect=({1},{2}); Vert={3},{4} ; Opposite Edge=({5},{6})---({7},{8})",
                        mDistance, mIntersect.x, mIntersect.y,

@@ -1,10 +1,11 @@
-/*** 
- * @Author: Xu.WANG
- * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-07-24 21:28:02
- * @LastEditors: Xu.WANG
- * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_utils.h
+/***
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-07-22 17:36:32
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 17:22:23
+ * @FilePath: \core\include\kiri2d\straight_skeleton\sskel_utils.h
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_SSKEL_UTILS_H_
@@ -16,8 +17,8 @@
 namespace KIRI2D::SSKEL
 {
 
-    /*** 
-     * @description: 
+    /***
+     * @description:
      * @param {Vector2F} p1
      * @param {Vector2F} p2
      * @param {Vector2F} q

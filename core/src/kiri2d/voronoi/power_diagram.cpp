@@ -177,11 +177,11 @@ namespace KIRI
         site->SetNeighborSites(neighborSitesList);
 
         // KIRI_LOG_DEBUG("-----------------PRINT SITE-------------");
-        // site->Print();
+        // site->print();
         // KIRI_LOG_DEBUG("-----------------PRINT NEIGHBORS-------------");
         // for (size_t i = 0; i < neighborSitesList.size(); i++)
         // {
-        //     neighborSitesList[i]->Print();
+        //     neighborSitesList[i]->print();
         // }
     }
 
@@ -378,8 +378,8 @@ namespace KIRI
     {
         if (!vcp1->bbox().overlaps(vcp2->bbox()))
         {
-            // vcp1->Print();
-            // vcp2->Print();
+            // vcp1->print();
+            // vcp2->print();
             // KIRI_LOG_ERROR("VoroCellPolygonClip: vcp1 low={0},{1}; high={2},{3};vcp2 low={4},{5}; high={6},{7}",
             //                vcp1->bbox().LowestPoint.x,
             //                vcp1->bbox().LowestPoint.y,
@@ -425,7 +425,7 @@ namespace KIRI
         // intersection->PrintVertexList();
         if (intersection != NULL && intersection->Size() > 0)
         {
-            auto node = intersection->GetHead();
+            auto node = intersection->head();
             double firstX = node->value.x;
             double firstY = node->value.y;
 
@@ -453,7 +453,7 @@ namespace KIRI
 
             clipedPolygon->updateBBox();
             clipedPolygon->ComputeVoroSitesList();
-            // clipedPolygon->Print();
+            // clipedPolygon->print();
             return clipedPolygon;
         }
 
@@ -601,7 +601,7 @@ namespace KIRI
 
                                             clipedPolygon->updateBBox();
                                             clipedPolygon->ComputeVoroSitesList();
-                                            // clipedPolygon->Print();
+                                            // clipedPolygon->print();
 
                                             site->SetCellPolygon(clipedPolygon);
                                         }
@@ -634,7 +634,7 @@ namespace KIRI
     {
         KIRI_LOG_DEBUG("----------Voronoi Sites INFO----------");
         for (size_t i = 0; i < mVoroSites.size(); i++)
-            mVoroSites[i]->Print();
+            mVoroSites[i]->print();
         KIRI_LOG_DEBUG("------------------------------");
     }
 }

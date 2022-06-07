@@ -303,7 +303,7 @@ namespace KIRI
     {
         mVoroSitesList->removeAll();
         for (size_t i = 0; i < mPolygonVertices2.size(); i++)
-            mVoroSitesList->Push(Vector2F(mPolygonVertices2[mPolygonVertices2.size() - 1 - i]));
+            mVoroSitesList->push(Vector2F(mPolygonVertices2[mPolygonVertices2.size() - 1 - i]));
     }
 
     void KiriVoroCellPolygon2::PrintPolyVertices()
@@ -325,7 +325,7 @@ namespace KIRI
         KIRI_LOG_DEBUG("------------------------------");
     }
 
-    void KiriVoroCellPolygon2::Print()
+    void KiriVoroCellPolygon2::print()
     {
         KIRI_LOG_DEBUG("----------Voronoi Cell Polygon INFO----------");
         KIRI_LOG_DEBUG("Voro cell polygon size={0}", mPolygonVertices2.size());

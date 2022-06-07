@@ -1,12 +1,12 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-10-04 13:50:30
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-10-05 00:08:58
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 17:22:40
+ * @FilePath: \core\include\kiri2d\straight_skeleton\sskel_slav.h
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_slav.h
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _KIRI2D_SSKEL_SLAV_H_
 #define _KIRI2D_SSKEL_SLAV_H_
 
@@ -33,15 +33,15 @@ namespace KIRI2D::SSKEL
                 auto prev = poly[(i - 1) % size];
                 auto curr = poly[i % size];
                 auto next = poly[(i + 1) % size];
-                lav_poly->Push(std::make_shared<SSkelVertex>(
+                lav_poly->push(std::make_shared<SSkelVertex>(
                     lav_poly->id(),
                     Vector4F(prev.x, prev.y, curr.x, curr.y),
                     curr,
                     Vector4F(curr.x, curr.y, next.x, next.y)));
             }
 
-            mEdges = lav_poly->GenEdgesData();
-            auto events = lav_poly->GenEvents(mEdges);
+            mEdges = lav_poly->computeEdgesData();
+            auto events = lav_poly->computeEvents(mEdges);
 
             // reset priority queue
             mPriorityQueue =
@@ -58,7 +58,7 @@ namespace KIRI2D::SSKEL
             //  {
             //      auto p = mPriorityQueue.top();
             //      mPriorityQueue.pop();
-            //      p->Print();
+            //      p->print();
             //  }
 
             // KIRI_LOG_DEBUG("-----handle start-----");

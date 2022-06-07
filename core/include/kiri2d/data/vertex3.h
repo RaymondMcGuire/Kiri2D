@@ -44,7 +44,7 @@ namespace KIRI
             return (mValue.x == vert->GetValue().x && mValue.y == vert->GetValue().y && mValue.z == vert->GetValue().z && mIdx == vert->GetIdx());
         }
 
-        void Print()
+        void print()
         {
             KIRI_LOG_DEBUG("vertex idx={0}", mIdx);
             KIRI_LOG_DEBUG("vertex value=({0},{1},{2})",

@@ -1,10 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-10-07 02:41:56
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-12-17 14:27:34
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 17:20:10
+ * @FilePath: \core\include\kiri2d\straight_skeleton\sskel_lav.h
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_lav.h
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_SSKEL_LAV_H_
@@ -53,24 +54,24 @@ namespace KIRI2D::SSKEL
         UInt id() { return mId; }
         UInt length() { return mCounter; }
 
-        const SSkelVertexPtr &GetHead() { return mHead; }
-        void SetHead(const SSkelVertexPtr &head) { mHead = head; }
+        const SSkelVertexPtr &head() { return mHead; }
+        void setHead(const SSkelVertexPtr &head) { mHead = head; }
 
-        void Push(const SSkelVertexPtr &x);
+        void push(const SSkelVertexPtr &x);
 
-        void PrintSSkelLAV();
+        void print();
 
-        Vector<std::tuple<Vector4F, Vector4F, Vector4F>> GenEdgesData();
-        Vector<SSkelEventPtr> GenEvents(Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
-        SSkelEventPtr GenEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
-        SSkelVertexPtr Unify(SSkelVertexPtr va, SSkelVertexPtr vb, Vector2F mid);
+        Vector<std::tuple<Vector4F, Vector4F, Vector4F>> computeEdgesData();
+        Vector<SSkelEventPtr> computeEvents(Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
+        SSkelEventPtr computeEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
+        SSkelVertexPtr unify(SSkelVertexPtr va, SSkelVertexPtr vb, Vector2F mid);
 
     private:
         UInt mId;
         UInt mCounter = 0;
         SSkelVertexPtr mHead = nullptr;
 
-        Vector<SSkelEventPtr> GenSplitEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
+        Vector<SSkelEventPtr> computeSplitEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges);
     };
     typedef SharedPtr<SSkelLAV> SSkelLAVPtr;
 }

@@ -284,8 +284,8 @@ namespace KIRI
         //         edge->PrintEdgeInfo();
         //     }
         //     KIRI_LOG_ERROR("Edge Info");
-        //     a->Print();
-        //     b->Print();
+        //     a->print();
+        //     b->print();
         // }
 
         return edgeId;
@@ -406,8 +406,8 @@ namespace KIRI
 
     void KiriConvexHull3::BuildConflictGraph(KiriFace3Ptr &f, KiriVertex3Ptr &v)
     {
-        mFConflict[f->GetIdx()]->Push(v);
-        mVConflict[v->GetIdx()]->Push(f);
+        mFConflict[f->GetIdx()]->push(v);
+        mVConflict[v->GetIdx()]->push(f);
     }
 
     void KiriConvexHull3::RemoveConflictGraphByFace(KiriFace3Ptr &f)

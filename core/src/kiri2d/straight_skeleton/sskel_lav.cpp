@@ -11,7 +11,7 @@
 
 namespace KIRI2D::SSKEL
 {
-    void SSkelLAV::Push(const SSkelVertexPtr &x)
+    void SSkelLAV::push(const SSkelVertexPtr &x)
     {
         if (mHead == nullptr)
         {
@@ -30,7 +30,7 @@ namespace KIRI2D::SSKEL
         }
     }
 
-    void SSkelLAV::PrintSSkelLAV()
+    void SSkelLAV::print()
     {
         KIRI_LOG_DEBUG("----------SSkelLAV----------");
         KIRI_LOG_DEBUG("LAV list number={0}", this->length());
@@ -40,7 +40,7 @@ namespace KIRI2D::SSKEL
             auto x = mHead;
             do
             {
-                x->Print();
+                x->print();
                 x = x->next.lock();
             } while (x != mHead);
         }
@@ -48,7 +48,7 @@ namespace KIRI2D::SSKEL
         KIRI_LOG_DEBUG("--------------------------------------");
     }
 
-    Vector<std::tuple<Vector4F, Vector4F, Vector4F>> SSkelLAV::GenEdgesData()
+    Vector<std::tuple<Vector4F, Vector4F, Vector4F>> SSkelLAV::computeEdgesData()
     {
         // edge/ bisector left/ right
         Vector<std::tuple<Vector4F, Vector4F, Vector4F>> edges;
@@ -91,7 +91,7 @@ namespace KIRI2D::SSKEL
         return edges;
     }
 
-    SSkelVertexPtr SSkelLAV::Unify(SSkelVertexPtr va, SSkelVertexPtr vb, Vector2F mid)
+    SSkelVertexPtr SSkelLAV::unify(SSkelVertexPtr va, SSkelVertexPtr vb, Vector2F mid)
     {
         auto dir_vbb = Vector2F(vb->GetBisector().z, vb->GetBisector().w).normalized();
         auto dir_vab = Vector2F(va->GetBisector().z, va->GetBisector().w).normalized();
@@ -127,7 +127,7 @@ namespace KIRI2D::SSKEL
         return newVertex;
     }
 
-    Vector<SSkelEventPtr> SSkelLAV::GenSplitEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
+    Vector<SSkelEventPtr> SSkelLAV::computeSplitEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
     {
         Vector<SSkelEventPtr> events;
         if (!vertex->GetIsReflex())
@@ -200,7 +200,7 @@ namespace KIRI2D::SSKEL
                     b2,
                     vertex,
                     edge);
-                // split_event->Print();
+                // split_event->print();
                 if (dis == dis)
                     events.emplace_back(split_event);
             }
@@ -209,11 +209,11 @@ namespace KIRI2D::SSKEL
         return events;
     }
 
-    SSkelEventPtr SSkelLAV::GenEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
+    SSkelEventPtr SSkelLAV::computeEventByVertex(const SSkelVertexPtr &vertex, Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
     {
         Vector<SSkelEventPtr> events;
 
-        auto split_event = GenSplitEventByVertex(vertex, originalEdges);
+        auto split_event = computeSplitEventByVertex(vertex, originalEdges);
         if (!split_event.empty())
             events.insert(events.end(), split_event.begin(), split_event.end());
 
@@ -274,16 +274,16 @@ namespace KIRI2D::SSKEL
             auto min = std::min_element(
                 events.begin(), events.end(),
                 [=](const SSkelEventPtr &event1, const SSkelEventPtr &event2)
-                { return event1->GetIntersectPoint().distanceTo(vertex->GetPoint()) < event2->GetIntersectPoint().distanceTo(vertex->GetPoint()); });
+                { return event1->intersectPoint().distanceTo(vertex->GetPoint()) < event2->intersectPoint().distanceTo(vertex->GetPoint()); });
 
-            //(*min)->Print();
+            //(*min)->print();
             return (*min);
         }
 
         return nullptr;
     }
 
-    Vector<SSkelEventPtr> SSkelLAV::GenEvents(Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
+    Vector<SSkelEventPtr> SSkelLAV::computeEvents(Vector<std::tuple<Vector4F, Vector4F, Vector4F>> originalEdges)
     {
         Vector<SSkelEventPtr> events;
 
@@ -296,7 +296,7 @@ namespace KIRI2D::SSKEL
                 if (x == nullptr)
                     break;
 
-                auto edge_event = this->GenEventByVertex(x, originalEdges);
+                auto edge_event = this->computeEventByVertex(x, originalEdges);
                 if (edge_event != nullptr)
                     events.emplace_back(edge_event);
 
@@ -306,7 +306,7 @@ namespace KIRI2D::SSKEL
             // auto x = mHead;
             // do
             // {
-            //     auto edge_event = this->GenEventByVertex(x, originalEdges);
+            //     auto edge_event = this->computeEventByVertex(x, originalEdges);
             //     if (edge_event != nullptr)
             //         events.emplace_back(edge_event);
 

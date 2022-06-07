@@ -39,7 +39,7 @@ namespace KIRI
         void PopPolygonVertex2() { mPolygonVertices2.pop_back(); }
         void ReversePolygonVertex2() { std::reverse(mPolygonVertices2.begin(), mPolygonVertices2.end()); }
 
-        void Print();
+        void print();
         void PrintPolyVertices();
         void PrintVoroSitesList();
         void updateBBox();

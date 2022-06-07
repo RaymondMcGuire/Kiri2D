@@ -36,7 +36,7 @@ namespace KIRI
             }
         }
 
-        void Push(const T x)
+        void push(const T x)
         {
             mCounter++;
             if (mFirst == NULL)
@@ -120,7 +120,7 @@ namespace KIRI
 
         constexpr UInt Size() const { return mCounter; }
 
-        void Print()
+        void print()
         {
             // static_assert(
             //     IsSame_Int<T>::value ||

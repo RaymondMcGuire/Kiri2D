@@ -28,8 +28,8 @@ namespace KIRI
         if (list->Size() < 3)
             return false;
 
-        auto cur = list->GetHead()->next;
-        while (cur != list->GetHead())
+        auto cur = list->head()->next;
+        while (cur != list->head())
         {
             if (GetSignedAreasOfTriangle2(cur->value, cur->next->value, cur->next->next->value) < 0)
                 return false;
@@ -97,8 +97,8 @@ namespace KIRI
     void KiriConvexClip2::ConvexIntersection(const KiriVector2ListPtr &p, const KiriVector2ListPtr &q)
     {
         InsideFlag flag = IF_UNKNOWN;
-        auto curP = p->GetHead();
-        auto curQ = q->GetHead();
+        auto curP = p->head();
+        auto curQ = q->head();
 
         // flag whether first point or not
         auto firstPoint = true;
@@ -130,7 +130,7 @@ namespace KIRI
                 }
 
                 // adding the intersection to the result
-                mIntersectionList->Push(Vector2F(pqIntersec.start));
+                mIntersectionList->push(Vector2F(pqIntersec.start));
                 // Flag update
                 if (pInQ > 0)
                 {
@@ -146,8 +146,8 @@ namespace KIRI
             // vP and vQ overlap and oppositely oriented
             if (pqIntersec.code == 'e' && vP.dot(vQ) < 0)
             {
-                mIntersectionList->Push(Vector2F(pqIntersec.start));
-                mIntersectionList->Push(Vector2F(pqIntersec.end));
+                mIntersectionList->push(Vector2F(pqIntersec.start));
+                mIntersectionList->push(Vector2F(pqIntersec.end));
                 return;
             }
             // vP and vQ are parallel and separated. p and q are disjoint!
@@ -182,7 +182,7 @@ namespace KIRI
                 if (qInP > 0)
                 {
                     if (flag == IF_PINSIDE)
-                        mIntersectionList->Push(Vector2F(curP->value));
+                        mIntersectionList->push(Vector2F(curP->value));
 
                     ++advP;
                     curP = curP->next;
@@ -190,7 +190,7 @@ namespace KIRI
                 else
                 {
                     if (flag == IF_QINSIDE)
-                        mIntersectionList->Push(Vector2F(curQ->value));
+                        mIntersectionList->push(Vector2F(curQ->value));
                     ++advQ;
                     curQ = curQ->next;
                 }
@@ -200,14 +200,14 @@ namespace KIRI
                 if (pInQ > 0)
                 {
                     if (flag == IF_QINSIDE)
-                        mIntersectionList->Push(Vector2F(curQ->value));
+                        mIntersectionList->push(Vector2F(curQ->value));
                     ++advQ;
                     curQ = curQ->next;
                 }
                 else
                 {
                     if (flag == IF_PINSIDE)
-                        mIntersectionList->Push(Vector2F(curP->value));
+                        mIntersectionList->push(Vector2F(curP->value));
                     ++advP;
                     curP = curP->next;
                 }

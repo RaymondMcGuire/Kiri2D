@@ -1,12 +1,12 @@
-/*** 
- * @Author: Xu.WANG
- * @Date: 2021-07-22 10:58:21
- * @LastEditTime: 2021-10-04 20:21:33
- * @LastEditors: Xu.WANG
- * @Description: 
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\straight_skeleton\sskel_vertex.h
+/***
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-10-05 00:08:58
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 17:22:30
+ * @FilePath: \core\include\kiri2d\straight_skeleton\sskel_vertex.h
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _KIRI2D_SSKEL_VERTEX_H_
 #define _KIRI2D_SSKEL_VERTEX_H_
 
@@ -61,7 +61,7 @@ namespace KIRI2D::SSKEL
         void SetLAVId(UInt id) { mLAVId = id; }
         void SetInValid() { mIsValid = false; }
 
-        void Print()
+        void print()
         {
             // KIRI_LOG_DEBUG("left edge=({0},{1})--({2},{3}),right edge=({4},{5})--({6},{7}),mIsReflex={8},bisector_end=({9},{10}),point={11},{12}",
             //                mLeftEdge.x, mLeftEdge.y, mLeftEdge.z, mLeftEdge.w,
