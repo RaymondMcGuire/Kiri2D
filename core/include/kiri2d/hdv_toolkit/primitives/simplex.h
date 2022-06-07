@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-12-01 20:39:30
- * @LastEditTime: 2021-12-01 20:39:30
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 18:35:00
+ * @FilePath: \core\include\kiri2d\hdv_toolkit\primitives\simplex.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _HDV_SIMPLEX_H_

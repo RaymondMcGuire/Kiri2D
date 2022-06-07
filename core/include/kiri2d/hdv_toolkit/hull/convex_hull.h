@@ -95,19 +95,24 @@ namespace HDV::Hull
 
             // preprocess
             std::vector<int> remove_idx;
-            for (auto i = 0; i < pre_simplexs.size() - 1; i++)
+
+            if (pre_simplexs.size() >= 1)
             {
-                auto usi = pre_simplexs[i];
-                for (auto j = i + 1; j < pre_simplexs.size(); j++)
+                for (auto i = 0; i < pre_simplexs.size() - 1; i++)
                 {
-                    auto usj = pre_simplexs[j];
-                    if (usi.x == usj.z && usi.y == usj.w && usi.z == usj.x && usi.w == usj.y)
+                    auto usi = pre_simplexs[i];
+                    for (auto j = i + 1; j < pre_simplexs.size(); j++)
                     {
-                        remove_idx.emplace_back(i);
-                        break;
+                        auto usj = pre_simplexs[j];
+                        if (usi.x == usj.z && usi.y == usj.w && usi.z == usj.x && usi.w == usj.y)
+                        {
+                            remove_idx.emplace_back(i);
+                            break;
+                        }
                     }
                 }
             }
+
 
             for (auto i = 0; i < pre_simplexs.size(); i++)
             {
@@ -126,6 +131,8 @@ namespace HDV::Hull
             }
 
             // remove idx
+            if (unprocessed_simplexs.empty())
+                return simplexs;
 
             auto current = unprocessed_simplexs.back();
             simplexs.emplace_back(current);

@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-12-23 17:57:21
- * @LastEditTime: 2021-12-29 15:01:22
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-02-19 10:59:26
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 20:19:00
+ * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\voronoi\power_diagram.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #ifndef _HDV_POWER_DIAGRAM_H_
 #define _HDV_POWER_DIAGRAM_H_
@@ -107,8 +109,9 @@ namespace HDV::Voronoi
             mSites.erase(remove_array, mSites.end());
         }
 
-        void move2Centroid()
+        bool move2Centroid()
         {
+            bool outside = false;
             //#pragma omp parallel for
             for (auto i = 0; i < mSites.size(); i++)
             {
@@ -122,8 +125,16 @@ namespace HDV::Voronoi
                     auto centroid = site->polygon()->centroid();
                     if (mMesh->boundaryPolygon()->contains(centroid))
                         site->set(centroid.x, centroid.y);
+                    else
+                    {
+                        outside = true;
+                        auto rnd_point = site->polygon()->rndInnerPoint();
+                        site->set(rnd_point.x, rnd_point.y);
+                    }
                 }
             }
+
+            return outside;
         }
 
         void lloydIteration()

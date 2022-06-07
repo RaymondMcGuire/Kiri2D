@@ -5,7 +5,6 @@
 
 #include <tinycolormap.hpp>
 
-using namespace KIRI;
 using namespace KIRI2D;
 
 String UInt2Str4Digit(UInt Input)
@@ -43,7 +42,7 @@ void QuickHullVoronoi2d()
     BoundaryPolygon->add(Vector2D(-scale_size, scale_size));
     BoundaryPolygon->add(Vector2D(scale_size, scale_size));
     BoundaryPolygon->add(Vector2D(scale_size, -scale_size));
-    pd2->setBoundaryPolygon(BoundaryPolygon);
+    pd2->setBoundary(BoundaryPolygon);
 
     // scene renderer config
     float windowheight = 1080.f;
@@ -225,7 +224,7 @@ void MSSampler2D()
         BoundaryPolygon->add(newPos);
     }
 
-    multiSizeSampler->setBoundaryPolygon(BoundaryPolygon);
+    multiSizeSampler->setBoundary(BoundaryPolygon);
 
     auto total_area = BoundaryPolygon->area();
     auto total_num = total_area / (kiri_math_mini::pi<double>() * total_sum * total_sum);

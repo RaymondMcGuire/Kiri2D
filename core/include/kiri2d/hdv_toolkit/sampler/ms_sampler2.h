@@ -179,13 +179,13 @@ namespace HDV::Sampler
 
         double globalAvgDistance()
         {
-            double sum = 0.0;
-            int num = 0;
+            auto sum = 0.0;
+            auto num = 0;
             auto site = mPowerDiagram->sites();
 
 #pragma omp parallel for reduction(+ \
                                    : sum, num)
-            for (int i = 0; i < site.size(); i++)
+            for (auto i = 0; i < site.size(); i++)
             {
                 if (site[i]->isBoundaryVertex())
                     continue;

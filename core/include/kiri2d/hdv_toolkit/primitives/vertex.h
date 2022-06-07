@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-12-01 18:20:37
- * @LastEditTime: 2021-12-08 14:53:06
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-12-23 17:57:21
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 17:46:40
+ * @FilePath: \core\include\kiri2d\hdv_toolkit\primitives\vertex.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _HDV_VERTEX_H_
@@ -62,6 +64,11 @@ namespace HDV::Primitives
             return mRadius;
         }
 
+        double percentage() const
+        {
+            return mPercentage;
+        }
+
         bool isBoundaryVertex() const
         {
             return mIsBoundaryVertex;
@@ -95,6 +102,11 @@ namespace HDV::Primitives
         void setRadius(double radius)
         {
             mRadius = radius;
+        }
+
+        void setPercentage(double percentage)
+        {
+            mPercentage = percentage;
         }
 
         void setAsBoundaryVertex()
@@ -165,6 +177,7 @@ namespace HDV::Primitives
         int mTag = 0;
         double mWeight = 0.0;
         double mRadius = 0.0;
+        double mPercentage = 0.0;
         bool mIsBoundaryVertex = false;
 
         std::vector<double> mPosition;
