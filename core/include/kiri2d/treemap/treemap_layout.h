@@ -1,12 +1,12 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-03-27 01:42:49
- * @LastEditTime: 2021-06-01 20:11:05
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-05-27 20:00:49
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-07 21:26:38
+ * @FilePath: \Kiri2D\core\include\kiri2d\treemap\treemap_layout.h
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\treemap\treemap_layout.h
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _KIRI2D_TREEMAP_LAYOUT_H_
 #define _KIRI2D_TREEMAP_LAYOUT_H_
 
@@ -14,7 +14,7 @@
 
 #include <treehh/tree.hh>
 #include <kiri2d/data/shape_struct.h>
-#include <kiri2d/voronoi/voro_treemap_data.h>
+#include <kiri2d/treemap/treemap_data.h>
 
 using namespace KIRI2D;
 
