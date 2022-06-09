@@ -1,3 +1,12 @@
+/***
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-05-02 13:22:27
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-06-09 11:51:39
+ * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ */
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>
 #include <root_directory.h>
@@ -655,6 +664,104 @@ void BlueNoiseSampling()
     export_sampling_data("jiang2015.csv", position, rad);
 }
 
+// autodiff include
+//#include <autodiff/forward/real.hpp>
+//#include <autodiff/forward/real/eigen.hpp>
+#include <autodiff/forward/dual.hpp>
+#include <autodiff/forward/dual/eigen.hpp>
+
+using namespace autodiff;
+
+// real target_func(const ArrayXreal &lambda, const ArrayXreal &radius)
+// {
+//     return 1 - (KIRI_PI<real>() * (lambda * radius) * (lambda * radius)).sum();
+// }
+
+// real optimize_func(const ArrayXreal &lambda, const ArrayXreal &radius, const std::vector<Vector2F> &pos, const real &t)
+// {
+//     auto n = lambda.size();
+
+//     auto i = 0;
+//     real c_prod = 1.f;
+//     while (i < n)
+//     {
+//         for (auto k = i + 1; k < n; k++)
+//         {
+//             auto ci = (pos[i] - pos[k]).length() - (lambda[i] * radius[i] + lambda[k] * radius[k]);
+//             c_prod *= ci;
+//         }
+//         i++;
+//     }
+
+//     // std::cout << c_prod << std::endl;
+
+//     return 1 - (KIRI_PI<real>() * (lambda * radius) * (lambda * radius)).sum() - 1 / t * log(lambda.prod() * (1 - lambda).prod() * c_prod);
+// }
+
+dual2nd optimize_hessian_func(const VectorXdual2nd &lambda, const VectorXdual2nd &radius, const VectorXdual2nd &one, const std::vector<Vector2F> &pos, const dual2nd &t)
+{
+    auto n = lambda.size();
+
+    auto i = 0;
+    dual2nd c_prod = 1.0;
+    while (i < n)
+    {
+        for (auto k = i + 1; k < n; k++)
+        {
+            auto ci = (pos[i] - pos[k]).length() - (lambda[i] * radius[i] + lambda[k] * radius[k]);
+            c_prod *= ci;
+        }
+        i++;
+    }
+
+    dual2nd porosity = 1.0;
+    for (auto j = 0; j < n; j++)
+    {
+        porosity -= KIRI_PI<dual2nd>() * (lambda[j] * radius[j]) * (lambda[j] * radius[j]);
+    }
+
+    return porosity - 1 / t * log(lambda.prod() * (one - lambda).prod() * c_prod);
+}
+
+void ipm_test()
+{
+
+    using Eigen::MatrixXd;
+
+    std::vector<Vector2F> var_pos;
+
+    var_pos.emplace_back(Vector2F(1.f));
+    var_pos.emplace_back(Vector2F(2.f));
+
+    VectorXdual2nd dual_lambda(2);
+    dual_lambda << 0.01, 0.02;
+    VectorXdual2nd dual_radius(2);
+    dual_radius << 1, 2;
+
+    VectorXdual2nd one(2);
+    one << 1, 1;
+
+    dual2nd dual_u;
+    VectorXdual dual_g;
+
+    Eigen::MatrixXd H = hessian(optimize_hessian_func, wrt(dual_lambda), at(dual_lambda, dual_radius, one, var_pos, 0.1), dual_u, dual_g); // evaluate the Hessian matrix H and the gradient vector g of u
+
+    std::cout << "dual_u = " << dual_u << std::endl; // print the evaluated output variable u
+    std::cout << "dual_g = \n"
+              << dual_g << std::endl; // print the evaluated gradient vector of u
+    std::cout << "H = \n"
+              << H << std::endl; // print the evaluated Hessian matrix of u
+
+    auto ures = 1 - (KIRI_PI<float>() * 0.01 * 0.01 + KIRI_PI<float>() * 0.04 * 0.04) - 1 / 0.1 * log(0.01 * 0.02 * 0.99 * 0.98 * (sqrt(2) - 0.05));
+    auto res1 = -KIRI_PI<float>() * 2 * 0.01 - 1 / 0.1 * (1 / 0.01 + 1 / (0.01 - 1) + (-1 / (sqrt(2) - (0.01 + 0.04))));
+    auto res2 = -KIRI_PI<float>() * 8 * 0.02 - 1 / 0.1 * (1 / 0.02 + 1 / (0.02 - 1) + (-2 / (sqrt(2) - (0.01 + 0.04))));
+
+    auto hA = -KIRI_PI<float>() * 2 * 1 - 1 / 0.1 * (-1 / (0.01 * 0.01) - 1 / ((0.01 - 1) * (0.01 - 1)) + (-1 * 1 / ((sqrt(2) - (0.01 + 0.04)) * (sqrt(2) - (0.01 + 0.04)))));
+    auto hD = -KIRI_PI<float>() * 2 * 2 * 2 - 1 / 0.1 * (-1 / (0.02 * 0.02) - 1 / ((0.02 - 1) * (0.02 - 1)) + (-2 * 2 / ((sqrt(2) - (0.01 + 0.04)) * (sqrt(2) - (0.01 + 0.04)))));
+
+    std::cout << "g1=" << res1 << "; f=" << res2 << ";hA=" << hA << ";hD=" << hD << std::endl;
+}
+
 void main()
 {
     KiriLog::init();
@@ -666,6 +773,8 @@ void main()
     // BlueNoiseSampling();
     // BlueNoiseSamplingVisual();
 
-    MSSampler2D();
-    //     ExportParticleRadiusDist();
+    // MSSampler2D();
+    //      ExportParticleRadiusDist();
+
+    ipm_test();
 }
