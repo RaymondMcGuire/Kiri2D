@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-06-10 13:14:07
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-10 15:48:46
+ * @LastEditTime: 2022-06-10 16:33:03
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
  * @Description: 
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
@@ -706,42 +706,42 @@ dual2nd optimize_hessian_func(const VectorXdual2nd &lambda, const VectorXdual2nd
         porosity -= KIRI_PI<dual2nd>() * (lambda[j] * radius[j]) * (lambda[j] * radius[j]);
     }
 
-    return porosity - 1 / t * log(lambda.prod()  * c_prod);
+    return porosity - 1 / t * log(lambda.prod() * (one-lambda).prod() * c_prod);
 }
 #include<Eigen/LU>
 void BarrierMethod(double m, double t, double nu=0.01, double tol_barrier=1e-5, double tol_newton = 1e-5, int max_iter=1000)
 {
     using Eigen::MatrixXd;
 
-    // std::vector<Vector2F> var_pos;
-    // var_pos.emplace_back(Vector2F(0.5, 0.5));
-    // var_pos.emplace_back(Vector2F(0.25, 0.75));
-    //     var_pos.emplace_back(Vector2F(0.6, 0.75));
-    // var_pos.emplace_back(Vector2F(0.25, 0.25));
-    //     var_pos.emplace_back(Vector2F(0.7, 0.3));
-
-
-    // VectorXdual2nd dual_lambda(5);
-    // dual_lambda << 0.1, 0.1,0.1,0.1,0.1;
-    // VectorXdual2nd dual_radius(5);
-    // dual_radius << 0.3,0.25,0.25,0.25,0.3;
-
-    // VectorXdual2nd one(5);
-    // one << 1, 1,1,1,1;
-
-
-        std::vector<Vector2F> var_pos;
+    std::vector<Vector2F> var_pos;
     var_pos.emplace_back(Vector2F(0.5, 0.5));
     var_pos.emplace_back(Vector2F(0.25, 0.75));
+        var_pos.emplace_back(Vector2F(0.6, 0.75));
+    var_pos.emplace_back(Vector2F(0.25, 0.25));
+        var_pos.emplace_back(Vector2F(0.7, 0.3));
 
 
-    VectorXdual2nd dual_lambda(2);
-    dual_lambda << 0.01, 0.01;
-    VectorXdual2nd dual_radius(2);
-    dual_radius << 0.5,0.25;
+    VectorXdual2nd dual_lambda(5);
+    dual_lambda << 0.1, 0.1,0.1,0.1,0.1;
+    VectorXdual2nd dual_radius(5);
+    dual_radius << 0.3,0.25,0.25,0.25,0.23;
 
-    VectorXdual2nd one(2);
-    one << 1, 1;
+    VectorXdual2nd one(5);
+    one << 1, 1,1,1,1;
+
+
+    //     std::vector<Vector2F> var_pos;
+    // var_pos.emplace_back(Vector2F(0.5, 0.5));
+    // var_pos.emplace_back(Vector2F(0.25, 0.75));
+
+
+    // VectorXdual2nd dual_lambda(2);
+    // dual_lambda << 0.01, 0.01;
+    // VectorXdual2nd dual_radius(2);
+    // dual_radius << 0.5,0.25;
+
+    // VectorXdual2nd one(2);
+    // one << 1, 1;
 
     // store initial value
     std::vector<std::vector<double>> vec_lambda;
@@ -770,8 +770,12 @@ void BarrierMethod(double m, double t, double nu=0.01, double tol_barrier=1e-5, 
     {
         // centering step: Newton Algorithm
         auto i = 0;
-        VectorXdual2nd d(2);
-        d << 1, 1;
+        // VectorXdual2nd d(2);
+        // d << 1, 1;
+
+
+        VectorXdual2nd d(5);
+        d << 1, 1,1,1,1;
 
         std::cout<<"t="<<t<<std::endl;
         while(d.norm() >tol_newton && i<max_iter)
@@ -795,7 +799,8 @@ void BarrierMethod(double m, double t, double nu=0.01, double tol_barrier=1e-5, 
         }
 
         //update parameter t
-        t = (1 + 1/(13 * std::sqrt(nu))) * t;
+        //t = (1 + 1/(13 * std::sqrt(nu))) * t;
+        t*=1.1;
 
         
         vec_func.emplace_back(optimize_func(dual_lambda,dual_radius));
