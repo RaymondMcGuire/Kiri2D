@@ -1,11 +1,11 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-05-02 13:22:27
+ * @Date: 2022-06-10 13:14:07
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-09 11:51:39
+ * @LastEditTime: 2022-06-10 15:48:46
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
  */
 #include <kiri2d/renderer/renderer.h>
 #include <kiri2d/sdf/sdf_poly_2d.h>
@@ -672,31 +672,17 @@ void BlueNoiseSampling()
 
 using namespace autodiff;
 
-// real target_func(const ArrayXreal &lambda, const ArrayXreal &radius)
-// {
-//     return 1 - (KIRI_PI<real>() * (lambda * radius) * (lambda * radius)).sum();
-// }
+dual2nd optimize_func(const VectorXdual2nd &lambda, const VectorXdual2nd &radius)
+{
+    auto n = lambda.size();
+    dual2nd porosity = 1.0;
+    for (auto j = 0; j < n; j++)
+    {
+        porosity -= KIRI_PI<dual2nd>() * (lambda[j] * radius[j]) * (lambda[j] * radius[j]);
+    }
 
-// real optimize_func(const ArrayXreal &lambda, const ArrayXreal &radius, const std::vector<Vector2F> &pos, const real &t)
-// {
-//     auto n = lambda.size();
-
-//     auto i = 0;
-//     real c_prod = 1.f;
-//     while (i < n)
-//     {
-//         for (auto k = i + 1; k < n; k++)
-//         {
-//             auto ci = (pos[i] - pos[k]).length() - (lambda[i] * radius[i] + lambda[k] * radius[k]);
-//             c_prod *= ci;
-//         }
-//         i++;
-//     }
-
-//     // std::cout << c_prod << std::endl;
-
-//     return 1 - (KIRI_PI<real>() * (lambda * radius) * (lambda * radius)).sum() - 1 / t * log(lambda.prod() * (1 - lambda).prod() * c_prod);
-// }
+    return porosity;
+}
 
 dual2nd optimize_hessian_func(const VectorXdual2nd &lambda, const VectorXdual2nd &radius, const VectorXdual2nd &one, const std::vector<Vector2F> &pos, const dual2nd &t)
 {
@@ -720,8 +706,113 @@ dual2nd optimize_hessian_func(const VectorXdual2nd &lambda, const VectorXdual2nd
         porosity -= KIRI_PI<dual2nd>() * (lambda[j] * radius[j]) * (lambda[j] * radius[j]);
     }
 
-    return porosity - 1 / t * log(lambda.prod() * (one - lambda).prod() * c_prod);
+    return porosity - 1 / t * log(lambda.prod()  * c_prod);
 }
+#include<Eigen/LU>
+void BarrierMethod(double m, double t, double nu=0.01, double tol_barrier=1e-5, double tol_newton = 1e-5, int max_iter=1000)
+{
+    using Eigen::MatrixXd;
+
+    // std::vector<Vector2F> var_pos;
+    // var_pos.emplace_back(Vector2F(0.5, 0.5));
+    // var_pos.emplace_back(Vector2F(0.25, 0.75));
+    //     var_pos.emplace_back(Vector2F(0.6, 0.75));
+    // var_pos.emplace_back(Vector2F(0.25, 0.25));
+    //     var_pos.emplace_back(Vector2F(0.7, 0.3));
+
+
+    // VectorXdual2nd dual_lambda(5);
+    // dual_lambda << 0.1, 0.1,0.1,0.1,0.1;
+    // VectorXdual2nd dual_radius(5);
+    // dual_radius << 0.3,0.25,0.25,0.25,0.3;
+
+    // VectorXdual2nd one(5);
+    // one << 1, 1,1,1,1;
+
+
+        std::vector<Vector2F> var_pos;
+    var_pos.emplace_back(Vector2F(0.5, 0.5));
+    var_pos.emplace_back(Vector2F(0.25, 0.75));
+
+
+    VectorXdual2nd dual_lambda(2);
+    dual_lambda << 0.01, 0.01;
+    VectorXdual2nd dual_radius(2);
+    dual_radius << 0.5,0.25;
+
+    VectorXdual2nd one(2);
+    one << 1, 1;
+
+    // store initial value
+    std::vector<std::vector<double>> vec_lambda;
+    std::vector<double> vec_func;
+    std::vector<double> vec_duality_gap;
+
+    std::vector<double> vec_tmp;
+    for (auto i = 0; i < dual_lambda.size(); i++)
+        vec_tmp.emplace_back(dual_lambda[i]);
+    
+     // initialize tabulation of x for each iteration
+    vec_lambda.emplace_back(vec_tmp);
+
+    // initialize tabulation of function value at x
+    vec_func.emplace_back(optimize_func(dual_lambda,dual_radius));
+
+    // initialize tabulation of duality gap
+    vec_duality_gap.emplace_back(m/t);
+    
+     // number of iterations
+    auto iteration_num = 0   ;
+
+
+    // loop until stopping criterion is met
+    while (m/t > tol_barrier)
+    {
+        // centering step: Newton Algorithm
+        auto i = 0;
+        VectorXdual2nd d(2);
+        d << 1, 1;
+
+        std::cout<<"t="<<t<<std::endl;
+        while(d.norm() >tol_newton && i<max_iter)
+        {
+            dual2nd dual_u;
+            VectorXdual dual_g;
+            Eigen::MatrixXd H = hessian(optimize_hessian_func, wrt(dual_lambda), at(dual_lambda, dual_radius, one, var_pos, t), dual_u, dual_g); // evaluate the Hessian matrix H and the gradient vector g of u
+            
+            std::cout<<"B lambda="<<dual_lambda<<std::endl;
+            d = -(H.inverse() * dual_g).cast<dual2nd>();
+            dual_lambda += d;
+            std::cout<<"d="<<d<<std::endl;
+            std::cout<<"A lambda="<<dual_lambda<<std::endl;
+
+            // record
+            vec_tmp.clear();
+            for (auto idx = 0; idx < dual_lambda.size(); idx++)
+                vec_tmp.emplace_back(dual_lambda[idx]);
+            vec_lambda.emplace_back(vec_tmp);
+            i+=1;
+        }
+
+        //update parameter t
+        t = (1 + 1/(13 * std::sqrt(nu))) * t;
+
+        
+        vec_func.emplace_back(optimize_func(dual_lambda,dual_radius));
+        vec_duality_gap.emplace_back(m/t);
+
+        iteration_num+=1;
+        //print result
+        
+        KIRI_LOG_INFO("Iteration: {0}; f(x) = {1}, gap = {2}",iteration_num,vec_func[iteration_num],vec_duality_gap[iteration_num]);
+      
+    }
+
+   
+                       
+}
+
+
 
 void ipm_test()
 {
@@ -730,13 +821,13 @@ void ipm_test()
 
     std::vector<Vector2F> var_pos;
 
-    var_pos.emplace_back(Vector2F(1.f));
-    var_pos.emplace_back(Vector2F(2.f));
+    var_pos.emplace_back(Vector2F(0.25f,0.75f));
+    var_pos.emplace_back(Vector2F(0.5f,0.5f));
 
     VectorXdual2nd dual_lambda(2);
-    dual_lambda << 0.01, 0.02;
+    dual_lambda << 0.1, 0.1;
     VectorXdual2nd dual_radius(2);
-    dual_radius << 1, 2;
+    dual_radius << 0.25, 0.5;
 
     VectorXdual2nd one(2);
     one << 1, 1;
@@ -746,20 +837,17 @@ void ipm_test()
 
     Eigen::MatrixXd H = hessian(optimize_hessian_func, wrt(dual_lambda), at(dual_lambda, dual_radius, one, var_pos, 0.1), dual_u, dual_g); // evaluate the Hessian matrix H and the gradient vector g of u
 
+    auto d = -H.inverse() * dual_g;
+    VectorXdual2nd tmpd = d.cast<dual2nd>();
+    
+    
+
+std::cout << "d = " << tmpd << std::endl;
     std::cout << "dual_u = " << dual_u << std::endl; // print the evaluated output variable u
     std::cout << "dual_g = \n"
               << dual_g << std::endl; // print the evaluated gradient vector of u
     std::cout << "H = \n"
               << H << std::endl; // print the evaluated Hessian matrix of u
-
-    auto ures = 1 - (KIRI_PI<float>() * 0.01 * 0.01 + KIRI_PI<float>() * 0.04 * 0.04) - 1 / 0.1 * log(0.01 * 0.02 * 0.99 * 0.98 * (sqrt(2) - 0.05));
-    auto res1 = -KIRI_PI<float>() * 2 * 0.01 - 1 / 0.1 * (1 / 0.01 + 1 / (0.01 - 1) + (-1 / (sqrt(2) - (0.01 + 0.04))));
-    auto res2 = -KIRI_PI<float>() * 8 * 0.02 - 1 / 0.1 * (1 / 0.02 + 1 / (0.02 - 1) + (-2 / (sqrt(2) - (0.01 + 0.04))));
-
-    auto hA = -KIRI_PI<float>() * 2 * 1 - 1 / 0.1 * (-1 / (0.01 * 0.01) - 1 / ((0.01 - 1) * (0.01 - 1)) + (-1 * 1 / ((sqrt(2) - (0.01 + 0.04)) * (sqrt(2) - (0.01 + 0.04)))));
-    auto hD = -KIRI_PI<float>() * 2 * 2 * 2 - 1 / 0.1 * (-1 / (0.02 * 0.02) - 1 / ((0.02 - 1) * (0.02 - 1)) + (-2 * 2 / ((sqrt(2) - (0.01 + 0.04)) * (sqrt(2) - (0.01 + 0.04)))));
-
-    std::cout << "g1=" << res1 << "; f=" << res2 << ";hA=" << hA << ";hD=" << hD << std::endl;
 }
 
 void main()
@@ -776,5 +864,7 @@ void main()
     // MSSampler2D();
     //      ExportParticleRadiusDist();
 
-    ipm_test();
+   //ipm_test();
+
+   BarrierMethod(5,0.1);
 }
