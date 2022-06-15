@@ -1,33 +1,25 @@
 # Project Name
-set(PROJECT_NAME kiri2d_examples)
+set(PROJECT_NAME IPM)
 
+# Enable CUDA
 set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
-message(STATUS "Kiri2dExample ENABLE_CUDA: ${ENABLE_CUDA}")
 
-# Find Extra Library Package
+# External Library Package
 set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/external/KiriExtlib/include)
 set(EXTLIBS_LIB ${CMAKE_SOURCE_DIR}/external/KiriExtlib/lib)
 link_directories(${EXTLIBS_LIB})
 
-# Find PBS2D Library Package
-set(PBS2D_CUDA_INCLUDE ${CMAKE_SOURCE_DIR}/Kiri2dPBSCuda/include)
-
 # Configuration File
-if(${ENABLE_CUDA})
-    set(BUILD_STRING "build_cuda")
-else()
-    set(BUILD_STRING "build")
-endif()
-configure_file(${CMAKE_SOURCE_DIR}/configuration/root_directory.h.in  ${CMAKE_BINARY_DIR}/configuration/root_directory.h)
+configure_file(${CMAKE_SOURCE_DIR}/configuration/root_directory.h.in ${CMAKE_BINARY_DIR}/configuration/root_directory.h)
 set(CONFIGURATION_INCLUDE ${CMAKE_BINARY_DIR}/configuration)
 
-# Kiri2D Library
-set(KIRI2D_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/Kiri2d/include)
+# Kiri2d Core Library
+set(KIRI2D_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/core/include)
 
-# Extra Static Library
-# set(EXTLIBS_LINK_LIBS XXXXX)
+# OpenMP
 if(WIN32)
     find_package(OpenMP REQUIRED)
+
     if(OPENMP_FOUND)
         message(STATUS "OpenMP_C_Found   : ${OpenMP_C_FOUND}")
         message(STATUS "OpenMP_CXX_Found : ${OpenMP_CXX_FOUND}")
@@ -37,16 +29,16 @@ if(WIN32)
 endif()
 
 if(APPLE)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS ON)
-set(OpenCV_DIR "/Users/raymondmg/Project/opencv/build")
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS ON)
+    set(OpenCV_DIR "/Users/raymondmg/Project/opencv/build")
     find_package(OpenCV REQUIRED)
 endif()
 
 # Project Config
-file(GLOB_RECURSE SOURCES  "src/*.cpp" "src/*.c")
-file(GLOB_RECURSE HEADERS  "include/*.hpp" "include/*.h")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
+file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
 set(PROJECT_FILES ${SOURCES} ${HEADERS})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)
@@ -68,20 +60,19 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CONFIGURATION_INCLUDE}
     ${KIRI2D_LIB_INLCUDE}
     ${EXTLIBS_INCLUDE}
-    ${PBS2D_CUDA_INCLUDE}
 )
 
 if(WIN32 AND ${ENABLE_CUDA})
-target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D kiri2d_pbs_cuda)
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D kiri2d_pbs_cuda)
 elseif(WIN32)
-target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D)
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D)
 elseif(APPLE)
-target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui KIRI2D)
+    target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui KIRI2D)
 endif()
 
 # WorkSpace
-set(WD_DEBUG_FILE_PATH ${CMAKE_BINARY_DIR}/bin/Debug/)
-set(WD_RELEASE_FILE_PATH ${CMAKE_BINARY_DIR}/bin/Release/)
+set(WD_DEBUG_FILE_PATH ${CMAKE_BINARY_DIR}/demos/bin/Debug/)
+set(WD_RELEASE_FILE_PATH ${CMAKE_BINARY_DIR}/demos/bin/Release/)
 
 set_target_properties(
     ${PROJECT_NAME} PROPERTIES
@@ -90,5 +81,5 @@ set_target_properties(
     VS_DEBUGGER_WORKING_DIRECTORY "$<$<CONFIG:debug>:${WD_DEBUG_FILE_PATH}>$<$<CONFIG:release>:${WD_RELEASE_FILE_PATH}>"
 )
 
-#Copy DLLs
+# Copy DLLs
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/external/KiriExtlib/dlls" $<TARGET_FILE_DIR:${PROJECT_NAME}>)
