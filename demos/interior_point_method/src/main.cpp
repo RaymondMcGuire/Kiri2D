@@ -2,11 +2,12 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-06-15 16:46:01
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-15 16:47:51
+ * @LastEditTime: 2022-06-17 11:06:07
  * @FilePath: \Kiri2D\demos\interior_point_method\src\main.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
+
 #include <kiri2d.h>
 using namespace KIRI2D;
 
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
     KiriLog::init();
 
     VectorXdual2nd data(2);
-    data << -0.5579, 2.1847;
+    data << -2.1433, 0.2949;
 
     auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data);
     ipm->solve();
