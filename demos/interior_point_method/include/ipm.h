@@ -1,11 +1,11 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-06-15 23:16:19
+ * @Date: 2022-06-24 11:30:24
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-21 09:06:38
+ * @LastEditTime: 2022-06-24 15:09:05
  * @FilePath: \Kiri2D\demos\interior_point_method\include\ipm.h
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
  */
 #ifndef _IPM_H_
 #define _IPM_H_
@@ -75,6 +75,9 @@ namespace OPTIMIZE::IPM
             this->initLambdaMultipler();
             this->computeKKT();
             this->computeConstrainstsHessian();
+                        this->computeBarriarCostGrad();
+            this->computeBackTrackingLineSearch();
+
         }
 
         virtual ~InteriorPointMethod()
@@ -155,13 +158,14 @@ namespace OPTIMIZE::IPM
         double mFtol = 1e-8;
         double mTau = 0.995;
         double mMu = 0.2;
+        double mRho = 0.1;
         bool mKtolConverged = false;
         bool mFtolConverged = false;
 
         dual2nd mPhi0, mLastPhi0;
         VectorXdual mFuncGrad;
         MatrixXd mFuncHessian;
-        MatrixXd mGrad;
+
 
         std::vector<double> mData;
         ArrayXreal mRealData;
@@ -169,12 +173,15 @@ namespace OPTIMIZE::IPM
 
         MatrixXd mCi;
         MatrixXd mConstrainJacobian;
-
         MatrixXd mConstraintsFuncHessian;
+
+        MatrixXd mGrad;
         MatrixXd mHessian;
 
         MatrixXd mLambda, mSlack;
         MatrixXd mKKT1, mKKT2, mKKT3, mKKT4;
+
+        MatrixXd mBarrierCostGrad;
 
         void initDataVector()
         {
@@ -250,6 +257,88 @@ namespace OPTIMIZE::IPM
             mConstrainJacobian = constrainst_jacobian;
         }
 
+        void computeBarriarCostGrad()
+        {
+            MatrixXd barriar_cost_grad = MatrixXd::Zero(2+3,1);
+            MatrixXd func_grad = mFuncGrad.cast<double>();
+            barriar_cost_grad<<func_grad,mSlack;
+            mBarrierCostGrad = barriar_cost_grad;
+            KIRI_LOG_DEBUG("mBarrierCostGrad=\n{0}", mBarrierCostGrad);
+        }
+
+        double computeMaximumStepSize(Eigen::ArrayXd x,Eigen::ArrayXd dx)
+        {
+            auto gold = (sqrt(5.0) + 1.0) / 2.0;
+             auto      a = 0.0;
+            auto b = 1.0;
+            
+            auto xbdx = x + b * dx - (1-mTau) * x;
+            bool flag = true;
+
+            for (auto i = 0; i < xbdx.size(); i++)
+            {
+                if(xbdx[i]<0)
+                {
+                    flag = false;
+                    break;
+                }
+            }
+
+            if(flag)
+            return b;
+
+            auto c = b - (b - a) / gold;
+            auto d = a + (b - a) / gold;
+            while (abs(b - a) > gold * MEpsilon<float>())
+            {
+                auto xddx = x+d*dx - (1-mTau) * x;
+                flag = true;
+                  for (auto i = 0; i < xddx.size(); i++)
+                    {
+                       if(xddx[i]>=0)
+                        {
+                            flag = false;
+                            break;
+                        }
+                    }
+
+                     if (flag)
+                    b = d;
+                else
+                    a = d;
+
+                    if(c>a)
+                    {
+                        auto xcdx = x+c*dx - (1-mTau) * x;
+                        flag = true;
+                        for (auto i = 0; i < xcdx.size(); i++)
+                    {
+                        if(xcdx[i]>=0)
+                        {
+                            flag = false;
+                            break;
+                        }
+                    }
+
+                     if (flag)
+                    b = c;
+                else
+                    a = c;
+
+                    }
+
+                          c = b - (b - a) / gold;
+                d = a + (b - a) / gold;
+            }
+               
+            return b;
+        }
+
+        void UpdateMeritFuncParams()
+        {
+
+        }
+
         void computeConstrainstsHessian()
         {
 
@@ -307,7 +396,7 @@ namespace OPTIMIZE::IPM
             hessianMatrix -= hessianHalfDiagMatrix;
 
             mHessian = hessianMatrix;
-            // KIRI_LOG_DEBUG("hessianMatrix=\n{0}", hessianMatrix);
+            KIRI_LOG_DEBUG("hessianMatrix=\n{0}", hessianMatrix);
         }
 
         void computeKKT()
@@ -344,13 +433,38 @@ namespace OPTIMIZE::IPM
 
         void computeBackTrackingLineSearch(double alphaSMax = 1.0, double alphaLMax = 1.0)
         {
-            // auto correction = false;
-            // auto alphaCorr = 1.0;
+            auto correction = false;
+            auto alphaCorr = 1.0;
 
-            // mPhi0 = targetFunc(mData);
+            //mPhi0 = targetFunc(mData);
 
-            // auto dir = -(mFuncHessian.inverse() * mFuncGrad);
-            // std::cout << "search direction=" << dir.cast<dual2nd>() << std::endl;
+            MatrixXd dir = -(mHessian.inverse() * mGrad);
+
+             KIRI_LOG_DEBUG("search direction=\n{0}", dir);
+
+             //change sign definition for the multipliers' search direction
+             for (auto i = 5; i < dir.size(); i++)
+             {
+                dir(i,0) = -dir(i,0);
+             }
+             KIRI_LOG_DEBUG("changed sign search direction=\n{0}", dir);
+
+            auto dot_barrier_dir = mBarrierCostGrad.transpose() * dir(Eigen::seq(0,4),Eigen::placeholders::all);
+            KIRI_LOG_DEBUG("dot_barrier_dir=\n{0}", dot_barrier_dir);
+
+            MatrixXd con= mCi - mSlack;
+            auto sum_abs_con = con.array().abs().sum();
+              KIRI_LOG_DEBUG("sum_abs_con={0}", sum_abs_con);
+
+            auto nu_thresh = dot_barrier_dir /(1- mRho)/sum_abs_con;
+              KIRI_LOG_DEBUG("nu_thresh={0}", nu_thresh);
+
+
+             auto alpha_smax = computeMaximumStepSize(mSlack.array(),dir(Eigen::seq(2,4),Eigen::placeholders::all).array());
+              KIRI_LOG_DEBUG("alpha_smax={0}", alpha_smax);
+
+                auto alpha_lmax = computeMaximumStepSize(mLambda.array(),dir(Eigen::seq(2,4),Eigen::placeholders::all).array());
+              KIRI_LOG_DEBUG("alpha_lmax={0}", alpha_lmax);
 
             // auto dphi0 = (mFuncGrad.transpose() * dir).cast<dual2nd>()(0, 0);
 

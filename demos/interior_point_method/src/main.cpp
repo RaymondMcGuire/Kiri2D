@@ -1,21 +1,13 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-06-15 16:46:01
+ * @Date: 2022-06-24 11:30:24
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-20 14:00:39
+ * @LastEditTime: 2022-06-24 11:33:02
  * @FilePath: \Kiri2D\demos\interior_point_method\src\main.cpp
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
  */
-/***
- * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-06-15 16:46:01
- * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-20 00:26:54
- * @FilePath: \Kiri2D\demos\interior_point_method\src\main.cpp
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
- */
+
 #include <kiri2d.h>
 using namespace KIRI2D;
 
