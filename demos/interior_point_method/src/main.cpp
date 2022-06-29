@@ -13,32 +13,6 @@ using namespace KIRI2D;
 
 #include <ipm.h>
 
-template <typename Derived>
-std::string get_shape(const EigenBase<Derived> &x)
-{
-    std::ostringstream oss;
-    oss << "(" << x.rows() << ", " << x.cols() << ")";
-    return oss.str();
-}
-#include <Eigen/QR>
-#include <autodiff/forward/real.hpp>
-#include <autodiff/forward/real/eigen.hpp>
-// The scalar function for which the gradient is needed
-real f(const ArrayXreal &x)
-{
-    return x[0] + 2 * x[1] - 10;
-}
-
-VectorXreal f1(const VectorXreal &x)
-{
-    return x;
-}
-
-dual2nd original_func(const VectorXdual2nd &x)
-{
-    return x[0] * x[0] + 2 * x[1] * x[1] + 2 * x[0] + 8 * x[1];
-}
-
 int main(int argc, char *argv[])
 {
     // log system
@@ -46,16 +20,42 @@ int main(int argc, char *argv[])
 
     std::vector<double> data;
 
+    std::vector<Vector2F> data_pos;
+    std::vector<double> data_radius;
+
+    data_pos.emplace_back(Vector2F(0.5, 0.5));
+    data_pos.emplace_back(Vector2F(0.25, 0.75));
+    data_pos.emplace_back(Vector2F(0.6, 0.75));
+    data_pos.emplace_back(Vector2F(0.25, 0.25));
+    data_pos.emplace_back(Vector2F(0.7, 0.3));
+
+    data_radius.emplace_back(0.3);
+    data_radius.emplace_back(0.25);
+    data_radius.emplace_back(0.25);
+    data_radius.emplace_back(0.25);
+    data_radius.emplace_back(0.3);
+
     for (auto i = 0; i < 1; i++)
     {
-        KIRI_LOG_INFO("Attempt num={0}", i + 1);
         data.clear();
         data.emplace_back(Random::get(-1.0, 1.0));
         data.emplace_back(Random::get(-1.0, 1.0));
-        auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data, 2);
-    }
+        data.emplace_back(Random::get(-1.0, 1.0));
+        data.emplace_back(Random::get(-1.0, 1.0));
+        data.emplace_back(Random::get(-1.0, 1.0));
 
-    // ipm->solve();
+        KIRI_LOG_INFO("Attempt num={0}", i + 1);
+
+        for (auto j = 0; j < data.size(); j++)
+        {
+            KIRI_LOG_INFO("Init Data[{0}]={1}", j, data[j]);
+        }
+
+        int n = data.size();
+        int inequ_num = 2 * n + n * (n - 1) / 2;
+
+        auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data, inequ_num, data_radius, data_pos);
+    }
 
     // using Eigen::MatrixXd;
     // using Eigen::VectorXd;
