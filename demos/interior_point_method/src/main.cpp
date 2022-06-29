@@ -1,11 +1,11 @@
-/*** 
+/***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-06-24 11:30:24
+ * @Date: 2022-06-25 01:39:47
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-24 11:33:02
+ * @LastEditTime: 2022-06-29 09:17:25
  * @FilePath: \Kiri2D\demos\interior_point_method\src\main.cpp
- * @Description: 
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #include <kiri2d.h>
@@ -45,10 +45,16 @@ int main(int argc, char *argv[])
     KiriLog::init();
 
     std::vector<double> data;
-    data.emplace_back(-0.6165);
-    data.emplace_back(-0.1307);
 
-    auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data);
+    for (auto i = 0; i < 1; i++)
+    {
+        KIRI_LOG_INFO("Attempt num={0}", i + 1);
+        data.clear();
+        data.emplace_back(Random::get(-1.0, 1.0));
+        data.emplace_back(Random::get(-1.0, 1.0));
+        auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data, 2);
+    }
+
     // ipm->solve();
 
     // using Eigen::MatrixXd;
