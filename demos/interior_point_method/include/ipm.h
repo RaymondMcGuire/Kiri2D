@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-06-25 01:39:47
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-29 09:16:04
+ * @LastEditTime: 2022-06-30 11:29:49
  * @FilePath: \Kiri2D\demos\interior_point_method\include\ipm.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -16,6 +16,8 @@
 
 #include <Eigen/LU>
 #include <Eigen/QR>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
 #include <autodiff/forward/dual.hpp>
 #include <autodiff/forward/dual/eigen.hpp>
@@ -27,6 +29,7 @@ using std::ostringstream;
 
 using Eigen::EigenBase;
 using Eigen::MatrixXd;
+using Eigen::VectorXcd;
 using Eigen::VectorXd;
 
 //-------------------------------------------------------------- example1
@@ -193,6 +196,7 @@ namespace OPTIMIZE::IPM
 
                     // compute gradient and hessian
                     this->computeGrad();
+
                     this->computeConstrainstsHessian();
 
                     // search direction
@@ -281,6 +285,8 @@ namespace OPTIMIZE::IPM
         int mVariableNum = 0;
         int mOuterIterNum = 10;
         int mInnerIterNum = 20;
+        // int mOuterIterNum = 1;
+        // int mInnerIterNum = 1;
 
         double mEta = 1e-4;
         double mKTol = 1e-4;
@@ -290,6 +296,7 @@ namespace OPTIMIZE::IPM
         double mMu = 0.2;
         double mNu = 10.0;
         double mRho = 0.1;
+        double mDelta = 0.0;
         bool mKtolConverged = false;
         bool mFTolConverged = false;
 
@@ -524,13 +531,23 @@ namespace OPTIMIZE::IPM
             // KIRI_LOG_DEBUG("mGrad=\n{0}", mGrad);
         }
 
+        int computeMatrixInertia(VectorXcd mat)
+        {
+            auto matrix_inertia = 0;
+            for (auto i = 0; i < mat.array().size(); i++)
+                if (mat.array()[i].real() < -MEpsilon<float>())
+                    matrix_inertia++;
+            return matrix_inertia;
+        }
+
         void computeConstrainstsHessian()
         {
+            mDelta = 0.0;
             this->computeConstrainstsJacobian();
 
             dual2nd u;
             VectorXdual g;
-            mConstraintsFuncHessian = hessian(ConstrainstFunc, wrt(mDual2ndData), at(mDual2ndData, mLambda,mRadius,mPos), u, g);
+            mConstraintsFuncHessian = hessian(ConstrainstFunc, wrt(mDual2ndData), at(mDual2ndData, mLambda, mRadius, mPos), u, g);
 
             // KIRI_LOG_DEBUG("mConstraintsFuncHessian={0}", mConstraintsFuncHessian);
 
@@ -580,6 +597,38 @@ namespace OPTIMIZE::IPM
 
             MatrixXd hessianHalfDiagMatrix = (hessianMatrix.diagonal() / 2).array().matrix().asDiagonal();
             hessianMatrix -= hessianHalfDiagMatrix;
+
+            // reg
+            auto w = hessianMatrix.eigenvalues();
+            auto rcond = w.array().abs().minCoeff() / w.array().abs().maxCoeff();
+
+            auto matrix_inertia = this->computeMatrixInertia(w);
+
+            if (rcond <= MEpsilon<float>() || mInEquNum != matrix_inertia)
+            {
+
+                if (mDelta == 0.0)
+                {
+                    mDelta = sqrt(MEpsilon<float>());
+                }
+                else
+                {
+                    // prevent the diagonal shift coefficient from becoming too small
+
+                    mDelta = std::max(mDelta / 2, sqrt((double)MEpsilon<float>()));
+                }
+                hessianMatrix.block(0, 0, mData.size(), mData.size()) += mDelta * MatrixXd::Identity(mData.size(), mData.size());
+                w = hessianMatrix.eigenvalues();
+                matrix_inertia = this->computeMatrixInertia(w);
+                while (mInEquNum != matrix_inertia)
+                {
+                    hessianMatrix.block(0, 0, mData.size(), mData.size()) -= mDelta * MatrixXd::Identity(mData.size(), mData.size());
+                    mDelta *= 10;
+                    hessianMatrix.block(0, 0, mData.size(), mData.size()) += mDelta * MatrixXd::Identity(mData.size(), mData.size());
+                    w = hessianMatrix.eigenvalues();
+                    matrix_inertia = this->computeMatrixInertia(w);
+                }
+            }
 
             mHessian = hessianMatrix;
             // KIRI_LOG_DEBUG("hessianMatrix=\n{0}", hessianMatrix);
