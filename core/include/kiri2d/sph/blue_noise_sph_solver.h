@@ -51,7 +51,7 @@ namespace KIRI2D::SPH
             grid.updateStructure(particles);
             numberParticles = data.size();
 
-            std::cout << "init particles number = " << numberParticles << std::endl;
+            // std::cout << "init particles number = " << numberParticles << std::endl;
         }
 
         void initWithBoxVolume(Vector2F volume, float radius)
@@ -310,7 +310,7 @@ namespace KIRI2D::SPH
             if (nbparticles != 0)
                 avgOverlap /= totalCnt;
 
-            std::cout << "Average Overlapping= " << avgOverlap << std::endl;
+            // std::cout << "Average Overlapping= " << avgOverlap << std::endl;
         }
 
         void calculateCohesion()

@@ -2,10 +2,9 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-09-26 16:12:57
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-05-31 09:28:20
+ * @LastEditTime: 2022-07-03 10:41:23
  * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\sampler\poisson_disk_sampler.h
  * @Description:
- * @Reference: Computing Distance, Erin Catto, Blizzard Entertainment, GDC2010
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #ifndef _HDV_POISSON_DISK_SAMPLER_H_
@@ -28,6 +27,7 @@ namespace HDV::Sampler
 
         void initUniRadiiSampler(float radius, Vector2F boundarySize)
         {
+            mFinished = false;
             mCellSize = radius / std::sqrtf(2.f);
             mGrid = Vector<Vec_Int>(static_cast<size_t>(boundarySize.x / mCellSize) + 1, Vec_Int(static_cast<size_t>(boundarySize.y / mCellSize) + 1, 0));
             mSpawnPoints.emplace_back(boundarySize / 2.f);
@@ -35,6 +35,7 @@ namespace HDV::Sampler
 
         void initMultiRadiiSampler(float minRadius, float maxRadius, Vector2F boundarySize)
         {
+            mFinished = false;
             mCellSize = minRadius / std::sqrtf(2.f);
             mMaxCellSize = maxRadius / std::sqrtf(2.f);
             mGrid = Vector<Vec_Int>(static_cast<size_t>(boundarySize.x / mCellSize) + 1, Vec_Int(static_cast<size_t>(boundarySize.y / mCellSize) + 1, 0));
@@ -45,7 +46,10 @@ namespace HDV::Sampler
         {
 
             if (mSpawnPoints.empty())
+            {
+                mFinished = true;
                 return mPoints;
+            }
 
             std::random_device seed;
             std::default_random_engine rnd_engine(seed());
@@ -80,7 +84,7 @@ namespace HDV::Sampler
         {
             if (mSpawnPoints.empty())
             {
-                KIRI_LOG_DEBUG("Sampling Finished!");
+                mFinished = true;
                 return mPointsPlusRadius;
             }
 
@@ -117,8 +121,11 @@ namespace HDV::Sampler
             return mPointsPlusRadius;
         }
 
+        bool sampledFinished() const { return mFinished; }
+
     private:
         float mCellSize, mMaxCellSize;
+        bool mFinished = false;
         Vector<Vec_Int> mGrid;
         Vec_Vec2F mPoints, mSpawnPoints;
         Vec_Vec3F mPointsPlusRadius;

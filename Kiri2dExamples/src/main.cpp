@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-06-13 11:24:25
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-14 10:13:53
+ * @LastEditTime: 2022-07-03 10:26:07
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -153,6 +153,19 @@ void MSSampler2D()
         return std::sqrt(sum / n);
     };
 
+    auto ExportRadius2CSVFile = [](const String fileName, const String idx, const Vector<double> &radius)
+    {
+        String voronoiFile = String(EXPORT_PATH) + "csv/" + fileName + "_samplers_" + idx + ".csv";
+        std::fstream vfile;
+        vfile.open(voronoiFile.c_str(), std::ios_base::out);
+        vfile << "radius"
+              << std::endl;
+        for (int i = 0; i < radius.size(); i++)
+            vfile << radius[i] << std::endl;
+
+        vfile.close();
+    };
+
     // scene renderer config
     float windowheight = 4000.f;
     float windowwidth = 4000.f;
@@ -172,6 +185,25 @@ void MSSampler2D()
     std::uniform_real_distribution<double> dist(-1.0, 1.0);
     std::uniform_real_distribution<double> rdist(-1.0, 1.0);
 
+    // std::vector<double> radiusRange;
+    // radiusRange.push_back(10.0);
+    // radiusRange.push_back(20.0);
+    // radiusRange.push_back(30.0);
+    // radiusRange.push_back(50.0);
+    // radiusRange.push_back(60.0);
+    // radiusRange.push_back(80.0);
+    // radiusRange.push_back(90.0);
+    // radiusRange.push_back(150.0);
+
+    // std::vector<double> radiusRangeProb;
+    // radiusRangeProb.push_back(0.025);
+    // radiusRangeProb.push_back(0.3);
+    // radiusRangeProb.push_back(0.025);
+    // radiusRangeProb.push_back(0.3);
+    // radiusRangeProb.push_back(0.025);
+    // radiusRangeProb.push_back(0.3);
+    // radiusRangeProb.push_back(0.025);
+
     std::vector<double> radiusRange;
     radiusRange.push_back(20.0);
     radiusRange.push_back(30.0);
@@ -179,8 +211,8 @@ void MSSampler2D()
     radiusRange.push_back(150.0);
 
     std::vector<double> radiusRangeProb;
-    radiusRangeProb.push_back(0.5);
-    radiusRangeProb.push_back(0.4);
+    radiusRangeProb.push_back(0.7);
+    radiusRangeProb.push_back(0.2);
     radiusRangeProb.push_back(0.1);
 
     multiSizeSampler->setRadiusDist(radiusRange);
@@ -191,19 +223,19 @@ void MSSampler2D()
     std::piecewise_constant_distribution<double> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
     Vec_Double ary1, ary2;
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0; i < radiusRange.size(); i++)
     {
         ary1.emplace_back(radiusRange[i]);
     }
 
     ary2.emplace_back(0.0);
-    for (size_t i = 0; i < 3; i++)
+    for (size_t i = 0; i < radiusRangeProb.size(); i++)
     {
         ary2.emplace_back(radiusRangeProb[i]);
     }
 
     auto total_sum = 0.0;
-    for (size_t i = 0; i < 3; i++)
+    for (size_t i = 0; i < radiusRangeProb.size(); i++)
     {
         auto m = 0.5 * (ary2[i + 1] - ary2[i]) / (ary1[i + 1] - ary1[i]);
         auto b = (ary2[i] * ary1[i + 1] - ary1[i] * ary2[i + 1]) / (ary1[i + 1] - ary1[i]);
@@ -237,29 +269,35 @@ void MSSampler2D()
 
     auto total_area = BoundaryPolygon->area();
     auto total_num = total_area / (kiri_math_mini::pi<double>() * total_sum * total_sum);
-    total_num *= 1.5f;
+    total_num *= 1.f;
 
     KIRI_LOG_DEBUG("avg_radius={0},total_area={1},total_num={2}", total_sum, total_area, total_num);
 
-    auto maxcnt = 100;
+    std::vector<double> target_radius_array;
+    auto maxcnt = total_num;
     for (size_t i = 0; i < maxcnt; i++)
     {
         auto pos = BoundaryPolygon->rndInnerPoint();
         auto radius = pcdis(gen);
+        target_radius_array.emplace_back(radius);
         multiSizeSampler->addSite(pos.x, pos.y, radius);
     }
 
-    multiSizeSampler->setMaxiumNum(static_cast<int>(total_num * 1.5));
+    ExportRadius2CSVFile(boundaryFileName, "target", target_radius_array);
+
+    multiSizeSampler->setMaxiumNum(static_cast<int>(total_num * 2.5));
 
     multiSizeSampler->init();
 
     std::vector<float> errorArray, porosityArray, radiusErrorArray;
     std::vector<Vector4D> lastMaxCircle;
-    auto minRadius = std::numeric_limits<double>::max();
-    auto maxRadius = std::numeric_limits<double>::min();
+    // auto minRadius = std::numeric_limits<double>::max();
+    // auto maxRadius = std::numeric_limits<double>::min();
+    auto minRadius = 0.f;
+    auto maxRadius = 150.f;
 
     auto min_rmsp = std::numeric_limits<double>::max();
-    for (size_t idx = 0; idx < 3000; idx++)
+    for (auto idx = 0; idx < 3000; idx++)
     {
         auto porosity = multiSizeSampler->compute();
 
@@ -268,7 +306,7 @@ void MSSampler2D()
 
         auto sites = multiSizeSampler->sites();
 
-        for (size_t i = 0; i < sites.size(); i++)
+        for (auto i = 0; i < sites.size(); i++)
         {
             auto site = std::dynamic_pointer_cast<Voronoi::VoronoiSite2>(sites[i]);
             if (site->isBoundaryVertex())
@@ -277,7 +315,7 @@ void MSSampler2D()
             auto cell_polygon = site->polygon();
             if (cell_polygon)
             {
-                for (size_t j = 0; j < cell_polygon->positions().size(); j++)
+                for (auto j = 0; j < cell_polygon->positions().size(); j++)
                 {
                     auto vert = cell_polygon->positions()[j];
                     auto vert1 = cell_polygon->positions()[(j + 1) % (cell_polygon->positions().size())];
@@ -298,7 +336,7 @@ void MSSampler2D()
         std::vector<KiriLine2> lines;
         std::vector<KiriPoint2> points;
         std::vector<KiriCircle2> circles;
-        for (size_t i = 0; i < precompute_points.size(); i++)
+        for (auto i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
         }
@@ -312,22 +350,22 @@ void MSSampler2D()
         lastMaxCircle = maxIC;
 
         Vec_Double predictRadiusArray, realRadiusArray;
-        for (size_t i = 0; i < maxIC.size(); i++)
+        for (auto i = 0; i < maxIC.size(); i++)
         {
             // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
             auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y) + offset, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
 
             circles.emplace_back(maxCir2);
 
-            minRadius = std::min(minRadius, maxIC[i].z);
-            maxRadius = std::max(maxRadius, maxIC[i].z);
+            // minRadius = std::min(minRadius, maxIC[i].z);
+            // maxRadius = std::max(maxRadius, maxIC[i].z);
 
             predictRadiusArray.emplace_back(maxIC[i].z);
             realRadiusArray.emplace_back(maxIC[i].w);
         }
 
         // re-color
-        for (size_t i = 0; i < maxIC.size(); i++)
+        for (auto i = 0; i < maxIC.size(); i++)
         {
             auto rad = (maxIC[i].z - minRadius) / (maxRadius - minRadius);
             const tinycolormap::Color color = tinycolormap::GetColor(rad, tinycolormap::ColormapType::Plasma);
@@ -340,12 +378,18 @@ void MSSampler2D()
 
         renderer->DrawCanvas();
 
-        renderer->SaveImages2FileWithPrefix(boundaryFileName);
+        if ((idx + 1) % 100 == 0)
+            renderer->SaveImages2FileWithPrefix(boundaryFileName);
+
         renderer->clearCanvas();
         scene->clear();
 
         auto cur_rmsp = ComputeRMSPE(predictRadiusArray, realRadiusArray);
         min_rmsp = std::min(min_rmsp, cur_rmsp);
+
+        // export
+        if ((idx + 1) % 100 == 0)
+            ExportRadius2CSVFile(boundaryFileName, std::to_string(idx), predictRadiusArray);
 
         KIRI_LOG_DEBUG("name={0}, idx={1}, porosity={2},minimum rmsp={3}", boundaryFileName, idx, porosity, min_rmsp);
     }
@@ -598,70 +642,117 @@ void BlueNoiseSampling()
         file.close();
     };
 
-    // load 2d boundary file
-    String boundaryFileName = "bunny";
-    String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
-    std::vector<Vector2F> boundary2d_data;
+    auto alpha_shapes_name = std::vector<String>{"bunny", "alligator", "beast", "cheburashka", "cow", "homer", "horse", "lucy", "nefertiti", "spot", "teapot", "woody", "xyzrgb_dragon"};
 
-    size_t bunnyNum;
-    load_polygon2d(boundary2d_data, bunnyNum, filePath.c_str());
-
-    KiriSDFPoly2D boundary_sdf;
-    BoundingBox2F boundary_bbox;
-
-    for (auto i = 0; i < boundary2d_data.size(); i++)
+    for (auto boundaryFileName : alpha_shapes_name)
     {
-        auto newPos = Vector2F(boundary2d_data[i].x, boundary2d_data[i].y);
-        boundary_sdf.Append(newPos);
-        boundary_bbox.merge(newPos);
-    }
 
-    // sdf sampling points
-    std::vector<Vector2F> position;
-    std::vector<float> rad;
+        // load 2d boundary file
+        // String boundaryFileName = "bunny";
+        String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
+        std::vector<Vector2F> boundary2d_data;
 
-    auto radius = 1.f / 140.f;
-    auto density_radius = 0.95f * radius;
-    auto lower = boundary_bbox.LowestPoint;
-    auto higher = boundary_bbox.HighestPoint;
-    auto wn = UInt(((higher - lower) / (density_radius * 2.f)).x);
-    auto hn = UInt(((higher - lower) / (density_radius * 2.f)).y);
-    for (auto i = 0; i <= wn; i++)
-    {
-        for (auto j = 0; j < hn; j++)
+        size_t bunnyNum;
+        load_polygon2d(boundary2d_data, bunnyNum, filePath.c_str());
+
+        auto boundary_polygon = std::make_shared<HDV::Voronoi::VoronoiPolygon2>();
+
+        KiriSDFPoly2D boundary_sdf;
+        BoundingBox2F boundary_bbox;
+
+        for (auto i = 0; i < boundary2d_data.size(); i++)
         {
-            auto pos = lower + Vector2F(density_radius, density_radius) + Vector2F(i, j) * (density_radius * 2.f);
-
-            if (boundary_sdf.FindRegion(pos) <= 0.f)
-                position.emplace_back(pos);
+            auto newPos = Vector2F(boundary2d_data[i].x, boundary2d_data[i].y);
+            boundary_sdf.Append(newPos);
+            boundary_bbox.merge(newPos);
+            boundary_polygon->add(Vector2D(newPos.x, newPos.y));
         }
+
+        // sdf sampling points
+        std::vector<Vector2F> position;
+        std::vector<float> rad;
+
+        auto radius = 1.f / 140.f;
+        auto density_radius = 0.95f * radius;
+        auto lower = boundary_bbox.LowestPoint;
+        auto higher = boundary_bbox.HighestPoint;
+        auto wn = UInt(((higher - lower) / (density_radius * 2.f)).x);
+        auto hn = UInt(((higher - lower) / (density_radius * 2.f)).y);
+        for (auto i = 0; i <= wn; i++)
+        {
+            for (auto j = 0; j < hn; j++)
+            {
+                auto pos = lower + Vector2F(density_radius, density_radius) + Vector2F(i, j) * (density_radius * 2.f);
+
+                if (boundary_sdf.FindRegion(pos) <= 0.f)
+                    position.emplace_back(pos);
+            }
+        }
+
+        // std::cout << boundary_bbox.LowestPoint.x << "," << boundary_bbox.LowestPoint.y << ";" << boundary_bbox.HighestPoint.x << "," << boundary_bbox.HighestPoint.y << std::endl;
+
+        // blue noise sampling
+        // TODO worldsize
+        const float timeStep = 0.00005f;
+        auto worldSize = boundary_bbox.LowestPoint + boundary_bbox.HighestPoint;
+        SPH::BlueNoiseSPHSolver blueNoiseSolver = SPH::BlueNoiseSPHSolver(worldSize, boundary_sdf);
+        blueNoiseSolver.init(position, radius);
+
+        for (auto i = 0; i < 1000; i++)
+        {
+            blueNoiseSolver.update(timeStep);
+            // std::cout << "step num=" << i << std::endl;
+        }
+
+        auto particles = blueNoiseSolver.GetParticles();
+        position.clear();
+        for (auto i = 0; i < particles.size(); i++)
+        {
+            auto particle = particles[i];
+            position.emplace_back(particle.position);
+            rad.emplace_back(radius);
+        }
+
+        // rescale size
+        for (auto i = 0; i < position.size() - 1; i++)
+        {
+            for (auto j = i + 1; j < position.size(); j++)
+            {
+                auto dist = (Vector2F(position[i].x, position[i].y) - Vector2F(position[j].x, position[j].y)).length();
+                if (dist < (rad[i] + rad[j]))
+                {
+                    auto pen_dist = (rad[i] + rad[j]) - dist;
+
+                    if (pen_dist > 0)
+                    {
+                        rad[i] -= dist / 2;
+                        rad[j] -= dist / 2;
+                    }
+                    else
+                    {
+                        if (rad[i] > rad[j])
+                            rad[j] = 0.f;
+                    }
+
+                    if (rad[i] < 0)
+                        rad[i] = 0;
+
+                    if (rad[j] < 0)
+                        rad[j] = 0;
+                }
+            }
+        }
+
+        // compute porosity
+        auto total_area = 0.0;
+        for (auto i = 0; i < rad.size(); i++)
+            total_area += KIRI_PI<float>() * rad[i] * rad[i];
+
+        auto porosity = (boundary_polygon->area() - total_area) / boundary_polygon->area();
+
+        KIRI_LOG_DEBUG("boundary_file_name={0}; porosity={1}", boundaryFileName, porosity);
     }
-
-    // std::cout << boundary_bbox.LowestPoint.x << "," << boundary_bbox.LowestPoint.y << ";" << boundary_bbox.HighestPoint.x << "," << boundary_bbox.HighestPoint.y << std::endl;
-
-    // blue noise sampling
-    // TODO worldsize
-    const float timeStep = 0.00005f;
-    auto worldSize = boundary_bbox.LowestPoint + boundary_bbox.HighestPoint;
-    SPH::BlueNoiseSPHSolver blueNoiseSolver = SPH::BlueNoiseSPHSolver(worldSize, boundary_sdf);
-    blueNoiseSolver.init(position, radius);
-
-    for (auto i = 0; i < 1000; i++)
-    {
-        blueNoiseSolver.update(timeStep);
-        std::cout << "step num=" << i << std::endl;
-    }
-
-    auto particles = blueNoiseSolver.GetParticles();
-    position.clear();
-    for (auto i = 0; i < particles.size(); i++)
-    {
-        auto particle = particles[i];
-        position.emplace_back(particle.position);
-        rad.emplace_back(radius);
-    }
-
-    export_sampling_data("jiang2015.csv", position, rad);
+    // export_sampling_data("jiang2015.csv", position, rad);
 }
 
 // autodiff include
@@ -1118,13 +1209,13 @@ void main()
     // Sph2dExample();
 
     // BlueNoiseSampling();
-    // BlueNoiseSamplingVisual();
+    //  BlueNoiseSamplingVisual();
 
-    // MSSampler2D();
-    //      ExportParticleRadiusDist();
+    MSSampler2D();
+    //       ExportParticleRadiusDist();
 
     // ipm_test();
 
-    BarrierMethod(5, 0.1);
-    // BarrierMethod3D(5, 0.1);
+    // BarrierMethod(5, 0.1);
+    //  BarrierMethod3D(5, 0.1);
 }

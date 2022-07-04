@@ -1,11 +1,12 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2022-01-10 22:51:36
- * @LastEditTime: 2022-01-10 23:03:16
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-03-03 21:57:00
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-07-02 14:32:57
+ * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\sampler\ms_sampler2.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _HDV_MS_SAMPLER2_H_
 #define _HDV_MS_SAMPLER2_H_
 
@@ -359,7 +360,10 @@ namespace HDV::Sampler
                 bReachMaximumNum = true;
 
             if (bReachMaximumNum)
+            {
+                KIRI_LOG_DEBUG("Reached Maximum!!!");
                 return false;
+            }
 
             auto entity_num = 20;
             auto k_threshold = 200;
@@ -373,7 +377,7 @@ namespace HDV::Sampler
                 std::vector<Voronoi::VoronoiSite2Ptr> new_sites;
                 std::vector<double> errorArray(mGlobalPorosityArray.end() - entity_num, mGlobalPorosityArray.end());
                 auto line = lineFitLeastSquares(errorArray);
-                // KIRI_LOG_DEBUG("line k={0}", std::abs(line.x));
+                // KIRI_LOG_DEBUG("line k={0};abs ={1}; reach={2}", std::abs(line.x), std::abs(line.x) < 1e-5, !bReachMaximumNum);
                 if (std::abs(line.x) < 1e-6)
                 {
                     // KIRI_LOG_DEBUG("reach line res={0}", std::abs(line.x) < 1e-6f);
