@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-06-25 01:39:47
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-30 11:29:49
+ * @LastEditTime: 2022-07-05 09:30:52
  * @FilePath: \Kiri2D\demos\interior_point_method\include\ipm.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -75,7 +75,7 @@ using Eigen::VectorXd;
 // }
 //-------------------------------------------------------------- example2
 
-VectorXreal Constrainsts(const VectorXreal &lambda, const std::vector<double> &radius, const std::vector<Vector2F> &pos)
+VectorXreal Constrainsts(const VectorXreal &lambda, const std::vector<double> &radius, const std::vector<Vector3F> &pos)
 {
     auto counter = 0;
     auto n = lambda.size();
@@ -94,7 +94,7 @@ VectorXreal Constrainsts(const VectorXreal &lambda, const std::vector<double> &r
     return consts;
 }
 
-dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda, const std::vector<double> &radius, const std::vector<Vector2F> &pos)
+dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda, const std::vector<double> &radius, const std::vector<Vector3F> &pos)
 {
     auto counter = 0;
     auto n = x.size();
@@ -123,7 +123,7 @@ dual2nd TargetFunc(const VectorXdual2nd &x, std::vector<double> radius)
     dual2nd sum = 0.0;
     for (auto j = 0; j < n; j++)
     {
-        sum -= KIRI_PI<dual2nd>() * (x[j] * radius[j]) * (x[j] * radius[j]);
+        sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j] * radius[j]) * (x[j] * radius[j]) * (x[j] * radius[j]);
     }
 
     return sum;
@@ -146,7 +146,7 @@ namespace OPTIMIZE::IPM
             const std::vector<double> &data,
             int inequ,
             const std::vector<double> &radius,
-            const std::vector<Vector2F> &pos)
+            const std::vector<Vector3F> &pos)
             : mData(data),
               mRadius(radius),
               mPos(pos),
@@ -179,6 +179,7 @@ namespace OPTIMIZE::IPM
                 {
                     mSignal = 1;
                     mKtolConverged = true;
+                    KIRI_LOG_INFO("mKtolConverged=true");
                     break;
                 }
 
@@ -189,6 +190,7 @@ namespace OPTIMIZE::IPM
                     {
                         mSignal = 1;
                         mKtolConverged = true;
+                        KIRI_LOG_INFO("mKtolConverged=true");
                         break;
                     }
 
@@ -246,6 +248,7 @@ namespace OPTIMIZE::IPM
                     {
                         mSignal = 2;
                         mFTolConverged = true;
+                        KIRI_LOG_INFO("mKtolConverged=true");
                     }
                     else
                         mFLast = mFNew;
@@ -265,7 +268,7 @@ namespace OPTIMIZE::IPM
                 // KIRI_LOG_DEBUG("mMu={0}", mMu);
             }
 
-            KIRI_LOG_INFO("optimal solution={0}", mRealData.transpose());
+            KIRI_LOG_INFO("optimal solution={0}; func={1}", mRealData.transpose(), -static_cast<double>(TargetFunc(mDual2ndData, mRadius)));
 
             // print();
         }
@@ -276,6 +279,11 @@ namespace OPTIMIZE::IPM
             //           << mFuncGrad << std::endl;
             // std::cout << "mFuncHessian = \n"
             //           << mFuncHessian << std::endl;
+        }
+
+        VectorXreal solution()
+        {
+            return mRealData;
         }
 
     private:
@@ -308,7 +316,7 @@ namespace OPTIMIZE::IPM
 
         std::vector<double> mData;
         std::vector<double> mRadius;
-        std::vector<Vector2F> mPos;
+        std::vector<Vector3F> mPos;
 
         VectorXreal mRealData;
         VectorXdual2nd mDual2ndData;
