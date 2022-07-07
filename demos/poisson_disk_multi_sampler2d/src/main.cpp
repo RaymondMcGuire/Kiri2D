@@ -17,8 +17,8 @@ int main(int argc, char *argv[])
     // log system
     KiriLog::init();
 
-    auto alpha_shapes_name = std::vector<String>{"bunny", "alligator", "beast", "cheburashka", "cow", "homer", "horse", "lucy", "nefertiti", "spot", "teapot", "woody", "xyzrgb_dragon"};
-
+    // auto alpha_shapes_name = std::vector<String>{"bunny", "alligator", "beast", "cheburashka", "cow", "homer", "horse", "lucy", "nefertiti", "spot", "teapot", "woody", "xyzrgb_dragon"};
+    auto alpha_shapes_name = std::vector<String>{"armadillo"};
     for (auto boundary_file_name : alpha_shapes_name)
     {
 

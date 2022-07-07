@@ -196,6 +196,9 @@ using BoundingBox3F = kiri_math_mini::BoundingBox3F;
 using BoundingBox2D = kiri_math_mini::BoundingBox2D;
 using BoundingBox3D = kiri_math_mini::BoundingBox3D;
 
+using Size3 = kiri_math_mini::Size3;
+using Point3I = kiri_math_mini::Point3I;
+
 ////////////////////////////////////////////////////////////////////////////////
 #include <random.hpp>
 using Random = effolkronium::random_static;

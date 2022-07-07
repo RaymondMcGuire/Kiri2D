@@ -75,7 +75,7 @@ using Eigen::VectorXd;
 // }
 //-------------------------------------------------------------- example2
 
-VectorXreal Constrainsts(const VectorXreal &lambda, const std::vector<double> &radius, const std::vector<Vector3F> &pos)
+VectorXreal Constrainsts(const VectorXreal &lambda, const std::vector<double> &radius, const std::vector<Vector3D> &pos)
 {
     auto counter = 0;
     auto n = lambda.size();
@@ -94,7 +94,7 @@ VectorXreal Constrainsts(const VectorXreal &lambda, const std::vector<double> &r
     return consts;
 }
 
-dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda, const std::vector<double> &radius, const std::vector<Vector3F> &pos)
+dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda, const std::vector<double> &radius, const std::vector<Vector3D> &pos)
 {
     auto counter = 0;
     auto n = x.size();
@@ -146,7 +146,7 @@ namespace OPTIMIZE::IPM
             const std::vector<double> &data,
             int inequ,
             const std::vector<double> &radius,
-            const std::vector<Vector3F> &pos)
+            const std::vector<Vector3D> &pos)
             : mData(data),
               mRadius(radius),
               mPos(pos),
@@ -316,7 +316,7 @@ namespace OPTIMIZE::IPM
 
         std::vector<double> mData;
         std::vector<double> mRadius;
-        std::vector<Vector3F> mPos;
+        std::vector<Vector3D> mPos;
 
         VectorXreal mRealData;
         VectorXdual2nd mDual2ndData;
@@ -751,7 +751,7 @@ namespace OPTIMIZE::IPM
                 // KIRI_LOG_DEBUG("con_old_sum={0}, con_new_sum={1}", con_old_sum, con_new_sum);
                 if (con_new_sum > con_old_sum)
                 {
-                    KIRI_LOG_INFO("con_new_sum > con_old_sum");
+                    // KIRI_LOG_INFO("con_new_sum > con_old_sum");
                     auto A = mConstrainJacobianWithIdentity.transpose();
 
                     // KIRI_LOG_DEBUG("A={0}", A);
@@ -851,7 +851,7 @@ namespace OPTIMIZE::IPM
             mLambda += alpha_lmax * dl;
 
             // KIRI_LOG_DEBUG("mLambda={0}", mLambda);
-            KIRI_LOG_DEBUG("searched new x={0}", mRealData.transpose());
+            // KIRI_LOG_DEBUG("searched new x={0}", mRealData.transpose());
         }
     };
 
