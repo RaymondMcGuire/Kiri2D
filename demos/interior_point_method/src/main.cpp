@@ -107,11 +107,12 @@ int main(int argc, char *argv[])
     // log system
     KiriLog::init();
 
-    auto bgeo_data = ReadBgeoFileForCPU("box", "box_normal");
+    auto bgeo_data = ReadBgeoFileForCPU("box", "box_small");
     auto data_size = bgeo_data.size();
     KIRI_LOG_DEBUG("data size={0}", data_size);
 
-    int n = data_size / 10;
+    int n = data_size;
+    double scale = 100.0;
 
     std::vector<double> data;
     std::vector<Vector3D> data_pos;
@@ -120,9 +121,9 @@ int main(int argc, char *argv[])
 
     for (auto i = 0; i < n; i++)
     {
-        data_pos.emplace_back(Vector3D(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z) * 100.0);
-        data_radius.emplace_back(bgeo_data[i].w * 100.0);
-        // KIRI_LOG_DEBUG("radius={0}", bgeo_data[i].w * 100.0);
+        data_pos.emplace_back(Vector3D(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z) * scale);
+        data_radius.emplace_back(bgeo_data[i].w * scale);
+        // KIRI_LOG_DEBUG("radius={0}", bgeo_data[i].w * scale);
     }
 
     for (auto j = 0; j < n; j++)
@@ -137,9 +138,9 @@ int main(int argc, char *argv[])
 
     for (auto j = 0; j < n; j++)
     {
-        if (data_radius[j] / 100.0 * double(results[j]) >= 1e-4)
-            positions.emplace_back(Vector4D(data_pos[j].x / 100.0, data_pos[j].y / 100.0, data_pos[j].z / 100.0, data_radius[j] / 100.0 * double(results[j])));
-        // KIRI_LOG_DEBUG("radius={0};{1}", data_radiusi[j] / 100.0 * double(results[j]), double(results[j]));
+        // if (data_radius[j] / scale * double(results[j]) >= 1e-4)
+        positions.emplace_back(Vector4D(data_pos[j].x / scale, data_pos[j].y / scale, data_pos[j].z / scale, data_radius[j] / scale * double(results[j])));
+        KIRI_LOG_DEBUG("radius={0};{1}", data_radius[j] / scale * double(results[j]), double(results[j]));
     }
 
     // KIRI_LOG_DEBUG("FIRST STAGE!!!!!!!");
@@ -221,16 +222,16 @@ int main(int argc, char *argv[])
 
     //         for (auto j = 0; j < datai_size; j++)
     //         {
-    //             if (data_radiusi[j] / 100.0 * double(results[j]) >= 1e-4)
-    //                 positions.emplace_back(Vector4D(data_posi[j].x / 100.0, data_posi[j].y / 100.0, data_posi[j].z / 100.0, data_radiusi[j] / 100.0 * double(results[j])));
-    //             // KIRI_LOG_DEBUG("radius={0};{1}", data_radiusi[j] / 100.0 * double(results[j]), double(results[j]));
+    //             if (data_radiusi[j] / scale * double(results[j]) >= 1e-4)
+    //                 positions.emplace_back(Vector4D(data_posi[j].x / scale, data_posi[j].y / scale, data_posi[j].z / scale, data_radiusi[j] / scale * double(results[j])));
+    //             // KIRI_LOG_DEBUG("radius={0};{1}", data_radiusi[j] / scale * double(results[j]), double(results[j]));
     //         }
     //         break;
     //     }
     //     else
     //     {
     //         for (auto j = 0; j < datai_size; j++)
-    //             positions.emplace_back(Vector4D(data_posi[j].x / 100.0, data_posi[j].y / 100.0, data_posi[j].z / 100.0, data_radiusi[j] / 100.0));
+    //             positions.emplace_back(Vector4D(data_posi[j].x / scale, data_posi[j].y / scale, data_posi[j].z / scale, data_radiusi[j] / scale));
     //     }
     // }
     ExportBgeoFileFromCPU("box", "box_opti", positions);

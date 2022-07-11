@@ -85,7 +85,7 @@ VectorXreal Constrainsts(const VectorXreal &lambda, const std::vector<double> &r
         consts[counter++] = lambda[i];
 
     for (auto i = 0; i < n; i++)
-        consts[counter++] = 1 - lambda[i];
+        consts[counter++] = 2 - lambda[i];
 
     for (auto i = 0; i < n - 1; i++)
         for (auto j = i + 1; j < n; j++)
