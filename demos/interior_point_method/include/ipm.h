@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-07-12 11:08:48
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-12 16:58:47
+ * @LastEditTime: 2022-07-12 17:46:41
  * @FilePath: \Kiri2D\demos\interior_point_method\include\ipm.h
  * @Description: 
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
@@ -98,7 +98,7 @@ VectorXreal Constrainsts(const VectorXreal &lambda,const std::vector<particle> &
         if(!p[i].optimize)
             consts[counter++] = 2 - lambda[i];
         else
-            consts[counter++] = 1.00001-lambda[i];
+            consts[counter++] = 1-lambda[i];
 
     for (auto i = 0; i < n - 1; i++)
         for (auto j = i + 1; j < n; j++)
@@ -126,7 +126,7 @@ dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,const st
         if(!p[i].optimize)
         sum += (2 - x[i]) * lambda(counter++, 0);
                 else
-        sum += (1.00001-x[i]) * lambda(counter++, 0);
+        sum += (1-x[i]) * lambda(counter++, 0);
     }
 
     for (auto i = 0; i < n - 1; i++)
@@ -213,8 +213,11 @@ namespace OPTIMIZE::IPM
 
                     KIRI_LOG_DEBUG("inner iter num={0}", j);
 
+                    KIRI_LOG_DEBUG("computeGrad start");
                     // compute gradient and hessian
-                    this->computeGrad();
+                    this->computeGrad();   
+
+                    KIRI_LOG_DEBUG("computeConstrainstsHessian start");
 
                     this->computeConstrainstsHessian();
 
@@ -229,10 +232,14 @@ namespace OPTIMIZE::IPM
                     }
                     // KIRI_LOG_DEBUG("changed sign search direction=\n{0}", dz);
 
+                KIRI_LOG_DEBUG("computeBarriarCostGrad start");
+
                     this->computeBarriarCostGrad();
                     auto dot_barrier_dir = mBarrierCostGrad.transpose() * dz(Eigen::seq(0, mVariableNum + mInEquNum - 1), Eigen::placeholders::all);
                     // KIRI_LOG_DEBUG("dot_barrier_dir=\n{0}", dot_barrier_dir);
                     // KIRI_LOG_DEBUG("dz=\n{0}", dir(Eigen::seq(0, 4), Eigen::placeholders::all));
+
+            KIRI_LOG_DEBUG("computeConstrainsts start");
 
                     auto ci = this->computeConstrainsts(mRealData);
                     MatrixXd con = ci - mSlack;
@@ -247,10 +254,12 @@ namespace OPTIMIZE::IPM
                     //      KIRI_LOG_DEBUG("update nu = {0}", mNu);
                     //  }
 
+                    KIRI_LOG_DEBUG("computeBackTrackingLineSearch start");
                     computeBackTrackingLineSearch(dz);
 
                     mIterCount++;
 
+                    KIRI_LOG_DEBUG("computeKKT start");
                     this->computeKKT();
 
                     if (mSignal == -2)

@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-07-12 11:08:48
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-12 17:03:04
+ * @LastEditTime: 2022-07-12 17:43:27
  * @FilePath: \Kiri2D\demos\interior_point_method\src\main.cpp
  * @Description: 
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
@@ -170,11 +170,22 @@ searcher->updateStructure(data_pos);
                 std::vector<double> data;
                  std::vector<particle> tmp_particles;
 
+                 bool flag = true;
+
                 for (auto j = 0; j < n; j++)
                     {
                          tmp_particles.emplace_back(data_particles[neighbors[j]]);
+                         
+                         if(data_particles[neighbors[j]].optimize == false)
+                         {
+                            flag=false;
+                         }
+                            
                          KIRI_LOG_DEBUG("tmp particle id={0}; optimized={1}",neighbors[j],data_particles[neighbors[j]].optimize);
                     }
+
+                    if(flag)
+                        continue;
 
                 for (auto j = 0; j < n; j++)
                     {
