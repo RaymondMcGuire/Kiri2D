@@ -1,11 +1,11 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-06-25 01:39:47
+ * @Date: 2022-07-12 11:08:48
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-05 09:30:52
+ * @LastEditTime: 2022-07-12 16:58:47
  * @FilePath: \Kiri2D\demos\interior_point_method\include\ipm.h
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
  */
 #ifndef _IPM_H_
 #define _IPM_H_
@@ -31,6 +31,13 @@ using Eigen::EigenBase;
 using Eigen::MatrixXd;
 using Eigen::VectorXcd;
 using Eigen::VectorXd;
+
+struct particle
+{
+    Vector3D pos;
+    double radius;
+    bool optimize;
+};
 
 //-------------------------------------------------------------- example1
 // VectorXreal Constrainsts(const VectorXreal &x)
@@ -75,26 +82,32 @@ using Eigen::VectorXd;
 // }
 //-------------------------------------------------------------- example2
 
-VectorXreal Constrainsts(const VectorXreal &lambda, const std::vector<double> &radius, const std::vector<Vector3D> &pos)
+VectorXreal Constrainsts(const VectorXreal &lambda,const std::vector<particle> &p)
 {
     auto counter = 0;
     auto n = lambda.size();
     VectorXreal consts(2 * n + n * (n - 1) / 2);
 
     for (auto i = 0; i < n; i++)
-        consts[counter++] = lambda[i];
+        if(!p[i].optimize)
+        consts[counter++] = lambda[i] - 0.5;
+        else
+        consts[counter++] = lambda[i] - 0.99999;
 
     for (auto i = 0; i < n; i++)
-        consts[counter++] = 2 - lambda[i];
+        if(!p[i].optimize)
+            consts[counter++] = 2 - lambda[i];
+        else
+            consts[counter++] = 1.00001-lambda[i];
 
     for (auto i = 0; i < n - 1; i++)
         for (auto j = i + 1; j < n; j++)
-            consts[counter++] = (pos[i] - pos[j]).length() - (lambda[i] * radius[i] + lambda[j] * radius[j]);
+            consts[counter++] = (p[i].pos - p[j].pos).length() - (lambda[i] * p[i].radius + lambda[j] * p[j].radius);
 
     return consts;
 }
 
-dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda, const std::vector<double> &radius, const std::vector<Vector3D> &pos)
+dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,const std::vector<particle> &p)
 {
     auto counter = 0;
     auto n = x.size();
@@ -102,28 +115,34 @@ dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda, const s
 
     for (auto i = 0; i < n; i++)
     {
-        sum += x[i] * lambda(counter++, 0);
+        if(!p[i].optimize)
+        sum += (x[i]-0.5) * lambda(counter++, 0);
+        else
+        sum += (x[i]-0.99999) * lambda(counter++, 0);
     }
 
     for (auto i = 0; i < n; i++)
     {
-        sum += (1 - x[i]) * lambda(counter++, 0);
+        if(!p[i].optimize)
+        sum += (2 - x[i]) * lambda(counter++, 0);
+                else
+        sum += (1.00001-x[i]) * lambda(counter++, 0);
     }
 
     for (auto i = 0; i < n - 1; i++)
         for (auto j = i + 1; j < n; j++)
-            sum += ((pos[i] - pos[j]).length() - (x[i] * radius[i] + x[j] * radius[j])) * lambda(counter++, 0);
+            sum += ((p[i].pos - p[j].pos).length() - (x[i] * p[i].radius + x[j] * p[j].radius)) * lambda(counter++, 0);
 
     return sum;
 }
 
-dual2nd TargetFunc(const VectorXdual2nd &x, std::vector<double> radius)
+dual2nd TargetFunc(const VectorXdual2nd &x, const std::vector<particle> &p)
 {
     auto n = x.size();
     dual2nd sum = 0.0;
     for (auto j = 0; j < n; j++)
     {
-        sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j] * radius[j]) * (x[j] * radius[j]) * (x[j] * radius[j]);
+        sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j] * p[j].radius) * (x[j] * p[j].radius) * (x[j] * p[j].radius);
     }
 
     return sum;
@@ -145,11 +164,9 @@ namespace OPTIMIZE::IPM
         explicit InteriorPointMethod(
             const std::vector<double> &data,
             int inequ,
-            const std::vector<double> &radius,
-            const std::vector<Vector3D> &pos)
+            const std::vector<particle> &particles)
             : mData(data),
-              mRadius(radius),
-              mPos(pos),
+              mParticles(particles),
               mVariableNum(data.size()),
               mInEquNum(inequ)
         {
@@ -167,7 +184,7 @@ namespace OPTIMIZE::IPM
         void solve()
         {
             mFTolConverged = false;
-            mFLast = static_cast<double>(TargetFunc(mDual2ndData, mRadius));
+            mFLast = static_cast<double>(TargetFunc(mDual2ndData, mParticles));
 
             this->computeKKT();
 
@@ -242,7 +259,7 @@ namespace OPTIMIZE::IPM
 
                 if (mSignal != -2)
                 {
-                    mFNew = static_cast<double>(TargetFunc(mDual2ndData, mRadius));
+                    mFNew = static_cast<double>(TargetFunc(mDual2ndData, mParticles));
                     // KIRI_LOG_DEBUG("new={0}; past={1}", mFNew, mFLast);
                     if (abs(mFLast - mFNew) < abs(mFTol))
                     {
@@ -268,7 +285,7 @@ namespace OPTIMIZE::IPM
                 // KIRI_LOG_DEBUG("mMu={0}", mMu);
             }
 
-            KIRI_LOG_INFO("optimal solution={0}; func={1}", mRealData.transpose(), -static_cast<double>(TargetFunc(mDual2ndData, mRadius)));
+            KIRI_LOG_INFO("optimal solution={0}; func={1}", mRealData.transpose(), -static_cast<double>(TargetFunc(mDual2ndData, mParticles)));
 
             // print();
         }
@@ -315,8 +332,7 @@ namespace OPTIMIZE::IPM
         MatrixXd mFuncHessian;
 
         std::vector<double> mData;
-        std::vector<double> mRadius;
-        std::vector<Vector3D> mPos;
+        std::vector<particle> mParticles;
 
         VectorXreal mRealData;
         VectorXdual2nd mDual2ndData;
@@ -379,7 +395,7 @@ namespace OPTIMIZE::IPM
 
         void computeHessian()
         {
-            mFuncHessian = hessian(TargetFunc, wrt(mDual2ndData), at(mDual2ndData, mRadius), mPhi0, mFuncGrad);
+            mFuncHessian = hessian(TargetFunc, wrt(mDual2ndData), at(mDual2ndData, mParticles), mPhi0, mFuncGrad);
 
             // KIRI_LOG_DEBUG("mFuncHessian={0}", mFuncHessian);
         }
@@ -390,7 +406,7 @@ namespace OPTIMIZE::IPM
             // auto constrain0 = double(Constrainst0(realData));
             // VectorXd constrain1 = Constrainst1(realData).cast<double>();
 
-            VectorXd constrain = Constrainsts(realData, mRadius, mPos).cast<double>();
+            VectorXd constrain = Constrainsts(realData, mParticles).cast<double>();
 
             MatrixXd constrain_i(mInEquNum, 1);
             constrain_i << constrain;
@@ -402,7 +418,7 @@ namespace OPTIMIZE::IPM
         void computeConstrainstsJacobian()
         {
             VectorXreal constrain_val;
-            MatrixXd jaco = jacobian(Constrainsts, wrt(mRealData), at(mRealData, mRadius, mPos), constrain_val);
+            MatrixXd jaco = jacobian(Constrainsts, wrt(mRealData), at(mRealData, mParticles), constrain_val);
             mConstrainJacobian = jaco.transpose();
 
             MatrixXd eyeConstrainMatrix = -MatrixXd::Identity(mInEquNum, mInEquNum);
@@ -555,7 +571,7 @@ namespace OPTIMIZE::IPM
 
             dual2nd u;
             VectorXdual g;
-            mConstraintsFuncHessian = hessian(ConstrainstFunc, wrt(mDual2ndData), at(mDual2ndData, mLambda, mRadius, mPos), u, g);
+            mConstraintsFuncHessian = hessian(ConstrainstFunc, wrt(mDual2ndData), at(mDual2ndData, mLambda, mParticles), u, g);
 
             // KIRI_LOG_DEBUG("mConstraintsFuncHessian={0}", mConstraintsFuncHessian);
 
@@ -701,7 +717,7 @@ namespace OPTIMIZE::IPM
             auto ci = this->computeConstrainsts(mRealData);
 
             // compute merit function
-            auto phi_nu = eval(TargetFunc(mDual2ndData, mRadius));
+            auto phi_nu = eval(TargetFunc(mDual2ndData, mParticles));
             phi_nu -= mMu * log(mSlack.array()).sum();
             phi_nu += mNu * abs(ci.array() - mSlack.array()).sum();
             // KIRI_LOG_DEBUG("phi_nu={0}", phi_nu);
@@ -727,7 +743,7 @@ namespace OPTIMIZE::IPM
 
             auto ci1 = this->computeConstrainsts(mRealData + alpha_smax * dx);
 
-            double phi_nu1 = static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx, mRadius));
+            double phi_nu1 = static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx, mParticles));
             phi_nu1 -= mMu * log((mSlack + alpha_smax * ds).array()).sum();
             phi_nu1 += mNu * abs(ci1.array() - (mSlack + alpha_smax * ds).array()).sum();
             // KIRI_LOG_DEBUG("phi_nu1={0}", phi_nu1);
@@ -763,7 +779,7 @@ namespace OPTIMIZE::IPM
                     // std::cout << get_shape(b) << std::endl;
 
                     auto ci2 = this->computeConstrainsts(mRealData + alpha_smax * dx + dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all));
-                    double phi_nu2 = static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx + dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all), mRadius));
+                    double phi_nu2 = static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx + dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all), mParticles));
                     phi_nu2 -= mMu * log((mSlack + alpha_smax * ds + dzp(Eigen::seq(mVariableNum, mVariableNum + mInEquNum - 1), Eigen::placeholders::all)).array()).sum();
                     phi_nu2 += mNu * abs(ci2.array() - (mSlack + alpha_smax * ds + dzp(Eigen::seq(mVariableNum, mVariableNum + mInEquNum - 1), Eigen::placeholders::all)).array()).sum();
 
@@ -774,7 +790,7 @@ namespace OPTIMIZE::IPM
                         alpha_corr = computeMaximumStepSize(mSlack.array(), (alpha_smax * ds + dzp(Eigen::seq(mVariableNum, mVariableNum + mInEquNum - 1), Eigen::placeholders::all)).array());
 
                         ci2 = this->computeConstrainsts(mRealData + alpha_corr * (alpha_smax * dx + dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all)));
-                        phi_nu2 = static_cast<double>(TargetFunc(mDual2ndData + alpha_corr * (alpha_smax * dx + dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all)), mRadius));
+                        phi_nu2 = static_cast<double>(TargetFunc(mDual2ndData + alpha_corr * (alpha_smax * dx + dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all)), mParticles));
                         phi_nu2 -= mMu * log((mSlack + alpha_corr * (alpha_smax * ds + dzp(Eigen::seq(mVariableNum, mVariableNum + mInEquNum - 1), Eigen::placeholders::all))).array()).sum();
                         phi_nu2 += mNu * abs(ci2.array() - (mSlack + alpha_corr * (alpha_smax * ds + dzp(Eigen::seq(mVariableNum, mVariableNum + mInEquNum - 1), Eigen::placeholders::all))).array()).sum();
 
@@ -793,7 +809,7 @@ namespace OPTIMIZE::IPM
 
                     ci1 = this->computeConstrainsts(mRealData + alpha_smax * dx);
 
-                    phi_nu1 = static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx, mRadius));
+                    phi_nu1 = static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx, mParticles));
                     phi_nu1 -= mMu * log((mSlack + alpha_smax * ds).array()).sum();
                     phi_nu1 += mNu * abs(ci1.array() - (mSlack + alpha_smax * ds).array()).sum();
 
@@ -814,7 +830,7 @@ namespace OPTIMIZE::IPM
                         // update
                         ci1 = this->computeConstrainsts(mRealData + alpha_smax * dx);
 
-                        phi_nu1 = static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx, mRadius));
+                        phi_nu1 = static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx, mParticles));
                         phi_nu1 -= mMu * log((mSlack + alpha_smax * ds).array()).sum();
                         phi_nu1 += mNu * abs(ci1.array() - (mSlack + alpha_smax * ds).array()).sum();
 

@@ -1,18 +1,17 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-06-25 01:39:47
+ * @Date: 2022-07-12 11:08:48
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-06 12:35:40
+ * @LastEditTime: 2022-07-12 17:03:04
  * @FilePath: \Kiri2D\demos\interior_point_method\src\main.cpp
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
  */
-
 #include <kiri2d.h>
 using namespace KIRI2D;
 
 #include <ipm.h>
-#include <gridding.h>
+#include <sph_grid.h>
 
 #include <root_directory.h>
 #include <partio/Partio.h>
@@ -114,126 +113,113 @@ int main(int argc, char *argv[])
     int n = data_size;
     double scale = 100.0;
 
-    std::vector<double> data;
+    
+    std::vector<particle> data_particles;
     std::vector<Vector3D> data_pos;
-    std::vector<double> data_radius;
+
     std::vector<Vector4D> positions;
 
+     BoundingBox3D bounding_box;
+     auto max_radius = 0.0;
     for (auto i = 0; i < n; i++)
     {
-        data_pos.emplace_back(Vector3D(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z) * scale);
-        data_radius.emplace_back(bgeo_data[i].w * scale);
-        // KIRI_LOG_DEBUG("radius={0}", bgeo_data[i].w * scale);
+        particle p;
+        p.pos = Vector3D(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z) * scale;
+        p.radius = bgeo_data[i].w * scale;
+        p.optimize = false;
+        data_particles.emplace_back(p);
+        data_pos.emplace_back(p.pos);
+
+        // std::cout << "radius=" << p.radius << std::endl;
+
+
+        max_radius = std::max(p.radius,max_radius);
+        bounding_box.merge( p.pos);
     }
 
-    for (auto j = 0; j < n; j++)
-    {
-        data.emplace_back(Random::get(-1.0, 1.0));
-    }
+    auto searcher = std::make_shared<OPTIMIZE::IPM::Grid>(bounding_box.HighestPoint , bounding_box.LowestPoint,max_radius);
+searcher->updateStructure(data_pos);
+ auto neighborhoods = std::vector<std::vector<int>>();
+            float maxDist2 = max_radius * max_radius;
 
-    int inequ_num = 2 * n + n * (n - 1) / 2;
+            for (int i = 0; i < data_pos.size(); i++)
+            {
+                std::vector<int> neighbors = std::vector<int>();
+                std::vector<OPTIMIZE::IPM::Cell> neighboringCells = searcher->getNeighboringCells(data_pos[i]);
 
-    auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data, inequ_num, data_radius, data_pos);
-    auto results = ipm->solution();
+                for each (const OPTIMIZE::IPM::Cell &cell in neighboringCells)
+                {
+                    for each (int index in cell)
+                    {
+                    
+                            neighbors.push_back(index);
+                       
+                    }
+                }
+                 std::cout << "neighbor size=" << neighbors.size() << std::endl;
+                neighborhoods.push_back(neighbors);
+            }
 
-    for (auto j = 0; j < n; j++)
-    {
-        // if (data_radius[j] / scale * double(results[j]) >= 1e-4)
-        positions.emplace_back(Vector4D(data_pos[j].x / scale, data_pos[j].y / scale, data_pos[j].z / scale, data_radius[j] / scale * double(results[j])));
-        KIRI_LOG_DEBUG("radius={0};{1}", data_radius[j] / scale * double(results[j]), double(results[j]));
-    }
 
-    // KIRI_LOG_DEBUG("FIRST STAGE!!!!!!!");
-    //  first stage
-    //  auto gridding0 = std::make_shared<OPTIMIZE::IPM::Gradding>(data_pos, data_radius, 6, 6, 6);
-    //  auto max_hash_id0 = gridding0->maxGridHash();
+            for (int i = 0; i < neighborhoods.size(); i++)
+            {
+                
+    
+                std::vector<int> neighbors = neighborhoods[i];
+                n = neighbors.size();
+                std::vector<double> data;
+                 std::vector<particle> tmp_particles;
 
-    // for (auto i = 0; i < max_hash_id0; i++)
+                for (auto j = 0; j < n; j++)
+                    {
+                         tmp_particles.emplace_back(data_particles[neighbors[j]]);
+                         KIRI_LOG_DEBUG("tmp particle id={0}; optimized={1}",neighbors[j],data_particles[neighbors[j]].optimize);
+                    }
+
+                for (auto j = 0; j < n; j++)
+                    {
+                        data.emplace_back(Random::get(-1.0, 1.0));
+                    }
+
+                    int inequ_num = 2 * n + n * (n - 1) / 2;
+
+                    auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data, inequ_num, tmp_particles);
+                    auto results = ipm->solution();
+
+                    for (auto j = 0; j < n; j++)
+                    {
+                         data_particles[neighbors[j]].optimize = true;
+                          KIRI_LOG_DEBUG("new particle id={0}; radius={1}, scale={2}",neighbors[j],data_particles[neighbors[j]].radius,double(results[j]));
+                         data_particles[neighbors[j]].radius =data_particles[neighbors[j]].radius * double(results[j]);
+                         
+                    }
+
+            }
+
+             for (auto j = 0; j < data_particles.size(); j++)
+                    {
+                        // if (data_radius[j] / scale * double(results[j]) >= 1e-4)
+                        positions.emplace_back(Vector4D(data_particles[j].pos.x / scale, data_particles[j].pos.y / scale, data_particles[j].pos.z / scale, data_particles[j].radius / scale ));
+                        KIRI_LOG_DEBUG("radius={0};", data_particles[j].radius / scale);
+                    }
+
+    // for (auto j = 0; j < n; j++)
     // {
-    //     auto [data_i, data_i_idx] = gridding0->getDataByGridHash(i);
-    //     auto datai_size = data_i.size();
-    //     KIRI_LOG_DEBUG("data pos size={0}", datai_size);
-
-    //     std::vector<Vector3D> data_posi;
-    //     std::vector<double> data_radiusi;
-    //     for (auto j = 0; j < data_i.size(); j++)
-    //     {
-    //         data_posi.emplace_back(Vector3D(data_i[j].x, data_i[j].y, data_i[j].z));
-    //         data_radiusi.emplace_back(data_i[j].w);
-    //     }
-
-    //     if (datai_size > 1)
-    //     {
-
-    //         data.clear();
-
-    //         for (auto j = 0; j < datai_size; j++)
-    //         {
-    //             data.emplace_back(Random::get(-1.0, 1.0));
-    //         }
-
-    //         int n = datai_size;
-    //         int inequ_num = 2 * n + n * (n - 1) / 2;
-
-    //         auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data, inequ_num, data_radiusi, data_posi);
-    //         auto results = ipm->solution();
-
-    //         for (auto j = 0; j < datai_size; j++)
-    //         {
-    //             data_radius[data_i_idx[j]] = data_radiusi[j] * double(results[j]);
-    //         }
-    //     }
+    //     data.emplace_back(Random::get(-1.0, 1.0));
     // }
 
-    // KIRI_LOG_DEBUG("SECOND STAGE!!!!!!!");
-    // // second stage
-    // auto gridding = std::make_shared<OPTIMIZE::IPM::Gradding>(data_pos, data_radius, 3, 3, 3);
-    // auto max_hash_id = gridding->maxGridHash();
+    // int inequ_num = 2 * n + n * (n - 1) / 2;
 
-    // for (auto i = 0; i < max_hash_id; i++)
+    // auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data, inequ_num, data_radius, data_pos);
+    // auto results = ipm->solution();
+
+    // for (auto j = 0; j < n; j++)
     // {
-    //     auto [data_i, data_i_idx] = gridding->getDataByGridHash(i);
-    //     auto datai_size = data_i.size();
-    //     KIRI_LOG_DEBUG("data pos size={0}", datai_size);
-
-    //     std::vector<Vector3D> data_posi;
-    //     std::vector<double> data_radiusi;
-    //     for (auto j = 0; j < data_i.size(); j++)
-    //     {
-    //         data_posi.emplace_back(Vector3D(data_i[j].x, data_i[j].y, data_i[j].z));
-    //         data_radiusi.emplace_back(data_i[j].w);
-    //     }
-
-    //     if (datai_size > 1)
-    //     {
-
-    //         data.clear();
-
-    //         for (auto j = 0; j < datai_size; j++)
-    //         {
-    //             data.emplace_back(Random::get(-1.0, 1.0));
-    //         }
-
-    //         int n = datai_size;
-    //         int inequ_num = 2 * n + n * (n - 1) / 2;
-
-    //         auto ipm = std::make_shared<OPTIMIZE::IPM::InteriorPointMethod>(data, inequ_num, data_radiusi, data_posi);
-    //         auto results = ipm->solution();
-
-    //         for (auto j = 0; j < datai_size; j++)
-    //         {
-    //             if (data_radiusi[j] / scale * double(results[j]) >= 1e-4)
-    //                 positions.emplace_back(Vector4D(data_posi[j].x / scale, data_posi[j].y / scale, data_posi[j].z / scale, data_radiusi[j] / scale * double(results[j])));
-    //             // KIRI_LOG_DEBUG("radius={0};{1}", data_radiusi[j] / scale * double(results[j]), double(results[j]));
-    //         }
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         for (auto j = 0; j < datai_size; j++)
-    //             positions.emplace_back(Vector4D(data_posi[j].x / scale, data_posi[j].y / scale, data_posi[j].z / scale, data_radiusi[j] / scale));
-    //     }
+    //     // if (data_radius[j] / scale * double(results[j]) >= 1e-4)
+    //     positions.emplace_back(Vector4D(data_pos[j].x / scale, data_pos[j].y / scale, data_pos[j].z / scale, data_radius[j] / scale * double(results[j])));
+    //     KIRI_LOG_DEBUG("radius={0};{1}", data_radius[j] / scale * double(results[j]), double(results[j]));
     // }
-    ExportBgeoFileFromCPU("box", "box_opti", positions);
+
+   ExportBgeoFileFromCPU("box", "box_opti", positions);
     return 0;
 }
