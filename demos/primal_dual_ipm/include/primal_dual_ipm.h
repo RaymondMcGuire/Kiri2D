@@ -1,14 +1,14 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-07-12 11:08:48
+ * @Date: 2022-07-14 12:35:07
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-14 12:34:42
- * @FilePath: \Kiri2D\demos\interior_point_method\include\ipm.h
+ * @LastEditTime: 2022-07-14 13:23:46
+ * @FilePath: \Kiri2D\demos\primal_dual_ipm\include\primal_dual_ipm.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-#ifndef _IPM_H_
-#define _IPM_H_
+#ifndef _PRIMAL_DUAL_IPM_H_
+#define _PRIMAL_DUAL_IPM_H_
 
 #pragma once
 
@@ -32,121 +32,21 @@ using Eigen::MatrixXd;
 using Eigen::VectorXcd;
 using Eigen::VectorXd;
 
-struct particle {
-  Vector3D pos;
-  double radius;
-  bool optimize;
-};
-
-//-------------------------------------------------------------- example1
-// VectorXreal Constrainsts(const VectorXreal &x)
-// {
-//     VectorXreal consts(3);
-//     consts[0] = x[0] + 2 * x[1] - 10;
-//     consts[1] = x[0];
-//     consts[2] = x[1];
-//     return consts;
-// }
-
-// dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda)
-// {
-//     return (x[0] + 2 * x[1] - 10) * lambda(0, 0) + x[0] * lambda(1, 0) + x[1]
-//     * lambda(2, 0);
-// }
-
-// dual2nd TargetFunc(const VectorXdual2nd &x)
-// {
-//     return x[0] * x[0] + 2 * x[1] * x[1] + 2 * x[0] + 8 * x[1];
-// }
-//-------------------------------------------------------------- example1
-
-//-------------------------------------------------------------- example2
-// real Constrainst0(const VectorXreal &x)
-// {
-//     return 3 - x[0] - 4 * x[1];
-// }
-
-// real Constrainst1(const VectorXreal &x)
-// {
-//     return x[0] - x[1];
-// }
-
-// dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda)
-// {
-//     return (3 - x[0] - 4 * x[1]) * lambda(0, 0) + (x[0] - x[1]) * lambda(1,
-//     0);
-// }
-
-// dual2nd TargetFunc(const VectorXdual2nd &x)
-// {
-//     return (x[0] - 2) * (x[0] - 2) + 2 * (x[1] - 1) * (x[1] - 1);
-// }
-//-------------------------------------------------------------- example2
-
-VectorXreal Constrainsts(const VectorXreal &lambda,
-                         const std::vector<particle> &p) {
-  auto counter = 0;
-  auto n = lambda.size();
-  VectorXreal consts(2 * n + n * (n - 1) / 2);
-
-  for (auto i = 0; i < n; i++)
-    if (!p[i].optimize)
-      consts[counter++] = lambda[i] - 0.5;
-    else
-      consts[counter++] = lambda[i] - 0.99999;
-
-  for (auto i = 0; i < n; i++)
-    if (!p[i].optimize)
-      consts[counter++] = 2 - lambda[i];
-    else
-      consts[counter++] = 1 - lambda[i];
-
-  for (auto i = 0; i < n - 1; i++)
-    for (auto j = i + 1; j < n; j++)
-      consts[counter++] = (p[i].pos - p[j].pos).length() -
-                          (lambda[i] * p[i].radius + lambda[j] * p[j].radius);
-
+VectorXreal Constrainsts(const VectorXreal &x) {
+  VectorXreal consts(3);
+  consts[0] = x[0] + 2 * x[1] - 10;
+  consts[1] = x[0];
+  consts[2] = x[1];
   return consts;
 }
 
-dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,
-                        const std::vector<particle> &p) {
-  auto counter = 0;
-  auto n = x.size();
-  dual2nd sum = 0.0;
-
-  for (auto i = 0; i < n; i++) {
-    if (!p[i].optimize)
-      sum += (x[i] - 0.5) * lambda(counter++, 0);
-    else
-      sum += (x[i] - 0.99999) * lambda(counter++, 0);
-  }
-
-  for (auto i = 0; i < n; i++) {
-    if (!p[i].optimize)
-      sum += (2 - x[i]) * lambda(counter++, 0);
-    else
-      sum += (1 - x[i]) * lambda(counter++, 0);
-  }
-
-  for (auto i = 0; i < n - 1; i++)
-    for (auto j = i + 1; j < n; j++)
-      sum += ((p[i].pos - p[j].pos).length() -
-              (x[i] * p[i].radius + x[j] * p[j].radius)) *
-             lambda(counter++, 0);
-
-  return sum;
+dual2nd ConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda) {
+  return (x[0] + 2 * x[1] - 10) * lambda(0, 0) + x[0] * lambda(1, 0) +
+         x[1] * lambda(2, 0);
 }
 
-dual2nd TargetFunc(const VectorXdual2nd &x, const std::vector<particle> &p) {
-  auto n = x.size();
-  dual2nd sum = 0.0;
-  for (auto j = 0; j < n; j++) {
-    sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j] * p[j].radius) *
-           (x[j] * p[j].radius) * (x[j] * p[j].radius);
-  }
-
-  return sum;
+dual2nd TargetFunc(const VectorXdual2nd &x) {
+  return x[0] * x[0] + 2 * x[1] * x[1] + 2 * x[0] + 8 * x[1];
 }
 
 template <typename Derived> std::string get_shape(const EigenBase<Derived> &x) {
@@ -156,12 +56,10 @@ template <typename Derived> std::string get_shape(const EigenBase<Derived> &x) {
 }
 
 namespace OPTIMIZE::IPM {
-class InteriorPointMethod {
+class PrimalDualIPM {
 public:
-  explicit InteriorPointMethod(const std::vector<double> &data, int inequ,
-                               const std::vector<particle> &particles)
-      : mData(data), mParticles(particles), mVariableNum(data.size()),
-        mInEquNum(inequ) {
+  explicit PrimalDualIPM(const std::vector<double> &data, int inequ)
+      : mData(data), mVariableNum(data.size()), mInEquNum(inequ) {
     this->initDataVector();
     this->initSlack();
     this->initLambdaMultipler();
@@ -169,22 +67,22 @@ public:
     this->solve();
   }
 
-  virtual ~InteriorPointMethod() {}
+  virtual ~PrimalDualIPM() {}
 
   void solve() {
     mFTolConverged = false;
-    mFLast = static_cast<double>(TargetFunc(mDual2ndData, mParticles));
+    mFLast = static_cast<double>(TargetFunc(mDual2ndData));
 
     this->computeKKT();
 
     for (auto i = 0; i < mOuterIterNum; i++) {
-      KIRI_LOG_DEBUG("outer iter num={0}", i);
+      // KIRI_LOG_DEBUG("outer iter num={0}", i);
 
       if (mKKT1.norm() <= mKTol && mKKT2.norm() <= mKTol &&
           mKKT3.norm() <= mKTol && mKKT4.norm() <= mKTol) {
         mSignal = 1;
         mKtolConverged = true;
-        KIRI_LOG_INFO("mKtolConverged=true");
+        // KIRI_LOG_INFO("mKtolConverged=true");
         break;
       }
 
@@ -194,17 +92,17 @@ public:
             mKKT3.norm() <= mMuTol && mKKT4.norm() <= mMuTol) {
           mSignal = 1;
           mKtolConverged = true;
-          KIRI_LOG_INFO("mKtolConverged=true");
+          // KIRI_LOG_INFO("mKtolConverged=true");
           break;
         }
 
-        KIRI_LOG_DEBUG("inner iter num={0}", j);
+        // KIRI_LOG_DEBUG("inner iter num={0}", j);
 
-        KIRI_LOG_DEBUG("computeGrad start");
-        // compute gradient and hessian
+        // KIRI_LOG_DEBUG("computeGrad start");
+        //  compute gradient and hessian
         this->computeGrad();
 
-        KIRI_LOG_DEBUG("computeConstrainstsHessian start");
+        // KIRI_LOG_DEBUG("computeConstrainstsHessian start");
 
         this->computeConstrainstsHessian();
 
@@ -218,7 +116,7 @@ public:
         }
         // KIRI_LOG_DEBUG("changed sign search direction=\n{0}", dz);
 
-        KIRI_LOG_DEBUG("computeBarriarCostGrad start");
+        // KIRI_LOG_DEBUG("computeBarriarCostGrad start");
 
         this->computeBarriarCostGrad();
         auto dot_barrier_dir = mBarrierCostGrad.transpose() *
@@ -228,7 +126,7 @@ public:
         // KIRI_LOG_DEBUG("dz=\n{0}", dir(Eigen::seq(0, 4),
         // Eigen::placeholders::all));
 
-        KIRI_LOG_DEBUG("computeConstrainsts start");
+        // KIRI_LOG_DEBUG("computeConstrainsts start");
 
         auto ci = this->computeConstrainsts(mRealData);
         MatrixXd con = ci - mSlack;
@@ -243,12 +141,12 @@ public:
         //      KIRI_LOG_DEBUG("update nu = {0}", mNu);
         //  }
 
-        KIRI_LOG_DEBUG("computeBackTrackingLineSearch start");
+        // KIRI_LOG_DEBUG("computeBackTrackingLineSearch start");
         computeBackTrackingLineSearch(dz);
 
         mIterCount++;
 
-        KIRI_LOG_DEBUG("computeKKT start");
+        // KIRI_LOG_DEBUG("computeKKT start");
         this->computeKKT();
 
         if (mSignal == -2)
@@ -256,7 +154,7 @@ public:
       }
 
       if (mSignal != -2) {
-        mFNew = static_cast<double>(TargetFunc(mDual2ndData, mParticles));
+        mFNew = static_cast<double>(TargetFunc(mDual2ndData));
         // KIRI_LOG_DEBUG("new={0}; past={1}", mFNew, mFLast);
         if (abs(mFLast - mFNew) < abs(mFTol)) {
           mSignal = 2;
@@ -285,7 +183,7 @@ public:
     }
 
     KIRI_LOG_INFO("optimal solution={0}; func={1}", mRealData.transpose(),
-                  -static_cast<double>(TargetFunc(mDual2ndData, mParticles)));
+                  -static_cast<double>(TargetFunc(mDual2ndData)));
 
     // print();
   }
@@ -309,6 +207,9 @@ private:
   // int mOuterIterNum = 1;
   // int mInnerIterNum = 1;
 
+  bool mHasEqualConstrainsts = false;
+  bool mHasNonEqualConstrainsts = false;
+
   double mEta = 1e-4;
   double mKTol = 1e-4;
   double mMuTol = 1e-4;
@@ -328,7 +229,6 @@ private:
   MatrixXd mFuncHessian;
 
   std::vector<double> mData;
-  std::vector<particle> mParticles;
 
   VectorXreal mRealData;
   VectorXdual2nd mDual2ndData;
@@ -388,8 +288,8 @@ private:
   }
 
   void computeHessian() {
-    mFuncHessian = hessian(TargetFunc, wrt(mDual2ndData),
-                           at(mDual2ndData, mParticles), mPhi0, mFuncGrad);
+    mFuncHessian = hessian(TargetFunc, wrt(mDual2ndData), at(mDual2ndData),
+                           mPhi0, mFuncGrad);
 
     // KIRI_LOG_DEBUG("mFuncHessian={0}", mFuncHessian);
   }
@@ -399,7 +299,7 @@ private:
     // auto constrain0 = double(Constrainst0(realData));
     // VectorXd constrain1 = Constrainst1(realData).cast<double>();
 
-    VectorXd constrain = Constrainsts(realData, mParticles).cast<double>();
+    VectorXd constrain = Constrainsts(realData).cast<double>();
 
     MatrixXd constrain_i(mInEquNum, 1);
     constrain_i << constrain;
@@ -410,8 +310,8 @@ private:
   //! TODO
   void computeConstrainstsJacobian() {
     VectorXreal constrain_val;
-    MatrixXd jaco = jacobian(Constrainsts, wrt(mRealData),
-                             at(mRealData, mParticles), constrain_val);
+    MatrixXd jaco =
+        jacobian(Constrainsts, wrt(mRealData), at(mRealData), constrain_val);
     mConstrainJacobian = jaco.transpose();
 
     MatrixXd eyeConstrainMatrix = -MatrixXd::Identity(mInEquNum, mInEquNum);
@@ -422,47 +322,6 @@ private:
         eyeConstrainMatrix;
     mConstrainJacobianWithIdentity = constrainst_jacobian_with_identity;
   }
-
-  //! TODO
-  // MatrixXd computeConstrainsts(VectorXreal realData)
-  // {
-  //     // auto constrain0 = double(Constrainst0(realData));
-  //     // auto constrain1 = double(Constrainst1(realData));
-
-  //     VectorXd constrain0 = Constrainst0(realData).cast<double>();
-  //     VectorXd constrain1 = Constrainst1(realData).cast<double>();
-
-  //     MatrixXd constrain_i(mInEquNum, 1);
-  //     constrain_i << constrain0, constrain1;
-
-  //     return constrain_i;
-  // }
-
-  // //! TODO
-  // void computeConstrainstsJacobian()
-  // {
-
-  //     VectorXreal F, F1;
-  //     MatrixXd grad0 = jacobian(Constrainst0, wrt(mRealData), at(mRealData),
-  //     F); MatrixXd grad1 = jacobian(Constrainst1, wrt(mRealData),
-  //     at(mRealData), F1);
-
-  //     MatrixXd constrainst_jacobian(grad0.rows(), grad0.cols() +
-  //     grad1.cols()); constrainst_jacobian << grad0, grad1; mConstrainJacobian
-  //     = constrainst_jacobian;
-
-  //     MatrixXd eyeConstrainMatrix = -MatrixXd::Identity(mInEquNum,
-  //     mInEquNum); MatrixXd
-  //     constrainst_jacobian_with_identity(constrainst_jacobian.rows(),
-  //     constrainst_jacobian.cols() + eyeConstrainMatrix.cols());
-  //     constrainst_jacobian_with_identity << constrainst_jacobian,
-  //     eyeConstrainMatrix; mConstrainJacobianWithIdentity =
-  //     constrainst_jacobian_with_identity;
-
-  //     // KIRI_LOG_DEBUG("mConstrainJacobian=\n{0}; \n
-  //     mConstrainJacobianWithIdentity=\n{1}", mConstrainJacobian,
-  //     mConstrainJacobianWithIdentity);
-  // }
 
   void computeBarriarCostGrad() {
     MatrixXd barriar_cost_grad = MatrixXd::Zero(mVariableNum + mInEquNum, 1);
@@ -559,9 +418,8 @@ private:
 
     dual2nd u;
     VectorXdual g;
-    mConstraintsFuncHessian =
-        hessian(ConstrainstFunc, wrt(mDual2ndData),
-                at(mDual2ndData, mLambda, mParticles), u, g);
+    mConstraintsFuncHessian = hessian(ConstrainstFunc, wrt(mDual2ndData),
+                                      at(mDual2ndData, mLambda), u, g);
 
     // KIRI_LOG_DEBUG("mConstraintsFuncHessian={0}", mConstraintsFuncHessian);
 
@@ -720,7 +578,7 @@ private:
     auto ci = this->computeConstrainsts(mRealData);
 
     // compute merit function
-    auto phi_nu = eval(TargetFunc(mDual2ndData, mParticles));
+    auto phi_nu = eval(TargetFunc(mDual2ndData));
     phi_nu -= mMu * log(mSlack.array()).sum();
     phi_nu += mNu * abs(ci.array() - mSlack.array()).sum();
     // KIRI_LOG_DEBUG("phi_nu={0}", phi_nu);
@@ -747,8 +605,8 @@ private:
 
     auto ci1 = this->computeConstrainsts(mRealData + alpha_smax * dx);
 
-    double phi_nu1 = static_cast<double>(
-        TargetFunc(mDual2ndData + alpha_smax * dx, mParticles));
+    double phi_nu1 =
+        static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx));
     phi_nu1 -= mMu * log((mSlack + alpha_smax * ds).array()).sum();
     phi_nu1 +=
         mNu * abs(ci1.array() - (mSlack + alpha_smax * ds).array()).sum();
@@ -789,8 +647,7 @@ private:
             dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all));
         double phi_nu2 = static_cast<double>(TargetFunc(
             mDual2ndData + alpha_smax * dx +
-                dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all),
-            mParticles));
+            dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all)));
         phi_nu2 -=
             mMu *
             log((mSlack + alpha_smax * ds +
@@ -825,8 +682,7 @@ private:
           phi_nu2 = static_cast<double>(TargetFunc(
               mDual2ndData + alpha_corr * (alpha_smax * dx +
                                            dzp(Eigen::seq(0, mVariableNum - 1),
-                                               Eigen::placeholders::all)),
-              mParticles));
+                                               Eigen::placeholders::all))));
           phi_nu2 -=
               mMu *
               log((mSlack +
@@ -860,8 +716,8 @@ private:
 
         ci1 = this->computeConstrainsts(mRealData + alpha_smax * dx);
 
-        phi_nu1 = static_cast<double>(
-            TargetFunc(mDual2ndData + alpha_smax * dx, mParticles));
+        phi_nu1 =
+            static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx));
         phi_nu1 -= mMu * log((mSlack + alpha_smax * ds).array()).sum();
         phi_nu1 +=
             mNu * abs(ci1.array() - (mSlack + alpha_smax * ds).array()).sum();
@@ -884,8 +740,8 @@ private:
           // update
           ci1 = this->computeConstrainsts(mRealData + alpha_smax * dx);
 
-          phi_nu1 = static_cast<double>(
-              TargetFunc(mDual2ndData + alpha_smax * dx, mParticles));
+          phi_nu1 =
+              static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx));
           phi_nu1 -= mMu * log((mSlack + alpha_smax * ds).array()).sum();
           phi_nu1 +=
               mNu * abs(ci1.array() - (mSlack + alpha_smax * ds).array()).sum();
@@ -929,8 +785,8 @@ private:
   }
 };
 
-typedef std::shared_ptr<InteriorPointMethod> InteriorPointMethodPtr;
+typedef std::shared_ptr<PrimalDualIPM> PrimalDualIPMPtr;
 
 } // namespace OPTIMIZE::IPM
 
-#endif /* _IPM_H_ */
+#endif /* _PRIMAL_DUAL_IPM_H_ */
