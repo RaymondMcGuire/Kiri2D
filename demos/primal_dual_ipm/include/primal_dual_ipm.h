@@ -42,13 +42,10 @@ VectorXreal EquConstrainsts(const VectorXreal &x)
 
 VectorXreal InEquConstrainsts(const VectorXreal &x)
 {
-  VectorXreal consts(6);
+  VectorXreal consts(3);
   consts[0] = x[0];
   consts[1] = x[1];
   consts[2] = x[2];
-  consts[3] = x[3];
-  consts[4] = x[4];
-  consts[5] = x[5];
   return consts;
 }
 
@@ -59,12 +56,12 @@ dual2nd EquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda)
 
 dual2nd InEquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda, const int equNum)
 {
-  return x[0] * lambda(equNum + 0, 0) + x[1] * lambda(equNum + 1, 0) + x[2] * lambda(equNum + 2, 0) + x[3] * lambda(equNum + 3, 0) + x[4] * lambda(equNum + 4, 0) + x[5] * lambda(equNum + 5, 0);
+  return x[0] * lambda(equNum + 0, 0) + x[1] * lambda(equNum + 1, 0) + x[2] * lambda(equNum + 2, 0);
 }
 
 dual2nd TargetFunc(const VectorXdual2nd &x)
 {
-  return x[0] * log(x[0]) + x[1] * log(x[1]) + x[2] * log(x[2]) + x[3] * log(x[3]) + x[4] * log(x[4]) + x[5] * log(x[5]);
+  return -x[0] * x[1] * x[2];
 }
 
 template <typename Derived>
@@ -132,7 +129,7 @@ namespace OPTIMIZE::IPM
 
           // search direction
           MatrixXd dz = -(mHessian.inverse() * mGrad);
-          KIRI_LOG_DEBUG("search direction=\n{0}", dz);
+          // KIRI_LOG_DEBUG("search direction=\n{0}", dz);
 
           // change sign definition for lambda multipliers search direction
           for (auto i = mVariableNum + mInEquNum; i < dz.size(); i++)
@@ -147,7 +144,7 @@ namespace OPTIMIZE::IPM
           auto dot_barrier_dir = (mBarrierCostGrad.transpose() *
                                   dz(Eigen::seq(0, mVariableNum + mInEquNum - 1),
                                      Eigen::placeholders::all))(0, 0);
-          KIRI_LOG_DEBUG("dot_barrier_dir=\n{0}", dot_barrier_dir);
+          // KIRI_LOG_DEBUG("dot_barrier_dir=\n{0}", dot_barrier_dir);
 
           // KIRI_LOG_DEBUG("dz=\n{0}", dir(Eigen::seq(0, 4),
           // Eigen::placeholders::all));
@@ -156,7 +153,7 @@ namespace OPTIMIZE::IPM
 
           MatrixXd con = this->computeConstainMatrix(mRealData, mSlack);
           double sum_abs_con = con.array().abs().sum();
-          KIRI_LOG_DEBUG("sum_abs_con={0}", sum_abs_con);
+          // KIRI_LOG_DEBUG("sum_abs_con={0}", sum_abs_con);
 
           //! FIXME sum_abs_con=0???
           if (sum_abs_con != 0.0)
@@ -593,7 +590,7 @@ namespace OPTIMIZE::IPM
 
       if (mInEquNum > 0)
         d2L -= d2ci;
-      KIRI_LOG_DEBUG("d2L=\n{0}", d2L);
+      // KIRI_LOG_DEBUG("d2L=\n{0}", d2L);
 
       MatrixXd d2L_upper = d2L.triangularView<Eigen::Upper>();
       // KIRI_LOG_DEBUG("d2L_upper={0}", d2L_upper);
@@ -729,10 +726,10 @@ namespace OPTIMIZE::IPM
         mKKT4 = mGrad(Eigen::seq(mVariableNum + mInEquNum + mEquNum, mGrad.rows() - 1), Eigen::placeholders::all);
       }
 
-      KIRI_LOG_DEBUG("KKT1=\n{0}", mKKT1.transpose());
-      KIRI_LOG_DEBUG("KKT2=\n{0}", mKKT2.transpose());
-      KIRI_LOG_DEBUG("KKT3=\n{0}", mKKT3.transpose());
-      KIRI_LOG_DEBUG("KKT4=\n{0}", mKKT4.transpose());
+      // KIRI_LOG_DEBUG("KKT1=\n{0}", mKKT1.transpose());
+      // KIRI_LOG_DEBUG("KKT2=\n{0}", mKKT2.transpose());
+      // KIRI_LOG_DEBUG("KKT3=\n{0}", mKKT3.transpose());
+      // KIRI_LOG_DEBUG("KKT4=\n{0}", mKKT4.transpose());
     }
 
     void computeBackTrackingLineSearch(MatrixXd dz, double alphaSMax = 1.0,
