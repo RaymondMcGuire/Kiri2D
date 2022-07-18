@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     std::vector<double> data;
     for (auto j = 0; j < n; j++)
     {
-      data.emplace_back(Random::get(-1.0, 1.0));
+      data.emplace_back(Random::get(0.0, 1.0));
     }
     // data.emplace_back(0.9503230351783563);
     // data.emplace_back(-0.7261491955624899);

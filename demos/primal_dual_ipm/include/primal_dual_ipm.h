@@ -32,7 +32,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXcd;
 using Eigen::VectorXd;
 
-VectorXreal EquConstrainsts(const VectorXreal &x)
+VectorXreal EquConstraints(const VectorXreal &x)
 {
   VectorXreal consts(1);
   consts[0] = x.sum() - 1.0;
@@ -40,7 +40,7 @@ VectorXreal EquConstrainsts(const VectorXreal &x)
   return consts;
 }
 
-VectorXreal InEquConstrainsts(const VectorXreal &x)
+VectorXreal InEquConstraints(const VectorXreal &x)
 {
   VectorXreal consts(3);
   consts[0] = x[0];
@@ -123,9 +123,9 @@ namespace OPTIMIZE::IPM
 
           // KIRI_LOG_DEBUG("inner iter num={0}", j);
 
-          // KIRI_LOG_DEBUG("computeConstrainstsHessian start");
+          // KIRI_LOG_DEBUG("computeLagrangianHessian start");
 
-          this->computeConstrainstsHessian();
+          this->computeLagrangianHessian();
 
           // search direction
           MatrixXd dz = -(mHessian.inverse() * mGrad);
@@ -149,9 +149,9 @@ namespace OPTIMIZE::IPM
           // KIRI_LOG_DEBUG("dz=\n{0}", dir(Eigen::seq(0, 4),
           // Eigen::placeholders::all));
 
-          // KIRI_LOG_DEBUG("computeInEquConstrainsts start");
+          // KIRI_LOG_DEBUG("computeInEquConstraints start");
 
-          MatrixXd con = this->computeConstainMatrix(mRealData, mSlack);
+          MatrixXd con = this->computeConstaintsValue(mRealData, mSlack);
           double sum_abs_con = con.array().abs().sum();
           // KIRI_LOG_DEBUG("sum_abs_con={0}", sum_abs_con);
 
@@ -159,12 +159,12 @@ namespace OPTIMIZE::IPM
           if (sum_abs_con != 0.0)
           {
             double nu_thresh = dot_barrier_dir / (1 - mRho) / sum_abs_con;
-            KIRI_LOG_DEBUG("nu_thresh={0}", nu_thresh);
+            // KIRI_LOG_DEBUG("nu_thresh={0}", nu_thresh);
 
             if (mNu < nu_thresh)
             {
               mNu = nu_thresh;
-              KIRI_LOG_DEBUG("update nu = {0}", mNu);
+              // KIRI_LOG_DEBUG("update nu = {0}", mNu);
             }
           }
 
@@ -200,12 +200,12 @@ namespace OPTIMIZE::IPM
         // update barrier params
         MatrixXd lambda_ineq = mLambda(Eigen::seq(mEquNum, mLambda.rows() - 1), Eigen::placeholders::all);
         auto xi = mInEquNum * (mSlack.array() * lambda_ineq.array()).minCoeff() /
-                  ((mSlack.transpose() * lambda_ineq)(0, 0) + MEpsilon<float>());
+                  ((mSlack.transpose() * lambda_ineq)(0, 0) + MEpsilon<double>());
         // KIRI_LOG_DEBUG("xi={0}", xi);
 
         mMu =
             0.1 *
-            pow(std::min(0.05 * (1.0 - xi) / (xi + MEpsilon<float>()), 2.0), 3) *
+            pow(std::min(0.05 * (1.0 - xi) / (xi + MEpsilon<double>()), 2.0), 3) *
             ((mSlack.transpose() * lambda_ineq)(0, 0) / mInEquNum);
         if (mMu < 0)
           mMu = 0;
@@ -239,8 +239,8 @@ namespace OPTIMIZE::IPM
     // int mOuterIterNum = 1;
     // int mInnerIterNum = 1;
 
-    bool mHasEqualConstrainsts = false;
-    bool mHasInEqualConstrainsts = false;
+    bool mHasEqualConstraints = false;
+    bool mHasInEqualConstraints = false;
 
     double mEta = 1e-4;
     double mKTol = 1e-4;
@@ -267,7 +267,7 @@ namespace OPTIMIZE::IPM
     VectorXdual2nd mDual2ndData;
 
     MatrixXd mConstrainJacobian;
-    MatrixXd mJaco, mDce, mDci;
+    MatrixXd mConstraintsJaco, mDce, mDci;
     MatrixXd mConstraintsFuncHessian;
 
     MatrixXd mGrad;
@@ -295,68 +295,61 @@ namespace OPTIMIZE::IPM
 
     void initSlack()
     {
-      MatrixXd slack(mInEquNum, 1);
-      MatrixXd ci = this->computeInEquConstrainsts(mRealData);
+      if (mInEquNum > 0)
+      {
+        MatrixXd slack(mInEquNum, 1);
+        MatrixXd ci = this->computeInEquConstraints(mRealData);
 
-      for (auto i = 0; i < slack.rows(); i++)
-        for (auto j = 0; j < slack.cols(); j++)
-          slack(i, j) = std::max(mKTol, ci(i, j));
+        for (auto i = 0; i < slack.rows(); i++)
+          for (auto j = 0; j < slack.cols(); j++)
+            slack(i, j) = std::max(mKTol, ci(i, j));
 
-      mSlack = slack;
+        mSlack = slack;
 
-      // KIRI_LOG_DEBUG("init mSlack=\n {0}", mSlack);
+        // KIRI_LOG_DEBUG("init mSlack=\n {0}", mSlack);
+      }
     }
 
     void initLambdaMultipler()
     {
-      this->computeHessian();
-      this->computeConstrainstsJacobian();
-
-      MatrixXd lambda =
-          mJaco(Eigen::seq(0, mVariableNum - 1),
-                Eigen::placeholders::all)
-              .completeOrthogonalDecomposition()
-              .pseudoInverse() *
-          mFuncGrad.cast<double>();
-
-      // KIRI_LOG_DEBUG("init Lambda=\n {0}", lambda);
-      // KIRI_LOG_DEBUG("Lambda Shape=\n {0}", get_shape(lambda));
-
-      mLambda = lambda;
-
-      if (mEquNum > 0 && mInEquNum > 0)
+      if (mEquNum > 0 || mInEquNum > 0)
       {
-        for (auto i = mEquNum; i < mLambda.rows(); i++)
-          for (auto j = 0; j < mLambda.cols(); j++)
-            if (mLambda(i, j) < 0.0)
-              mLambda(i, j) = 1e-4;
-      }
-      else if (mInEquNum > 0)
-      {
-        for (auto i = 0; i < mLambda.rows(); i++)
-          for (auto j = 0; j < mLambda.cols(); j++)
-            if (mLambda(i, j) < 0.0)
-              mLambda(i, j) = 1e-4;
-      }
+        this->computeConstraintsJacobian();
 
-      // KIRI_LOG_DEBUG("edited Lambda=\n {0}", mLambda);
+        MatrixXd lambda =
+            mConstraintsJaco(Eigen::seq(0, mVariableNum - 1),
+                             Eigen::placeholders::all)
+                .completeOrthogonalDecomposition()
+                .pseudoInverse() *
+            mFuncGrad.cast<double>();
+
+        // KIRI_LOG_DEBUG("init Lambda=\n {0}", lambda);
+        // KIRI_LOG_DEBUG("Lambda Shape=\n {0}", get_shape(lambda));
+
+        mLambda = lambda;
+
+        if (mEquNum > 0 && mInEquNum > 0)
+        {
+          for (auto i = mEquNum; i < mLambda.rows(); i++)
+            for (auto j = 0; j < mLambda.cols(); j++)
+              if (mLambda(i, j) < 0.0)
+                mLambda(i, j) = 1e-4;
+        }
+        else if (mInEquNum > 0)
+        {
+          for (auto i = 0; i < mLambda.rows(); i++)
+            for (auto j = 0; j < mLambda.cols(); j++)
+              if (mLambda(i, j) < 0.0)
+                mLambda(i, j) = 1e-4;
+        }
+
+        // KIRI_LOG_DEBUG("edited Lambda=\n {0}", mLambda);
+      }
     }
 
-    void computeHessian()
+    MatrixXd computeInEquConstraints(VectorXreal realData)
     {
-      mFuncHessian = hessian(TargetFunc, wrt(mDual2ndData), at(mDual2ndData),
-                             mPhi0, mFuncGrad);
-
-      // KIRI_LOG_DEBUG("mFuncHessian={0}", mFuncHessian);
-    }
-
-    //! TODO
-    MatrixXd computeInEquConstrainsts(VectorXreal realData)
-    {
-      // auto constrain0 = double(Constrainst0(realData));
-      // VectorXd constrain1 = Constrainst1(realData).cast<double>();
-
-      VectorXd constrain = InEquConstrainsts(realData).cast<double>();
+      VectorXd constrain = InEquConstraints(realData).cast<double>();
 
       MatrixXd constrain_i(mInEquNum, 1);
       constrain_i << constrain;
@@ -364,21 +357,9 @@ namespace OPTIMIZE::IPM
       return constrain_i;
     }
 
-    MatrixXd computeConstainMatrix(VectorXreal data, MatrixXd slack)
+    MatrixXd computeEquConstraints(VectorXreal realData)
     {
-      auto ci = this->computeInEquConstrainsts(mRealData);
-      auto ce = this->computeEquConstrainsts(mRealData);
-      MatrixXd con = MatrixXd(mEquNum + mInEquNum, 1);
-
-      con.block(0, 0, mEquNum, con.cols()) = ce;
-      con.block(mEquNum, 0, con.rows() - mEquNum, con.cols()) = ci - slack;
-
-      return con;
-    }
-
-    MatrixXd computeEquConstrainsts(VectorXreal realData)
-    {
-      VectorXd constrain = EquConstrainsts(realData).cast<double>();
+      VectorXd constrain = EquConstraints(realData).cast<double>();
 
       MatrixXd constrain_e(mEquNum, 1);
       constrain_e << constrain;
@@ -386,42 +367,72 @@ namespace OPTIMIZE::IPM
       return constrain_e;
     }
 
-    void computeConstrainstsJacobian()
+    MatrixXd computeConstaintsValue(VectorXreal data, MatrixXd slack)
     {
-      VectorXreal val_ce, val_ci;
-      MatrixXd dce =
-          jacobian(EquConstrainsts, wrt(mRealData), at(mRealData), val_ce);
-      MatrixXd dci =
-          jacobian(InEquConstrainsts, wrt(mRealData), at(mRealData), val_ci);
+      MatrixXd con = MatrixXd::Zero(mEquNum + mInEquNum, 1);
+      if (mEquNum > 0)
+      {
+        auto ce = this->computeEquConstraints(mRealData);
+        con.block(0, 0, mEquNum, 1) = ce;
+      }
 
-      mDce = dce.transpose();
-      mDci = dci.transpose();
+      if (mInEquNum > 0)
+      {
+        auto ci = this->computeInEquConstraints(mRealData);
+        con.block(mEquNum, 0, mInEquNum, 1) = ci - slack;
+      }
 
-      MatrixXd constrainst_jacobian(mDce.rows(), mDce.cols() + mDci.cols());
-      constrainst_jacobian << mDce, mDci;
-      mConstrainJacobian = constrainst_jacobian;
+      return con;
+    }
 
-      MatrixXd ce_zero_matrix =
-          MatrixXd::Zero(mInEquNum, mEquNum);
-      MatrixXd eye_constrain_matrix = -MatrixXd::Identity(mInEquNum, mInEquNum);
+    void computeConstraintsJacobian()
+    {
+      mFuncHessian = hessian(TargetFunc, wrt(mDual2ndData), at(mDual2ndData),
+                             mPhi0, mFuncGrad);
 
-      MatrixXd combine_ce_eye(mInEquNum, mEquNum + mInEquNum);
-      combine_ce_eye << ce_zero_matrix, eye_constrain_matrix;
+      MatrixXd jaco = MatrixXd::Zero(mVariableNum + mInEquNum, mInEquNum + mEquNum);
 
-      MatrixXd jaco(mConstrainJacobian.rows() +
-                        combine_ce_eye.rows(),
-                    mConstrainJacobian.cols());
-      jaco << mConstrainJacobian, combine_ce_eye;
-      mJaco = jaco;
+      if (mEquNum > 0)
+      {
+        VectorXreal val_ce;
+        MatrixXd dce =
+            jacobian(EquConstraints, wrt(mRealData), at(mRealData), val_ce);
 
-      // KIRI_LOG_DEBUG("mJaco=\n{0}", mJaco);
+        mDce = dce.transpose();
+        jaco.block(0, 0, mVariableNum, mEquNum) = mDce;
+
+        MatrixXd constrainst_jacobian(mDce.rows(), mDce.cols() + mDci.cols());
+        constrainst_jacobian << mDce, mDci;
+        mConstrainJacobian = constrainst_jacobian;
+      }
+
+      if (mInEquNum > 0)
+      {
+        VectorXreal val_ci;
+        MatrixXd dci =
+            jacobian(InEquConstraints, wrt(mRealData), at(mRealData), val_ci);
+        mDci = dci.transpose();
+        jaco.block(0, mEquNum, mVariableNum, mInEquNum) = mDce;
+
+        jaco.block(mVariableNum, mEquNum, mInEquNum, mInEquNum) = -MatrixXd::Identity(mInEquNum, mInEquNum);
+      }
+
+      mConstraintsJaco = jaco;
+
+      // KIRI_LOG_DEBUG("mConstraintsJaco=\n{0}", mConstraintsJaco);
     }
 
     void computeBarriarCostGrad()
     {
       MatrixXd barriar_cost_grad = MatrixXd::Zero(mVariableNum + mInEquNum, 1);
       MatrixXd func_grad = mFuncGrad.cast<double>();
-      barriar_cost_grad << func_grad, -mMu / (mSlack.array() + MEpsilon<float>());
+      barriar_cost_grad.block(0, 0, mVariableNum, 1) = func_grad;
+
+      if (mInEquNum > 0)
+      {
+        barriar_cost_grad.block(mVariableNum, 0, mInEquNum, 1) = -mMu / (mSlack.array() + MEpsilon<double>());
+      }
+
       mBarrierCostGrad = barriar_cost_grad;
       // KIRI_LOG_DEBUG("mBarrierCostGrad=\n{0}", mBarrierCostGrad);
     }
@@ -449,7 +460,7 @@ namespace OPTIMIZE::IPM
 
       auto c = b - (b - a) / gold;
       auto d = a + (b - a) / gold;
-      while (abs(b - a) > gold * MEpsilon<float>())
+      while (abs(b - a) > gold * MEpsilon<double>())
       {
         auto xddx = x + d * dx - (1 - mTau) * x;
         flag = false;
@@ -494,25 +505,26 @@ namespace OPTIMIZE::IPM
       return a;
     }
 
-    void computeGrad()
+    void computeGradient()
     {
-      mGrad = MatrixXd(mVariableNum + 2 * mInEquNum + mEquNum, 1);
+      mFuncHessian = hessian(TargetFunc, wrt(mDual2ndData), at(mDual2ndData),
+                             mPhi0, mFuncGrad);
 
-      MatrixXd grad_var_section = mFuncGrad.cast<double>();
-      MatrixXd grad_equ_section, grad_inequ_section, grad_inequ_last_section;
+      mGrad = MatrixXd::Zero(mVariableNum + 2 * mInEquNum + mEquNum, 1);
+      mGrad.block(0, 0, mVariableNum, 1) = mFuncGrad.cast<double>();
 
       if (mEquNum > 0)
       {
-        grad_var_section -= mDce * mLambda(Eigen::seq(0, mEquNum - 1), Eigen::placeholders::all);
+        mGrad.block(0, 0, mVariableNum, 1) -= mDce * mLambda(Eigen::seq(0, mEquNum - 1), Eigen::placeholders::all);
 
-        auto ce = this->computeEquConstrainsts(mRealData);
-        grad_equ_section = ce;
+        auto ce = this->computeEquConstraints(mRealData);
+        mGrad.block(mVariableNum + mInEquNum, 0, mEquNum, 1) = ce;
       }
 
       if (mInEquNum > 0)
       {
         MatrixXd lambda_ineq = mLambda(Eigen::seq(mEquNum, mLambda.rows() - 1), Eigen::placeholders::all);
-        grad_var_section -= mDci * lambda_ineq;
+        mGrad.block(0, 0, mVariableNum, 1) -= mDci * lambda_ineq;
 
         auto grad2 = mSlack;
         for (auto i = 0; i < grad2.rows(); i++)
@@ -520,119 +532,83 @@ namespace OPTIMIZE::IPM
           for (auto j = 0; j < grad2.cols(); j++)
           {
             grad2(i, j) =
-                (lambda_ineq(i, j) - mMu / (mSlack(i, j) + MEpsilon<float>()));
+                (lambda_ineq(i, j) - mMu / (mSlack(i, j) + MEpsilon<double>()));
           }
         }
-        grad_inequ_section = grad2;
-        auto ci = this->computeInEquConstrainsts(mRealData);
-        grad_inequ_last_section = ci - mSlack;
-      }
+        mGrad.block(mVariableNum, 0, mInEquNum, 1) = grad2;
 
-      if (mEquNum > 0 && mInEquNum > 0)
-      {
-        mGrad << grad_var_section, grad_inequ_section, grad_equ_section, grad_inequ_last_section;
+        auto ci = this->computeInEquConstraints(mRealData);
+        mGrad.block(mVariableNum + mEquNum + mInEquNum, 0, mInEquNum, 1) = ci - mSlack;
       }
-      else if (mEquNum > 0)
-      {
-        mGrad << grad_var_section, grad_equ_section;
-      }
-      else if (mInEquNum > 0)
-      {
-        mGrad << grad_var_section, grad_inequ_section, grad_inequ_last_section;
-      }
-      else
-      {
-        mGrad << grad_var_section;
-      }
-
-      // auto grad2 = mSlack;
-      // for (auto i = 0; i < grad2.rows(); i++)
-      // {
-      //   for (auto j = 0; j < grad2.cols(); j++)
-      //   {
-      //     grad2(i, j) =
-      //         (mLambda(i, j) - mMu / (mSlack(i, j) + MEpsilon<float>()));
-      //   }
-      // }
-
-      // mGrad = MatrixXd(mKKT1.rows() + mKKT2.rows() + mKKT4.rows(), 1);
-      // mGrad << mKKT1, grad2, mKKT4;
-      // KIRI_LOG_DEBUG("mGrad=\n{0}", mGrad.transpose());
     }
 
     int computeMatrixInertia(VectorXcd mat)
     {
       auto matrix_inertia = 0;
       for (auto i = 0; i < mat.array().size(); i++)
-        if (mat.array()[i].real() < -MEpsilon<float>())
+        if (mat.array()[i].real() < -MEpsilon<double>())
           matrix_inertia++;
       return matrix_inertia;
     }
 
-    void computeConstrainstsHessian()
+    void computeLagrangianHessian()
     {
       mDelta = 0.0;
-      this->computeConstrainstsJacobian();
+      this->computeConstraintsJacobian();
 
-      dual2nd u_ce, u_ci;
-      VectorXdual g_ce, g_ci;
-
-      MatrixXd d2ce = hessian(EquConstrainstFunc, wrt(mDual2ndData),
-                              at(mDual2ndData, mLambda), u_ce, g_ce);
-
-      MatrixXd d2ci = hessian(InEquConstrainstFunc, wrt(mDual2ndData),
-                              at(mDual2ndData, mLambda, mEquNum), u_ci, g_ci);
-
-      // Hessian of the Lagrangian
       MatrixXd d2L = mFuncHessian;
       if (mEquNum > 0)
-        d2L -= d2ce;
-
-      if (mInEquNum > 0)
-        d2L -= d2ci;
-      // KIRI_LOG_DEBUG("d2L=\n{0}", d2L);
-
-      MatrixXd d2L_upper = d2L.triangularView<Eigen::Upper>();
-      // KIRI_LOG_DEBUG("d2L_upper={0}", d2L_upper);
-
-      auto sigma = mSlack;
-      for (auto i = 0; i < sigma.rows(); i++)
       {
-        for (auto j = 0; j < sigma.cols(); j++)
-        {
-          sigma(i, j) = mLambda(i + mEquNum, j) / (mSlack(i, j) + MEpsilon<float>());
-        }
+        dual2nd u_ce;
+        VectorXdual g_ce;
+        MatrixXd d2ce = hessian(EquConstrainstFunc, wrt(mDual2ndData),
+                                at(mDual2ndData, mLambda), u_ce, g_ce);
+
+        d2L -= d2ce;
       }
 
-      auto diagSize = sigma.array().size();
-      MatrixXd sigma_diag(diagSize, diagSize);
+      if (mInEquNum > 0)
+      {
+        dual2nd u_ci;
+        VectorXdual g_ci;
+        MatrixXd d2ci = hessian(InEquConstrainstFunc, wrt(mDual2ndData),
+                                at(mDual2ndData, mLambda, mEquNum), u_ci, g_ci);
 
-      sigma_diag = sigma.array().matrix().asDiagonal();
-      // // KIRI_LOG_DEBUG("sigma={0}", sigma_diag);
+        d2L -= d2ci;
+      }
 
-      MatrixXd eye_constrain_matrix = -MatrixXd::Identity(mInEquNum, mInEquNum);
+      // KIRI_LOG_DEBUG("d2L=\n{0}", d2L);
 
-      MatrixXd hess_first_row =
-          MatrixXd::Zero(mVariableNum, mVariableNum + 2 * mInEquNum + mEquNum);
-      MatrixXd first_col_zero_matrix = MatrixXd::Zero(mVariableNum, mInEquNum);
-      hess_first_row << d2L_upper, first_col_zero_matrix, mConstrainJacobian;
+      MatrixXd hess = MatrixXd::Zero(mVariableNum + 2 * mInEquNum + mEquNum,
+                                     mVariableNum + 2 * mInEquNum + mEquNum);
+      hess.block(0, 0, mVariableNum, mVariableNum) = d2L.triangularView<Eigen::Upper>();
 
-      MatrixXd hess_second_row =
-          MatrixXd::Zero(mInEquNum, mVariableNum + 2 * mInEquNum + mEquNum);
-      MatrixXd second_col_zero_matrix1 = MatrixXd::Zero(mInEquNum, mVariableNum);
-      MatrixXd second_col_zero_matrix2 = MatrixXd::Zero(mInEquNum, mEquNum);
-      hess_second_row << second_col_zero_matrix1, sigma_diag, second_col_zero_matrix2, eye_constrain_matrix;
+      if (mEquNum > 0)
+      {
+        hess.block(0, mVariableNum + mInEquNum, mVariableNum, mEquNum) = mDce;
+      }
 
-      MatrixXd hess_concate_row_first_second =
-          MatrixXd::Zero(mVariableNum + mInEquNum, mVariableNum + 2 * mInEquNum + mEquNum);
-      hess_concate_row_first_second << hess_first_row, hess_second_row;
+      if (mInEquNum > 0)
+      {
+        hess.block(0, mVariableNum + mInEquNum + mEquNum, mVariableNum, mInEquNum) = mDci;
 
-      MatrixXd hess_third_row_zero =
-          MatrixXd::Zero(mInEquNum + mEquNum, mVariableNum + 2 * mInEquNum + mEquNum);
+        auto sigma = mSlack;
+        for (auto i = 0; i < sigma.rows(); i++)
+        {
+          for (auto j = 0; j < sigma.cols(); j++)
+          {
+            sigma(i, j) = mLambda(i + mEquNum, j) / (mSlack(i, j) + MEpsilon<double>());
+          }
+        }
 
-      MatrixXd hess(mVariableNum + 2 * mInEquNum + mEquNum,
-                    mVariableNum + 2 * mInEquNum + mEquNum);
-      hess << hess_concate_row_first_second, hess_third_row_zero;
+        auto diag_size = sigma.array().size();
+        MatrixXd sigma_diag(diag_size, diag_size);
+
+        sigma_diag = sigma.array().matrix().asDiagonal();
+
+        hess.block(mVariableNum, mVariableNum, mInEquNum, mInEquNum) = sigma_diag;
+        hess.block(mVariableNum, mVariableNum + mInEquNum + mEquNum, mInEquNum, mInEquNum) = -MatrixXd::Identity(mInEquNum, mInEquNum);
+      }
 
       MatrixXd hess_upper = hess.triangularView<Eigen::Upper>();
       hess = hess_upper + hess_upper.transpose();
@@ -641,34 +617,32 @@ namespace OPTIMIZE::IPM
           (hess.diagonal() / 2).array().matrix().asDiagonal();
       hess -= hess_half_diag;
 
-      // KIRI_LOG_DEBUG("before reg hess=\n{0}", hess);
-
-      // // reg
+      // reg
       auto w = hess.eigenvalues();
       auto rcond = w.array().abs().minCoeff() / w.array().abs().maxCoeff();
 
       auto matrix_inertia = this->computeMatrixInertia(w);
 
-      if (rcond <= MEpsilon<float>() || (mInEquNum + mEquNum) != matrix_inertia)
+      if (rcond <= MEpsilon<double>() || (mInEquNum + mEquNum) != matrix_inertia)
       {
 
-        if (rcond <= MEpsilon<float>() && mEquNum > 0)
+        if (rcond <= MEpsilon<double>() && mEquNum > 0)
         {
           auto ind1 = mVariableNum + mInEquNum;
           auto ind2 = ind1 + mEquNum;
           hess.block(ind1, ind1, ind2 - ind1, ind2 - ind1) -=
-              sqrt((double)MEpsilon<float>()) * mEta * std::pow(mMu, mBeta) * MatrixXd::Identity(mEquNum, mEquNum);
+              sqrt((double)MEpsilon<double>()) * mEta * std::pow(mMu, mBeta) * MatrixXd::Identity(mEquNum, mEquNum);
         }
 
         if (mDelta == 0.0)
         {
-          mDelta = sqrt(MEpsilon<float>());
+          mDelta = sqrt(MEpsilon<double>());
         }
         else
         {
           // prevent the diagonal shift coefficient from becoming too small
 
-          mDelta = std::max(mDelta / 2, sqrt((double)MEpsilon<float>()));
+          mDelta = std::max(mDelta / 2, sqrt((double)MEpsilon<double>()));
         }
         hess.block(0, 0, mData.size(), mData.size()) +=
             mDelta * MatrixXd::Identity(mData.size(), mData.size());
@@ -694,9 +668,8 @@ namespace OPTIMIZE::IPM
 
     void computeKKT()
     {
-      this->computeHessian();
-      this->computeConstrainstsJacobian();
-      this->computeGrad();
+      this->computeConstraintsJacobian();
+      this->computeGradient();
 
       // KIRI_LOG_DEBUG("mLambda=\n{0}", mLambda);
       mKKT1 = mGrad(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all);
@@ -768,8 +741,8 @@ namespace OPTIMIZE::IPM
       // KIRI_LOG_DEBUG("ds={0}", ds);
       // KIRI_LOG_DEBUG("dl={0}", dl);
 
-      auto ci = this->computeInEquConstrainsts(mRealData);
-      auto ce = this->computeEquConstrainsts(mRealData);
+      auto ci = this->computeInEquConstraints(mRealData);
+      auto ce = this->computeEquConstraints(mRealData);
 
       // compute merit function
       auto phi_nu = eval(TargetFunc(mDual2ndData));
@@ -804,7 +777,7 @@ namespace OPTIMIZE::IPM
         {
           for (auto j = 0; j < tmp.cols(); j++)
           {
-            tmp(i, j) = mMu / (mSlack(i, j) + MEpsilon<float>());
+            tmp(i, j) = mMu / (mSlack(i, j) + MEpsilon<double>());
           }
         }
 
@@ -815,8 +788,8 @@ namespace OPTIMIZE::IPM
 
       // KIRI_LOG_DEBUG("dphi_nu={0}", dphi_nu);
 
-      auto ci1 = this->computeInEquConstrainsts(mRealData + alpha_smax * dx);
-      auto ce1 = this->computeEquConstrainsts(mRealData + alpha_smax * dx);
+      auto ci1 = this->computeInEquConstraints(mRealData + alpha_smax * dx);
+      auto ce1 = this->computeEquConstraints(mRealData + alpha_smax * dx);
 
       double phi_nu1 =
           static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx));
@@ -842,8 +815,8 @@ namespace OPTIMIZE::IPM
       {
         // KIRI_LOG_DEBUG("phi_nu1 > phi1_next");
 
-        MatrixXd con_old = this->computeConstainMatrix(mRealData, mSlack);
-        MatrixXd con_new = this->computeConstainMatrix(mRealData + alpha_smax * dx, mSlack + alpha_smax * ds);
+        MatrixXd con_old = this->computeConstaintsValue(mRealData, mSlack);
+        MatrixXd con_new = this->computeConstaintsValue(mRealData + alpha_smax * dx, mSlack + alpha_smax * ds);
         // KIRI_LOG_DEBUG("con_old={0}", con_old);
         // KIRI_LOG_DEBUG("con_new={0}", con_new);
 
@@ -855,7 +828,7 @@ namespace OPTIMIZE::IPM
         if (con_new_sum > con_old_sum)
         {
           // KIRI_LOG_INFO("con_new_sum > con_old_sum");
-          auto A = mJaco.transpose();
+          auto A = mConstraintsJaco.transpose();
 
           // KIRI_LOG_DEBUG("A={0}", A);
           //  dzp = -(A.inverse() * con_new);
@@ -865,10 +838,10 @@ namespace OPTIMIZE::IPM
           // std::cout << get_shape(dzp) << std::endl;
           // std::cout << get_shape(b) << std::endl;
 
-          auto ci2 = this->computeInEquConstrainsts(
+          auto ci2 = this->computeInEquConstraints(
               mRealData + alpha_smax * dx +
               dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all));
-          auto ce2 = this->computeEquConstrainsts(
+          auto ce2 = this->computeEquConstraints(
               mRealData + alpha_smax * dx +
               dzp(Eigen::seq(0, mVariableNum - 1), Eigen::placeholders::all));
 
@@ -912,12 +885,12 @@ namespace OPTIMIZE::IPM
                      Eigen::placeholders::all))
                     .array());
 
-            ci2 = this->computeInEquConstrainsts(
+            ci2 = this->computeInEquConstraints(
                 mRealData + alpha_corr * (alpha_smax * dx +
                                           dzp(Eigen::seq(0, mVariableNum - 1),
                                               Eigen::placeholders::all)));
 
-            ce2 = this->computeEquConstrainsts(
+            ce2 = this->computeEquConstraints(
                 mRealData + alpha_corr * (alpha_smax * dx +
                                           dzp(Eigen::seq(0, mVariableNum - 1),
                                               Eigen::placeholders::all)));
@@ -968,8 +941,8 @@ namespace OPTIMIZE::IPM
           alpha_smax *= mTau;
           alpha_lmax *= mTau;
 
-          ci1 = this->computeInEquConstrainsts(mRealData + alpha_smax * dx);
-          ce1 = this->computeEquConstrainsts(mRealData + alpha_smax * dx);
+          ci1 = this->computeInEquConstraints(mRealData + alpha_smax * dx);
+          ce1 = this->computeEquConstraints(mRealData + alpha_smax * dx);
 
           phi_nu1 =
               static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx));
@@ -993,7 +966,7 @@ namespace OPTIMIZE::IPM
           {
             if (sqrt((alpha_smax * dx).norm() * (alpha_smax * dx).norm() +
                      (alpha_lmax * ds).norm() * (alpha_lmax * ds).norm()) <
-                MEpsilon<float>())
+                MEpsilon<double>())
             {
               mSignal = -2;
               KIRI_LOG_INFO(" search direction is unreliable to machine "
@@ -1005,8 +978,8 @@ namespace OPTIMIZE::IPM
             alpha_lmax *= mTau;
 
             // update
-            ci1 = this->computeInEquConstrainsts(mRealData + alpha_smax * dx);
-            ce1 = this->computeEquConstrainsts(mRealData + alpha_smax * dx);
+            ci1 = this->computeInEquConstraints(mRealData + alpha_smax * dx);
+            ce1 = this->computeEquConstraints(mRealData + alpha_smax * dx);
 
             phi_nu1 =
                 static_cast<double>(TargetFunc(mDual2ndData + alpha_smax * dx));
@@ -1065,7 +1038,7 @@ namespace OPTIMIZE::IPM
       mLambda += alpha_lmax * dl;
 
       // KIRI_LOG_DEBUG("mLambda={0}", mLambda);
-      KIRI_LOG_DEBUG("searched new x={0}", mRealData.transpose());
+      // KIRI_LOG_DEBUG("searched new x={0}", mRealData.transpose());
     }
   };
 
