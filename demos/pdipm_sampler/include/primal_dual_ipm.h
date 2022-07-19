@@ -38,40 +38,55 @@ using Eigen::VectorXd;
 struct particle {
   Vector3D pos;
   double radius;
+  double max_radius;
   bool optimize;
 };
 
-VectorXreal EquConstraints(const VectorXreal &x) {
-  VectorXreal consts(2);
-  consts[0] = 2 * x[0] - x[1] - x[2] - 2;
-  consts[1] = x[0] * x[0] + x[1] * x[1] - 1;
+VectorXreal EquConstraints(const VectorXreal &x, const std::vector<particle> &p,
+                           int equNum) {
+  auto counter = 0;
+  auto n = x.size();
+
+  VectorXreal consts(equNum);
+  for (auto i = 0; i < n; i++)
+    if (p[i].optimize)
+      consts[counter++] = x[i] - 1;
+
   return consts;
 }
 
-dual2nd EquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda) {
-  dual2nd sum;
-  sum += (2 * x[0] - x[1] - x[2] - 2) * lambda(0, 0);
-  sum += (x[0] * x[0] + x[1] * x[1] - 1) * lambda(1, 0);
+dual2nd EquConstrainstFunc(const VectorXdual2nd &x,
+                           const std::vector<particle> &p,
+                           const MatrixXd &lambda) {
+  auto counter = 0;
+  auto n = x.size();
+  dual2nd sum = 0.0;
+
+  for (auto i = 0; i < n; i++) {
+    if (p[i].optimize)
+      sum += (x[i] - 1) * lambda(counter++, 0);
+  }
+
   return sum;
 }
 
 VectorXreal InEquConstraints(const VectorXreal &x,
-                             const std::vector<particle> &p) {
+                             const std::vector<particle> &p, int inEquNum) {
   auto counter = 0;
   auto n = x.size();
-  VectorXreal consts(2 * n + n * (n - 1) / 2);
+  VectorXreal consts(inEquNum);
 
   for (auto i = 0; i < n; i++)
     if (!p[i].optimize)
-      consts[counter++] = x[i] - 0.5;
-    else
-      consts[counter++] = x[i] - 0.99999;
+      consts[counter++] = x[i] - 0.1;
 
   for (auto i = 0; i < n; i++)
     if (!p[i].optimize)
       consts[counter++] = 2 - x[i];
-    else
-      consts[counter++] = 1 - x[i];
+
+  for (auto i = 0; i < n; i++)
+    if (!p[i].optimize)
+      consts[counter++] = p[i].max_radius - p[i].radius * x[i];
 
   for (auto i = 0; i < n - 1; i++)
     for (auto j = i + 1; j < n; j++)
@@ -89,16 +104,17 @@ dual2nd InEquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,
 
   for (auto i = 0; i < n; i++) {
     if (!p[i].optimize)
-      sum += (x[i] - 0.5) * lambda(counter++, 0);
-    else
-      sum += (x[i] - 0.99999) * lambda(counter++, 0);
+      sum += (x[i] - 0.1) * lambda(counter++, 0);
   }
 
   for (auto i = 0; i < n; i++) {
     if (!p[i].optimize)
       sum += (2 - x[i]) * lambda(counter++, 0);
-    else
-      sum += (1 - x[i]) * lambda(counter++, 0);
+  }
+
+  for (auto i = 0; i < n; i++) {
+    if (!p[i].optimize)
+      sum += (p[i].max_radius - p[i].radius * x[i]) * lambda(counter++, 0);
   }
 
   for (auto i = 0; i < n - 1; i++)
@@ -444,7 +460,8 @@ private:
   }
 
   MatrixXd computeInEquConstraints(VectorXreal realData) {
-    VectorXd constrain = InEquConstraints(realData, mParticles).cast<double>();
+    VectorXd constrain =
+        InEquConstraints(realData, mParticles, mInEquNum).cast<double>();
 
     MatrixXd constrain_i(mInEquNum, 1);
     constrain_i << constrain;
@@ -453,7 +470,8 @@ private:
   }
 
   MatrixXd computeEquConstraints(VectorXreal realData) {
-    VectorXd constrain = EquConstraints(realData).cast<double>();
+    VectorXd constrain =
+        EquConstraints(realData, mParticles, mEquNum).cast<double>();
 
     MatrixXd constrain_e(mEquNum, 1);
     constrain_e << constrain;
@@ -486,8 +504,8 @@ private:
 
     if (mEquNum > 0) {
       VectorXreal val_ce;
-      MatrixXd dce =
-          jacobian(EquConstraints, wrt(mRealData), at(mRealData), val_ce);
+      MatrixXd dce = jacobian(EquConstraints, wrt(mRealData),
+                              at(mRealData, mParticles, mEquNum), val_ce);
 
       mDce = dce.transpose();
       jaco.block(0, 0, mVariableNum, mEquNum) = mDce;
@@ -496,7 +514,7 @@ private:
     if (mInEquNum > 0) {
       VectorXreal val_ci;
       MatrixXd dci = jacobian(InEquConstraints, wrt(mRealData),
-                              at(mRealData, mParticles), val_ci);
+                              at(mRealData, mParticles, mInEquNum), val_ci);
       mDci = dci.transpose();
       jaco.block(0, mEquNum, mVariableNum, mInEquNum) = mDci;
 
@@ -634,8 +652,9 @@ private:
     if (mEquNum > 0) {
       dual2nd u_ce;
       VectorXdual g_ce;
-      MatrixXd d2ce = hessian(EquConstrainstFunc, wrt(mDual2ndData),
-                              at(mDual2ndData, mLambda), u_ce, g_ce);
+      MatrixXd d2ce =
+          hessian(EquConstrainstFunc, wrt(mDual2ndData),
+                  at(mDual2ndData, mParticles, mLambda), u_ce, g_ce);
 
       d2L -= d2ce;
     }

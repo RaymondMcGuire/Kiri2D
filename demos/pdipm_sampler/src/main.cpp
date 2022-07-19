@@ -12,6 +12,10 @@
 #include <primal_dual_ipm.h>
 #include <root_directory.h>
 #include <sph_grid.h>
+// #include <voronoi/voronoi_polygon.h>
+
+#include <Discregrid/All>
+#include <Eigen/Dense>
 
 using namespace KIRI2D;
 
@@ -111,6 +115,11 @@ int main(int argc, char *argv[]) {
   int n = data_size;
   double scale = 100.0;
 
+  auto cdf_file_path =
+      String(RESOURCES_PATH) + "cdf" + "/" + "box" + "/" + "box" + ".cdf";
+  auto sdf = std::unique_ptr<Discregrid::CubicLagrangeDiscreteGrid>(
+      new Discregrid::CubicLagrangeDiscreteGrid(cdf_file_path));
+
   std::vector<particle> data_particles;
   std::vector<Vector3D> data_pos;
 
@@ -123,6 +132,12 @@ int main(int argc, char *argv[]) {
     p.pos = Vector3D(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z) * scale;
     p.radius = bgeo_data[i].w * scale;
     p.optimize = false;
+
+    auto dist = sdf->interpolate(
+        0u, Eigen::Vector3d(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z));
+    // KIRI_LOG_DEBUG("dist={0}", dist);
+    p.max_radius = abs(dist) * scale;
+
     data_particles.emplace_back(p);
     data_pos.emplace_back(p.pos);
 
@@ -133,7 +148,7 @@ int main(int argc, char *argv[]) {
   }
 
   auto searcher = std::make_shared<OPTIMIZE::IPM::Grid>(
-      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 2.0);
+      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius);
   searcher->updateStructure(data_pos);
   auto neighborhoods = std::vector<std::vector<int>>();
   float maxDist2 = max_radius * max_radius;
@@ -153,24 +168,23 @@ int main(int argc, char *argv[]) {
     neighborhoods.push_back(neighbors);
   }
 
-  // for (int i = 0; i < neighborhoods.size(); i++) {
-  for (int i = 0; i < 1; i++) {
+  for (int i = 0; i < neighborhoods.size(); i++) {
     std::vector<int> neighbors = neighborhoods[i];
     n = neighbors.size();
     std::vector<double> data;
     std::vector<particle> tmp_particles;
 
     bool flag = true;
+    auto optimized_number = 0;
 
     for (auto j = 0; j < n; j++) {
       tmp_particles.emplace_back(data_particles[neighbors[j]]);
 
       if (data_particles[neighbors[j]].optimize == false) {
         flag = false;
+      } else {
+        optimized_number++;
       }
-
-      KIRI_LOG_DEBUG("tmp particle id={0}; optimized={1}", neighbors[j],
-                     data_particles[neighbors[j]].optimize);
     }
 
     if (flag)
@@ -180,8 +194,8 @@ int main(int argc, char *argv[]) {
       data.emplace_back(Random::get(0.0, 1.0));
     }
 
-    int equ_num = 0;
-    int inequ_num = 2 * n + n * (n - 1) / 2;
+    int equ_num = optimized_number;
+    int inequ_num = 3 * (n - optimized_number) + n * (n - 1) / 2;
 
     auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
         data, tmp_particles, equ_num, inequ_num);
@@ -189,8 +203,6 @@ int main(int argc, char *argv[]) {
 
     for (auto j = 0; j < n; j++) {
       data_particles[neighbors[j]].optimize = true;
-      KIRI_LOG_DEBUG("new particle id={0}; radius={1}, scale={2}", neighbors[j],
-                     data_particles[neighbors[j]].radius, double(results[j]));
       data_particles[neighbors[j]].radius =
           data_particles[neighbors[j]].radius * double(results[j]);
     }
@@ -205,7 +217,7 @@ int main(int argc, char *argv[]) {
           data_particles[j].pos.z / scale, data_particles[j].radius / scale));
       volume += 4 / 3 * KIRI_PI<double>() * data_particles[j].radius *
                 data_particles[j].radius * data_particles[j].radius;
-      KIRI_LOG_DEBUG("radius={0};", data_particles[j].radius / scale);
+      // KIRI_LOG_DEBUG("radius={0};", data_particles[j].radius / scale);
     }
   }
   KIRI_LOG_DEBUG("volume={0};", volume);
