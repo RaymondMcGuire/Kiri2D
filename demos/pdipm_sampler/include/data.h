@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-07-21 11:00:14
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-21 11:14:49
+ * @LastEditTime: 2022-07-25 14:18:53
  * @FilePath: \Kiri2D\demos\pdipm_sampler\include\data.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -24,6 +24,7 @@ struct particle {
   double max_radius;
   double min_dist;
   bool optimize;
+  std::vector<int> neighbors;
   std::vector<int> need_optimize;
   std::vector<int> need_constrain;
 };

@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-07-21 11:00:14
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-21 11:02:25
+ * @LastEditTime: 2022-07-25 13:59:26
  * @FilePath: \Kiri2D\demos\pdipm_sampler\include\primal_dual_ipm.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -11,6 +11,8 @@
 #define _PRIMAL_DUAL_IPM_H_
 
 #pragma once
+
+#define EIGEN_USE_MKL_ALL
 
 #include <sstream>
 
@@ -72,11 +74,11 @@ VectorXreal InEquConstraints(const VectorXreal &x,
 
   for (auto i = 0; i < n; i++)
     if (!p[i].optimize)
-      consts[counter++] = x[i] - 0.3;
+      consts[counter++] = x[i] - 0.1;
 
   for (auto i = 0; i < n; i++)
     if (!p[i].optimize)
-      consts[counter++] = 1.5 - x[i];
+      consts[counter++] = 2.0 - x[i];
 
   // for (auto i = 0; i < n; i++)
   //   if (!p[i].optimize)
@@ -93,17 +95,17 @@ VectorXreal InEquConstraints(const VectorXreal &x,
   //   if (!p[i].optimize)
   //     consts[counter++] = p[i].max_radius - p[i].radius * x[i];
 
-  for (auto i = 0; i < n - 1; i++)
-    for (auto j = i + 1; j < n; j++)
-      consts[counter++] = (p[i].pos - p[j].pos).length() -
-                          (x[i] * p[i].radius + x[j] * p[j].radius);
+  // for (auto i = 0; i < n - 1; i++)
+  //   for (auto j = i + 1; j < n; j++)
+  //     consts[counter++] = (p[i].pos - p[j].pos).length() -
+  //                         (x[i] * p[i].radius + x[j] * p[j].radius);
 
   for (auto i = 0; i < n; i++) {
-    // for (auto j = 0; j < p[i].need_constrain.size(); j++) {
-    //   consts[counter++] =
-    //       (p[i].pos - allParticles[p[i].need_constrain[j]].pos).length() -
-    //       (x[i] * p[i].radius + allParticles[p[i].need_constrain[j]].radius);
-    // }
+    for (auto j = 0; j < p[i].neighbors.size(); j++) {
+      consts[counter++] = (p[i].pos - p[p[i].neighbors[j]].pos).length() -
+                          (x[i] * p[i].radius +
+                           x[p[i].neighbors[j]] * p[p[i].neighbors[j]].radius);
+    }
 
     // for (auto j = 0; j < p[i].need_optimize.size(); j++) {
     //   consts[counter++] =
@@ -126,12 +128,12 @@ dual2nd InEquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,
 
   for (auto i = 0; i < n; i++) {
     if (!p[i].optimize)
-      sum += (x[i] - 0.3) * lambda(counter++, 0);
+      sum += (x[i] - 0.1) * lambda(counter++, 0);
   }
 
   for (auto i = 0; i < n; i++) {
     if (!p[i].optimize)
-      sum += (1.5 - x[i]) * lambda(counter++, 0);
+      sum += (2.0 - x[i]) * lambda(counter++, 0);
   }
 
   // for (auto i = 0; i < n; i++) {
@@ -153,20 +155,19 @@ dual2nd InEquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,
   //     sum += (p[i].max_radius - p[i].radius * x[i]) * lambda(counter++, 0);
   // }
 
-  for (auto i = 0; i < n - 1; i++)
-    for (auto j = i + 1; j < n; j++)
-      sum += ((p[i].pos - p[j].pos).length() -
-              (x[i] * p[i].radius + x[j] * p[j].radius)) *
-             lambda(counter++, 0);
+  // for (auto i = 0; i < n - 1; i++)
+  //   for (auto j = i + 1; j < n; j++)
+  //     sum += ((p[i].pos - p[j].pos).length() -
+  //             (x[i] * p[i].radius + x[j] * p[j].radius)) *
+  //            lambda(counter++, 0);
 
   for (auto i = 0; i < n; i++) {
-    // for (auto j = 0; j < p[i].need_constrain.size(); j++) {
-    //   sum +=
-    //       ((p[i].pos - allParticles[p[i].need_constrain[j]].pos).length() -
-    //        (x[i] * p[i].radius +
-    //        allParticles[p[i].need_constrain[j]].radius)) *
-    //       lambda(counter++, 0);
-    // }
+    for (auto j = 0; j < p[i].neighbors.size(); j++) {
+      sum += ((p[i].pos - p[p[i].neighbors[j]].pos).length() -
+              (x[i] * p[i].radius +
+               x[p[i].neighbors[j]] * p[p[i].neighbors[j]].radius)) *
+             lambda(counter++, 0);
+    }
 
     // for (auto j = 0; j < p[i].need_optimize.size(); j++) {
     //   sum += ((p[i].pos - p[p[i].need_optimize[j]].pos).length() -
@@ -287,12 +288,12 @@ public:
           }
         }
 
-        // KIRI_LOG_DEBUG("computeBackTrackingLineSearch start");
+        KIRI_LOG_DEBUG("computeBackTrackingLineSearch start");
         computeBackTrackingLineSearch(dz);
 
         mIterCount++;
 
-        // KIRI_LOG_DEBUG("computeKKT start");
+        KIRI_LOG_DEBUG("computeKKT start");
         this->computeKKT();
 
         if (mInEquNum == 0 && mSignal != -2) {
@@ -588,7 +589,7 @@ private:
 
     mConstraintsJaco = jaco;
 
-    // //KIRI_LOG_DEBUG("mConstraintsJaco=\n{0}", mConstraintsJaco);
+    KIRI_LOG_DEBUG("mConstraintsJaco=\n{0}", EigenDataShape(mConstraintsJaco));
   }
 
   void computeBarriarCostGrad() {
@@ -734,7 +735,7 @@ private:
       d2L -= d2ci;
     }
 
-    // //KIRI_LOG_DEBUG("d2L=\n{0}", d2L);
+    // KIRI_LOG_DEBUG("d2L=\n{0}", EigenDataShape(d2L));
 
     MatrixXd hess = MatrixXd::Zero(mVariableNum + 2 * mInEquNum + mEquNum,
                                    mVariableNum + 2 * mInEquNum + mEquNum);
@@ -816,7 +817,7 @@ private:
     }
 
     mHessian = hess;
-    // //KIRI_LOG_DEBUG("hess=\n{0}", hess);
+    // KIRI_LOG_DEBUG("hess=\n{0}", EigenDataShape(hess));
   }
 
   void computeKKT() {

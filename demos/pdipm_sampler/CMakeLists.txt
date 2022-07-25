@@ -7,7 +7,6 @@ set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
 # External Library Package
 set(EXTLIBS_INCLUDE ${CMAKE_SOURCE_DIR}/external/KiriExtlib/include)
 set(EXTLIBS_LIB ${CMAKE_SOURCE_DIR}/external/KiriExtlib/lib)
-link_directories(${EXTLIBS_LIB})
 
 # Configuration File
 configure_file(${CMAKE_SOURCE_DIR}/configuration/root_directory.h.in ${CMAKE_BINARY_DIR}/configuration/root_directory.h)
@@ -26,6 +25,13 @@ if(WIN32)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     endif()
+
+    find_package(MKL CONFIG REQUIRED)
+    set(MKL_LIB_DIRS ${MKL_ROOT}/lib/${MKL_ARCH})
+    set(EXTLIBS_LIB ${EXTLIBS_LIB} ${MKL_LIB_DIRS})
+    message(STATUS "MKL_INCLUDE_DIRS   : ${MKL_INCLUDE}")
+    message(STATUS "MKL_LIBRARIES_DIRS   : ${MKL_LIB_DIRS}")
+    message(STATUS "MKL_LIBRARIES   : ${MKL_LIBRARIES}")
 endif()
 
 if(APPLE)
@@ -35,6 +41,8 @@ if(APPLE)
     set(OpenCV_DIR "/Users/raymondmg/Project/opencv/build")
     find_package(OpenCV REQUIRED)
 endif()
+
+link_directories(${EXTLIBS_LIB})
 
 # Project Config
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
@@ -60,12 +68,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CONFIGURATION_INCLUDE}
     ${KIRI2D_LIB_INLCUDE}
     ${EXTLIBS_INCLUDE}
+    ${MKL_INCLUDE}
 )
 
 if(WIN32 AND ${ENABLE_CUDA})
-    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D kiri2d_pbs_cuda discregrid)
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D kiri2d_pbs_cuda discregrid ${MKL_LIBRARIES})
 elseif(WIN32)
-    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D discregrid)
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D discregrid  ${MKL_LIBRARIES})
 elseif(APPLE)
     target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui KIRI2D)
 endif()
