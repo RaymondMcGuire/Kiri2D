@@ -804,7 +804,7 @@ private:
       w = hess.eigenvalues();
       matrix_inertia = this->computeMatrixInertia(w);
       auto counter = 0;
-      auto max_loop = 10;
+      auto max_loop = 10000;
       while ((mInEquNum + mEquNum) != matrix_inertia && counter++ < max_loop) {
         hess.block(0, 0, mData.size(), mData.size()) -=
             mDelta * MatrixXd::Identity(mData.size(), mData.size());
