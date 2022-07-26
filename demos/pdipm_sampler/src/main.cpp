@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 
   // search neighbor particles
   auto searcher = std::make_shared<OPTIMIZE::IPM::Grid>(
-      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 1.1f);
+      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 2.f);
   searcher->updateStructure(data_pos);
   // auto neighborhoods = std::vector<std::vector<int>>();
   float maxDist2 = max_radius * max_radius;
