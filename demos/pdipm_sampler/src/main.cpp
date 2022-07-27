@@ -129,8 +129,8 @@ int main(int argc, char *argv[])
 
   auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
   auto data_size = bgeo_data.size();
-  KIRI_LOG_DEBUG("data size={0}", data_size);
-
+  KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size, mkl_get_max_threads());
+  mkl_set_num_threads(mkl_get_max_threads());
   int n = data_size;
   double scale = 100.0;
 
