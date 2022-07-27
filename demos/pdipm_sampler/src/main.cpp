@@ -24,7 +24,8 @@ using namespace KIRI2D;
 
 std::vector<Vector4D> ReadBgeoFileForCPU(String Folder, String Name,
                                          Vector3D Offset = Vector3D(0.0),
-                                         bool FlipYZ = false) {
+                                         bool FlipYZ = false)
+{
   std::vector<Vector4D> pos_array;
   String root_folder = "bgeo";
   String extension = ".bgeo";
@@ -37,35 +38,47 @@ std::vector<Vector4D> ReadBgeoFileForCPU(String Folder, String Name,
   Partio::ParticleAttribute pscale_attr;
   if (!data->attributeInfo("position", pos_attr) ||
       (pos_attr.type != Partio::FLOAT && pos_attr.type != Partio::VECTOR) ||
-      pos_attr.count != 3) {
+      pos_attr.count != 3)
+  {
     KIRI_LOG_ERROR("Failed to Get Proper Position Attribute");
   }
 
   bool pscaleLoaded = data->attributeInfo("pscale", pscale_attr);
 
   double max_y = 0.0;
-  for (auto i = 0; i < data->numParticles(); i++) {
+  for (auto i = 0; i < data->numParticles(); i++)
+  {
     const float *pos = data->data<float>(pos_attr, i);
-    if (pscaleLoaded) {
+    if (pscaleLoaded)
+    {
       const float *pscale = data->data<float>(pscale_attr, i);
-      if (i == 0) {
+      if (i == 0)
+      {
         KIRI_LOG_INFO("pscale={0}", *pscale);
       }
 
-      if (FlipYZ) {
+      if (FlipYZ)
+      {
         pos_array.emplace_back(Vector4D(pos[0] + Offset.x, pos[2] + Offset.z,
                                         pos[1] + Offset.y, *pscale));
-      } else {
+      }
+      else
+      {
         pos_array.emplace_back(Vector4D(pos[0] + Offset.x, pos[1] + Offset.y,
                                         pos[2] + Offset.z, *pscale));
         if (pos[1] > max_y)
           max_y = pos[1];
       }
-    } else {
-      if (FlipYZ) {
+    }
+    else
+    {
+      if (FlipYZ)
+      {
         pos_array.emplace_back(Vector4D(pos[0] + Offset.x, pos[2] + Offset.z,
                                         pos[1] + Offset.y, 0.01f));
-      } else {
+      }
+      else
+      {
         pos_array.emplace_back(Vector4D(pos[0] + Offset.x, pos[1] + Offset.y,
                                         pos[2] + Offset.z, 0.01f));
       }
@@ -81,7 +94,8 @@ std::vector<Vector4D> ReadBgeoFileForCPU(String Folder, String Name,
 }
 
 void ExportBgeoFileFromCPU(String Folder, String FileName,
-                           std::vector<Vector4D> Positions) {
+                           std::vector<Vector4D> Positions)
+{
   String exportPath =
       String(EXPORT_PATH) + "bgeo/" + Folder + "/" + FileName + ".bgeo";
 
@@ -91,7 +105,8 @@ void ExportBgeoFileFromCPU(String Folder, String FileName,
   Partio::ParticleAttribute pScaleAttr =
       p->addAttribute("pscale", Partio::FLOAT, 1);
 
-  for (UInt i = 0; i < Positions.size(); i++) {
+  for (UInt i = 0; i < Positions.size(); i++)
+  {
     Int particle = p->addParticle();
     float *pos = p->dataWrite<float>(positionAttr, particle);
     float *pscale = p->dataWrite<float>(pScaleAttr, particle);
@@ -107,11 +122,12 @@ void ExportBgeoFileFromCPU(String Folder, String FileName,
   p->release();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("box", "box_180");
+  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}", data_size);
 
@@ -129,7 +145,8 @@ int main(int argc, char *argv[]) {
 
   BoundingBox3D bounding_box;
   auto max_radius = 0.0;
-  for (auto i = 0; i < n; i++) {
+  for (auto i = 0; i < n; i++)
+  {
     OPTIMIZE::IPM::particle p;
     p.pos = Vector3D(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z) * scale;
     p.radius = bgeo_data[i].w * scale;
@@ -153,29 +170,35 @@ int main(int argc, char *argv[]) {
   auto optimized_number = 0;
   std::vector<double> data;
 
-  for (auto j = 0; j < n; j++) {
+  for (auto j = 0; j < n; j++)
+  {
     data.emplace_back(Random::get(0.0, 1.0));
   }
 
   // search neighbor particles
   auto searcher = std::make_shared<OPTIMIZE::IPM::Grid>(
-      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 2.f);
+      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 1.5f);
   searcher->updateStructure(data_pos);
   // auto neighborhoods = std::vector<std::vector<int>>();
   float maxDist2 = max_radius * max_radius;
 
   auto dist_constrains_num = 0;
   std::unordered_map<std::string, int> pair_hash_table;
-  for (int i = 0; i < data_pos.size(); i++) {
+  for (int i = 0; i < data_pos.size(); i++)
+  {
     std::vector<int> neighbors = std::vector<int>();
     std::vector<OPTIMIZE::IPM::Cell> neighboringCells =
         searcher->getNeighboringCells(data_pos[i]);
 
-    for each (const OPTIMIZE::IPM::Cell &cell in neighboringCells) {
-      for each (int index in cell) {
-        if (index != i) {
+    for each (const OPTIMIZE::IPM::Cell &cell in neighboringCells)
+    {
+      for each (int index in cell)
+      {
+        if (index != i)
+        {
           auto key_str = std::to_string(i) + "_" + std::to_string(index);
-          if (pair_hash_table.find(key_str) == pair_hash_table.end()) {
+          if (pair_hash_table.find(key_str) == pair_hash_table.end())
+          {
             neighbors.emplace_back(index);
 
             auto reverse_key_str =
@@ -208,7 +231,8 @@ int main(int argc, char *argv[]) {
 
   KIRI_LOG_DEBUG("running time={0}", thisTime);
 
-  for (auto j = 0; j < data_particles.size(); j++) {
+  for (auto j = 0; j < data_particles.size(); j++)
+  {
     positions.emplace_back(Vector4D(
         data_particles[j].pos.x / scale, data_particles[j].pos.y / scale,
         data_particles[j].pos.z / scale,
