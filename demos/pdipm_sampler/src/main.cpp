@@ -204,6 +204,8 @@ int main(int argc, char *argv[])
             auto reverse_key_str =
                 std::to_string(index) + "_" + std::to_string(i);
             pair_hash_table.emplace(reverse_key_str, 0);
+
+            // KIRI_LOG_DEBUG("pair={0}", reverse_key_str);
           }
         }
       }
@@ -233,10 +235,15 @@ int main(int argc, char *argv[])
 
   for (auto j = 0; j < data_particles.size(); j++)
   {
+    // positions.emplace_back(Vector4D(
+    //     data_particles[j].pos.x / scale, data_particles[j].pos.y / scale,
+    //     data_particles[j].pos.z / scale,
+    //     data_particles[j].radius * double(results[j]) / scale));
+
     positions.emplace_back(Vector4D(
         data_particles[j].pos.x / scale, data_particles[j].pos.y / scale,
         data_particles[j].pos.z / scale,
-        data_particles[j].radius * double(results[j]) / scale));
+        double(results[j]) / scale));
   }
   ExportBgeoFileFromCPU("box", "box_opti", positions);
 

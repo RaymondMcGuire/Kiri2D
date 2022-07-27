@@ -78,7 +78,7 @@ VectorXreal InEquConstraints(const VectorXreal &x,
 
   for (auto i = 0; i < n; i++)
     if (!p[i].optimize)
-      consts[counter++] = x[i] - 0.1;
+      consts[counter++] = x[i] - 0.001;
 
   for (auto i = 0; i < n; i++)
     if (!p[i].optimize)
@@ -106,12 +106,20 @@ VectorXreal InEquConstraints(const VectorXreal &x,
 
   for (auto i = 0; i < n; i++)
   {
+
     for (auto j = 0; j < p[i].neighbors.size(); j++)
     {
       consts[counter++] = (p[i].pos - p[p[i].neighbors[j]].pos).length() -
-                          (x[i] * p[i].radius +
-                           x[p[i].neighbors[j]] * p[p[i].neighbors[j]].radius);
+                          (x[i] +
+                           x[p[i].neighbors[j]]);
     }
+
+    // for (auto j = 0; j < p[i].neighbors.size(); j++)
+    // {
+    //   consts[counter++] = (p[i].pos - p[p[i].neighbors[j]].pos).length() -
+    //                       (x[i] * p[i].radius +
+    //                        x[p[i].neighbors[j]] * p[p[i].neighbors[j]].radius);
+    // }
 
     // for (auto j = 0; j < p[i].need_optimize.size(); j++) {
     //   consts[counter++] =
@@ -136,7 +144,7 @@ dual2nd InEquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,
   for (auto i = 0; i < n; i++)
   {
     if (!p[i].optimize)
-      sum += (x[i] - 0.1) * lambda(counter++, 0);
+      sum += (x[i] - 0.001) * lambda(counter++, 0);
   }
 
   for (auto i = 0; i < n; i++)
@@ -172,13 +180,22 @@ dual2nd InEquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,
 
   for (auto i = 0; i < n; i++)
   {
+
     for (auto j = 0; j < p[i].neighbors.size(); j++)
     {
       sum += ((p[i].pos - p[p[i].neighbors[j]].pos).length() -
-              (x[i] * p[i].radius +
-               x[p[i].neighbors[j]] * p[p[i].neighbors[j]].radius)) *
+              (x[i] +
+               x[p[i].neighbors[j]])) *
              lambda(counter++, 0);
     }
+
+    // for (auto j = 0; j < p[i].neighbors.size(); j++)
+    // {
+    //   sum += ((p[i].pos - p[p[i].neighbors[j]].pos).length() -
+    //           (x[i] * p[i].radius +
+    //            x[p[i].neighbors[j]] * p[p[i].neighbors[j]].radius)) *
+    //          lambda(counter++, 0);
+    // }
 
     // for (auto j = 0; j < p[i].need_optimize.size(); j++) {
     //   sum += ((p[i].pos - p[p[i].need_optimize[j]].pos).length() -
@@ -198,8 +215,11 @@ dual2nd TargetFunc(const VectorXdual2nd &x, const std::vector<particle> &p)
   dual2nd sum = 0.0;
   for (auto j = 0; j < n; j++)
   {
-    sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j] * p[j].radius) *
-           (x[j] * p[j].radius) * (x[j] * p[j].radius);
+    // sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j] * p[j].radius) *
+    //        (x[j] * p[j].radius) * (x[j] * p[j].radius);
+
+    sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j]) *
+           (x[j]) * (x[j]);
   }
 
   return sum;
