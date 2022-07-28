@@ -1,12 +1,13 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-07-21 11:00:14
+ * @Date: 2022-07-28 12:10:51
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-25 13:59:26
- * @FilePath: \Kiri2D\demos\pdipm_sampler\include\primal_dual_ipm.h
+ * @LastEditTime: 2022-07-28 12:32:01
+ * @FilePath: \Kiri2D\demos\pdipm_sampler2\include\primal_dual_ipm.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
+
 #ifndef _PRIMAL_DUAL_IPM_H_
 #define _PRIMAL_DUAL_IPM_H_
 
@@ -42,18 +43,9 @@ VectorXreal EquConstraints(const VectorXreal &x, const std::vector<particle> &p,
   auto n = x.size();
 
   VectorXreal consts(equNum);
-  // for (auto i = 0; i < n; i++)
-  //   if (p[i].optimize)
-  //     consts[counter++] = x[i] - 1;
-
-  // for (auto i = 0; i < n - 1; i++)
-  //   for (auto j = i + 1; j < n; j++)
-  //     consts[0] += min((p[i].pos - p[j].pos).length()/(x[i] + x[j]),1.0);
-
-  for (auto i = 0; i < n - 1; i++)
-    for (auto j = i + 1; j < n; j++)
-      consts[counter] +=
-          min((p[i].pos - p[j].pos).length() / (x[i] + x[j]), 1.0) - 1.0;
+  for (auto i = 0; i < n; i++)
+    if (p[i].optimize)
+      consts[counter++] = x[i] - 1;
 
   return consts;
 }
@@ -65,19 +57,10 @@ dual2nd EquConstrainstFunc(const VectorXdual2nd &x,
   auto n = x.size();
   dual2nd sum = 0.0;
 
-  // for (auto i = 0; i < n; i++) {
-  //   if (p[i].optimize)
-  //     sum += (x[i] - 1) * lambda(counter++, 0);
-  // }
-
-  dual2nd sum_dist = 0.0;
-
-  for (auto i = 0; i < n - 1; i++)
-    for (auto j = i + 1; j < n; j++)
-      sum_dist +=
-          min((p[i].pos - p[j].pos).length() / (x[i] + x[j]), 1.0) - 1.0;
-
-  sum += sum_dist * lambda(counter++, 0);
+  for (auto i = 0; i < n; i++) {
+    if (p[i].optimize)
+      sum += (x[i] - 1) * lambda(counter++, 0);
+  }
 
   return sum;
 }
@@ -90,74 +73,18 @@ VectorXreal InEquConstraints(const VectorXreal &x,
   auto n = x.size();
   VectorXreal consts(inEquNum);
 
-  // for (auto i = 0; i < n; i++)
-  //   if (!p[i].optimize)
-  //     consts[counter++] = x[i] - 0.001;
-
-  // for (auto i = 0; i < n; i++)
-  //   if (!p[i].optimize)
-  //     consts[counter++] = 1.0 - x[i];
-
-  for (auto i = 0; i < n; i++)
-    consts[counter++] = x[i];
-
   for (auto i = 0; i < n; i++)
     if (p[i].max_radius > 2 * 100.0)
       consts[counter++] = 2 * 100.0 - x[i];
     else
-      consts[counter++] += p[i].max_radius - x[i];
+      consts[counter++] = p[i].max_radius - x[i];
 
-  // for (auto i = 0; i < n; i++)
-  //   if (!p[i].optimize)
-  //     consts[counter++] = p[i].max_radius - p[i].radius * x[i];
-
-  // for (auto i = 0; i < n; i++)
-  //   if (!p[i].optimize)
-  //     if (p[i].max_radius - p[i].radius > 2)
-  //       consts[counter++] = p[i].max_radius - p[i].radius * x[i];
-  //     else
-  //       consts[counter++] = 2 - x[i];
-
-  // for (auto i = 0; i < n; i++)
-  //   if (!p[i].optimize)
-  //     consts[counter++] = p[i].max_radius - p[i].radius * x[i];
-
-  // for (auto i = 0; i < n - 1; i++)
-  //   for (auto j = i + 1; j < n; j++)
-  //     consts[counter++] = (p[i].pos - p[j].pos).length() -
-  //                         (x[i] * p[i].radius + x[j] * p[j].radius);
+  for (auto i = 0; i < n; i++)
+    consts[counter++] = x[i] - 0.001 * 100.0;
 
   for (auto i = 0; i < n - 1; i++)
     for (auto j = i + 1; j < n; j++)
       consts[counter++] = (p[i].pos - p[j].pos).length() - (x[i] + x[j]);
-
-  // for (auto i = 0; i < n - 1; i++)
-  //   for (auto j = i + 1; j < n; j++)
-  //     consts[counter] +=
-  //         min((p[i].pos - p[j].pos).length() / (x[i] + x[j]), 1.0) - 1.0;
-
-  for (auto i = 0; i < n; i++) {
-
-    // for (auto j = 0; j < p[i].neighbors.size(); j++) {
-    //   consts[counter++] = (p[i].pos - p[p[i].neighbors[j]].pos).length() -
-    //                       (x[i] + x[p[i].neighbors[j]]);
-    // }
-
-    // for (auto j = 0; j < p[i].neighbors.size(); j++)
-    // {
-    //   consts[counter++] = (p[i].pos - p[p[i].neighbors[j]].pos).length() -
-    //                       (x[i] * p[i].radius +
-    //                        x[p[i].neighbors[j]] *
-    //                        p[p[i].neighbors[j]].radius);
-    // }
-
-    // for (auto j = 0; j < p[i].need_optimize.size(); j++) {
-    //   consts[counter++] =
-    //       (p[i].pos - p[p[i].need_optimize[j]].pos).length() -
-    //       (x[i] * p[i].radius +
-    //        x[p[i].need_optimize[j]] * p[p[i].need_optimize[j]].radius);
-    // }
-  }
 
   return consts;
 }
@@ -171,79 +98,21 @@ dual2nd InEquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,
   dual2nd sum = 0.0;
 
   for (auto i = 0; i < n; i++) {
-
-    sum += (x[i]) * lambda(counter++, 0);
-  }
-
-  for (auto i = 0; i < n; i++) {
     if (p[i].max_radius > 2 * 100.0)
       sum += (2.0 * 100.0 - x[i]) * lambda(counter++, 0);
     else
       sum += (p[i].max_radius - x[i]) * lambda(counter++, 0);
   }
 
-  // for (auto i = 0; i < n; i++) {
-  //   if (!p[i].optimize)
-  //     sum += (p[i].max_radius - p[i].radius * x[i]) * lambda(counter++, 0);
-  // }
+  for (auto i = 0; i < n; i++) {
 
-  // for (auto i = 0; i < n; i++)
-  // {
-  //   if (!p[i].optimize)
-  //     if ((p[i].max_radius - p[i].radius * x[i]) > 2)
-  //       sum += (p[i].max_radius - p[i].radius * x[i]) * lambda(counter++, 0);
-  //     else
-  //       sum += (2 - x[i]) * lambda(counter++, 0);
-  // }
-
-  // for (auto i = 0; i < n; i++) {
-  //   if (!p[i].optimize)
-  //     sum += (p[i].max_radius - p[i].radius * x[i]) * lambda(counter++, 0);
-  // }
-
-  // for (auto i = 0; i < n - 1; i++)
-  //   for (auto j = i + 1; j < n; j++)
-  //     sum += ((p[i].pos - p[j].pos).length() -
-  //             (x[i] * p[i].radius + x[j] * p[j].radius)) *
-  //            lambda(counter++, 0);
+    sum += (x[i] - 0.001 * 100.0) * lambda(counter++, 0);
+  }
 
   for (auto i = 0; i < n - 1; i++)
     for (auto j = i + 1; j < n; j++)
       sum += ((p[i].pos - p[j].pos).length() - (x[i] + x[j])) *
              lambda(counter++, 0);
-
-  // dual2nd sum_dist = 0.0;
-
-  // for (auto i = 0; i < n - 1; i++)
-  //   for (auto j = i + 1; j < n; j++)
-  //     sum_dist +=
-  //         min((p[i].pos - p[j].pos).length() / (x[i] + x[j]), 1.0) - 1.0;
-
-  // sum += sum_dist * lambda(counter++, 0);
-
-  for (auto i = 0; i < n; i++) {
-
-    // for (auto j = 0; j < p[i].neighbors.size(); j++) {
-    //   sum += ((p[i].pos - p[p[i].neighbors[j]].pos).length() -
-    //           (x[i] + x[p[i].neighbors[j]])) *
-    //          lambda(counter++, 0);
-    // }
-
-    // for (auto j = 0; j < p[i].neighbors.size(); j++)
-    // {
-    //   sum += ((p[i].pos - p[p[i].neighbors[j]].pos).length() -
-    //           (x[i] * p[i].radius +
-    //            x[p[i].neighbors[j]] * p[p[i].neighbors[j]].radius)) *
-    //          lambda(counter++, 0);
-    // }
-
-    // for (auto j = 0; j < p[i].need_optimize.size(); j++) {
-    //   sum += ((p[i].pos - p[p[i].need_optimize[j]].pos).length() -
-    //           (x[i] * p[i].radius +
-    //            x[p[i].need_optimize[j]] * p[p[i].need_optimize[j]].radius)) *
-    //          lambda(counter++, 0);
-    // }
-  }
 
   return sum;
 }
@@ -253,8 +122,6 @@ dual2nd TargetFunc(const VectorXdual2nd &x, const std::vector<particle> &p) {
   auto n = x.size();
   dual2nd sum = 0.0;
   for (auto j = 0; j < n; j++) {
-    // sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j] * p[j].radius) *
-    //        (x[j] * p[j].radius) * (x[j] * p[j].radius);
 
     sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j]) * (x[j]) * (x[j]);
   }
@@ -439,7 +306,7 @@ private:
   int mEquNum = 0;
   int mInEquNum = 0;
   int mVariableNum = 0;
-  int mOuterIterNum = 1000;
+  int mOuterIterNum = 10;
   int mInnerIterNum = 20;
   // int mOuterIterNum = 1;
   // int mInnerIterNum = 1;

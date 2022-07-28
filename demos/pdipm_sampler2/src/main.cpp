@@ -1,9 +1,9 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-07-21 11:00:14
+ * @Date: 2022-07-28 12:10:51
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-25 12:34:42
- * @FilePath: \Kiri2D\demos\pdipm_sampler\src\main.cpp
+ * @LastEditTime: 2022-07-28 13:22:44
+ * @FilePath: \Kiri2D\demos\pdipm_sampler2\src\main.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80_opti2");
+  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size,
                  mkl_get_max_threads());
@@ -150,22 +150,11 @@ int main(int argc, char *argv[]) {
     bounding_box.merge(p.pos);
   }
 
-  bool flag = true;
-  auto optimized_number = 0;
-  std::vector<double> data;
-
-  for (auto j = 0; j < n; j++) {
-    data.emplace_back(Random::get(0.0, 1.0));
-  }
-
-  // search neighbor particles
   auto searcher = std::make_shared<OPTIMIZE::IPM::Grid>(
-      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 2.f);
+      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 2.0);
   searcher->updateStructure(data_pos);
-  // auto neighborhoods = std::vector<std::vector<int>>();
+  auto neighborhoods = std::vector<std::vector<int>>();
 
-  auto dist_constrains_num = 0;
-  std::unordered_map<std::string, int> pair_hash_table;
   for (int i = 0; i < data_pos.size(); i++) {
     std::vector<int> neighbors = std::vector<int>();
     std::vector<OPTIMIZE::IPM::Cell> neighboringCells =
@@ -173,98 +162,50 @@ int main(int argc, char *argv[]) {
 
     for each (const OPTIMIZE::IPM::Cell &cell in neighboringCells) {
       for each (int index in cell) {
-        if (index != i) {
-          auto key_str = std::to_string(i) + "_" + std::to_string(index);
-          if (pair_hash_table.find(key_str) == pair_hash_table.end()) {
-            neighbors.emplace_back(index);
-
-            auto reverse_key_str =
-                std::to_string(index) + "_" + std::to_string(i);
-            pair_hash_table.emplace(reverse_key_str, 0);
-
-            // KIRI_LOG_DEBUG("pair={0}", reverse_key_str);
-          }
-        }
+        neighbors.push_back(index);
       }
     }
-    // std::cout << "neighbor size=" << neighbors.size() << std::endl;
-    data_particles[i].neighbors = neighbors;
-    dist_constrains_num += neighbors.size();
-    // neighborhoods.push_back(neighbors);
+    std::cout << "neighbor size=" << neighbors.size() << std::endl;
+    neighborhoods.push_back(neighbors);
   }
 
-  int equ_num = 0;
-  int inequ_num = 2 * n + n * (n - 1) / 2;
-  // int inequ_num = 2 * (n - optimized_number) + dist_constrains_num;
-  // int inequ_num = 2 * (n - optimized_number) + 1;
+  for (auto i = 0; i < neighborhoods.size(); i++) {
 
-  KIRI_LOG_DEBUG("equ number={0}; inequ number={1}", equ_num, inequ_num);
+    std::vector<int> neighbors = neighborhoods[i];
+    n = neighbors.size();
+    if (n < 2)
+      continue;
 
-  double start_timer = clock();
+    std::vector<OPTIMIZE::IPM::particle> neighbor_particles;
+    // neighbor particles
+    for (auto j = 0; j < n; j++) {
+      auto neighbor_particle = data_particles[neighbors[j]];
+      neighbor_particles.emplace_back(neighbor_particle);
+    }
 
-  auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
-      data, data_particles, data_particles, equ_num, inequ_num);
-  auto results = ipm->solution();
+    std::vector<double> data;
 
-  double end_timer = clock();
-  double thisTime = (double)(end_timer - start_timer) / CLOCKS_PER_SEC;
+    for (auto j = 0; j < n; j++) {
+      data.emplace_back(Random::get(0.0, 1.0));
+    }
 
-  KIRI_LOG_DEBUG("running time={0}", thisTime);
+    int equ_num = 0;
+    int inequ_num = 2 * (n - equ_num) + n * (n - 1) / 2;
 
-  for (auto j = 0; j < data_particles.size(); j++) {
-    // positions.emplace_back(Vector4D(
-    //     data_particles[j].pos.x / scale, data_particles[j].pos.y / scale,
-    //     data_particles[j].pos.z / scale,
-    //     data_particles[j].radius * double(results[j]) / scale));
+    auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
+        data, neighbor_particles, neighbor_particles, equ_num, inequ_num);
+    auto results = ipm->solution();
 
-    positions.emplace_back(Vector4D(
-        data_particles[j].pos.x / scale, data_particles[j].pos.y / scale,
-        data_particles[j].pos.z / scale, double(results[j]) / scale));
+    for (auto j = 0; j < n; j++) {
+      positions.emplace_back(
+          Vector4D(data_particles[neighbors[j]].pos.x / scale,
+                   data_particles[neighbors[j]].pos.y / scale,
+                   data_particles[neighbors[j]].pos.z / scale,
+                   double(results[j]) / scale));
+    }
   }
+
   ExportBgeoFileFromCPU("box", "box_opti", positions);
-
-  // -----------
-  // auto gridding = std::make_shared<OPTIMIZE::IPM::Gradding>(data_particles,
-  // 3, 3, 3); auto grid_size = gridding->maxGridHash(); for (auto i = 13; i <
-  // 14; i++)
-  // {
-  //   auto [grid_particles, particles_index] = gridding->getDataByGridHash(i);
-  //   KIRI_LOG_DEBUG("grid data size={0}", grid_particles.size());
-
-  //   n = grid_particles.size();
-  //   std::vector<double> data;
-
-  //   bool flag = true;
-  //   auto optimized_number = 0;
-
-  //   for (auto j = 0; j < n; j++)
-  //   {
-  //     data.emplace_back(Random::get(0.0, 1.0));
-  //   }
-
-  //   int equ_num = optimized_number;
-  //   int inequ_num = 2 * (n - optimized_number) + n * (n - 1) / 2;
-
-  //   auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
-  //       data, grid_particles, equ_num, inequ_num);
-  //   auto results = ipm->solution();
-
-  //   for (auto j = 0; j < n; j++)
-  //   {
-  //     data_particles[particles_index[j]].optimize = true;
-  //     data_particles[particles_index[j]].radius =
-  //         data_particles[particles_index[j]].radius * double(results[j]);
-  //   }
-
-  //   for (auto j = 0; j < grid_particles.size(); j++)
-  //   {
-  //     positions.emplace_back(Vector4D(
-  //         data_particles[particles_index[j]].pos.x / scale,
-  //         data_particles[particles_index[j]].pos.y / scale,
-  //         data_particles[particles_index[j]].pos.z / scale,
-  //         data_particles[particles_index[j]].radius / scale));
-  //   }
-  // }
 
   //----------
   // auto searcher = std::make_shared<OPTIMIZE::IPM::Grid>(
