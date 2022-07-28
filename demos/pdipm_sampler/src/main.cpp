@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
+  auto bgeo_data = ReadBgeoFileForCPU("box", "box_180");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size, mkl_get_max_threads());
   mkl_set_num_threads(mkl_get_max_threads());
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 
   // search neighbor particles
   auto searcher = std::make_shared<OPTIMIZE::IPM::Grid>(
-      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 1.5f);
+      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 2.f);
   searcher->updateStructure(data_pos);
   // auto neighborhoods = std::vector<std::vector<int>>();
   float maxDist2 = max_radius * max_radius;
