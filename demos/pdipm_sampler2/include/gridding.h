@@ -26,17 +26,17 @@ namespace OPTIMIZE::IPM
         {
             mGridSize.set(x, y, z);
 
-            auto max_radius = 0.0;
+            // auto max_radius = 0.0;
             for (auto i = 0; i < data.size(); i++)
             {
                 mBbox.merge(data[i].pos);
                 mData.emplace_back(data[i]);
-                max_radius = std::max(max_radius, data[i].radius);
-                // KIRI_LOG_DEBUG("radius={0},{1},{2}", data[i].pos.x, data[i].pos.y, data[i].pos.z);
+                // max_radius = std::max(max_radius, data[i].radius);
+                //  KIRI_LOG_DEBUG("radius={0},{1},{2}", data[i].pos.x, data[i].pos.y, data[i].pos.z);
             }
             // KIRI_LOG_DEBUG("low={0},{1},{2}", mBbox.LowestPoint.x, mBbox.LowestPoint.y, mBbox.LowestPoint.z);
             // KIRI_LOG_DEBUG(" high={0},{1},{2}", mBbox.HighestPoint.x, mBbox.HighestPoint.y, mBbox.HighestPoint.z);
-            mBbox.expand(max_radius * 2.5);
+            // mBbox.expand(max_radius * 2.5);
             // KIRI_LOG_DEBUG("max_radius={0}", max_radius);
             // KIRI_LOG_DEBUG("expand low={0},{1},{2}", mBbox.LowestPoint.x, mBbox.LowestPoint.y, mBbox.LowestPoint.z);
             // KIRI_LOG_DEBUG("expand high={0},{1},{2}", mBbox.HighestPoint.x, mBbox.HighestPoint.y, mBbox.HighestPoint.z);
@@ -62,16 +62,16 @@ namespace OPTIMIZE::IPM
                 {
                     index.emplace_back(i);
 
-                    auto rel_pos = mData[i].pos - mBbox.LowestPoint;
-                    auto grid_xyz = computeGridXYZByPos3(rel_pos);
-                    auto cell_lowest = mBbox.LowestPoint + Vector3D(grid_xyz.x * mCellSize.x, grid_xyz.y * mCellSize.y, grid_xyz.z * mCellSize.z);
-                    // KIRI_LOG_DEBUG("eee low={0},{1},{2}", mBbox.LowestPoint.x, mBbox.LowestPoint.y, mBbox.LowestPoint.z);
-                    // KIRI_LOG_DEBUG("eee grid_xyz={0},{1},{2}", grid_xyz.x * mCellSize.x, grid_xyz.y * mCellSize.y, grid_xyz.z * mCellSize.z);
-                    // KIRI_LOG_DEBUG("eee cell_lowest={0},{1},{2}", cell_lowest.x, cell_lowest.y, cell_lowest.z);
+                    // auto rel_pos = mData[i].pos - mBbox.LowestPoint;
+                    // auto grid_xyz = computeGridXYZByPos3(rel_pos);
+                    // auto cell_lowest = mBbox.LowestPoint + Vector3D(grid_xyz.x * mCellSize.x, grid_xyz.y * mCellSize.y, grid_xyz.z * mCellSize.z);
+                    // // KIRI_LOG_DEBUG("eee low={0},{1},{2}", mBbox.LowestPoint.x, mBbox.LowestPoint.y, mBbox.LowestPoint.z);
+                    // // KIRI_LOG_DEBUG("eee grid_xyz={0},{1},{2}", grid_xyz.x * mCellSize.x, grid_xyz.y * mCellSize.y, grid_xyz.z * mCellSize.z);
+                    // // KIRI_LOG_DEBUG("eee cell_lowest={0},{1},{2}", cell_lowest.x, cell_lowest.y, cell_lowest.z);
 
-                    auto cell_highest = cell_lowest + mCellSize;
-                    auto min_dist = computeMinDist(mData[i].pos, cell_lowest, cell_highest);
-                    mData[i].min_dist = min_dist;
+                    // auto cell_highest = cell_lowest + mCellSize;
+                    // auto min_dist = computeMinDist(mData[i].pos, cell_lowest, cell_highest);
+                    // mData[i].min_dist = min_dist;
                     data.emplace_back(mData[i]);
                 }
             }
@@ -80,23 +80,16 @@ namespace OPTIMIZE::IPM
 
         int maxGridHash() const { return mGridSize.x * mGridSize.y * mGridSize.z; }
 
+        void updateData(const std::vector<particle> &data)
+        {
+            mData = data;
+        }
+
     private:
         Vector3D mCellSize;
         Size3 mGridSize;
         BoundingBox3D mBbox;
         std::vector<particle> mData;
-
-        double computeMinDist(Vector3D pos, Vector3D low, Vector3D high)
-        {
-            auto min_x = std::min(abs(pos.x - low.x), abs(pos.x - high.x));
-            auto min_y = std::min(abs(pos.y - low.y), abs(pos.y - high.y));
-            auto min_z = std::min(abs(pos.z - low.z), abs(pos.z - high.z));
-            // KIRI_LOG_DEBUG("pos={0},{1},{2}", pos.x, pos.y, pos.z);
-            // KIRI_LOG_DEBUG("low={0},{1},{2}", low.x, low.y, low.z);
-            // KIRI_LOG_DEBUG("high={0},{1},{2}", high.x, high.y, high.z);
-            // KIRI_LOG_DEBUG("min_xyz={0},{1},{2}", min_x, min_y, min_z);
-            return std::min(std::min(min_x, min_y), min_z);
-        }
 
         Point3I computeGridXYZByPos3(
             const Vector3D &pos)

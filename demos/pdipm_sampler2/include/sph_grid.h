@@ -113,7 +113,7 @@ namespace OPTIMIZE::IPM
       return resultCells;
     }
 
-    void updateStructure(std::vector<Vector3D> &data)
+    void updateStructure(std::vector<particle> &data)
     {
       cells = std::vector<std::vector<std::vector<Cell>>>(
           numberCells.x,
@@ -122,7 +122,7 @@ namespace OPTIMIZE::IPM
 
       for (int i = 0; i < data.size(); i++)
       {
-        auto rel_pos = data[i] - mLowestPoint;
+        auto rel_pos = data[i].pos - mLowestPoint;
         int xCell = rel_pos.x / kernelRadius;
         int yCell = rel_pos.y / kernelRadius;
         int zCell = rel_pos.z / kernelRadius;

@@ -17,17 +17,15 @@ using namespace KIRI2D;
 
 #include <tuple>
 
-namespace OPTIMIZE::IPM {
-struct particle {
-  Vector3D pos;
-  double radius;
-  double max_radius;
-  double min_dist;
-  bool optimize;
-  std::vector<int> neighbors;
-  std::vector<int> need_optimize;
-  std::vector<int> need_constrain;
-};
+namespace OPTIMIZE::IPM
+{
+  struct particle
+  {
+    Vector3D pos;
+    double radius;
+    double max_radius;
+    std::vector<int> neighbors;
+  };
 } // namespace OPTIMIZE::IPM
 
 #endif
