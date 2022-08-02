@@ -16,34 +16,25 @@ int main(int argc, char *argv[]) {
   // log system
   KiriLog::init();
 
-  MatrixXd a = MatrixXd::Random(6000, 6000); // 随机初始化矩阵
-  MatrixXd b = MatrixXd::Random(6000, 6000);
+  for (auto i = 0; i < 1000; i++) {
 
-  double start = clock();
-  MatrixXd c = a * b; // 乘法好简洁
-  double endd = clock();
-  double thisTime = (double)(endd - start) / CLOCKS_PER_SEC;
+    auto n = 3;
+    std::vector<double> data;
+    for (auto j = 0; j < n; j++) {
+      data.emplace_back(Random::get(0.0, 1.0));
+    }
 
-  std::cout << thisTime << std::endl;
-  // for (auto i = 0; i < 1000; i++) {
+    for (auto j = 0; j < n; j++) {
+      KIRI_LOG_DEBUG("data.emplace_back({0})", data[j]);
+    }
 
-  //   auto n = 3;
-  //   std::vector<double> data;
-  //   for (auto j = 0; j < n; j++) {
-  //     data.emplace_back(Random::get(0.0, 1.0));
-  //   }
+    int equ_num = 2;
+    int inequ_num = 0;
 
-  //   for (auto j = 0; j < n; j++) {
-  //     KIRI_LOG_DEBUG("data.emplace_back({0})", data[j]);
-  //   }
-
-  //   int equ_num = 2;
-  //   int inequ_num = 0;
-
-  //   auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(data, equ_num,
-  //                                                             inequ_num);
-  //   auto results = ipm->solution();
-  // }
+    auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(data, equ_num,
+                                                              inequ_num);
+    auto results = ipm->solution();
+  }
 
   return 0;
 }

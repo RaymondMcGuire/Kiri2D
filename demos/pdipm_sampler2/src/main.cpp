@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
+  auto bgeo_data = ReadBgeoFileForCPU("box", "box_200");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size,
                  mkl_get_max_threads());
@@ -229,10 +229,10 @@ int main(int argc, char *argv[]) {
   //------
   auto total_num = 0;
   auto gridding =
-      std::make_shared<OPTIMIZE::IPM::Gradding>(data_particles, 2, 2, 2);
+      std::make_shared<OPTIMIZE::IPM::Gradding>(data_particles, 3, 3, 3);
   auto grid_size = gridding->maxGridHash();
 
-  for (auto iter = 0; iter < 10; iter++) {
+  for (auto iter = 0; iter < 50; iter++) {
     for (auto i = 0; i < grid_size; i++) {
       auto [grid_particles, particles_index] = gridding->getDataByGridHash(i);
       n = grid_particles.size();

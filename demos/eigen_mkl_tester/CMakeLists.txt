@@ -1,5 +1,5 @@
 # Project Name
-set(PROJECT_NAME PDIPMSampler2)
+set(PROJECT_NAME EigenMKLSampler)
 
 # Enable CUDA
 set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
@@ -62,8 +62,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ../lib/Debug)
 add_executable(${PROJECT_NAME} ${PROJECT_FILES})
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PROJECT_FILES})
-
-target_compile_options(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     include
