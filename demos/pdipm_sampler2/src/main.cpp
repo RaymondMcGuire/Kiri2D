@@ -10,12 +10,11 @@
 
 #include <gridding.h>
 #include <kiri2d.h>
+#include <offset_gridding.h>
 #include <partio/Partio.h>
 #include <primal_dual_ipm.h>
 #include <root_directory.h>
 #include <sph_grid.h>
-
-// #include <voronoi/voronoi_polygon.h>
 
 #include <Discregrid/All>
 #include <Eigen/Dense>
@@ -24,8 +23,7 @@ using namespace KIRI2D;
 
 std::vector<Vector4D> ReadBgeoFileForCPU(String Folder, String Name,
                                          Vector3D Offset = Vector3D(0.0),
-                                         bool FlipYZ = false)
-{
+                                         bool FlipYZ = false) {
   std::vector<Vector4D> pos_array;
   String root_folder = "bgeo";
   String extension = ".bgeo";
@@ -38,47 +36,35 @@ std::vector<Vector4D> ReadBgeoFileForCPU(String Folder, String Name,
   Partio::ParticleAttribute pscale_attr;
   if (!data->attributeInfo("position", pos_attr) ||
       (pos_attr.type != Partio::FLOAT && pos_attr.type != Partio::VECTOR) ||
-      pos_attr.count != 3)
-  {
+      pos_attr.count != 3) {
     KIRI_LOG_ERROR("Failed to Get Proper Position Attribute");
   }
 
   bool pscaleLoaded = data->attributeInfo("pscale", pscale_attr);
 
   double max_y = 0.0;
-  for (auto i = 0; i < data->numParticles(); i++)
-  {
+  for (auto i = 0; i < data->numParticles(); i++) {
     const float *pos = data->data<float>(pos_attr, i);
-    if (pscaleLoaded)
-    {
+    if (pscaleLoaded) {
       const float *pscale = data->data<float>(pscale_attr, i);
-      if (i == 0)
-      {
+      if (i == 0) {
         KIRI_LOG_INFO("pscale={0}", *pscale);
       }
 
-      if (FlipYZ)
-      {
+      if (FlipYZ) {
         pos_array.emplace_back(Vector4D(pos[0] + Offset.x, pos[2] + Offset.z,
                                         pos[1] + Offset.y, *pscale));
-      }
-      else
-      {
+      } else {
         pos_array.emplace_back(Vector4D(pos[0] + Offset.x, pos[1] + Offset.y,
                                         pos[2] + Offset.z, *pscale));
         if (pos[1] > max_y)
           max_y = pos[1];
       }
-    }
-    else
-    {
-      if (FlipYZ)
-      {
+    } else {
+      if (FlipYZ) {
         pos_array.emplace_back(Vector4D(pos[0] + Offset.x, pos[2] + Offset.z,
                                         pos[1] + Offset.y, 0.01f));
-      }
-      else
-      {
+      } else {
         pos_array.emplace_back(Vector4D(pos[0] + Offset.x, pos[1] + Offset.y,
                                         pos[2] + Offset.z, 0.01f));
       }
@@ -94,8 +80,7 @@ std::vector<Vector4D> ReadBgeoFileForCPU(String Folder, String Name,
 }
 
 void ExportBgeoFileFromCPU(String Folder, String FileName,
-                           std::vector<Vector4D> Positions)
-{
+                           std::vector<Vector4D> Positions) {
   String exportPath =
       String(EXPORT_PATH) + "bgeo/" + Folder + "/" + FileName + ".bgeo";
 
@@ -105,8 +90,7 @@ void ExportBgeoFileFromCPU(String Folder, String FileName,
   Partio::ParticleAttribute pScaleAttr =
       p->addAttribute("pscale", Partio::FLOAT, 1);
 
-  for (UInt i = 0; i < Positions.size(); i++)
-  {
+  for (UInt i = 0; i < Positions.size(); i++) {
     Int particle = p->addParticle();
     float *pos = p->dataWrite<float>(positionAttr, particle);
     float *pscale = p->dataWrite<float>(pScaleAttr, particle);
@@ -122,22 +106,19 @@ void ExportBgeoFileFromCPU(String Folder, String FileName,
   p->release();
 }
 
-void computeVolume(const std::vector<particle> &particles)
-{
+void computeVolume(const std::vector<particle> &particles) {
   auto volume = 0.0;
-  for (auto i = 0; i < particles.size(); i++)
-  {
+  for (auto i = 0; i < particles.size(); i++) {
     volume += 4 / 3 * KIRI_PI<double>() * pow(particles[i].radius, 3);
   }
   KIRI_LOG_INFO("volume={0}", volume);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("box", "box_200");
+  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size,
                  mkl_get_max_threads());
@@ -155,11 +136,11 @@ int main(int argc, char *argv[])
 
   BoundingBox3D bounding_box;
   auto max_radius = 0.0;
-  for (auto i = 0; i < n; i++)
-  {
+  for (auto i = 0; i < n; i++) {
     OPTIMIZE::IPM::particle p;
     p.pos = Vector3D(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z) * scale;
     p.radius = bgeo_data[i].w * scale;
+    p.new_radius = bgeo_data[i].w * scale;
 
     auto dist = sdf->interpolate(
         0u, Eigen::Vector3d(bgeo_data[i].x, bgeo_data[i].y, bgeo_data[i].z));
@@ -173,20 +154,17 @@ int main(int argc, char *argv[])
 
   //---------------------- sph kernel search
   auto sph_searcher = std::make_shared<OPTIMIZE::IPM::Grid>(
-      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius);
+      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 1.5);
   sph_searcher->updateStructure(data_particles);
   std::vector<std::vector<int>> neighborhoods;
-  for (int i = 0; i < data_size; i++)
-  {
+  for (int i = 0; i < data_size; i++) {
     auto particle = data_particles[i];
     auto neighbors = std::vector<int>();
     std::vector<OPTIMIZE::IPM::Cell> neighboringCells =
         sph_searcher->getNeighboringCells(particle.pos);
 
-    for each (const OPTIMIZE::IPM::Cell &cell in neighboringCells)
-    {
-      for each (int index in cell)
-      {
+    for each (const OPTIMIZE::IPM::Cell &cell in neighboringCells) {
+      for each (int index in cell) {
         if (i != index)
           neighbors.push_back(index);
       }
@@ -194,32 +172,30 @@ int main(int argc, char *argv[])
     neighborhoods.emplace_back(neighbors);
   }
 
-  for (auto iter = 0; iter < 50; iter++)
-  {
-    auto gridding =
-        std::make_shared<OPTIMIZE::IPM::Gradding>(data_particles, 3, 3, 3);
+  for (auto iter = 0; iter < 10; iter++) {
+    auto gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
+        data_particles, 2, 2, 2);
     auto grid_size = gridding->maxGridHash();
-    for (auto i = 0; i < grid_size; i++)
-    {
+
+    // auto flag = (iter + 1) % 2;
+    for (auto i = 0; i < grid_size; i++) {
+
       auto [grid_particles, particles_index] = gridding->getDataByGridHash(i);
       n = grid_particles.size();
       KIRI_LOG_DEBUG("grid data size={0}", n);
 
-      if (n < 2)
-      {
-        if (n == 1)
-          KIRI_LOG_INFO("grid just has one data");
+      if (n < 1) {
+        // if (n == 1)
+        //   KIRI_LOG_INFO("grid just has one data");
         continue;
       }
 
       // boundary constrains
       auto boundary_constrains_num = 0;
-      for (auto idx = 0; idx < particles_index.size(); idx++)
-      {
+      for (auto idx = 0; idx < particles_index.size(); idx++) {
         auto p_index = particles_index[idx];
         auto real_neighbors = std::vector<int>();
-        for (auto j = 0; j < neighborhoods[p_index].size(); j++)
-        {
+        for (auto j = 0; j < neighborhoods[p_index].size(); j++) {
           if (std::find(particles_index.begin(), particles_index.end(),
                         neighborhoods[p_index][j]) == particles_index.end())
             real_neighbors.emplace_back(neighborhoods[p_index][j]);
@@ -229,8 +205,7 @@ int main(int argc, char *argv[])
       }
       // pmipm
       std::vector<double> data;
-      for (auto j = 0; j < n; j++)
-      {
+      for (auto j = 0; j < n; j++) {
         data.emplace_back(Random::get(0.0, 1.0));
       }
 
@@ -242,85 +217,28 @@ int main(int argc, char *argv[])
           data, grid_particles, data_particles, equ_num, inequ_num);
       auto results = ipm->solution();
 
-      for (auto j = 0; j < n; j++)
-      {
+      for (auto j = 0; j < n; j++) {
+        // data_particles[particles_index[j]].new_radius = double(results[j]);
         data_particles[particles_index[j]].radius = double(results[j]);
-        grid_particles[j].radius = double(results[j]);
+        // grid_particles[j].new_radius = double(results[j]);
       }
 
       gridding->updateData(data_particles);
-
-      //
-
-      gridding =
-          std::make_shared<OPTIMIZE::IPM::Gradding>(data_particles, 2, 2, 2);
-      grid_size = gridding->maxGridHash();
-      for (auto i = 0; i < grid_size; i++)
-      {
-        auto [grid_particles, particles_index] = gridding->getDataByGridHash(i);
-        n = grid_particles.size();
-        KIRI_LOG_DEBUG("grid data size={0}", n);
-
-        if (n < 2)
-        {
-          if (n == 1)
-            KIRI_LOG_INFO("grid just has one data");
-          continue;
-        }
-
-        // boundary constrains
-        auto boundary_constrains_num = 0;
-        for (auto idx = 0; idx < particles_index.size(); idx++)
-        {
-          auto p_index = particles_index[idx];
-          auto real_neighbors = std::vector<int>();
-          for (auto j = 0; j < neighborhoods[p_index].size(); j++)
-          {
-            if (std::find(particles_index.begin(), particles_index.end(),
-                          neighborhoods[p_index][j]) == particles_index.end())
-              real_neighbors.emplace_back(neighborhoods[p_index][j]);
-          }
-          grid_particles[idx].neighbors = real_neighbors;
-          boundary_constrains_num += real_neighbors.size();
-        }
-        // pmipm
-        std::vector<double> data;
-        for (auto j = 0; j < n; j++)
-        {
-          data.emplace_back(Random::get(0.0, 1.0));
-        }
-
-        int equ_num = 0;
-        int inequ_num =
-            2 * (n - equ_num) + n * (n - 1) / 2 + boundary_constrains_num;
-
-        auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
-            data, grid_particles, data_particles, equ_num, inequ_num);
-        auto results = ipm->solution();
-
-        for (auto j = 0; j < n; j++)
-        {
-          data_particles[particles_index[j]].radius = double(results[j]);
-          grid_particles[j].radius = double(results[j]);
-        }
-
-        gridding->updateData(data_particles);
-      }
-
-      computeVolume(data_particles);
-
-      // export all
-      positions.clear();
-      for (auto j = 0; j < data_size; j++)
-      {
-        positions.emplace_back(Vector4D(
-            data_particles[j].pos.x / scale, data_particles[j].pos.y / scale,
-            data_particles[j].pos.z / scale, data_particles[j].radius / scale));
-      }
-
-      ExportBgeoFileFromCPU("box", "box_opti_iter_" + std::to_string(iter),
-                            positions);
     }
 
-    return 0;
+    computeVolume(data_particles);
+
+    // export all
+    positions.clear();
+    for (auto j = 0; j < data_size; j++) {
+      positions.emplace_back(Vector4D(
+          data_particles[j].pos.x / scale, data_particles[j].pos.y / scale,
+          data_particles[j].pos.z / scale, data_particles[j].radius / scale));
+    }
+
+    ExportBgeoFileFromCPU("box", "box_opti_iter_" + std::to_string(iter),
+                          positions);
   }
+
+  return 0;
+}
