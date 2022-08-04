@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
+  auto bgeo_data = ReadBgeoFileForCPU("box", "box_200");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size,
                  mkl_get_max_threads());
@@ -173,25 +173,25 @@ int main(int argc, char *argv[]) {
   }
 
   for (auto iter = 0; iter < 10; iter++) {
-    auto gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
-        data_particles, 2, 2, 2);
-    auto grid_size = gridding->maxGridHash();
+
+    // offset_gridding
+    auto offset_gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
+        data_particles, 3, 3, 3);
+    auto offset_grid_size = offset_gridding->maxGridHash();
 
     // auto flag = (iter + 1) % 2;
-    for (auto i = 0; i < grid_size; i++) {
-
-      auto [grid_particles, particles_index] = gridding->getDataByGridHash(i);
+    for (auto i = 0; i < offset_grid_size; i++) {
+      auto boundary_constrains_num = 0;
+      auto [grid_particles, particles_index] =
+          offset_gridding->getDataByGridHash(i);
       n = grid_particles.size();
       KIRI_LOG_DEBUG("grid data size={0}", n);
 
       if (n < 1) {
-        // if (n == 1)
-        //   KIRI_LOG_INFO("grid just has one data");
         continue;
       }
 
       // boundary constrains
-      auto boundary_constrains_num = 0;
       for (auto idx = 0; idx < particles_index.size(); idx++) {
         auto p_index = particles_index[idx];
         auto real_neighbors = std::vector<int>();
@@ -203,19 +203,26 @@ int main(int argc, char *argv[]) {
         grid_particles[idx].neighbors = real_neighbors;
         boundary_constrains_num += real_neighbors.size();
       }
-      // pmipm
-      std::vector<double> data;
-      for (auto j = 0; j < n; j++) {
-        data.emplace_back(Random::get(0.0, 1.0));
+
+      VectorXreal results;
+      int signal = -2;
+      while (signal == -2) {
+        // pmipm
+        std::vector<double> data;
+        for (auto j = 0; j < n; j++) {
+          data.emplace_back(Random::get(0.0, 1.0));
+        }
+
+        int equ_num = 0;
+        int inequ_num =
+            2 * (n - equ_num) + n * (n - 1) / 2 + boundary_constrains_num;
+
+        auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
+            data, grid_particles, data_particles, equ_num, inequ_num);
+
+        signal = ipm->signal();
+        results = ipm->solution();
       }
-
-      int equ_num = 0;
-      int inequ_num =
-          2 * (n - equ_num) + n * (n - 1) / 2 + boundary_constrains_num;
-
-      auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
-          data, grid_particles, data_particles, equ_num, inequ_num);
-      auto results = ipm->solution();
 
       for (auto j = 0; j < n; j++) {
         // data_particles[particles_index[j]].new_radius = double(results[j]);
@@ -223,7 +230,7 @@ int main(int argc, char *argv[]) {
         // grid_particles[j].new_radius = double(results[j]);
       }
 
-      gridding->updateData(data_particles);
+      offset_gridding->updateData(data_particles);
     }
 
     computeVolume(data_particles);

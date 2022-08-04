@@ -315,6 +315,8 @@ public:
 
   VectorXreal solution() { return mRealData; }
 
+  int signal() const { return mSignal; }
+
 private:
   int mIterCount = 0;
   int mSignal = 0;

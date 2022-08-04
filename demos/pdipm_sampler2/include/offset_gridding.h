@@ -7,8 +7,8 @@
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-#ifndef _OFFSET_OffsetGridding_H_
-#define _OFFSET_OffsetGridding_H_
+#ifndef _OFFSET_Gridding_H_
+#define _OFFSET_Gridding_H_
 
 #pragma once
 #include <data.h>
