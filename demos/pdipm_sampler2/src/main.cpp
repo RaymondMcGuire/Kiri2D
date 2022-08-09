@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("box", "box_200");
+  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size,
                  mkl_get_max_threads());
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
     neighborhoods.emplace_back(neighbors);
   }
 
-  for (auto iter = 0; iter < 10; iter++) {
+  for (auto iter = 0; iter < 20; iter++) {
 
     // offset_gridding
     auto offset_gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
@@ -225,12 +225,16 @@ int main(int argc, char *argv[]) {
       }
 
       for (auto j = 0; j < n; j++) {
-        // data_particles[particles_index[j]].new_radius = double(results[j]);
-        data_particles[particles_index[j]].radius = double(results[j]);
-        // grid_particles[j].new_radius = double(results[j]);
+        data_particles[particles_index[j]].new_radius = double(results[j]);
+        // data_particles[particles_index[j]].radius = double(results[j]);
+        //  grid_particles[j].new_radius = double(results[j]);
       }
 
       offset_gridding->updateData(data_particles);
+    }
+
+    for (auto j = 0; j < data_size; j++) {
+      data_particles[j].radius = data_particles[j].new_radius;
     }
 
     computeVolume(data_particles);
