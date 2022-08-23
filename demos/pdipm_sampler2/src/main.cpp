@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
+  auto bgeo_data = ReadBgeoFileForCPU("bunny", "bunny_180");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size,
                  mkl_get_max_threads());
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
   double scale = 100.0;
 
   auto cdf_file_path =
-      String(RESOURCES_PATH) + "cdf" + "/" + "box" + "/" + "box_80" + ".cdf";
+      String(RESOURCES_PATH) + "cdf" + "/" + "bunny" + "/" + "bunny_180" + ".cdf";
   auto sdf = std::unique_ptr<Discregrid::CubicLagrangeDiscreteGrid>(
       new Discregrid::CubicLagrangeDiscreteGrid(cdf_file_path));
 
@@ -194,31 +194,122 @@ int main(int argc, char *argv[])
     neighborhoods.emplace_back(neighbors);
   }
 
+  // for (auto iter = 0; iter < 20; iter++)
+  // {
+
+  //   // offset_gridding
+  //   // auto offset_gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
+  //   //     data_particles, 3, 3, 3);
+
+  //   auto offset_gridding = std::make_shared<OPTIMIZE::IPM::Gridding>(
+  //       data_particles, 3, 3, 3);
+
+  //   auto offset_grid_size = offset_gridding->maxGridHash();
+
+  //   // auto flag = (iter + 1) % 2;
+  //   for (auto i = 0; i < offset_grid_size; i++)
+  //   {
+  //     auto boundary_constrains_num = 0;
+  //     auto [grid_particles, particles_index] =
+  //         offset_gridding->getDataByGridHash(i);
+  //     n = grid_particles.size();
+  //     KIRI_LOG_DEBUG("grid data size={0}", n);
+
+  //     if (n < 1)
+  //     {
+  //       continue;
+  //     }
+
+  //     // boundary constrains
+  //     for (auto idx = 0; idx < particles_index.size(); idx++)
+  //     {
+  //       auto p_index = particles_index[idx];
+  //       auto real_neighbors = std::vector<int>();
+  //       for (auto j = 0; j < neighborhoods[p_index].size(); j++)
+  //       {
+  //         if (std::find(particles_index.begin(), particles_index.end(),
+  //                       neighborhoods[p_index][j]) == particles_index.end())
+  //           real_neighbors.emplace_back(neighborhoods[p_index][j]);
+  //       }
+  //       grid_particles[idx].neighbors = real_neighbors;
+  //       boundary_constrains_num += real_neighbors.size();
+  //     }
+
+  //     VectorXreal results;
+  //     int signal = -2;
+  //     while (signal == -2)
+  //     {
+  //       // pmipm
+  //       std::vector<double> data;
+  //       for (auto j = 0; j < n; j++)
+  //       {
+  //         data.emplace_back(Random::get(0.0, 1.0));
+  //       }
+
+  //       int equ_num = 0;
+  //       int inequ_num =
+  //           2 * (n - equ_num) + n * (n - 1) / 2 + boundary_constrains_num;
+
+  //       auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
+  //           data, grid_particles, data_particles, equ_num, inequ_num);
+
+  //       signal = ipm->signal();
+  //       results = ipm->solution();
+  //     }
+
+  //     for (auto j = 0; j < n; j++)
+  //     {
+  //       data_particles[particles_index[j]].new_radius = double(results[j]);
+  //       data_particles[particles_index[j]].radius = double(results[j]);
+  //       //  grid_particles[j].new_radius = double(results[j]);
+  //     }
+
+  //     offset_gridding->updateData(data_particles);
+  //   }
+
+  //   // for (auto j = 0; j < data_size; j++)
+  //   // {
+  //   //   data_particles[j].radius = data_particles[j].new_radius;
+  //   // }
+
+  //   computeVolume(data_particles);
+
+  //   // export all
+  //   positions.clear();
+  //   for (auto j = 0; j < data_size; j++)
+  //   {
+  //     positions.emplace_back(Vector4D(
+  //         data_particles[j].pos.x / scale, data_particles[j].pos.y / scale,
+  //         data_particles[j].pos.z / scale, data_particles[j].radius / scale));
+  //   }
+
+  //   ExportBgeoFileFromCPU("box", "box_opti_iter_" + std::to_string(iter),
+  //                         positions);
+  // }
+
+  // red black
   for (auto iter = 0; iter < 20; iter++)
   {
+    auto offset_gridding = std::make_shared<OPTIMIZE::IPM::Gridding>(
+        data_particles, 6, 6, 6);
 
-    // offset_gridding
     // auto offset_gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
     //     data_particles, 3, 3, 3);
 
-    auto offset_gridding = std::make_shared<OPTIMIZE::IPM::Gridding>(
-        data_particles, 3, 3, 3);
-
     auto offset_grid_size = offset_gridding->maxGridHash();
 
-    // auto flag = (iter + 1) % 2;
+    // red
     for (auto i = 0; i < offset_grid_size; i++)
     {
       auto boundary_constrains_num = 0;
       auto [grid_particles, particles_index] =
-          offset_gridding->getDataByGridHash(i);
+          offset_gridding->getDataByRed(i);
       n = grid_particles.size();
-      KIRI_LOG_DEBUG("grid data size={0}", n);
 
       if (n < 1)
-      {
         continue;
-      }
+
+      // KIRI_LOG_DEBUG("grid data size={0}", n);
 
       // boundary constrains
       for (auto idx = 0; idx < particles_index.size(); idx++)
@@ -259,9 +350,74 @@ int main(int argc, char *argv[])
 
       for (auto j = 0; j < n; j++)
       {
-        data_particles[particles_index[j]].new_radius = double(results[j]);
+        // data_particles[particles_index[j]].new_radius = double(results[j]);
         data_particles[particles_index[j]].radius = double(results[j]);
-        //  grid_particles[j].new_radius = double(results[j]);
+        //   grid_particles[j].new_radius = double(results[j]);
+      }
+
+      offset_gridding->updateData(data_particles);
+    }
+
+    // for (auto j = 0; j < data_size; j++)
+    // {
+    //   data_particles[j].radius = data_particles[j].new_radius;
+    // }
+
+    // black
+    for (auto i = 0; i < offset_grid_size; i++)
+    {
+      auto boundary_constrains_num = 0;
+      auto [grid_particles, particles_index] =
+          offset_gridding->getDataByBlack(i);
+      n = grid_particles.size();
+
+      if (n < 1)
+        continue;
+
+      // KIRI_LOG_DEBUG("grid data size={0}", n);
+
+      // boundary constrains
+      for (auto idx = 0; idx < particles_index.size(); idx++)
+      {
+        auto p_index = particles_index[idx];
+        auto real_neighbors = std::vector<int>();
+        for (auto j = 0; j < neighborhoods[p_index].size(); j++)
+        {
+          if (std::find(particles_index.begin(), particles_index.end(),
+                        neighborhoods[p_index][j]) == particles_index.end())
+            real_neighbors.emplace_back(neighborhoods[p_index][j]);
+        }
+        grid_particles[idx].neighbors = real_neighbors;
+        boundary_constrains_num += real_neighbors.size();
+      }
+
+      VectorXreal results;
+      int signal = -2;
+      while (signal == -2)
+      {
+        // pmipm
+        std::vector<double> data;
+        for (auto j = 0; j < n; j++)
+        {
+          data.emplace_back(Random::get(0.0, 1.0));
+        }
+
+        int equ_num = 0;
+        int inequ_num =
+            2 * (n - equ_num) + n * (n - 1) / 2 + boundary_constrains_num;
+
+        auto ipm = std::make_shared<OPTIMIZE::IPM::PrimalDualIPM>(
+            data, grid_particles, data_particles, equ_num, inequ_num);
+
+        signal = ipm->signal();
+        results = ipm->solution();
+      }
+
+      for (auto j = 0; j < n; j++)
+      {
+        // data_particles[particles_index[j]].new_radius = double(results[j]);
+        data_particles[particles_index[j]].radius = double(results[j]);
+        //   grid_particles[j].new_radius = double(results[j]);
       }
 
       offset_gridding->updateData(data_particles);

@@ -1,11 +1,11 @@
-/*** 
+/***
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-08-01 11:32:37
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
  * @LastEditTime: 2022-08-23 16:48:43
  * @FilePath: \Kiri2D\demos\pdipm_sampler2\include\gridding.h
- * @Description: 
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
@@ -81,6 +81,42 @@ namespace OPTIMIZE::IPM
                     // auto cell_highest = cell_lowest + mCellSize;
                     // auto min_dist = computeMinDist(mData[i].pos, cell_lowest, cell_highest);
                     // mData[i].min_dist = min_dist;
+                    data.emplace_back(mData[i]);
+                }
+            }
+            return std::make_tuple(data, index);
+        }
+
+        std::tuple<std::vector<particle>, std::vector<int>> getDataByRed(int hash)
+        {
+            std::vector<int> index;
+            std::vector<particle> data;
+            for (auto i = 0; i < mData.size(); i++)
+            {
+                auto rel_pos = mData[i].pos - mBbox.LowestPoint;
+                auto grid_xyz = computeGridXYZByPos3(rel_pos);
+                auto data_grid_hash = computePos2GridHash(mData[i].pos);
+                if ((grid_xyz.x + grid_xyz.y + grid_xyz.z) % 2 == 0 && data_grid_hash == hash)
+                {
+                    index.emplace_back(i);
+                    data.emplace_back(mData[i]);
+                }
+            }
+            return std::make_tuple(data, index);
+        }
+
+        std::tuple<std::vector<particle>, std::vector<int>> getDataByBlack(int hash)
+        {
+            std::vector<int> index;
+            std::vector<particle> data;
+            for (auto i = 0; i < mData.size(); i++)
+            {
+                auto rel_pos = mData[i].pos - mBbox.LowestPoint;
+                auto grid_xyz = computeGridXYZByPos3(rel_pos);
+                auto data_grid_hash = computePos2GridHash(mData[i].pos);
+                if ((grid_xyz.x + grid_xyz.y + grid_xyz.z) % 2 == 1 && data_grid_hash == hash)
+                {
+                    index.emplace_back(i);
                     data.emplace_back(mData[i]);
                 }
             }
