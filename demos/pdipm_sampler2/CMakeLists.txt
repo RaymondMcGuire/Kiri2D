@@ -74,9 +74,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 if(WIN32 AND ${ENABLE_CUDA})
-    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D kiri2d_pbs_cuda discregrid ${MKL_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D kiri2d_pbs_cuda debug discregrid_d optimized discregrid ${MKL_LIBRARIES})
 elseif(WIN32)
-    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio KIRI2D discregrid  ${MKL_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} debug opencv_world451d optimized opencv_world451 debug partiod optimized partio debug discregrid_d optimized discregrid KIRI2D ${MKL_LIBRARIES})
 elseif(APPLE)
     target_link_libraries(${PROJECT_NAME} optimized opencv_core opencv_imgcodecs opencv_imgproc opencv_highgui KIRI2D)
 endif()
