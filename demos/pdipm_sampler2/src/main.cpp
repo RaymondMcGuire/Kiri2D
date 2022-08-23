@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
   // log system
   KiriLog::init();
 
-  auto bgeo_data = ReadBgeoFileForCPU("bunny", "bunny_180");
+  auto bgeo_data = ReadBgeoFileForCPU("box", "box_80");
   auto data_size = bgeo_data.size();
   KIRI_LOG_DEBUG("data size={0}; mkl max threads={1}", data_size,
                  mkl_get_max_threads());
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
   double scale = 100.0;
 
   auto cdf_file_path =
-      String(RESOURCES_PATH) + "cdf" + "/" + "bunny" + "/" + "bunny_180" + ".cdf";
+      String(RESOURCES_PATH) + "cdf" + "/" + "box" + "/" + "box_80" + ".cdf";
   auto sdf = std::unique_ptr<Discregrid::CubicLagrangeDiscreteGrid>(
       new Discregrid::CubicLagrangeDiscreteGrid(cdf_file_path));
 
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
     neighborhoods.emplace_back(neighbors);
   }
 
-  for (auto iter = 0; iter < 20; iter++)
+  for (auto iter = 0; iter < 5; iter++)
   {
 
     // offset_gridding
@@ -256,17 +256,17 @@ int main(int argc, char *argv[])
       for (auto j = 0; j < n; j++)
       {
         data_particles[particles_index[j]].new_radius = double(results[j]);
-        // data_particles[particles_index[j]].radius = double(results[j]);
+        data_particles[particles_index[j]].radius = double(results[j]);
         //  grid_particles[j].new_radius = double(results[j]);
       }
 
       offset_gridding->updateData(data_particles);
     }
 
-    for (auto j = 0; j < data_size; j++)
-    {
-      data_particles[j].radius = data_particles[j].new_radius;
-    }
+    // for (auto j = 0; j < data_size; j++)
+    // {
+    //   data_particles[j].radius = data_particles[j].new_radius;
+    // }
 
     computeVolume(data_particles);
 
