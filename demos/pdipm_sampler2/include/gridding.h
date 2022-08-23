@@ -1,3 +1,12 @@
+/*** 
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-08-01 11:32:37
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-08-23 16:48:43
+ * @FilePath: \Kiri2D\demos\pdipm_sampler2\include\gridding.h
+ * @Description: 
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
+ */
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-07-20 16:30:47
@@ -7,8 +16,8 @@
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-#ifndef _GRADDING_H_
-#define _GRADDING_H_
+#ifndef _GRIDDING_H_
+#define _GRIDDING_H_
 
 #pragma once
 #include <data.h>
@@ -17,10 +26,10 @@
 
 namespace OPTIMIZE::IPM
 {
-    class Gradding
+    class Gridding
     {
     public:
-        explicit Gradding(
+        explicit Gridding(
             const std::vector<particle> &data,
             int x, int y, int z)
         {
@@ -46,7 +55,7 @@ namespace OPTIMIZE::IPM
             // KIRI_LOG_DEBUG("mCellSize={0},{1},{2}", mCellSize.x, mCellSize.y, mCellSize.z);
         }
 
-        virtual ~Gradding()
+        virtual ~Gridding()
         {
         }
 
@@ -113,7 +122,7 @@ namespace OPTIMIZE::IPM
         }
     };
 
-    typedef std::shared_ptr<Gradding> GraddingPtr;
+    typedef std::shared_ptr<Gridding> GraddingPtr;
 }
 
 #endif

@@ -194,12 +194,16 @@ int main(int argc, char *argv[])
     neighborhoods.emplace_back(neighbors);
   }
 
-  for (auto iter = 0; iter < 5; iter++)
+  for (auto iter = 0; iter < 20; iter++)
   {
 
     // offset_gridding
-    auto offset_gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
+    // auto offset_gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
+    //     data_particles, 3, 3, 3);
+
+    auto offset_gridding = std::make_shared<OPTIMIZE::IPM::Gridding>(
         data_particles, 3, 3, 3);
+
     auto offset_grid_size = offset_gridding->maxGridHash();
 
     // auto flag = (iter + 1) % 2;
