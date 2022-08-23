@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
                  mkl_get_max_threads());
   mkl_set_num_threads(mkl_get_max_threads());
   int n = data_size;
-  double scale = 1000.0;
+  double scale = 100.0;
 
   auto cdf_file_path =
       String(RESOURCES_PATH) + "cdf" + "/" + "bunny" + "/" + "bunny_180" + ".cdf";
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 
     // offset_gridding
     auto offset_gridding = std::make_shared<OPTIMIZE::IPM::OffsetGridding>(
-        data_particles, 2, 2, 2);
+        data_particles, 3, 3, 3);
     auto offset_grid_size = offset_gridding->maxGridHash();
 
     // auto flag = (iter + 1) % 2;

@@ -37,7 +37,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXcd;
 using Eigen::VectorXd;
 
-float SCALE = 1000.f;
+float SCALE = 100.f;
 
 VectorXreal EquConstraints(const VectorXreal &x, const std::vector<particle> &p,
                            int equNum)
