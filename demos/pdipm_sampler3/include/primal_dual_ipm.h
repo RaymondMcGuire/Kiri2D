@@ -1,12 +1,13 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-08-01 11:32:37
+ * @Date: 2022-08-30 15:38:05
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-09-01 10:24:47
- * @FilePath: \Kiri2D\demos\pdipm_sampler\include\primal_dual_ipm.h
+ * @LastEditTime: 2022-08-30 15:48:46
+ * @FilePath: \Kiri2D\demos\pdipm_sampler3\include\primal_dual_ipm.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
+
 #ifndef _PRIMAL_DUAL_IPM_H_
 #define _PRIMAL_DUAL_IPM_H_
 
@@ -36,6 +37,8 @@ using Eigen::MatrixXd;
 using Eigen::VectorXcd;
 using Eigen::VectorXd;
 
+float SCALE = 100.f;
+
 VectorXreal EquConstraints(const VectorXreal &x, const std::vector<particle> &p,
                            int equNum)
 {
@@ -43,11 +46,8 @@ VectorXreal EquConstraints(const VectorXreal &x, const std::vector<particle> &p,
   auto n = x.size();
 
   VectorXreal consts(equNum);
-
-  for (auto i = 0; i < n - 1; i++)
-    for (auto j = i + 1; j < n; j++)
-      consts[counter] +=
-          min((p[i].pos - p[j].pos).length() / (x[i] + x[j]), 1.0) - 1.0;
+  for (auto i = 0; i < n; i++)
+    consts[counter++] = x[i] - 1;
 
   return consts;
 }
@@ -60,14 +60,10 @@ dual2nd EquConstrainstFunc(const VectorXdual2nd &x,
   auto n = x.size();
   dual2nd sum = 0.0;
 
-  dual2nd sum_dist = 0.0;
-
-  for (auto i = 0; i < n - 1; i++)
-    for (auto j = i + 1; j < n; j++)
-      sum_dist +=
-          min((p[i].pos - p[j].pos).length() / (x[i] + x[j]), 1.0) - 1.0;
-
-  sum += sum_dist * lambda(counter++, 0);
+  for (auto i = 0; i < n; i++)
+  {
+    sum += (x[i] - 1) * lambda(counter++, 0);
+  }
 
   return sum;
 }
@@ -82,17 +78,27 @@ VectorXreal InEquConstraints(const VectorXreal &x,
   VectorXreal consts(inEquNum);
 
   for (auto i = 0; i < n; i++)
-    consts[counter++] = x[i];
+    if (p[i].max_radius > 2 * SCALE)
+      consts[counter++] = 2 * SCALE - x[i];
+    else
+      consts[counter++] = p[i].max_radius - x[i];
 
   for (auto i = 0; i < n; i++)
-    if (p[i].max_radius > 2 * 100.0)
-      consts[counter++] = 2 * 100.0 - x[i];
-    else
-      consts[counter++] += p[i].max_radius - x[i];
+    consts[counter++] = x[i] - 0.001 * SCALE;
 
   for (auto i = 0; i < n - 1; i++)
     for (auto j = i + 1; j < n; j++)
       consts[counter++] = (p[i].pos - p[j].pos).length() - (x[i] + x[j]);
+
+  // for (auto i = 0; i < n; i++)
+  // {
+  //   for (auto j = 0; j < p[i].neighbors.size(); j++)
+  //   {
+  //     consts[counter++] =
+  //         (p[i].pos - allParticles[p[i].neighbors[j]].pos).length() -
+  //         (x[i] + allParticles[p[i].neighbors[j]].radius);
+  //   }
+  // }
 
   return consts;
 }
@@ -108,22 +114,32 @@ dual2nd InEquConstrainstFunc(const VectorXdual2nd &x, const MatrixXd &lambda,
 
   for (auto i = 0; i < n; i++)
   {
-
-    sum += (x[i]) * lambda(counter++, 0);
+    if (p[i].max_radius > 2 * SCALE)
+      sum += (2.0 * SCALE - x[i]) * lambda(counter++, 0);
+    else
+      sum += (p[i].max_radius - x[i]) * lambda(counter++, 0);
   }
 
   for (auto i = 0; i < n; i++)
   {
-    if (p[i].max_radius > 2 * 100.0)
-      sum += (2.0 * 100.0 - x[i]) * lambda(counter++, 0);
-    else
-      sum += (p[i].max_radius - x[i]) * lambda(counter++, 0);
+
+    sum += (x[i] - 0.001 * SCALE) * lambda(counter++, 0);
   }
 
   for (auto i = 0; i < n - 1; i++)
     for (auto j = i + 1; j < n; j++)
       sum += ((p[i].pos - p[j].pos).length() - (x[i] + x[j])) *
              lambda(counter++, 0);
+
+  // for (auto i = 0; i < n; i++)
+  // {
+  //   for (auto j = 0; j < p[i].neighbors.size(); j++)
+  //   {
+  //     sum += ((p[i].pos - allParticles[p[i].neighbors[j]].pos).length() -
+  //             (x[i] + allParticles[p[i].neighbors[j]].radius)) *
+  //            lambda(counter++, 0);
+  //   }
+  // }
 
   return sum;
 }
@@ -135,6 +151,7 @@ dual2nd TargetFunc(const VectorXdual2nd &x, const std::vector<particle> &p)
   dual2nd sum = 0.0;
   for (auto j = 0; j < n; j++)
   {
+
     sum -= 4 / 3 * KIRI_PI<dual2nd>() * (x[j]) * (x[j]) * (x[j]);
   }
 
@@ -193,9 +210,10 @@ namespace OPTIMIZE::IPM
 
         for (auto j = 0; j < mInnerIterNum; j++)
         {
-          KIRI_LOG_INFO("Progress(%)={0}",
-                        static_cast<double>(i * mInnerIterNum + j) /
-                            static_cast<double>(mInnerIterNum * mOuterIterNum));
+          // KIRI_LOG_INFO("Progress(%)={0}",
+          //               static_cast<double>(i * mInnerIterNum + j) /
+          //                   static_cast<double>(mInnerIterNum *
+          //                   mOuterIterNum));
 
           mMuTol = std::max(mKTol, mMu);
           if (mKKT1.norm() <= mMuTol && mKKT2.norm() <= mMuTol &&
@@ -251,12 +269,12 @@ namespace OPTIMIZE::IPM
             }
           }
 
-          KIRI_LOG_DEBUG("computeBackTrackingLineSearch start");
+          // KIRI_LOG_DEBUG("computeBackTrackingLineSearch start");
           computeBackTrackingLineSearch(dz);
 
           mIterCount++;
 
-          KIRI_LOG_DEBUG("computeKKT start");
+          // KIRI_LOG_DEBUG("computeKKT start");
           this->computeKKT();
 
           if (mInEquNum == 0 && mSignal != -2)
@@ -268,7 +286,7 @@ namespace OPTIMIZE::IPM
             {
               mSignal = 2;
               mFTolConverged = true;
-              KIRI_LOG_INFO("mKtolConverged=true");
+              // KIRI_LOG_INFO("mKtolConverged=true");
               break;
             }
             else
@@ -288,7 +306,7 @@ namespace OPTIMIZE::IPM
           {
             mSignal = 2;
             mFTolConverged = true;
-            KIRI_LOG_INFO("mKtolConverged=true");
+            // KIRI_LOG_INFO("mKtolConverged=true");
           }
           else
             mFLast = mFNew;
@@ -334,13 +352,15 @@ namespace OPTIMIZE::IPM
 
     VectorXreal solution() { return mRealData; }
 
+    int signal() const { return mSignal; }
+
   private:
     int mIterCount = 0;
     int mSignal = 0;
     int mEquNum = 0;
     int mInEquNum = 0;
     int mVariableNum = 0;
-    int mOuterIterNum = 1000;
+    int mOuterIterNum = 10;
     int mInnerIterNum = 20;
     // int mOuterIterNum = 1;
     // int mInnerIterNum = 1;
@@ -587,7 +607,8 @@ namespace OPTIMIZE::IPM
 
       mConstraintsJaco = jaco;
 
-      KIRI_LOG_DEBUG("mConstraintsJaco=\n{0}", EigenDataShape(mConstraintsJaco));
+      // KIRI_LOG_DEBUG("mConstraintsJaco=\n{0}",
+      // EigenDataShape(mConstraintsJaco));
     }
 
     void computeBarriarCostGrad()
