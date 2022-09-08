@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
   auto dist_constrainst_num = 0;
   //---------------------- sph kernel search
   auto sph_searcher = std::make_shared<OPTIMIZE::IPM::Grid>(
-      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 2.0);
+      bounding_box.HighestPoint, bounding_box.LowestPoint, max_radius * 1.0);
   sph_searcher->updateStructure(data_particles);
   std::vector<std::vector<int>> neighborhoods;
   for (int i = 0; i < data_size; i++) {
@@ -159,27 +159,10 @@ int main(int argc, char *argv[]) {
     std::vector<OPTIMIZE::IPM::Cell> neighboringCells =
         sph_searcher->getNeighboringCells(particle.pos);
 
-    auto min_dist = 100000.0;
-
     for each (const OPTIMIZE::IPM::Cell &cell in neighboringCells) {
       for each (int index in cell) {
-        if (i != index) {
-          auto dist =
-              (data_particles[index].pos - data_particles[i].pos).length();
-          if (dist < min_dist)
-            min_dist = dist;
-        }
-      }
-    }
-
-    for each (const OPTIMIZE::IPM::Cell &cell in neighboringCells) {
-      for each (int index in cell) {
-        if (i != index) {
-          auto dist =
-              (data_particles[index].pos - data_particles[i].pos).length();
-          if (dist < min_dist * 3.0)
-            neighbors.push_back(index);
-        }
+        if (i != index)
+          neighbors.push_back(index);
       }
     }
 
