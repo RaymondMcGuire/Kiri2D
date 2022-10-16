@@ -52,7 +52,7 @@ namespace KIRI2D
 
         ~KiriSDF2D() {}
 
-        const Vec_Vec2F GetPoints() const { return mPoints; }
+        const Vec_Vec2F points() const { return mPoints; }
 
         void Append(Vector2F p, Vector2F v = Vector2F(0.f));
         const Int FindRegion(Vector2F p);

@@ -1,10 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-02-22 14:13:45
- * @LastEditTime: 2021-05-29 22:35:09
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-03-27 01:28:37
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-10-16 14:02:39
+ * @FilePath: \Kiri2D\core\include\kiri2d\scene.h
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\scene.h
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_SCENE_H_
@@ -34,36 +35,36 @@ namespace KIRI2D
               mWindowHeight(windowHeight),
               mViewWidth(windowWidth)
         {
-            float viewHeight = mWindowHeight * mViewWidth / mWindowWidth;
-            auto lookAt = Vector2F(mViewWidth / 2.f, viewHeight / 2.f);
-            auto windowCellSize = Vector2F(mViewWidth / mWindowWidth, viewHeight / mWindowHeight);
-            auto windowCenter = Vector2F(mViewWidth / (2.f * windowCellSize.x), viewHeight / (2.f * windowCellSize.y));
+            float view_height = mWindowHeight * mViewWidth / mWindowWidth;
+            auto look_at = Vector2F(mViewWidth / 2.f, view_height / 2.f);
+            auto window_size = Vector2F(mViewWidth / mWindowWidth, view_height / mWindowHeight);
+            auto window_center = Vector2F(mViewWidth / (2.f * window_size.x), view_height / (2.f * window_size.y));
             mCamera = std::make_shared<KiriCamera2D>(
                 Camera2DProperty(
-                    lookAt,
-                    windowCellSize,
-                    windowCenter));
+                    look_at,
+                    window_size,
+                    window_center));
         }
 
-        void AddObject(KiriSDF2D object);
-        void AddLine(KiriLine2 line);
-        void AddLines(std::vector<KiriLine2> lines);
-        void AddParticle(KiriPoint2 particle);
-        void AddParticles(std::vector<KiriPoint2> particles);
-        void AddRect(KiriRect2 rect);
-        void AddRects(std::vector<KiriRect2> rects);
-        void AddCircle(KiriCircle2 circle);
-        void AddCircles(std::vector<KiriCircle2> circles);
+        void addObject(KiriSDF2D object);
+        void addLine(KiriLine2 line);
+        void addLines(std::vector<KiriLine2> lines);
+        void addParticle(KiriPoint2 particle);
+        void addParticles(std::vector<KiriPoint2> particles);
+        void addRect(KiriRect2 rect);
+        void addRects(std::vector<KiriRect2> rects);
+        void addCircle(KiriCircle2 circle);
+        void addCircles(std::vector<KiriCircle2> circles);
 
-        inline const auto GetSDFObjects() { return mSDFObjects; }
-        inline const auto GetPoints() { return mPoints; }
-        inline const auto GetLines() { return mLines; }
-        inline const auto GetRects() { return mRects; }
-        inline const auto GetCircles() { return mCircles; }
+        inline const auto sdfObjects() { return mSDFObjects; }
+        inline const auto points() { return mPoints; }
+        inline const auto lines() { return mLines; }
+        inline const auto rects() { return mRects; }
+        inline const auto circles() { return mCircles; }
 
-        inline const auto GetCamera() { return mCamera; }
-        inline const auto GetWindowWidth() { return mWindowWidth; }
-        inline const auto GetWindowHeight() { return mWindowHeight; }
+        inline const auto camera() { return mCamera; }
+        inline const auto windowWidth() { return mWindowWidth; }
+        inline const auto windowHeight() { return mWindowHeight; }
 
         void clear()
         {

@@ -1,10 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-02-22 13:41:44
- * @LastEditTime: 2021-02-22 14:44:00
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2021-02-23 00:18:39
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-10-16 13:58:26
+ * @FilePath: \Kiri2D\core\include\kiri2d\camera\camera.h
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\camera\camera.h
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_CAMERA_H_
@@ -24,7 +25,6 @@ namespace KIRI2D
         Vector2F WindowCenter;
         float ViewDistance;
 
-        // Constructor
         Camera2DProperty(
             Vector2F lookAt,
             Vector2F windowCellSize,
@@ -51,16 +51,16 @@ namespace KIRI2D
             mCameraData.CameraDistance = 1.f;
         }
 
-        inline const float ViewScale()
+        inline const float viewScale()
         {
             return mCameraData.CameraDistance / mCameraData.ViewDistance;
         }
 
-        inline const Vector2F Project(Vector2F pixel)
+        inline const Vector2F project(Vector2F pixel)
         {
-            auto relPosition = mRotateMatrix * (pixel - mCameraData.LookAt) * this->ViewScale();
+            auto rel_position = mRotateMatrix * (pixel - mCameraData.LookAt) * this->viewScale();
 
-            return relPosition / mCameraData.WindowCellSize + mCameraData.WindowCenter;
+            return rel_position / mCameraData.WindowCellSize + mCameraData.WindowCenter;
         }
 
         ~KiriCamera2D() {}

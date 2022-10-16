@@ -86,12 +86,12 @@ int main(int argc, char *argv[])
         for (auto i = 0; i < precompute_lines.size(); ++i)
             lines.emplace_back(precompute_lines[i]);
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        // renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        // renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
 
         // clean canvas
