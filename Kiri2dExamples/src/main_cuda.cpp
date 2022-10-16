@@ -415,12 +415,12 @@ void VoronoiExample()
             }
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -546,12 +546,12 @@ void VoronoiExample1()
         //     lines.emplace_back(line);
         // }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -712,15 +712,15 @@ void VoronoiExample2()
         }
     }
 
-    scene->AddLines(lines);
-    scene->AddParticles(points);
-    scene->AddCircles(circles);
+    scene->addLines(lines);
+    scene->addParticles(points);
+    scene->addCircles(circles);
 
-    renderer->DrawCanvas();
-    renderer->SaveImages2File();
+    renderer->drawCanvas();
+    renderer->saveImages2File();
     while (1)
     {
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
     }
 }
@@ -838,11 +838,11 @@ void LloydRelaxationExample()
             }
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -917,12 +917,12 @@ void NOCAJ12Example()
             }
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -1064,11 +1064,11 @@ void NOCAJ12Example1()
     //         }
     //     }
 
-    //     scene->AddLines(lines);
-    //     scene->AddParticles(points);
+    //     scene->addLines(lines);
+    //     scene->addParticles(points);
 
-    //     renderer->DrawCanvas();
-    //     cv::imshow("KIRI2D", renderer->GetCanvas());
+    //     renderer->drawCanvas();
+    //     cv::imshow("KIRI2D", renderer->canvas());
     //     cv::waitKey(5);
     //     renderer->clearCanvas();
     //     scene->clear();
@@ -1179,12 +1179,12 @@ void VoroTestExample()
             }
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        // renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        // renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -1331,12 +1331,12 @@ void VoroPorosityOptimizeConvexExample()
             //     lines.emplace_back(line);
             // }
 
-            scene->AddParticles(points);
-            scene->AddCircles(circles);
-            scene->AddLines(lines);
+            scene->addParticles(points);
+            scene->addCircles(circles);
+            scene->addLines(lines);
 
-            renderer->DrawCanvas();
-            renderer->SaveImages2File();
+            renderer->drawCanvas();
+            renderer->saveImages2File();
 
             renderer->clearCanvas();
             scene->clear();
@@ -1461,12 +1461,12 @@ void VoroPorosityTreemapOptiExample()
             }
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -1540,19 +1540,19 @@ void UniParticleSampler()
     // line.col = Vector3F(0.f, 0.f, 255.f);
     // lines.emplace_back(line);
 
-    scene->AddLines(lines);
-    scene->AddParticles(points);
-    scene->AddCircles(circles);
-    scene->AddObject(boundary);
+    scene->addLines(lines);
+    scene->addParticles(points);
+    scene->addCircles(circles);
+    scene->addObject(boundary);
 
-    renderer->DrawCanvas();
-    renderer->SaveImages2File();
+    renderer->drawCanvas();
+    renderer->saveImages2File();
 
     ExportSamplerData2CSVFile("uni_bunny", UInt2Str4Digit(0), circles);
 
     while (1)
     {
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
     }
 }
@@ -1695,12 +1695,12 @@ void VoroPorosityOptimizeScaleExample()
                 circles[i].col = Vector3F(color.r(), color.g(), color.b());
             }
 
-            scene->AddParticles(points);
-            scene->AddCircles(circles);
-            scene->AddLines(lines);
+            scene->addParticles(points);
+            scene->addCircles(circles);
+            scene->addLines(lines);
 
-            renderer->DrawCanvas();
-            renderer->SaveImages2File();
+            renderer->drawCanvas();
+            renderer->saveImages2File();
 
             renderer->clearCanvas();
             scene->clear();
@@ -1849,14 +1849,14 @@ void StraightSkeletonExample1()
         boundary.Append(polygon[i] + offset);
     }
 
-    scene->AddLines(lines);
-    scene->AddObject(boundary);
+    scene->addLines(lines);
+    scene->addObject(boundary);
 
-    renderer->DrawCanvas();
-    renderer->SaveImages2File();
+    renderer->drawCanvas();
+    renderer->saveImages2File();
     while (1)
     {
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
     }
 }
@@ -1988,12 +1988,12 @@ void LoadVoronoiExample()
         }
     }
 
-    // scene->AddParticles(points);
-    scene->AddLines(lines);
-    scene->AddCircles(circles);
+    // scene->addParticles(points);
+    scene->addLines(lines);
+    scene->addCircles(circles);
 
-    renderer->DrawCanvas();
-    renderer->SaveImages2File();
+    renderer->drawCanvas();
+    renderer->saveImages2File();
 
     renderer->clearCanvas();
     scene->clear();
@@ -2085,18 +2085,18 @@ void UniPoissonDiskSampler()
             //         circles.emplace_back(KiriCircle2(pos + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, mr_points[i].z / 2.f));
             // }
 
-            scene->AddLines(lines);
-            scene->AddParticles(points);
-            scene->AddCircles(circles);
-            scene->AddObject(boundary);
+            scene->addLines(lines);
+            scene->addParticles(points);
+            scene->addCircles(circles);
+            scene->addObject(boundary);
 
-            renderer->DrawCanvas();
-            renderer->SaveImages2File();
+            renderer->drawCanvas();
+            renderer->saveImages2File();
 
             // KIRI_LOG_DEBUG("sampling iterate idx:{0}", counter);
             // ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(counter), circles);
 
-            cv::imshow("KIRI2D", renderer->GetCanvas());
+            cv::imshow("KIRI2D", renderer->canvas());
             cv::waitKey(5);
 
             renderer->clearCanvas();
@@ -2193,15 +2193,15 @@ void DebugNSParticles()
         circles.emplace_back(KiriCircle2(Vector2F(sp.center.x, sp.center.y), Vector3F(sp.color.x, sp.color.y, sp.color.z), sp.radius));
     }
 
-    scene->AddCircles(circles);
+    scene->addCircles(circles);
 
-    renderer->DrawCanvas();
-    renderer->SaveImages2File();
+    renderer->drawCanvas();
+    renderer->saveImages2File();
 
     // KIRI_LOG_DEBUG("sampling iterate idx:{0}", counter);
     // ExportSamplerData2CSVFile(boundaryFileName, UInt2Str4Digit(counter), circles);
 
-    // cv::imshow("KIRI2D", renderer->GetCanvas());
+    // cv::imshow("KIRI2D", renderer->canvas());
     // cv::waitKey(5);
 
     renderer->clearCanvas();
@@ -2364,22 +2364,22 @@ void VoronoiNSOptimize()
             }
         }
 
-        // scene->AddParticles(points);
-        scene->AddLines(lines);
-        scene->AddCircles(circles);
+        // scene->addParticles(points);
+        scene->addLines(lines);
+        scene->addCircles(circles);
 
-        renderer->DrawCanvas();
-        renderer->SaveImages2File();
+        renderer->drawCanvas();
+        renderer->saveImages2File();
 
         renderer->clearCanvas();
         scene->clear();
 
         // debug g
-        // scene->AddLines(glines);
-        scene->AddCircles(gcircles);
+        // scene->addLines(glines);
+        scene->addCircles(gcircles);
 
-        renderer->DrawCanvas();
-        renderer->SaveImages2FileWithPrefix("group");
+        renderer->drawCanvas();
+        renderer->saveImages2FileWithPrefix("group");
 
         renderer->clearCanvas();
         scene->clear();
@@ -2445,11 +2445,11 @@ void TestPolygonUnion()
             lines.emplace_back(precompute_lines[i]);
         }
 
-        scene->AddLines(lines);
+        scene->addLines(lines);
 
-        renderer->DrawCanvas();
-        // renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        // renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -2647,12 +2647,12 @@ void QuickHullConvexHull2d()
             lines.emplace_back(precompute_lines[i]);
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        // renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        // renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -2738,12 +2738,12 @@ void QuickHullDelaunayTriangulation2d()
             lines.emplace_back(precompute_lines[i]);
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -2838,12 +2838,12 @@ void QuickHullVoronoi2d()
             lines.emplace_back(precompute_lines[i]);
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        // renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        // renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -2946,25 +2946,25 @@ void BalzerIEEE2009Example()
             lines.emplace_back(precompute_lines[i]);
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
         // if (!stable)
         // {
-        //     renderer->DrawCanvas();
-        //     cv::imshow("KIRI2D", renderer->GetCanvas());
+        //     renderer->drawCanvas();
+        //     cv::imshow("KIRI2D", renderer->canvas());
         //     cv::waitKey(5);
         //     renderer->clearCanvas();
         //     scene->clear();
         // }
         // else
         // {
-        //     renderer->SaveImages2File();
+        //     renderer->saveImages2File();
         //     break;
         // }
 
-        renderer->DrawCanvas();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -3150,15 +3150,15 @@ void MSSampler2D()
             circles[i].col = Vector3F(color.r(), color.g(), color.b());
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
-        scene->AddCircles(circles);
+        scene->addLines(lines);
+        scene->addParticles(points);
+        scene->addCircles(circles);
 
-        renderer->DrawCanvas();
+        renderer->drawCanvas();
 
         if (idx % 10 == 0)
-            renderer->SaveImages2File();
-        // cv::imshow("KIRI2D", renderer->GetCanvas());
+            renderer->saveImages2File();
+        // cv::imshow("KIRI2D", renderer->canvas());
         // cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();

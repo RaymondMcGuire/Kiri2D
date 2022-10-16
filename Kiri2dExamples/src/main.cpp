@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-06-13 11:24:25
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-07-03 10:26:07
+ * @LastEditTime: 2022-10-16 14:14:14
  * @FilePath: \Kiri2D\Kiri2dExamples\src\main.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -110,12 +110,12 @@ void QuickHullVoronoi2d()
             lines.emplace_back(precompute_lines[i]);
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
+        scene->addLines(lines);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        // renderer->SaveImages2File();
-        cv::imshow("KIRI2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        // renderer->saveImages2File();
+        cv::imshow("KIRI2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -263,7 +263,7 @@ void MSSampler2D()
     // auto boundary_name_list = std::vector<String>
     //{"bunny", "alligator", "beast", "cheburashka", "cow", "homer", "horse", "lucy", "nefertiti", "spot", "teapot", "woody", "xyzrgb_dragon"};
 
-    String boundaryFileName = "beast";
+    String boundaryFileName = "bunny";
 
     String filePath = String(RESOURCES_PATH) + "alpha_shapes/" + boundaryFileName + ".xy";
     std::vector<Vector2F> bunny2d;
@@ -379,14 +379,14 @@ void MSSampler2D()
             circles[i].col = Vector3F(color.r(), color.g(), color.b());
         }
 
-        scene->AddLines(lines);
-        scene->AddParticles(points);
-        scene->AddCircles(circles);
+        scene->addLines(lines);
+        scene->addParticles(points);
+        scene->addCircles(circles);
 
-        renderer->DrawCanvas();
+        renderer->drawCanvas();
 
         if ((idx + 1) % 100 == 0)
-            renderer->SaveImages2FileWithPrefix(boundaryFileName);
+            renderer->saveImages2FileWithPrefix(boundaryFileName);
 
         renderer->clearCanvas();
         scene->clear();
@@ -483,12 +483,12 @@ void Sph2dExample()
             points.emplace_back(p);
         }
 
-        scene->AddRect(boundaryRect);
-        scene->AddParticles(points);
+        scene->addRect(boundaryRect);
+        scene->addParticles(points);
 
-        renderer->DrawCanvas();
-        // renderer->SaveImages2File();
-        cv::imshow("KIRI2D::SPH2D", renderer->GetCanvas());
+        renderer->drawCanvas();
+        // renderer->saveImages2File();
+        cv::imshow("KIRI2D::SPH2D", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -604,15 +604,15 @@ void BlueNoiseSamplingVisual()
             points.emplace_back(p);
         }
 
-        scene->AddRect(boundaryRect);
-        scene->AddParticles(points);
+        scene->addRect(boundaryRect);
+        scene->addParticles(points);
 
-        // scene->AddCircles(circles);
-        //  scene->AddObject(boundary_vis);
+        // scene->addCircles(circles);
+        //  scene->addObject(boundary_vis);
 
-        renderer->DrawCanvas();
-        renderer->SaveImages2File();
-        cv::imshow("KIRI2D::Blue Noise Sampling", renderer->GetCanvas());
+        renderer->drawCanvas();
+        renderer->saveImages2File();
+        cv::imshow("KIRI2D::Blue Noise Sampling", renderer->canvas());
         cv::waitKey(5);
         renderer->clearCanvas();
         scene->clear();
@@ -832,9 +832,9 @@ void main()
 
     // Sph2dExample();
 
-    BlueNoiseSampling();
-    //  BlueNoiseSamplingVisual();
+    // BlueNoiseSampling();
+    //   BlueNoiseSamplingVisual();
 
-    // MSSampler2D();
+    MSSampler2D();
     //         ExportParticleRadiusDist();
 }

@@ -383,13 +383,13 @@ void MRDEM_SetupParams()
 void UpdateScene(const std::vector<KiriCircle2> &circles)
 {
 
-    scene->AddCircles(boundaries);
-    scene->AddCircles(circles);
+    scene->addCircles(boundaries);
+    scene->addCircles(circles);
 
-    renderer->DrawCanvas();
-    renderer->SaveImages2File();
+    renderer->drawCanvas();
+    renderer->saveImages2File();
 
-    cv::imshow("DEM", renderer->GetCanvas());
+    cv::imshow("DEM", renderer->canvas());
     cv::waitKey(5);
 
     renderer->clearCanvas();
