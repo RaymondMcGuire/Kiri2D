@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-08-23 18:20:43
- * @LastEditTime: 2021-12-12 17:15:08
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-10-16 15:08:04
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-10-16 15:17:24
+ * @FilePath: \Kiri2D\core\include\kiri2d\data\shape_struct.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_SHAPE_STRUCT_H_
