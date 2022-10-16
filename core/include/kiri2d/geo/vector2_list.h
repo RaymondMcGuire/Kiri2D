@@ -1,12 +1,12 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-05-14 14:43:27
- * @LastEditTime: 2021-06-16 00:38:26
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-10-16 15:12:44
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-10-16 15:22:41
+ * @FilePath: \Kiri2D\core\include\kiri2d\geo\vector2_list.h
  * @Description:
- * @FilePath: \Kiri2D\Kiri2d\include\kiri2d\geo\vector2_list.h
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _KIRI_VECTOR2_LIST_H_
 #define _KIRI_VECTOR2_LIST_H_
 
@@ -34,7 +34,7 @@ namespace KIRI
             }
             else
             {
-                if (!CheckVertex2Identity(x))
+                if (!checkVertex2Identity(x))
                 {
                     auto new_node = SharedPtr<Node>(new Node(x));
                     mHead->prev->next = new_node;
@@ -46,7 +46,7 @@ namespace KIRI
             }
         }
 
-        void Clone(const SharedPtr<KiriVector2List> &list)
+        void clone(const SharedPtr<KiriVector2List> &list)
         {
             if (mHead != NULL)
             {
@@ -59,10 +59,10 @@ namespace KIRI
             }
         }
 
-        void ReverseVertexList()
+        void reverseVertexList()
         {
             auto list = std::make_shared<KiriVector2List>();
-            Clone(list);
+            clone(list);
             removeAll();
             if (list->head() != NULL)
             {
@@ -75,7 +75,7 @@ namespace KIRI
             }
         }
 
-        void PrintVertexList()
+        void printVertexList()
         {
             KIRI_LOG_DEBUG("----------Vertex LIST----------");
             KIRI_LOG_DEBUG("vector2d list number={0}", this->Size());
@@ -94,7 +94,7 @@ namespace KIRI
         }
 
     private:
-        bool CheckVertex2Identity(const Vector2F &v1)
+        bool checkVertex2Identity(const Vector2F &v1)
         {
             auto epsilon = 0.1f;
             auto v2 = mHead->prev->value;

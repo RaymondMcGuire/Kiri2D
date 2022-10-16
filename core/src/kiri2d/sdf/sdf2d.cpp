@@ -1,9 +1,9 @@
-/*** 
+/***
  * @Author: Xu.WANG
  * @Date: 2021-02-22 15:22:11
  * @LastEditTime: 2021-02-22 18:15:43
  * @LastEditors: Xu.WANG
- * @Description: 
+ * @Description:
  * @FilePath: \Kiri2D\Kiri2d\src\kiri2d\sdf\sdf2d.cpp
  */
 
@@ -12,7 +12,7 @@
 
 namespace KIRI2D
 {
-    void KiriSDF2D::ReCalcBBox(Vector2F p)
+    void KiriSDF2D::reCalcBBox(Vector2F p)
     {
         mBBoxMin[0] = std::min(p[0], mBBoxMin[0]);
         mBBoxMin[1] = std::min(p[1], mBBoxMin[1]);
@@ -21,15 +21,15 @@ namespace KIRI2D
         mBBoxMax[1] = std::max(p[1], mBBoxMax[1]);
     }
 
-    void KiriSDF2D::Append(Vector2F p, Vector2F v)
+    void KiriSDF2D::append(Vector2F p, Vector2F v)
     {
         mPoints.emplace_back(p);
         mVelocities.emplace_back(v);
 
-        this->ReCalcBBox(p);
+        this->reCalcBBox(p);
     }
 
-    const Int KiriSDF2D::FindRegion(Vector2F p)
+    const Int KiriSDF2D::findRegion(Vector2F p)
     {
         Int res = 1;
         Int len = mPoints.size();
@@ -45,7 +45,7 @@ namespace KIRI2D
         return res;
     }
 
-    const SDF2DInfo KiriSDF2D::CalcClosestDistance(Vector2F p)
+    const SDF2DInfo KiriSDF2D::calcClosestDistance(Vector2F p)
     {
         auto minDis = Huge<float>();
         int startIdx = mPoints.size() - 1, endIdx = 0;
@@ -62,7 +62,7 @@ namespace KIRI2D
             }
         }
 
-        Int sign = this->FindRegion(p);
+        Int sign = this->findRegion(p);
         return SDF2DInfo(sign * minDis, startIdx, endIdx);
     }
 }

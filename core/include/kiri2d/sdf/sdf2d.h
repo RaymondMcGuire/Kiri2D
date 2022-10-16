@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-09-26 16:12:57
- * @LastEditTime: 2022-02-20 13:27:25
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-10-16 14:56:24
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2022-10-16 15:24:24
+ * @FilePath: \Kiri2D\core\include\kiri2d\sdf\sdf2d.h
  * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_SDF2D_H_
@@ -54,9 +56,9 @@ namespace KIRI2D
 
         const Vec_Vec2F points() const { return mPoints; }
 
-        void Append(Vector2F p, Vector2F v = Vector2F(0.f));
-        const Int FindRegion(Vector2F p);
-        const SDF2DInfo CalcClosestDistance(Vector2F p);
+        void append(Vector2F p, Vector2F v = Vector2F(0.f));
+        const Int findRegion(Vector2F p);
+        const SDF2DInfo calcClosestDistance(Vector2F p);
 
         void setOffset(const Vector2F &offset) { mOffset = offset; }
         Vector2F offset() { return mOffset; }
@@ -86,7 +88,7 @@ namespace KIRI2D
         Vec_Vec2F mPoints;
         Vec_Vec2F mVelocities;
 
-        void ReCalcBBox(Vector2F p);
+        void reCalcBBox(Vector2F p);
     };
     typedef SharedPtr<KiriSDF2D> KiriSDF2DPtr;
 }
