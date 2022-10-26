@@ -2,12 +2,11 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-02-19 10:59:26
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-05-31 10:13:11
+ * @LastEditTime: 2022-10-26 16:44:30
  * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\voronoi\voronoi_polygon.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _HDV_VORONOI_POLYGON_H_
 #define _HDV_VORONOI_POLYGON_H_
 
@@ -195,6 +194,35 @@ namespace HDV::Voronoi
             for (size_t i = 0; i < mPositions.size(); i++)
                 min_dist = std::min(min_dist, minDis2LineSegment2(mPositions[i], mPositions[(i + 1) % mPositions.size()], p));
             return min_dist;
+        }
+
+        Vector2D minDisPoint2LineSegment2(Vector2D v, Vector2D w, Vector2D p)
+        {
+            auto l2 = v.distanceSquaredTo(w);
+            if (l2 == 0.f)
+                return v;
+
+            auto t = std::clamp(((p - v).dot(w - v)) / l2, 0.0, 1.0);
+            auto projection = v + t * (w - v);
+            return projection;
+        }
+
+        Vector2D computeMinDistPointInPoly(const Vector2D &p)
+        {
+            auto min_dist_point = Vector2D(0.0);
+            auto min_dist = std::numeric_limits<double>::max();
+            for (size_t i = 0; i < mPositions.size(); i++)
+            {
+                auto dist_point = minDisPoint2LineSegment2(mPositions[i], mPositions[(i + 1) % mPositions.size()], p);
+                auto dist = p.distanceTo(dist_point);
+                if (dist < min_dist)
+                {
+                    min_dist = dist;
+                    min_dist_point = dist_point;
+                }
+            }
+
+            return min_dist_point;
         }
 
         Vector3D computeMICByStraightSkeleton()

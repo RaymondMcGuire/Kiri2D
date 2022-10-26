@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-09-26 16:12:57
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-10-16 14:07:52
+ * @LastEditTime: 2022-10-26 16:55:44
  * @FilePath: \Kiri2D\core\src\kiri2d\renderer\renderer.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -44,18 +44,6 @@ namespace KIRI2D
 
     void KiriRenderer2D::drawCanvas()
     {
-        auto particles = mScene->points();
-        for (int i = 0; i < particles.size(); i++)
-        {
-            auto relate_position = mScene->camera()->project(particles[i].pos);
-            int cx = relate_position[0];
-            int cy = mWindowHeight - relate_position[1];
-            if (cx < 0 || cx >= mWindowWidth || cy < 0 || cy >= mWindowHeight)
-                continue;
-            auto col = particles[i].col * 255.f;
-
-            cv::circle(mCanvas, cv::Point(cx, cy), particles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), -1);
-        }
 
         auto circles = mScene->circles();
         for (int i = 0; i < circles.size(); i++)
@@ -111,6 +99,19 @@ namespace KIRI2D
                 auto ey = mWindowHeight - (size_t)end_relate_position.y;
                 cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(253, 185, 134), 2.f * mScene->camera()->viewScale());
             }
+        }
+
+        auto particles = mScene->points();
+        for (int i = 0; i < particles.size(); i++)
+        {
+            auto relate_position = mScene->camera()->project(particles[i].pos);
+            int cx = relate_position[0];
+            int cy = mWindowHeight - relate_position[1];
+            if (cx < 0 || cx >= mWindowWidth || cy < 0 || cy >= mWindowHeight)
+                continue;
+            auto col = particles[i].col * 255.f;
+
+            cv::circle(mCanvas, cv::Point(cx, cy), particles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), -1);
         }
     }
 }
