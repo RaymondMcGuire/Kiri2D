@@ -1,5 +1,7 @@
 build
 build_cuda
+release_exe
+*.mp4
 .vscode
 /cmake/checkCUDA/compile/*
 !/cmake/checkCUDA/compile/.gitkeep
