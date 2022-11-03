@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-05-10 17:38:37
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-06-15 16:47:34
+ * @LastEditTime: 2022-11-03 16:57:41
  * @FilePath: \Kiri2D\core\include\kiri2d.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -19,4 +19,6 @@
 #include <kiri2d/hdv_toolkit/sampler/ms_sampler2.h>
 #include <kiri2d/hdv_toolkit/voronoi/voronoi_nocaj_treemap.h>
 
+#include <kiri2d/proto_sphere/proto_sphere_packing.h>
+#include <kiri2d/proto_sphere/proto_sphere_bon20.h>
 #endif

@@ -1,12 +1,3 @@
-/***
- * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-10-26 16:40:21
- * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-03 16:56:53
- * @FilePath: \Kiri2D\demos\proto_sphere_scene1\src\main.cpp
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
- */
 
 #include <kiri2d.h>
 
