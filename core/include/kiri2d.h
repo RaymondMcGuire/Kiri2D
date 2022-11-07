@@ -21,4 +21,5 @@
 
 #include <kiri2d/proto_sphere/proto_sphere_packing.h>
 #include <kiri2d/proto_sphere/proto_sphere_bon20.h>
+#include <kiri2d/proto_sphere/proto_sphere_opti.h>
 #endif
