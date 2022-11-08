@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-02-23 00:18:39
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-10-16 14:00:51
+ * @LastEditTime: 2022-11-08 23:20:22
  * @FilePath: \Kiri2D\core\include\kiri2d\renderer\renderer.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.

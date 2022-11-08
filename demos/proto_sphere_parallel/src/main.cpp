@@ -1,8 +1,8 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-11-08 11:45:10
+ * @Date: 2022-11-08 18:11:34
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-08 14:14:57
+ * @LastEditTime: 2022-11-08 23:22:54
  * @FilePath: \Kiri2D\demos\proto_sphere_parallel\src\main.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -15,7 +15,8 @@ using namespace KIRI2D;
 using namespace PSPACK;
 using namespace HDV;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // log system
   KiriLog::init();
 
@@ -33,10 +34,12 @@ int main(int argc, char *argv[]) {
   auto boundary_polygon = std::make_shared<Voronoi::VoronoiPolygon2>();
 
   auto LoadPolygonFromXYFile = [](std::vector<Vector2F> &points, size_t &num,
-                                  const char *filePath) {
+                                  const char *filePath)
+  {
     std::ifstream file(filePath);
     file >> num;
-    for (int i = 0; i < num; ++i) {
+    for (int i = 0; i < num; ++i)
+    {
       Vector2F xy;
       file >> xy.x >> xy.y;
       points.emplace_back(xy);
@@ -65,12 +68,17 @@ int main(int argc, char *argv[]) {
   // compute sdf
   auto poly_sdf = std::make_shared<SDF::PolygonSDF2D>(boundary_polygon, 1.0);
   poly_sdf->computeSDF();
-
+  auto rnd_point = boundary_polygon->rndInnerPoint();
+  auto dist = poly_sdf->getSDF(rnd_point);
+  KIRI_LOG_DEBUG("dist={0}; min dist={1}", dist, boundary_polygon->computeMinDisInPoly(rnd_point));
+  auto rnd_point_cir = KiriCircle2(Vector2F(rnd_point.x, rnd_point.y) + offset, Vector3F(0.f, 1.f, 1.f), abs(dist), false);
+  auto rnd_point_p = KiriPoint2(Vector2F(rnd_point.x, rnd_point.y) + offset, Vector3F(1.f, 0.f, 0.f));
   // visualization
   std::vector<KiriLine2> lines;
   std::vector<KiriLine2> precompute_lines;
 
-  for (size_t j = 0; j < boundary_polygon->positions().size(); j++) {
+  for (size_t j = 0; j < boundary_polygon->positions().size(); j++)
+  {
     auto vertices = boundary_polygon->positions()[j];
     auto vertices1 =
         boundary_polygon
@@ -85,10 +93,13 @@ int main(int argc, char *argv[]) {
     lines.emplace_back(precompute_lines[i]);
 
   scene->addLines(lines);
+  scene->addParticle(rnd_point_p);
+  scene->addCircle(rnd_point_cir);
 
   renderer->drawCanvas();
 
-  while (1) {
+  while (1)
+  {
     // renderer->saveImages2File();
     cv::imshow("KIRI2D", renderer->canvas());
     cv::waitKey(5);
