@@ -20,6 +20,7 @@
 #include <kiri2d/hdv_toolkit/voronoi/voronoi_nocaj_treemap.h>
 
 #include <kiri2d/proto_sphere/proto_sphere_packing.h>
+#include <kiri2d/proto_sphere/proto_sphere_packing_sdf.h>
 #include <kiri2d/proto_sphere/proto_sphere_bon20.h>
 #include <kiri2d/proto_sphere/proto_sphere_opti.h>
 #endif

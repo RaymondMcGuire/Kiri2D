@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-08 18:11:34
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-08 23:56:20
+ * @LastEditTime: 2022-11-09 15:43:05
  * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\sdf\sdf2d.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -29,6 +29,8 @@ namespace HDV::SDF
       mHeightCellNum = mBbox.height() / mCellSize;
       mSDFData.resize(mWidthCellNum, mHeightCellNum,
                       (mHeightCellNum + mWidthCellNum) * mCellSize);
+      mSDFClosestPoint.resize(mWidthCellNum, mHeightCellNum,
+                              Vector2D());
     }
 
     virtual ~PolygonSDF2D() {}
@@ -79,8 +81,9 @@ namespace HDV::SDF
         {
           auto pos = mBbox.LowestPoint + Vector2D(i * mCellSize, j * mCellSize);
           auto sgn = mPolygon->contains(pos) ? 1.0 : -1.0;
-          auto dist = mPolygon->computeMinDisInPoly(pos);
-          auto val = sgn * dist;
+          auto [min_dist, min_dist_point] = mPolygon->computeMinDistInfoInPoly(pos);
+          auto val = sgn * min_dist;
+          mSDFClosestPoint(i, j) = min_dist_point;
           if (abs(val) < mSDFData(i, j))
           {
             mSDFData(i, j) = val;
@@ -89,7 +92,30 @@ namespace HDV::SDF
       }
     }
 
-    double getSDF(Vector2D pos)
+    void updateSDFWithSpheres(std::vector<Vector3D> spheres)
+    {
+      for (auto i = 0; i < mWidthCellNum; i++)
+      {
+        for (auto j = 0; j < mHeightCellNum; j++)
+        {
+          auto pos = mBbox.LowestPoint + Vector2D(i * mCellSize, j * mCellSize);
+
+          for (auto s = 0; s < spheres.size(); s++)
+          {
+            auto ss = spheres[s];
+            auto dist_ps = (pos - Vector2D(ss.x, ss.y)).length() - ss.z;
+            if (dist_ps < mSDFData(i, j))
+            {
+              mSDFData(i, j) = dist_ps;
+              // KIRI_LOG_DEBUG("updated sdf ij={0}", mSDFData(i, j));
+              mSDFClosestPoint(i, j) = Vector2D(ss.x, ss.y) + ss.z * (pos - Vector2D(ss.x, ss.y)).normalized();
+            }
+          }
+        }
+      }
+    }
+
+    std::tuple<double, Vector2D> getSDF(Vector2D pos)
     {
       auto grid_pos = (pos - mBbox.LowestPoint) / mCellSize;
 
@@ -97,7 +123,9 @@ namespace HDV::SDF
       double fi, fj;
       get_barycentric(grid_pos.x, i, fi, 0, mWidthCellNum);
       get_barycentric(grid_pos.y, j, fj, 0, mHeightCellNum);
-      return bilerp(mSDFData(i, j), mSDFData(i + 1, j), mSDFData(i, j + 1), mSDFData(i + 1, j + 1), fi, fj);
+      auto sdf_val = bilerp(mSDFData(i, j), mSDFData(i + 1, j), mSDFData(i, j + 1), mSDFData(i + 1, j + 1), fi, fj);
+      auto sdf_cloest_point = bilerp(mSDFClosestPoint(i, j), mSDFClosestPoint(i + 1, j), mSDFClosestPoint(i, j + 1), mSDFClosestPoint(i + 1, j + 1), fi, fj);
+      return std::make_tuple(sdf_val, sdf_cloest_point);
     }
 
   private:
@@ -105,8 +133,12 @@ namespace HDV::SDF
     double mCellSize;
     BoundingBox2D mBbox;
     Array2D mSDFData;
+    Array2Vec2D mSDFClosestPoint;
     Voronoi::VoronoiPolygon2Ptr mPolygon;
   };
+
+  typedef std::shared_ptr<PolygonSDF2D> PolygonSDF2DPtr;
+
 } // namespace HDV::SDF
 
 #endif

@@ -1,5 +1,5 @@
 # Project Name
-set(PROJECT_NAME ProtoSphereParallel)
+set(PROJECT_NAME ProtoSphereSDFParallel)
 
 # Enable CUDA
 set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")
