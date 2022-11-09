@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-09 15:59:29
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-09 16:00:15
+ * @LastEditTime: 2022-11-09 21:10:23
  * @FilePath: \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_packing_sdf.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -23,70 +23,125 @@ namespace PSPACK
         explicit ProtoSpherePackingSDF2D(const HDV::Voronoi::VoronoiPolygon2Ptr &boundary)
             : mBoundary(std::move(boundary))
         {
-            mIterNum = 0;
-            mCurrentSphereRadius = 0.0;
-            mCurrentSphere = mBoundary->rndInnerPoint();
-
-            mSDF2D = std::make_shared<HDV::SDF::PolygonSDF2D>(mBoundary, 1.0);
+            mSDF2D = std::make_shared<HDV::SDF::PolygonSDF2D>(mBoundary, 10.0);
             mSDF2D->computeSDF();
+            initParticles();
         }
 
         virtual ~ProtoSpherePackingSDF2D()
         {
         }
 
-        const Vector2D currentSphere() const { return mCurrentSphere; }
-        const double currentSphereRadius() const { return mCurrentSphereRadius; }
+        const std::vector<Vector3D> &currentSpheres() const { return mCurrentSpheres; }
         const std::vector<Vector3D> &insertedSpheres() const { return mInsertedSpheres; }
         const std::vector<Vector3F> &insertedSpheresColor() const { return mInsertedSpheresColor; }
 
         virtual void convergePrototype()
         {
-
-            auto [min_dist, q_c] = mSDF2D->getSDF(mCurrentSphere);
-
-            auto epsilon = this->coolingFunc(mIterNum, 0.08, 0.8);
-            auto current_move = epsilon * (mCurrentSphere - q_c);
-
-            if (current_move.length() <= min_dist)
-                mCurrentSphere += current_move;
-
-            mCurrentSphereRadius = min_dist;
-            auto current_move_len = current_move.length();
-            if (current_move_len < 1e-6)
+            if (mDrawCurrentSpheres)
             {
-                mIterNum = 0;
-
-                mInsertedSpheres.emplace_back(Vector3D(mCurrentSphere.x, mCurrentSphere.y, mCurrentSphereRadius));
-                mInsertedSpheresColor.emplace_back(Vector3F(Random::get(0.0, 1.0), Random::get(0.0, 1.0), Random::get(0.0, 1.0)));
-
+                mDrawCurrentSpheres = false;
                 mSDF2D->updateSDFWithSpheres(mInsertedSpheres);
-                auto pos_flag = false;
-                while (!pos_flag)
-                {
-                    pos_flag = true;
-                    mCurrentSphere = mBoundary->rndInnerPoint();
-                    auto [new_min_dist, new_q_c] = mSDF2D->getSDF(mCurrentSphere);
-
-                    if (new_min_dist <= 0)
-                        pos_flag = false;
-                }
+                initParticles();
+                KIRI_LOG_DEBUG("re append particles!={0}; inserted number={1}", mCurrentSpheres.size(), mInsertedSpheres.size());
             }
 
-            mIterNum++;
+            mAllConverged = true;
+            for (auto i = 0; i < mCurrentSpheres.size(); i++)
+            {
+                if (mConverges[i])
+                    continue;
+                else
+                    mAllConverged = false;
+
+                // KIRI_LOG_DEBUG("itertaion!");
+
+                auto sphere = mCurrentSpheres[i];
+                auto pos = Vector2D(sphere.x, sphere.y);
+                auto [min_dist, q_c] = mSDF2D->getSDF(pos);
+
+                auto epsilon = this->coolingFunc(mIterNums[i], 0.08, 0.8);
+                auto current_move = epsilon * (pos - q_c);
+
+                if (current_move.length() <= min_dist)
+                    pos += current_move;
+
+                auto radius = min_dist;
+                auto current_move_len = current_move.length();
+                if (current_move_len < 1e-6)
+                    mConverges[i] = true;
+
+                mCurrentSpheres[i] = Vector3D(pos.x, pos.y, radius);
+                mIterNums[i]++;
+            }
+
+            if (mAllConverged && !mDrawCurrentSpheres)
+            {
+                // KIRI_LOG_DEBUG("sort and add !");
+
+                std::sort(mCurrentSpheres.begin(), mCurrentSpheres.end(), [](const auto &lhs, const auto &rhs)
+                          { return lhs.z > rhs.z; });
+
+                for (auto i = 0; i < mCurrentSpheres.size(); i++)
+                {
+                    auto cur_pos = Vector2D(mCurrentSpheres[i].x, mCurrentSpheres[i].y);
+                    auto cur_radius = mCurrentSpheres[i].z;
+
+                    auto overlapping = false;
+                    for (auto j = 0; j < mInsertedSpheres.size(); j++)
+                    {
+                        auto other_pos = Vector2D(mInsertedSpheres[j].x, mInsertedSpheres[j].y);
+                        auto other_radius = mInsertedSpheres[j].z;
+                        auto dist = (other_pos - cur_pos).length() - (cur_radius + other_radius);
+                        if (dist < 0)
+                        {
+                            overlapping = true;
+                            break;
+                        }
+                    }
+
+                    if (!overlapping)
+                    {
+                        mInsertedSpheres.emplace_back(mCurrentSpheres[i]);
+                        mInsertedSpheresColor.emplace_back(Vector3F(Random::get(0.0, 1.0), Random::get(0.0, 1.0), Random::get(0.0, 1.0)));
+                    }
+                }
+
+                mDrawCurrentSpheres = true;
+                // mInsertedSpheres.insert(std::end(mInsertedSpheres), std::begin(mInsertedSpheresTmp), std::end(mInsertedSpheresTmp));
+                // mInsertedSpheresColor.insert(std::end(mInsertedSpheresColor), std::begin(mInsertedSpheresColorTmp), std::end(mInsertedSpheresColorTmp));
+            }
         }
 
     protected:
+        void initParticles()
+        {
+            mCurrentSpheres.clear();
+            mIterNums.clear();
+            mConverges.clear();
+            // mInsertedSpheresTmp.clear();
+            // mInsertedSpheresColorTmp.clear();
+
+            auto data = mSDF2D->placeGridPoints();
+            KIRI_LOG_DEBUG("sphere array num={0}; data num={1}", mCurrentSpheres.size(), data.size());
+            for (auto i = 0; i < data.size(); i++)
+                mCurrentSpheres.emplace_back(Vector3D(data[i].x, data[i].y, 0.0));
+
+            mIterNums.resize(mCurrentSpheres.size(), 0);
+            mConverges.resize(mCurrentSpheres.size(), false);
+        }
+
         virtual double coolingFunc(const int iter, const double init, const double k)
         {
             return init * exp(-k * iter);
         }
 
-        UInt mIterNum;
-        double mCurrentSphereRadius;
-        Vector2D mCurrentSphere;
-        std::vector<Vector3D> mInsertedSpheres;
-        std::vector<Vector3F> mInsertedSpheresColor;
+        bool mAllConverged = false, mDrawCurrentSpheres = false;
+        std::vector<UInt> mIterNums;
+        std::vector<bool> mConverges;
+        std::vector<Vector3D> mCurrentSpheres;
+        std::vector<Vector3D> mInsertedSpheresTmp, mInsertedSpheres;
+        std::vector<Vector3F> mInsertedSpheresColorTmp, mInsertedSpheresColor;
         HDV::Voronoi::VoronoiPolygon2Ptr mBoundary;
         HDV::SDF::PolygonSDF2DPtr mSDF2D;
     };

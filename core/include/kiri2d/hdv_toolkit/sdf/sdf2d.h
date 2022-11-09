@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-08 18:11:34
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-09 15:43:05
+ * @LastEditTime: 2022-11-09 21:05:29
  * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\sdf\sdf2d.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -71,6 +71,24 @@ namespace HDV::SDF
           lerp(v00, v10, fx),
           lerp(v01, v11, fx),
           fy);
+    }
+
+    std::vector<Vector2D> placeGridPoints()
+    {
+      std::vector<Vector2D> data;
+      for (auto i = 0; i < mWidthCellNum; i++)
+      {
+        for (auto j = 0; j < mHeightCellNum; j++)
+        {
+          auto pos = mBbox.LowestPoint + Vector2D((i + 0.5) * mCellSize, (j + 0.5) * mCellSize);
+          auto [sdf_val, sdf_cloest_point] = getSDF(pos);
+          if (sdf_val > 0.0)
+          {
+            data.emplace_back(pos);
+          }
+        }
+      }
+      return data;
     }
 
     void computeSDF()
