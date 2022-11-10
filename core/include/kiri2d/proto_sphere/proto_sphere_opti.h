@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-08 11:45:10
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-08 11:47:26
+ * @LastEditTime: 2022-11-10 14:01:43
  * @FilePath: \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_opti.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -115,7 +115,7 @@ public:
 
 private:
   bool mFinished = false;
-  int mRangeSize = 100, mCurrentIdx = 0, mMaxSingleIter = 100;
+  int mRangeSize = 100, mCurrentIdx = 0, mMaxSingleIter = 20;
   double mErrorRate = 0.05;
   double mCurrentTargetRadius;
   double mRadiusMin, mRadiusMax;
