@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-14 12:26:31
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-14 12:27:10
+ * @LastEditTime: 2022-11-15 11:54:33
  * @FilePath:
  * \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_packing_sdf_opti.h
  * @Description:
@@ -14,15 +14,30 @@
 #pragma once
 
 #include <kiri2d/hdv_toolkit/sdf/sdf2d.h>
-
+std::vector<double> mCurrentRadiusRange, mPreDefinedRadiusRange;
+std::vector<double> mCurrentRadiusRangeProb, mPreDefinedRadiusRangeProb;
 namespace PSPACK {
 class ProtoSpherePackingSDFOpti {
 public:
   explicit ProtoSpherePackingSDFOpti(
-      const HDV::Voronoi::VoronoiPolygon2Ptr &boundary)
-      : mBoundary(std::move(boundary)) {
+      const HDV::Voronoi::VoronoiPolygon2Ptr &boundary,
+      const std::vector<double> radiusRange,
+      const std::vector<double> radiusRangeProb)
+      : mBoundary(std::move(boundary)), mCurrentRadiusRange(radiusRange),
+        mPreDefinedRadiusRange(radiusRange),
+        mCurrentRadiusRangeProb(radiusRangeProb),
+        mPreDefinedRadiusRangeProb(radiusRangeProb) {
     mSDF2D = std::make_shared<HDV::SDF::PolygonSDF2D>(mBoundary, 10.0);
     mSDF2D->computeSDF();
+
+    estimateIdealTotalNum();
+
+    // realloc generator: method2 failed
+    mCurrentRadiusRangeProb[mCurrentRadiusRangeProb.size() - 1] = 1.0;
+    if (mCurrentRadiusRangeProb.size() - 1 != 0)
+      for (int j = mCurrentRadiusRangeProb.size() - 1 - 1; j >= 0; j--)
+        mCurrentRadiusRangeProb[j] = 0.0;
+
     initParticles();
   }
 
@@ -42,20 +57,17 @@ public:
 
   void statisticDistribution() {
 
-    int a = 0, b = 0, c = 0, d = 0;
+    std::vector<int> counter;
+    counter.resize(mPreDefinedRadiusRange.size() - 1, 0);
     double v = 0.0, rmspe = 0.0;
     for (auto i = 0; i < mInsertedSpheres.size(); i++) {
-      if (mInsertedSpheres[i].z >= 1 && mInsertedSpheres[i].z <= 5)
-        a++;
 
-      if (mInsertedSpheres[i].z > 5 && mInsertedSpheres[i].z <= 10)
-        b++;
-
-      if (mInsertedSpheres[i].z > 10 && mInsertedSpheres[i].z <= 100)
-        c++;
-
-      if (mInsertedSpheres[i].z > 100)
-        d++;
+      for (auto ri = 0; ri < mPreDefinedRadiusRange.size() - 1; ri++) {
+        auto rj = ri + 1;
+        if (mInsertedSpheres[i].z > mPreDefinedRadiusRange[ri] &&
+            mInsertedSpheres[i].z <= mPreDefinedRadiusRange[rj])
+          counter[ri]++;
+      }
 
       v += KIRI_PI<double>() * mInsertedSpheres[i].z * mInsertedSpheres[i].z;
       rmspe += std::pow((mInsertedSpheres[i].z - mInsertedSpheres[i].w) /
@@ -64,30 +76,92 @@ public:
     }
 
     rmspe = std::sqrt(rmspe / (double)mInsertedSpheres.size());
+    std::string distribution_str = "";
+    for (auto ri = 0; ri < mPreDefinedRadiusRange.size() - 1; ri++)
+      distribution_str +=
+          std::to_string((int)mPreDefinedRadiusRange[ri]) + "---" +
+          std::to_string((int)mPreDefinedRadiusRange[ri + 1]) + ":" +
+          std::to_string(counter[ri] / (double)mInsertedSpheres.size()) + "; ";
+    KIRI_LOG_DEBUG("{0}; porosity={1}; rmspe={2}", distribution_str,
+                   1.0 - v / mBoundary->area(), rmspe);
 
-    KIRI_LOG_DEBUG(
-        "1-5:{0}; 5-10:{1}; 10-100:{2}; 100:{3}; porosity={4}; rmspe={5}",
-        a / (double)mInsertedSpheres.size(),
-        b / (double)mInsertedSpheres.size(),
-        c / (double)mInsertedSpheres.size(),
-        d / (double)mInsertedSpheres.size(), 1.0 - v / mBoundary->area(),
-        rmspe);
+    auto sum_remain = 0;
+    for (auto i = 0; i < counter.size(); i++) {
+      auto remain_num =
+          mRemainSamples[i] -
+          (counter[i] - mRemainSamples[i] * mInsertedIntervalCounter);
+      remain_num = remain_num > 0 ? remain_num : 0;
+      sum_remain += remain_num;
+
+      KIRI_LOG_DEBUG(
+          "dist:{0}-{1}; remain samples num={2}; remain iter num={3}",
+          mCurrentRadiusRange[i], mCurrentRadiusRange[i + 1], remain_num,
+          mInsertedIntervalCounter);
+    }
+
+    if (sum_remain == 0) {
+      mInsertedIntervalCounter++;
+    } else {
+
+      // adjust distribution generator based on remained particles: failed!
+      // for (auto i = 0; i < mCurrentRadiusRangeProb.size(); i++) {
+      //   auto remain_num = mRemainSamples[i] - counter[i];
+      //   remain_num = remain_num > 0 ? remain_num : 0;
+      //   mCurrentRadiusRangeProb[i] = remain_num / (double)sum_remain;
+      //   KIRI_LOG_DEBUG("new dist:{0}-{1}:{2}; remain samples num={3}",
+      //                  mCurrentRadiusRange[i], mCurrentRadiusRange[i + 1],
+      //                  mCurrentRadiusRangeProb[i], remain_num);
+      // }
+
+      // method2 failed
+      for (int i = mCurrentRadiusRangeProb.size() - 1; i >= 0; i--) {
+        auto remain_num =
+            mRemainSamples[i] -
+            (counter[i] - mRemainSamples[i] * mInsertedIntervalCounter);
+        remain_num = remain_num > 0 ? remain_num : 0;
+        if (remain_num == 0) {
+          mCurrentRadiusRangeProb[i] = 0.0;
+          continue;
+        }
+
+        mCurrentRadiusRangeProb[i] = 1.0;
+        if (i != 0)
+          for (int j = i - 1; j >= 0; j--)
+            mCurrentRadiusRangeProb[j] = 0.0;
+
+        break;
+      }
+
+      // for (auto i = 0; i < mCurrentRadiusRangeProb.size(); i++) {
+      //   auto remain_num = mRemainSamples[i] - counter[i];
+      //   remain_num = remain_num > 0 ? remain_num : 0;
+      //   if (remain_num == 0)
+      //     mCurrentRadiusRangeProb[i] = 0.0;
+
+      //   KIRI_LOG_DEBUG("new dist:{0}-{1}:{2}; remain samples num={3}",
+      //                  mCurrentRadiusRange[i], mCurrentRadiusRange[i + 1],
+      //                  mCurrentRadiusRangeProb[i], remain_num);
+      // }
+    }
   }
 
   void reAllocateParticles() {
     if (mDrawCurrentSpheres) {
       mDrawCurrentSpheres = false;
       mSDF2D->updateSDFWithSpheres(mInsertedSpheres);
-      initParticles();
       KIRI_LOG_DEBUG("re append particles!={0}; inserted number={1}; min "
                      "radius={2}; max radius={3}",
                      mCurrentSpheres.size(), mInsertedSpheres.size(),
                      mInsertedMinRadius, mInsertedMaxRadius);
       statisticDistribution();
+      initParticles();
     }
   }
 
   virtual void convergePrototype() {
+
+    if (mInsertedIntervalCounter > mInsertedIntervalNum)
+      return;
 
     mAllConverged = true;
     for (auto i = 0; i < mCurrentSpheres.size(); i++) {
@@ -101,9 +175,29 @@ public:
       auto sphere = mCurrentSpheres[i];
       auto target_radius = sphere.w;
       auto pos = Vector2D(sphere.x, sphere.y);
+
+      // compute current sphere radius
       auto [current_radius, q_c] = mSDF2D->getSDF(pos);
 
+      // radius is not correct
+      if (current_radius < 0.0) {
+        mConvergesTotalNum++;
+        mConverges[i] = true;
+        mCurrentSpheres[i] = mLastSpheres[i];
+        continue;
+      }
+
+      mCurrentSpheres[i] =
+          Vector4D(pos.x, pos.y, current_radius, target_radius);
+
+      // check sphere radius is converges or not
       auto radius_dist = target_radius - current_radius;
+      if (abs(radius_dist) < target_radius * mErrorRate ||
+          mIterNums[i] > mMaxSingleIter) {
+        mConvergesTotalNum++;
+        mConverges[i] = true;
+        continue;
+      }
 
       mLearningRate[i] *= timeBasedDecay(mIterNums[i], 0.1);
       // mLearningRate[i] = expBasedDecay(0.1, mIterNums[i], 0.1);
@@ -114,16 +208,8 @@ public:
       if (current_move.length() <= current_radius)
         pos += current_move;
 
-      if (current_radius < 0.0)
-        KIRI_LOG_ERROR("radius is minus!!!");
-
-      if (abs(radius_dist) < target_radius * mErrorRate ||
-          mIterNums[i] > mMaxSingleIter) {
-        mConvergesTotalNum++;
-        mConverges[i] = true;
-      }
-
-      mCurrentSpheres[i] = Vector4D(pos.x, pos.y, current_radius, sphere.w);
+      mLastSpheres[i] = mCurrentSpheres[i];
+      mCurrentSpheres[i] = Vector4D(pos.x, pos.y, 0.0, sphere.w);
       mIterNums[i]++;
     }
 
@@ -153,7 +239,8 @@ public:
           }
         }
 
-        if (!overlapping) {
+        if (!overlapping &&
+            abs(cur_radius - tar_radius) < tar_radius * mErrorRate) {
           mInsertedSpheres.emplace_back(mCurrentSpheres[i]);
           mInsertedSpheresColor.emplace_back(Vector3F(Random::get(0.0, 1.0),
                                                       Random::get(0.0, 1.0),
@@ -171,6 +258,26 @@ public:
   }
 
 protected:
+  void estimateIdealTotalNum() {
+    auto area = mBoundary->area();
+    auto denominator = 0.0;
+    for (auto ri = 0; ri < mPreDefinedRadiusRange.size() - 1; ri++) {
+      auto rj = ri + 1;
+      auto avg_radius =
+          0.5 * (mPreDefinedRadiusRange[ri] + mPreDefinedRadiusRange[rj]);
+      denominator += avg_radius * avg_radius * KIRI_PI<double>() *
+                     mPreDefinedRadiusRangeProb[ri];
+    }
+    mIdealTotalNum = area / denominator;
+    KIRI_LOG_DEBUG("ideal total num={0}", mIdealTotalNum);
+
+    mRemainSamples.resize(mPreDefinedRadiusRangeProb.size(), 0);
+    for (auto i = 0; i < mPreDefinedRadiusRangeProb.size(); i++) {
+      mRemainSamples[i] = int(mIdealTotalNum * mPreDefinedRadiusRangeProb[i] /
+                              mInsertedIntervalNum);
+    }
+  }
+
   double timeBasedDecay(const int iter, const double decay) {
     return 1.0 / (1.0 + decay * iter);
   }
@@ -181,35 +288,23 @@ protected:
 
   void initParticles() {
     mCurrentSpheres.clear();
+    mLastSpheres.clear();
     mIterNums.clear();
     mConverges.clear();
     mLearningRate.clear();
 
-    // predefine radius dist
-    std::vector<double> radius_range;
-    radius_range.push_back(1.0);
-    radius_range.push_back(5.0);
-    radius_range.push_back(10.0);
-    radius_range.push_back(100.0);
-
-    std::vector<double> radius_range_prob;
-    radius_range_prob.push_back(0.7);
-    radius_range_prob.push_back(0.2);
-    radius_range_prob.push_back(0.1);
-
     std::random_device engine;
     std::mt19937 gen(engine());
     std::piecewise_constant_distribution<double> pcdis{
-        std::begin(radius_range), std::end(radius_range),
-        std::begin(radius_range_prob)};
+        std::begin(mCurrentRadiusRange), std::end(mCurrentRadiusRange),
+        std::begin(mCurrentRadiusRangeProb)};
 
     auto data = mSDF2D->placeGridPoints();
-    KIRI_LOG_DEBUG("sphere array num={0}; data num={1}", mCurrentSpheres.size(),
-                   data.size());
 
     for (auto i = 0; i < data.size(); i++) {
-      mCurrentSpheres.emplace_back(
-          Vector4D(data[i].x, data[i].y, 0.0, pcdis(gen)));
+      auto new_sphere = Vector4D(data[i].x, data[i].y, 0.0, pcdis(gen));
+      mCurrentSpheres.emplace_back(new_sphere);
+      mLastSpheres.emplace_back(new_sphere);
     }
 
     mIterNums.resize(mCurrentSpheres.size(), 0);
@@ -223,12 +318,19 @@ protected:
   double mInsertedMaxRadius = Tiny<double>(),
          mInsertedMinRadius = Huge<double>();
 
+  int mIdealTotalNum = 0;
+
+  int mInsertedIntervalCounter = 0, mInsertedIntervalNum = 10;
+  std::vector<int> mRemainSamples;
+
   std::vector<double> mLearningRate;
   std::vector<UInt> mIterNums;
   std::vector<bool> mConverges;
-  std::vector<Vector4D> mCurrentSpheres;
+  std::vector<Vector4D> mCurrentSpheres, mLastSpheres;
   std::vector<Vector4D> mInsertedSpheres;
   std::vector<Vector3F> mInsertedSpheresColor;
+  std::vector<double> mCurrentRadiusRange, mPreDefinedRadiusRange;
+  std::vector<double> mCurrentRadiusRangeProb, mPreDefinedRadiusRangeProb;
   HDV::Voronoi::VoronoiPolygon2Ptr mBoundary;
   HDV::SDF::PolygonSDF2DPtr mSDF2D;
 };

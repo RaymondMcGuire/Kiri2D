@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-10 12:22:57
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-14 14:01:53
+ * @LastEditTime: 2022-11-15 11:57:26
  * @FilePath: \Kiri2D\demos\proto_sphere_parallel_test\src\main.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -80,12 +80,24 @@ int main(int argc, char *argv[]) {
     precompute_lines.emplace_back(line);
   }
 
+  // predefine radius dist
+  std::vector<double> radius_range;
+  radius_range.push_back(1.0);
+  radius_range.push_back(5.0);
+  radius_range.push_back(10.0);
+  radius_range.push_back(100.0);
+
+  std::vector<double> radius_range_prob;
+  radius_range_prob.push_back(0.7);
+  radius_range_prob.push_back(0.2);
+  radius_range_prob.push_back(0.1);
+
   // proto sphere algo
-  auto proto_sphere_packing =
-      std::make_shared<ProtoSpherePackingSDFOpti>(boundary_polygon);
+  auto proto_sphere_packing = std::make_shared<ProtoSpherePackingSDFOpti>(
+      boundary_polygon, radius_range, radius_range_prob);
 
   // while (1)
-  for (auto idx = 0; idx < 30; idx++) {
+  for (auto idx = 0; idx < 100; idx++) {
     // clear
     lines.clear();
     points.clear();
