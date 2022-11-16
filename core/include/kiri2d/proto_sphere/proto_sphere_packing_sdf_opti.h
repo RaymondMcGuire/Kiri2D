@@ -212,7 +212,8 @@ namespace PSPACK
         auto pos = Vector2D(sphere.x, sphere.y);
 
         // compute current sphere radius
-        auto [current_radius, q_c] = mSDF2D->getSDF(pos);
+        // auto [current_radius, q_c] = mSDF2D->getSDF(pos);
+        auto [current_radius, q_c] = mSDF2D->getSDFWithRndOffset(pos);
 
         // radius is not correct
         if (current_radius < 0.0)

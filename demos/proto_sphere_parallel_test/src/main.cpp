@@ -98,11 +98,12 @@ int main(int argc, char *argv[])
 
   // proto sphere algo
   auto proto_sphere_packing = std::make_shared<ProtoSpherePackingSDFOpti>(
-      boundary_polygon, radius_range, radius_range_prob, true);
+      boundary_polygon, radius_range, radius_range_prob, false);
 
   // while (1)
   for (auto idx = 0; idx < 200; idx++)
   {
+    auto converged = false;
     // clear
     lines.clear();
     points.clear();
@@ -111,13 +112,16 @@ int main(int argc, char *argv[])
 
     while (!proto_sphere_packing->needDrawSpheres())
     {
-      auto convergence = proto_sphere_packing->convergePrototype();
-      if (convergence)
+      converged = proto_sphere_packing->convergePrototype();
+      if (converged)
       {
-        KIRI_LOG_DEBUG("convergence!!!!");
+        KIRI_LOG_DEBUG("Already Converged!");
         break;
       }
     }
+
+    if (converged)
+      break;
 
     proto_sphere_packing->reAllocateParticles();
 
