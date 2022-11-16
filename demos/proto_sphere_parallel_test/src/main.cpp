@@ -86,15 +86,22 @@ int main(int argc, char *argv[])
 
   // predefine radius dist
   std::vector<double> radius_range;
+  // radius_range.push_back(1.0);
+  // radius_range.push_back(5.0);
+  // radius_range.push_back(10.0);
+  // radius_range.push_back(100.0);
+
   radius_range.push_back(1.0);
-  radius_range.push_back(5.0);
   radius_range.push_back(10.0);
+  radius_range.push_back(30.0);
+  radius_range.push_back(60.0);
   radius_range.push_back(100.0);
 
   std::vector<double> radius_range_prob;
-  radius_range_prob.push_back(0.7);
+  radius_range_prob.push_back(0.6);
   radius_range_prob.push_back(0.2);
-  radius_range_prob.push_back(0.1);
+  radius_range_prob.push_back(0.15);
+  radius_range_prob.push_back(0.05);
 
   // proto sphere algo
   auto proto_sphere_packing = std::make_shared<ProtoSpherePackingSDFOpti>(

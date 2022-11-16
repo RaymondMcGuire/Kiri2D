@@ -1,8 +1,8 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-11-15 18:49:55
+ * @Date: 2022-11-16 20:58:33
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-16 18:42:48
+ * @LastEditTime: 2022-11-17 00:40:57
  * @FilePath: \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_packing_sdf_opti.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -167,19 +167,19 @@ namespace PSPACK
     {
       if (mDrawCurrentSpheres)
       {
-
+        mDrawCurrentSpheres = false;
         if (mLastInsertedNum == mInsertedSpheres.size())
         {
           if (mFindMinimumPorosity)
             mStartFindMinimumPorosity = true;
           else
           {
+            KIRI_LOG_DEBUG("Generated Finished!");
             mFinished = true;
             return;
           }
         }
 
-        mDrawCurrentSpheres = false;
         mSDF2D->updateSDFWithSpheres(mInsertedSpheres);
         KIRI_LOG_DEBUG("re append particles!={0}; inserted number={1}; min "
                        "radius={2}; max radius={3}",
@@ -212,8 +212,8 @@ namespace PSPACK
         auto pos = Vector2D(sphere.x, sphere.y);
 
         // compute current sphere radius
-        // auto [current_radius, q_c] = mSDF2D->getSDF(pos);
-        auto [current_radius, q_c] = mSDF2D->getSDFWithRndOffset(pos);
+        auto [current_radius, q_c] = mSDF2D->getSDF(pos);
+        // auto [current_radius, q_c] = mSDF2D->getSDFWithRndOffset(pos);
 
         // radius is not correct
         if (current_radius < 0.0)
