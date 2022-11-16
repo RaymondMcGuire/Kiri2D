@@ -1,8 +1,8 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-11-15 18:49:55
+ * @Date: 2022-11-16 12:37:22
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-15 19:09:36
+ * @LastEditTime: 2022-11-16 18:56:55
  * @FilePath: \Kiri2D\demos\proto_sphere_parallel_test\src\main.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -14,7 +14,8 @@ using namespace KIRI2D;
 using namespace PSPACK;
 using namespace HDV;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // log system
   KiriLog::init();
 
@@ -32,10 +33,12 @@ int main(int argc, char *argv[]) {
   auto boundary_polygon = std::make_shared<Voronoi::VoronoiPolygon2>();
 
   auto LoadPolygonFromXYFile = [](std::vector<Vector2F> &points, size_t &num,
-                                  const char *filePath) {
+                                  const char *filePath)
+  {
     std::ifstream file(filePath);
     file >> num;
-    for (int i = 0; i < num; ++i) {
+    for (int i = 0; i < num; ++i)
+    {
       Vector2F xy;
       file >> xy.x >> xy.y;
       points.emplace_back(xy);
@@ -46,7 +49,7 @@ int main(int argc, char *argv[]) {
 
   std::vector<Vector2F> boundary2d_vertices;
   size_t boundary_vertices;
-  auto boundary_file_name = "xyzrgb_dragon";
+  auto boundary_file_name = "bunny";
   String boundary_file_path =
       String(RESOURCES_PATH) + "alpha_shapes/" + boundary_file_name + ".xy";
   LoadPolygonFromXYFile(boundary2d_vertices, boundary_vertices,
@@ -69,7 +72,8 @@ int main(int argc, char *argv[]) {
   std::vector<KiriLine2> precompute_lines;
   std::vector<Vector2F> precompute_points;
 
-  for (size_t j = 0; j < boundary_polygon->positions().size(); j++) {
+  for (size_t j = 0; j < boundary_polygon->positions().size(); j++)
+  {
     auto vertices = boundary_polygon->positions()[j];
     auto vertices1 =
         boundary_polygon
@@ -94,20 +98,25 @@ int main(int argc, char *argv[]) {
 
   // proto sphere algo
   auto proto_sphere_packing = std::make_shared<ProtoSpherePackingSDFOpti>(
-      boundary_polygon, radius_range, radius_range_prob);
+      boundary_polygon, radius_range, radius_range_prob, true);
 
   // while (1)
-  for (auto idx = 0; idx < 100; idx++) {
+  for (auto idx = 0; idx < 200; idx++)
+  {
     // clear
     lines.clear();
     points.clear();
     circles.clear();
     precompute_points.clear();
 
-    while (!proto_sphere_packing->needDrawSpheres()) {
+    while (!proto_sphere_packing->needDrawSpheres())
+    {
       auto convergence = proto_sphere_packing->convergePrototype();
       if (convergence)
+      {
+        KIRI_LOG_DEBUG("convergence!!!!");
         break;
+      }
     }
 
     proto_sphere_packing->reAllocateParticles();

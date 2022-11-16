@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-15 18:49:55
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-15 19:01:54
+ * @LastEditTime: 2022-11-16 18:42:48
  * @FilePath: \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_packing_sdf_opti.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -23,16 +23,22 @@ namespace PSPACK
     explicit ProtoSpherePackingSDFOpti(
         const HDV::Voronoi::VoronoiPolygon2Ptr &boundary,
         const std::vector<double> radiusRange,
-        const std::vector<double> radiusRangeProb)
+        const std::vector<double> radiusRangeProb,
+        bool findMinimumPorosity = false)
         : mBoundary(std::move(boundary)), mCurrentRadiusRange(radiusRange),
           mPreDefinedRadiusRange(radiusRange),
           mCurrentRadiusRangeProb(radiusRangeProb),
-          mPreDefinedRadiusRangeProb(radiusRangeProb)
+          mPreDefinedRadiusRangeProb(radiusRangeProb),
+          mFindMinimumPorosity(findMinimumPorosity)
     {
       mSDF2D = std::make_shared<HDV::SDF::PolygonSDF2D>(mBoundary, 10.0);
       mSDF2D->computeSDF();
 
       estimateIdealTotalNum();
+
+      mMinVal = radiusRange.front();
+      mMaxVal = radiusRange.back();
+      KIRI_LOG_DEBUG("range min val={0}; range max val={1}", mMinVal, mMaxVal);
 
       // realloc generator
       mCurrentRadiusRangeProb[mCurrentRadiusRangeProb.size() - 1] = 1.0;
@@ -102,6 +108,16 @@ namespace PSPACK
       KIRI_LOG_DEBUG("{0}; porosity={1}; rmspe={2}; bhatta_val={3}", distribution_str,
                      1.0 - v / mBoundary->area(), rmspe, bhatta_val);
 
+      if (mStartFindMinimumPorosity)
+      {
+        for (int i = 0; i < mCurrentRadiusRangeProb.size(); i++)
+        {
+          mCurrentRadiusRangeProb[i] = mPreDefinedRadiusRangeProb[i];
+        }
+
+        return;
+      }
+
       auto sum_remain = 0;
       for (auto i = 0; i < counter.size(); i++)
       {
@@ -126,6 +142,7 @@ namespace PSPACK
 
         for (int i = mCurrentRadiusRangeProb.size() - 1; i >= 0; i--)
         {
+
           auto remain_num =
               mRemainSamples[i] -
               (counter[i] - mRemainSamples[i] * mInsertedIntervalCounter);
@@ -153,8 +170,13 @@ namespace PSPACK
 
         if (mLastInsertedNum == mInsertedSpheres.size())
         {
-          mFinished = true;
-          return;
+          if (mFindMinimumPorosity)
+            mStartFindMinimumPorosity = true;
+          else
+          {
+            mFinished = true;
+            return;
+          }
         }
 
         mDrawCurrentSpheres = false;
@@ -241,7 +263,7 @@ namespace PSPACK
           auto cur_pos = Vector2D(mCurrentSpheres[i].x, mCurrentSpheres[i].y);
           auto cur_radius = mCurrentSpheres[i].z;
           auto tar_radius = mCurrentSpheres[i].w;
-          if (cur_radius < 1.0 || cur_radius > 100.0)
+          if (cur_radius < mMinVal || cur_radius > mMaxVal)
             continue;
 
           auto overlapping = false;
@@ -358,6 +380,8 @@ namespace PSPACK
            mInsertedMinRadius = Huge<double>();
 
     int mIdealTotalNum = 0;
+    double mMinVal = 0.0, mMaxVal = 0.0;
+    bool mFindMinimumPorosity = false, mStartFindMinimumPorosity = false;
     bool mFinished = false;
     int mLastInsertedNum = 0;
     int mInsertedIntervalCounter = 0, mInsertedIntervalNum = 10;
