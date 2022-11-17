@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-16 20:58:33
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-17 00:40:57
+ * @LastEditTime: 2022-11-17 13:17:54
  * @FilePath: \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_packing_sdf_opti.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -39,6 +39,8 @@ namespace PSPACK
       mMinVal = radiusRange.front();
       mMaxVal = radiusRange.back();
       KIRI_LOG_DEBUG("range min val={0}; range max val={1}", mMinVal, mMaxVal);
+
+      mTotalCounter.resize(mPreDefinedRadiusRange.size() - 1, 0);
 
       // realloc generator
       mCurrentRadiusRangeProb[mCurrentRadiusRangeProb.size() - 1] = 1.0;
@@ -212,8 +214,8 @@ namespace PSPACK
         auto pos = Vector2D(sphere.x, sphere.y);
 
         // compute current sphere radius
-        auto [current_radius, q_c] = mSDF2D->getSDF(pos);
-        // auto [current_radius, q_c] = mSDF2D->getSDFWithRndOffset(pos);
+        // auto [current_radius, q_c] = mSDF2D->getSDF(pos);
+        auto [current_radius, q_c] = mSDF2D->getSDFWithRndOffset(pos);
 
         // radius is not correct
         if (current_radius < 0.0)
@@ -255,6 +257,7 @@ namespace PSPACK
       {
         // KIRI_LOG_DEBUG("sort and add !");
 
+        // sort particles by size
         std::sort(mCurrentSpheres.begin(), mCurrentSpheres.end(),
                   [](const auto &lhs, const auto &rhs)
                   { return lhs.z > rhs.z; });
@@ -282,18 +285,34 @@ namespace PSPACK
             }
           }
 
+          // insert new spheres
           if (!overlapping &&
               abs(cur_radius - tar_radius) < tar_radius * mErrorRate)
           {
-            mInsertedSpheres.emplace_back(mCurrentSpheres[i]);
-            mInsertedSpheresColor.emplace_back(Vector3F(Random::get(0.0, 1.0),
-                                                        Random::get(0.0, 1.0),
-                                                        Random::get(0.0, 1.0)));
-            if (mInsertedMaxRadius < mCurrentSpheres[i].z)
-              mInsertedMaxRadius = mCurrentSpheres[i].z;
+            auto cur_idx = -1;
+            for (auto ri = 0; ri < mPreDefinedRadiusRange.size() - 1; ri++)
+            {
+              auto rj = ri + 1;
+              if (cur_radius > mPreDefinedRadiusRange[ri] &&
+                  cur_radius <= mPreDefinedRadiusRange[rj])
+              {
+                cur_idx = ri;
+                mTotalCounter[ri]++;
+              }
+            }
 
-            if (mInsertedMinRadius > mCurrentSpheres[i].z)
-              mInsertedMinRadius = mCurrentSpheres[i].z;
+            if ((mRemainSamples[cur_idx] * mInsertedIntervalNum) >= mTotalCounter[cur_idx] || mStartFindMinimumPorosity)
+            {
+              mInsertedSpheres.emplace_back(mCurrentSpheres[i]);
+              mInsertedSpheresColor.emplace_back(Vector3F(Random::get(0.0, 1.0),
+                                                          Random::get(0.0, 1.0),
+                                                          Random::get(0.0, 1.0)));
+              if (mInsertedMaxRadius < mCurrentSpheres[i].z)
+                mInsertedMaxRadius = mCurrentSpheres[i].z;
+
+              if (mInsertedMinRadius > mCurrentSpheres[i].z)
+                mInsertedMinRadius = mCurrentSpheres[i].z;
+            }
           }
         }
 
@@ -386,6 +405,8 @@ namespace PSPACK
     bool mFinished = false;
     int mLastInsertedNum = 0;
     int mInsertedIntervalCounter = 0, mInsertedIntervalNum = 10;
+
+    std::vector<int> mTotalCounter;
     std::vector<int> mRemainSamples;
 
     std::vector<double> mLearningRate;

@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-16 12:37:22
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-16 18:56:55
+ * @LastEditTime: 2022-11-17 13:21:39
  * @FilePath: \Kiri2D\demos\proto_sphere_parallel_test\src\main.cpp
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -86,26 +86,31 @@ int main(int argc, char *argv[])
 
   // predefine radius dist
   std::vector<double> radius_range;
-  // radius_range.push_back(1.0);
-  // radius_range.push_back(5.0);
-  // radius_range.push_back(10.0);
-  // radius_range.push_back(100.0);
-
   radius_range.push_back(1.0);
+  radius_range.push_back(5.0);
   radius_range.push_back(10.0);
-  radius_range.push_back(30.0);
-  radius_range.push_back(60.0);
   radius_range.push_back(100.0);
 
+  // radius_range.push_back(1.0);
+  // radius_range.push_back(10.0);
+  // radius_range.push_back(30.0);
+  // radius_range.push_back(60.0);
+  // radius_range.push_back(100.0);
+
   std::vector<double> radius_range_prob;
-  radius_range_prob.push_back(0.6);
+
+  radius_range_prob.push_back(0.7);
   radius_range_prob.push_back(0.2);
-  radius_range_prob.push_back(0.15);
-  radius_range_prob.push_back(0.05);
+  radius_range_prob.push_back(0.1);
+
+  // radius_range_prob.push_back(0.6);
+  // radius_range_prob.push_back(0.2);
+  // radius_range_prob.push_back(0.15);
+  // radius_range_prob.push_back(0.05);
 
   // proto sphere algo
   auto proto_sphere_packing = std::make_shared<ProtoSpherePackingSDFOpti>(
-      boundary_polygon, radius_range, radius_range_prob, false);
+      boundary_polygon, radius_range, radius_range_prob, true);
 
   // while (1)
   for (auto idx = 0; idx < 200; idx++)
