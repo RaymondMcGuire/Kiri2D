@@ -13,8 +13,6 @@
 #pragma once
 
 #include <kiri2d/hdv_toolkit/sdf/sdf2d.h>
-std::vector<double> mCurrentRadiusRange, mPreDefinedRadiusRange;
-std::vector<double> mCurrentRadiusRangeProb, mPreDefinedRadiusRangeProb;
 namespace PSPACK
 {
   class ProtoSpherePackingSDFOpti
