@@ -96,10 +96,10 @@ if(NOT ${ENABLE_CUDA})
   add_subdirectory(demos/proto_sphere_bon2020_scene1)
   add_subdirectory(demos/proto_sphere_test)
   add_subdirectory(demos/proto_sphere_parallel_test)
-  
+
   add_subdirectory(demos/sdf2d_scene1)
-  
-  
+  add_subdirectory(demos/rigidbody2d_scene)
+
   # add_subdirectory(demos/pdipm_sampler2)
   # add_subdirectory(demos/pdipm_sampler3)
 
