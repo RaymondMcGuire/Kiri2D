@@ -1,11 +1,11 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-12-17 19:23:24
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-12-17 19:25:55
+ * @LastEditTime: 2022-12-22 19:08:32
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\rigidbody_solver.h
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
  */
 
 #ifndef _RIGIDBODY_SOLVER_H_
@@ -18,14 +18,14 @@
 namespace PHY::RIGIDBODY
 {
 
-    class RigidbodySolver
+    class RigidBodySolver
     {
     public:
-        explicit RigidbodySolver()
+        explicit RigidBodySolver()
         {
         }
 
-        virtual ~RigidbodySolver()
+        virtual ~RigidBodySolver()
         {
         }
     };
