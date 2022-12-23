@@ -1,34 +1,29 @@
-/*** 
+/***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-12-17 19:23:24
+ * @Date: 2022-12-23 13:08:40
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-12-22 19:08:32
+ * @LastEditTime: 2022-12-23 14:06:11
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\rigidbody_solver.h
- * @Description: 
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _RIGIDBODY_SOLVER_H_
 #define _RIGIDBODY_SOLVER_H_
 
 #pragma once
 
-#include <kiri_pch.h>
+#include <kiri2d/physics/rigidbody/collision_handler.h>
 
-namespace PHY::RIGIDBODY
-{
+namespace PHY::RIGIDBODY {
 
-    class RigidBodySolver
-    {
-    public:
-        explicit RigidBodySolver()
-        {
-        }
+class RigidBodySolver {
+public:
+  explicit RigidBodySolver() {}
 
-        virtual ~RigidBodySolver()
-        {
-        }
-    };
+  virtual ~RigidBodySolver() {}
+
+private:
+};
 
 } // namespace PHY::RIGIDBODY
 
