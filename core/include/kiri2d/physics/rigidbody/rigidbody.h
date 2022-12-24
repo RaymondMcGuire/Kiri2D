@@ -1,12 +1,13 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-12-19 16:10:09
+ * @Date: 2022-12-24 18:26:53
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-12-23 15:07:16
+ * @LastEditTime: 2022-12-24 21:13:44
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\rigidbody.h
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
+
 #ifndef _RIGIDBODY_H_
 #define _RIGIDBODY_H_
 
@@ -14,63 +15,91 @@
 
 #include <kiri2d/physics/rigidbody/shape.h>
 
-namespace PHY::RIGIDBODY {
-template <class RealType> class RigidBody {
-public:
-  explicit RigidBody(VectorX<2, RealType> pos)
-      : mPosition(pos), mDensity(1.0), mMass(0.0), mInverseMass(0.0) {
-    mVelocity = VectorX<2, RealType>(static_cast<RealType>(0.0));
-  }
+namespace PHY::RIGIDBODY
+{
+  template <class RealType>
+  class RigidBody
+  {
+  public:
+    explicit RigidBody(VectorX<2, RealType> pos)
+        : mPosition(pos), mDensity(1.0), mMass(0.0), mInverseMass(0.0)
+    {
+      mVelocity = VectorX<2, RealType>(static_cast<RealType>(0.0));
+    }
 
-  virtual ~RigidBody() {
-    // KIRI_LOG_DEBUG("~RigidBody");
-  }
+    virtual ~RigidBody()
+    {
+      // KIRI_LOG_DEBUG("~RigidBody");
+    }
 
-  void SetShape(const std::shared_ptr<Shape<RealType>> &shape) {
-    mShape = shape;
-  }
+    void SetShape(const std::shared_ptr<Shape<RealType>> &shape)
+    {
+      mShape = shape;
+    }
 
-  const std::shared_ptr<Shape<RealType>> &GetShape() const { return mShape; }
+    const std::shared_ptr<Shape<RealType>> &GetShape() const { return mShape; }
 
-  void SetMass(RealType mass) {
-    mMass = mass;
-    mInverseMass =
-        mMass ? static_cast<RealType>(1.0) / mMass : static_cast<RealType>(0.0);
-  }
+    void SetMass(RealType mass)
+    {
+      mMass = mass;
+      mInverseMass =
+          mMass ? static_cast<RealType>(1.0) / mMass : static_cast<RealType>(0.0);
+    }
 
-  void SetPosition(VectorX<2, RealType> pos) { mPosition = pos; }
-  void SetVelocity(VectorX<2, RealType> vel) { mVelocity = vel; }
+    void SetPosition(VectorX<2, RealType> pos) { mPosition = pos; }
+    void SetVelocity(VectorX<2, RealType> vel) { mVelocity = vel; }
 
-  const RealType GetMass() const { return mMass; }
-  const RealType GetInvMass() const { return mInverseMass; }
-  const RealType GetDensity() const { return mDensity; }
-  const RealType GetRestitution() const { return mRestitution; }
+    void AddPosition(VectorX<2, RealType> pos) { mPosition += pos; }
+    void AddVelocity(VectorX<2, RealType> vel) { mVelocity += vel; }
+    void AddAngularVelocity(VectorX<2, RealType> vel) { mAngularVelocity += vel; }
 
-  const VectorX<2, RealType> GetPosition() const { return mPosition; }
-  const VectorX<2, RealType> GetVelocity() const { return mVelocity; }
+    const RealType GetMass() const { return mMass; }
+    const RealType GetInvMass() const { return mInverseMass; }
 
-  friend void CompositeShapeRigidBody(
-      const std::shared_ptr<Shape<RealType>> &shape,
-      const std::shared_ptr<RigidBody<RealType>> &rigidbody) {
-    shape->SetRigidBody(rigidbody);
-    rigidbody->SetShape(shape);
-    shape->ComputeMass(rigidbody->GetDensity());
-  }
+    const RealType GetInertia() const { return mInertia; }
+    const RealType GetInverseInertia() const { return mInverseInertia; }
 
-  void Print() const {
-    KIRI_LOG_INFO("RigidBody mass={0}; inv mass={1}; density={2}", mMass,
-                  mInverseMass, mDensity);
-  }
+    const RealType GetDensity() const { return mDensity; }
+    const RealType GetRestitution() const { return mRestitution; }
+    const RealType GetStaticFriction() const { return mStaticFriction; }
+    const RealType GetDynamicFriction() const { return mDynamicFriction; }
 
-private:
-  RealType mMass, mInverseMass, mDensity, mRestitution;
-  VectorX<2, RealType> mPosition, mVelocity;
+    const RealType GetOrientation() const { return mOrientation; }
+    const RealType GetTorque() const { return mTorque; }
+    const RealType GetAngularVelocity() const { return mAngularVelocity; }
 
-  std::shared_ptr<Shape<RealType>> mShape;
-};
+    const VectorX<2, RealType> GetPosition() const { return mPosition; }
+    const VectorX<2, RealType> GetVelocity() const { return mVelocity; }
+    const VectorX<2, RealType> GetForce() const { return mForce; }
 
-template <class RealType>
-using RigdiBodyPtr = std::shared_ptr<RigidBody<RealType>>;
+    friend void CompositeShapeRigidBody(
+        const std::shared_ptr<Shape<RealType>> &shape,
+        const std::shared_ptr<RigidBody<RealType>> &rigidbody)
+    {
+      shape->SetRigidBody(rigidbody);
+      rigidbody->SetShape(shape);
+      shape->ComputeMass(rigidbody->GetDensity());
+    }
+
+    void Print() const
+    {
+      KIRI_LOG_INFO("RigidBody mass={0}; inv mass={1}; density={2}", mMass,
+                    mInverseMass, mDensity);
+    }
+
+  private:
+    RealType mMass, mInverseMass;
+    RealType mInertia, mInverseInertia;
+    RealType mDensity, mRestitution, mStaticFriction, mDynamicFriction;
+
+    RealType mOrientation, mTorque, mAngularVelocity;
+    VectorX<2, RealType> mPosition, mVelocity, mForce;
+
+    std::shared_ptr<Shape<RealType>> mShape;
+  };
+
+  template <class RealType>
+  using RigdiBodyPtr = std::shared_ptr<RigidBody<RealType>>;
 } // namespace PHY::RIGIDBODY
 
 #endif /* _RIGIDBODY_H_ */

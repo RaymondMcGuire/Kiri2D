@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-12-22 18:59:20
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-12-22 20:34:36
+ * @LastEditTime: 2022-12-24 18:44:34
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\rigidbody_system.h
  * @Description: 
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
@@ -21,7 +21,7 @@ namespace PHY::RIGIDBODY
     {
     public:
         explicit RigidBodySystem(
-            RealType dt , int iteration = 10
+            RealType dt , int iteration = 10 
         ):mDt(dt), mIteration(iteration)
         {
         }
@@ -42,7 +42,7 @@ namespace PHY::RIGIDBODY
         int mIteration;
 
         std::vector<std::shared_ptr<RigdiBody<RealType>>> mObjects;
-        std::vector<std::shared_ptr<CollisionHandler<RealType>>> mCollisions;
+ 
     };
 
 } // namespace PHY::RIGIDBODY

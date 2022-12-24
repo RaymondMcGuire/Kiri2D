@@ -36,10 +36,7 @@ int main(int argc, char *argv[]) {
   CompositeShapeRigidBody(circle1, rigidbody1);
   rigidbody1->Print();
 
-  auto solver = std::make_shared<RigidBodySolver>();
 
-  auto handler =
-      std::make_shared<CollisionHandler<float>>(rigidbody, rigidbody1);
-  handler->Solve();
+
   return 0;
 }
