@@ -7,14 +7,13 @@
  * @Description:
  * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-#include <eventpp/eventdispatcher.h>
 #include <kiri2d.h>
-#include <kiri2d/physics/rigidbody/rigidbody.h>
-#include <kiri2d/physics/rigidbody/rigidbody_solver.h>
+#include <kiri2d/physics/rigidbody/rigidbody_system.h>
 using namespace KIRI2D;
 using namespace PHY::RIGIDBODY;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   // log system
   KiriLog::init();
 
@@ -25,18 +24,22 @@ int main(int argc, char *argv[]) {
   auto scene = std::make_shared<KiriScene2D>((size_t)window_width,
                                              (size_t)window_height);
   auto renderer = std::make_shared<KiriRenderer2D>(scene);
+  auto system = std::make_shared<RigidBodySystem<float>>();
+  system->AddObject(std::make_shared<Circle<float>>(50.f), Vector2F(0.f), true);
+  system->AddObject(std::make_shared<Circle<float>>(10.f), Vector2F(0.f, 100.f), false);
 
-  auto circle = std::make_shared<Circle<float>>(1.f);
-  auto rigidbody = std::make_shared<RigidBody<float>>(Vector2F(0.f));
-  CompositeShapeRigidBody(circle, rigidbody);
-  rigidbody->Print();
+  while (1)
+  {
+    system->UpdateSystem();
+    system->Render(scene, renderer);
 
-  auto circle1 = std::make_shared<Circle<float>>(2.f);
-  auto rigidbody1 = std::make_shared<RigidBody<float>>(Vector2F(1.f));
-  CompositeShapeRigidBody(circle1, rigidbody1);
-  rigidbody1->Print();
+    cv::imshow("KIRI2D", renderer->canvas());
+    cv::waitKey(5);
 
-
+    // clean canvas
+    renderer->clearCanvas();
+    scene->clear();
+  }
 
   return 0;
 }

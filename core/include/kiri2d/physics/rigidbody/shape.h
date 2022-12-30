@@ -15,49 +15,69 @@
 
 #include <kiri2d/physics/rigidbody/rigidbody.h>
 
-namespace PHY::RIGIDBODY {
+namespace KIRI2D::PHY::RIGIDBODY
+{
 
-enum ShapeType { CIRCLE, POLYGON };
+  enum ShapeType
+  {
+    CIRCLE,
+    POLYGON
+  };
 
-template <class RealType> class RigidBody;
+  template <class RealType>
+  class RigidBody;
 
-template <class RealType> class Shape {
-public:
-  explicit Shape() {}
-  virtual ~Shape() { // KIRI_LOG_DEBUG("~Shape");
-  }
+  template <class RealType>
+  class Shape
+  {
+  public:
+    explicit Shape() {}
+    virtual ~Shape()
+    { // KIRI_LOG_DEBUG("~Shape");
+    }
 
-  virtual void ComputeMass(RealType density) = 0;
-  virtual const ShapeType GetType() = 0;
+    virtual void ComputeMass(RealType density) = 0;
+    virtual void SetOrientation(RealType ori) = 0;
+    virtual const ShapeType GetType() = 0;
 
-  void SetRigidBody(const std::shared_ptr<RigidBody<RealType>> &body) {
-    mBody = body;
-  }
+    void SetRigidBody(const std::shared_ptr<RigidBody<RealType>> &body)
+    {
+      mBody = body;
+    }
 
-  static const int SHAPE_NUM = 2;
+    static const int SHAPE_NUM = 2;
 
-protected:
-  std::weak_ptr<RigidBody<RealType>> mBody;
-};
+  protected:
+    std::weak_ptr<RigidBody<RealType>> mBody;
+  };
 
-template <class RealType> class Circle : public Shape<RealType> {
-public:
-  explicit Circle(RealType radius) : mRadius(radius) {}
+  template <class RealType>
+  class Circle : public Shape<RealType>
+  {
+  public:
+    explicit Circle(RealType radius) : mRadius(radius) {}
 
-  virtual void ComputeMass(RealType density) override {
-    mBody.lock()->SetMass(KIRI_PI<RealType>() * mRadius * mRadius * density);
-  }
+    virtual void ComputeMass(RealType density) override
+    {
+      mBody.lock()->SetMass(KIRI_PI<RealType>() * mRadius * mRadius * density);
+    }
 
-  virtual const ShapeType GetType() override { return CIRCLE; }
-  const RealType GetRadius() const { return mRadius; }
+    virtual void SetOrientation(RealType ori) override
+    {
+    }
 
-private:
-  RealType mRadius;
-};
+    virtual const ShapeType GetType() override { return CIRCLE; }
+    const RealType GetRadius() const { return mRadius; }
 
-template <class RealType> using ShapePtr = std::shared_ptr<Shape<RealType>>;
+  private:
+    RealType mRadius;
+  };
 
-template <class RealType> using CirclePtr = std::shared_ptr<Circle<RealType>>;
+  template <class RealType>
+  using ShapePtr = std::shared_ptr<Shape<RealType>>;
+
+  template <class RealType>
+  using CirclePtr = std::shared_ptr<Circle<RealType>>;
 
 } // namespace PHY::RIGIDBODY
 

@@ -14,7 +14,7 @@
 
 #include <kiri2d/physics/rigidbody/collision_handler.h>
 
-namespace PHY::RIGIDBODY
+namespace KIRI2D::PHY::RIGIDBODY
 {
 
   template <class RealType>
@@ -29,14 +29,23 @@ namespace PHY::RIGIDBODY
 
     void UpdateSolver(
         const std::vector<std::shared_ptr<RigidBody<RealType>>> &rigidbodies,
+        int iteration,
         RealType dt,
-        RealType gravity)
+        const VectorX<2, RealType> &gravity)
     {
       GenerateCollider(rigidbodies);
 
-      UpdateVelocity(dt, gravity);
+      UpdateVelocity(rigidbodies, dt, gravity);
 
-      HandleCollision(dt, gravity);
+      HandleCollision(iteration, dt, gravity);
+
+      Advect(rigidbodies, dt);
+
+      UpdateVelocity(rigidbodies, dt, gravity);
+
+      PositionalCorrection();
+
+      ClearForces(rigidbodies);
     }
 
   private:
@@ -48,14 +57,14 @@ namespace PHY::RIGIDBODY
       for (auto i = 0; i < rigidbodies.size() - 1; i++)
       {
         auto bodyA = rigidbodies[i];
-        for (auto j = i + 1; i < rigidbodies.size(); j++)
+        for (auto j = i + 1; j < rigidbodies.size(); j++)
         {
           auto bodyB = rigidbodies[j];
           if (bodyA->GetInvMass() == 0 && bodyB->GetInvMass() == 0)
             continue;
 
           auto collision = std::make_shared<CollisionHandler<RealType>>(bodyA, bodyB);
-          if (collision->GetContactNum)
+          if (collision->GetContactNum())
             mCollisions.emplace_back(collision);
         }
       }
@@ -64,22 +73,57 @@ namespace PHY::RIGIDBODY
     void UpdateVelocity(
         const std::vector<std::shared_ptr<RigidBody<RealType>>> &rigidbodies,
         RealType dt,
-        RealType gravity)
+        const VectorX<2, RealType> &gravity)
     {
       for (auto i = 0; i < rigidbodies.size(); i++)
       {
         auto body = rigidbodies[i];
-        if (body->GetInverseMass() == static_cast<RealType>(0.0))
+        if (body->GetInvMass() == static_cast<RealType>(0.0))
           continue;
-        body->AddVelocity((body->GetForce() * body->GetInverseMass() + gravity) * (dt / static_cast<RealType>(2.0)));
-        body->AddAngularVelocity(body->GetTorque() * body->GetInverseInteria() * (dt / static_cast<RealType>(2.0)));
+        auto acc = body->GetForce() * body->GetInvMass() + gravity;
+        // KIRI_LOG_DEBUG("Acc={0},{1}", acc.x, acc.y);
+        body->AddVelocity(acc * (dt / static_cast<RealType>(2.0)));
+        body->AddAngularVelocity(body->GetTorque() * body->GetInvInertia() * (dt / static_cast<RealType>(2.0)));
       }
     }
 
-    void HandleCollision(RealType dt, RealType gravity)
+    void HandleCollision(int iteration, RealType dt, const VectorX<2, RealType> &gravity)
     {
       for (auto i = 0; i < mCollisions.size(); i++)
         mCollisions[i]->ComputeContactSurfaceInfo(dt, gravity);
+
+      for (auto iter = 0; iter < iteration; iter++)
+        for (auto i = 0; i < mCollisions.size(); i++)
+          mCollisions[i]->ComputeImpluse();
+    }
+
+    void PositionalCorrection()
+    {
+      for (auto i = 0; i < mCollisions.size(); i++)
+        mCollisions[i]->PositionalCorrection();
+    }
+
+    void Advect(
+        const std::vector<std::shared_ptr<RigidBody<RealType>>> &rigidbodies,
+        RealType dt)
+    {
+      for (auto i = 0; i < rigidbodies.size(); i++)
+      {
+        auto body = rigidbodies[i];
+        if (body->GetInvMass() == static_cast<RealType>(0.0))
+          continue;
+        body->AddPosition(body->GetVelocity() * dt);
+        body->AddOrientation(body->GetAngularVelocity() * dt);
+      }
+    }
+
+    void ClearForces(const std::vector<std::shared_ptr<RigidBody<RealType>>> &rigidbodies)
+    {
+      for (auto i = 0; i < rigidbodies.size(); i++)
+      {
+        auto body = rigidbodies[i];
+        body->ClearForces();
+      }
     }
   };
 

@@ -1,48 +1,94 @@
-/*** 
+/***
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-12-22 18:59:20
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
  * @LastEditTime: 2022-12-24 18:44:34
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\rigidbody_system.h
- * @Description: 
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved. 
+ * @Description:
+ * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #ifndef _RIGIDBODY_SYSTEM_H_
 #define _RIGIDBODY_SYSTEM_H_
 
 #pragma once
- 
-#include <kiri2d/physics/rigidbody/collision_handler.h>
 
-namespace PHY::RIGIDBODY
+#include <kiri_timer.h>
+#include <kiri2d/physics/rigidbody/rigidbody_solver.h>
+
+namespace KIRI2D::PHY::RIGIDBODY
 {
     template <class RealType>
     class RigidBodySystem
     {
     public:
         explicit RigidBodySystem(
-            RealType dt , int iteration = 10 
-        ):mDt(dt), mIteration(iteration)
+            RealType dt = static_cast<RealType>(1.0 / 60.0),
+            int iteration = 10,
+            RealType gravityScale = static_cast<RealType>(5.0))
+            : mDt(dt), mIteration(iteration), mAccumulator(static_cast<RealType>(0.0)),
+              mGravityScale(gravityScale)
         {
+            mGravity = VectorX<2, RealType>(static_cast<RealType>(0.0), static_cast<RealType>(-9.8 * mGravityScale));
+            mSolver = std::make_shared<RigidBodySolver<RealType>>();
         }
 
         virtual ~RigidBodySystem()
         {
         }
 
-        void AddObject(const ShapePtr& shape, const VectorX<2, RealType>& pos)
+        void UpdateSystem()
         {
-            auto rigid_body = std::make_shared<RigdiBody<RealType>>(pos);
-            CompositeShapeRigidBody(shape,rigid_body);
-            mObjects.emplace_back(rigid_body);
+            mAccumulator += mPerFrameTimer.elapsed();
+            mPerFrameTimer.restart();
+            mAccumulator = std::clamp(mAccumulator, static_cast<RealType>(0.0), static_cast<RealType>(0.1));
+
+            while (mAccumulator >= mDt)
+            {
+                mSolver->UpdateSolver(mObjects, mIteration, mDt, mGravity);
+                mAccumulator -= mDt;
+            }
+        }
+
+        void Render(const KiriScene2DPtr &scene, const KiriRenderer2DPtr &renderer)
+        {
+            auto offset = VectorX<2, RealType>(250.0, 250.0);
+            std::vector<KiriCircle2> circles;
+            for (auto i = 0; i < mObjects.size(); i++)
+            {
+                auto shape = mObjects[i]->GetShape();
+                switch (shape->GetType())
+                {
+                case CIRCLE:
+                    auto shape_circle = std::dynamic_pointer_cast<Circle<RealType>>(shape);
+                    circles.emplace_back(KiriCircle2(mObjects[i]->GetPosition() + offset, Vector3F(0.f, 1.f, 1.f), shape_circle->GetRadius(), false));
+                    break;
+                }
+            }
+
+            scene->addCircles(circles);
+            renderer->drawCanvas();
+        }
+
+        void AddObject(const ShapePtr<RealType> &shape, const VectorX<2, RealType> &pos, const bool staticObj = false)
+        {
+            auto rigidbody = std::make_shared<RigidBody<RealType>>(pos);
+            CompositeShapeRigidBody(shape, rigidbody);
+            if (staticObj)
+                rigidbody->SetAsStatic();
+            mObjects.emplace_back(rigidbody);
         }
 
     private:
-         RealType mDt;
+        RealType mDt;
+        RealType mAccumulator;
         int mIteration;
 
-        std::vector<std::shared_ptr<RigdiBody<RealType>>> mObjects;
- 
+        RealType mGravityScale;
+        VectorX<2, RealType> mGravity;
+
+        KiriTimer mPerFrameTimer;
+        std::shared_ptr<RigidBodySolver<RealType>> mSolver;
+        std::vector<std::shared_ptr<RigidBody<RealType>>> mObjects;
     };
 
 } // namespace PHY::RIGIDBODY

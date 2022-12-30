@@ -15,7 +15,7 @@
 #include <kiri2d/physics/rigidbody/rigidbody.h>
 #include <memory>
 
-namespace PHY::RIGIDBODY
+namespace KIRI2D::PHY::RIGIDBODY
 {
 
   template <class RealType>
@@ -150,9 +150,63 @@ namespace PHY::RIGIDBODY
         InfiniteMassCorrection();
         return;
       }
+
+      for (auto i = 0; i < mContactNum; i++)
+      {
+
+        auto ra = mContactPoints[i] - mBodyA->GetPosition();
+        auto rb = mContactPoints[i] - mBodyB->GetPosition();
+
+        auto rv = mBodyB->GetVelocity() + VectorX<2, RealType>(-mBodyB->GetAngularVelocity() * rb.y, mBodyB->GetAngularVelocity() * rb.x) - mBodyA->GetVelocity() - VectorX<2, RealType>(-mBodyA->GetAngularVelocity() * ra.y, mBodyA->GetAngularVelocity() * ra.x);
+
+        auto contact_vel = rv.dot(mContactDir);
+        if (contact_vel > 0)
+          return;
+
+        auto ra_cross_n = ra.cross(mContactDir);
+        auto rb_cross_n = rb.cross(mContactDir);
+        auto inverse_mass_sum = a_im + b_im + ra_cross_n * ra_cross_n * mBodyA->GetInvInertia() + rb_cross_n * rb_cross_n * mBodyB->GetInvInertia();
+
+        auto j = -(static_cast<RealType>(1.0) + mMixRestitution) * contact_vel;
+        j /= inverse_mass_sum;
+        j /= static_cast<RealType>(mContactNum);
+
+        auto impulse = mContactDir * j;
+        mBodyA->ApplyImpulse(-impulse, ra);
+        mBodyB->ApplyImpulse(impulse, rb);
+
+        // friction
+        rv = mBodyB->GetVelocity() + VectorX<2, RealType>(-mBodyB->GetAngularVelocity() * rb.y, mBodyB->GetAngularVelocity() * rb.x) - mBodyA->GetVelocity() - VectorX<2, RealType>(-mBodyA->GetAngularVelocity() * ra.y, mBodyA->GetAngularVelocity() * ra.x);
+
+        auto t = rv - (mContactDir * rv.dot(mContactDir));
+        t.normalize();
+
+        auto jt = -rv.dot(t);
+        jt /= inverse_mass_sum;
+        jt /= static_cast<RealType>(mContactNum);
+
+        if (std::abs(jt) < MEpsilon<RealType>())
+          return;
+
+        auto tangent_impulse = t * -j * mMixDynamicFriction;
+        if (std::abs(jt) < j * mMixStaticFriction)
+          tangent_impulse = t * jt;
+
+        mBodyA->ApplyImpulse(-tangent_impulse, ra);
+        mBodyB->ApplyImpulse(tangent_impulse, rb);
+      }
     }
 
-    void ComputeContactSurfaceInfo(RealType dt, RealType gravity)
+    void PositionalCorrection()
+    {
+      auto k_slop = static_cast<RealType>(0.05);
+      auto percent = static_cast<RealType>(0.4);
+      auto correction = (std::max(mPenetration - k_slop, static_cast<RealType>(0.0)) / (mBodyA->GetInvMass() + mBodyB->GetInvMass())) * mContactDir * percent;
+      mBodyA->AddPosition(-correction * mBodyA->GetInvMass());
+      mBodyB->AddPosition(correction * mBodyB->GetInvMass());
+    }
+
+    void ComputeContactSurfaceInfo(RealType dt, const VectorX<2, RealType> &gravity)
     {
       if (!mContactNum)
         return;
@@ -167,8 +221,7 @@ namespace PHY::RIGIDBODY
         auto ra = mContactPoints[i] - mBodyA->GetPosition();
         auto rb = mContactPoints[i] - mBodyB->GetPosition();
 
-        auto rv = mBodyB->GetVelocity() + mBodyB->GetAngularVelocity().cross(rb) -
-                  mBodyA->GetVelocity() - mBodyA->GetAngularVelocity().cross(ra);
+        auto rv = mBodyB->GetVelocity() + VectorX<2, RealType>(-mBodyB->GetAngularVelocity() * rb.y, mBodyB->GetAngularVelocity() * rb.x) - mBodyA->GetVelocity() - VectorX<2, RealType>(-mBodyA->GetAngularVelocity() * ra.y, mBodyA->GetAngularVelocity() * ra.x);
 
         if (rv.lengthSquared() < (dt * gravity).lengthSquared() + MEpsilon<RealType>())
           mMixRestitution = static_cast<RealType>(0.0);

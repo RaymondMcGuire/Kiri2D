@@ -15,7 +15,7 @@
 
 #include <kiri2d/physics/rigidbody/shape.h>
 
-namespace PHY::RIGIDBODY
+namespace KIRI2D::PHY::RIGIDBODY
 {
   template <class RealType>
   class RigidBody
@@ -25,6 +25,10 @@ namespace PHY::RIGIDBODY
         : mPosition(pos), mDensity(1.0), mMass(0.0), mInverseMass(0.0)
     {
       mVelocity = VectorX<2, RealType>(static_cast<RealType>(0.0));
+      mRestitution = static_cast<RealType>(0.2);
+      mStaticFriction = static_cast<RealType>(0.5);
+      mDynamicFriction = static_cast<RealType>(0.3);
+      mOrientation = Random::get<RealType>(-KIRI_PI<RealType>(), KIRI_PI<RealType>());
     }
 
     virtual ~RigidBody()
@@ -48,16 +52,34 @@ namespace PHY::RIGIDBODY
 
     void SetPosition(VectorX<2, RealType> pos) { mPosition = pos; }
     void SetVelocity(VectorX<2, RealType> vel) { mVelocity = vel; }
+    void SetAngularVelocity(RealType vel) { mAngularVelocity = vel; }
+    void SetOrientation(RealType ori)
+    {
+      mOrientation = ori;
+      mShape->SetOrientation(ori);
+    }
 
     void AddPosition(VectorX<2, RealType> pos) { mPosition += pos; }
     void AddVelocity(VectorX<2, RealType> vel) { mVelocity += vel; }
-    void AddAngularVelocity(VectorX<2, RealType> vel) { mAngularVelocity += vel; }
+    void AddAngularVelocity(RealType vel) { mAngularVelocity += vel; }
+
+    void ApplyImpulse(VectorX<2, RealType> impulse, VectorX<2, RealType> contactDir)
+    {
+      mVelocity += mInverseMass * impulse;
+      mAngularVelocity += mInverseInertia * contactDir.cross(impulse);
+    }
+
+    void AddOrientation(RealType radian)
+    {
+      mOrientation += radian;
+      mShape->SetOrientation(mOrientation);
+    }
 
     const RealType GetMass() const { return mMass; }
     const RealType GetInvMass() const { return mInverseMass; }
 
     const RealType GetInertia() const { return mInertia; }
-    const RealType GetInverseInertia() const { return mInverseInertia; }
+    const RealType GetInvInertia() const { return mInverseInertia; }
 
     const RealType GetDensity() const { return mDensity; }
     const RealType GetRestitution() const { return mRestitution; }
@@ -71,6 +93,20 @@ namespace PHY::RIGIDBODY
     const VectorX<2, RealType> GetPosition() const { return mPosition; }
     const VectorX<2, RealType> GetVelocity() const { return mVelocity; }
     const VectorX<2, RealType> GetForce() const { return mForce; }
+
+    void SetAsStatic()
+    {
+      mMass = static_cast<RealType>(0.0);
+      mInverseMass = static_cast<RealType>(0.0);
+      mInertia = static_cast<RealType>(0.0);
+      mInverseInertia = static_cast<RealType>(0.0);
+    }
+
+    void ClearForces()
+    {
+      mForce = VectorX<2, RealType>(static_cast<RealType>(0.0));
+      mTorque = static_cast<RealType>(0.0);
+    }
 
     friend void CompositeShapeRigidBody(
         const std::shared_ptr<Shape<RealType>> &shape,
