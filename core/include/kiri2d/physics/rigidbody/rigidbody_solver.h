@@ -64,6 +64,7 @@ namespace KIRI2D::PHY::RIGIDBODY
             continue;
 
           auto collision = std::make_shared<CollisionHandler<RealType>>(bodyA, bodyB);
+          collision->CheckContactInfo();
           if (collision->GetContactNum())
             mCollisions.emplace_back(collision);
         }
@@ -81,8 +82,9 @@ namespace KIRI2D::PHY::RIGIDBODY
         if (body->GetInvMass() == static_cast<RealType>(0.0))
           continue;
         auto acc = body->GetForce() * body->GetInvMass() + gravity;
-        // KIRI_LOG_DEBUG("Acc={0},{1}", acc.x, acc.y);
+
         body->AddVelocity(acc * (dt / static_cast<RealType>(2.0)));
+        // KIRI_LOG_DEBUG("UpdateVelocity Isstatic={0}; Acc={1},{2}; Vel={3},{4}", body->IsStatic(), acc.x, acc.y, body->GetVelocity().x, body->GetVelocity().y);
         body->AddAngularVelocity(body->GetTorque() * body->GetInvInertia() * (dt / static_cast<RealType>(2.0)));
       }
     }
@@ -112,6 +114,8 @@ namespace KIRI2D::PHY::RIGIDBODY
         auto body = rigidbodies[i];
         if (body->GetInvMass() == static_cast<RealType>(0.0))
           continue;
+        // KIRI_LOG_DEBUG("Advect Isstatic={0}; body->GetVelocity().x, body->GetVelocity().y={1},{2}", body->IsStatic(), body->GetVelocity().x, body->GetVelocity().y);
+        // KIRI_LOG_DEBUG("body vel={0},{1}", body->GetVelocity().x, body->GetVelocity().y);
         body->AddPosition(body->GetVelocity() * dt);
         body->AddOrientation(body->GetAngularVelocity() * dt);
       }

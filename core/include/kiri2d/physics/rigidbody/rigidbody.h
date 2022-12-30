@@ -22,7 +22,7 @@ namespace KIRI2D::PHY::RIGIDBODY
   {
   public:
     explicit RigidBody(VectorX<2, RealType> pos)
-        : mPosition(pos), mDensity(1.0), mMass(0.0), mInverseMass(0.0)
+        : mPosition(pos), mDensity(1.0), mMass(0.0), mInverseMass(0.0), mTorque(0.0), mAngularVelocity(0.0), mIsStatic(false)
     {
       mVelocity = VectorX<2, RealType>(static_cast<RealType>(0.0));
       mRestitution = static_cast<RealType>(0.2);
@@ -94,8 +94,11 @@ namespace KIRI2D::PHY::RIGIDBODY
     const VectorX<2, RealType> GetVelocity() const { return mVelocity; }
     const VectorX<2, RealType> GetForce() const { return mForce; }
 
+    const bool IsStatic() const { return mIsStatic; }
+
     void SetAsStatic()
     {
+      mIsStatic = true;
       mMass = static_cast<RealType>(0.0);
       mInverseMass = static_cast<RealType>(0.0);
       mInertia = static_cast<RealType>(0.0);
@@ -124,6 +127,7 @@ namespace KIRI2D::PHY::RIGIDBODY
     }
 
   private:
+    bool mIsStatic;
     RealType mMass, mInverseMass;
     RealType mInertia, mInverseInertia;
     RealType mDensity, mRestitution, mStaticFriction, mDynamicFriction;

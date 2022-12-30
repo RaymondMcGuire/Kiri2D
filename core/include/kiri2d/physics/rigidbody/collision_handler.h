@@ -57,6 +57,7 @@ namespace KIRI2D::PHY::RIGIDBODY
     }
     else
     {
+      // KIRI_LOG_DEBUG("contact!!");
       handler->SetPenetration(radius - dist);
       auto unit_dir = dir / dist;
       handler->SetContactDir(unit_dir);
@@ -124,7 +125,7 @@ namespace KIRI2D::PHY::RIGIDBODY
                               const std::shared_ptr<RigidBody<RealType>> &bodyB)
         : mBodyA(bodyA), mBodyB(bodyB)
     {
-      this->CheckContactInfo();
+      // this->CheckContactInfo();
     }
 
     virtual ~CollisionHandler() {}
@@ -172,6 +173,9 @@ namespace KIRI2D::PHY::RIGIDBODY
         j /= static_cast<RealType>(mContactNum);
 
         auto impulse = mContactDir * j;
+        // KIRI_LOG_DEBUG("Compute first impulse; impulse={0},{1}; j={2};inverse_mass_sum={3};contact_vel={4}",
+        //                impulse.x, impulse.y, j, inverse_mass_sum, contact_vel);
+
         mBodyA->ApplyImpulse(-impulse, ra);
         mBodyB->ApplyImpulse(impulse, rb);
 
@@ -179,11 +183,15 @@ namespace KIRI2D::PHY::RIGIDBODY
         rv = mBodyB->GetVelocity() + VectorX<2, RealType>(-mBodyB->GetAngularVelocity() * rb.y, mBodyB->GetAngularVelocity() * rb.x) - mBodyA->GetVelocity() - VectorX<2, RealType>(-mBodyA->GetAngularVelocity() * ra.y, mBodyA->GetAngularVelocity() * ra.x);
 
         auto t = rv - (mContactDir * rv.dot(mContactDir));
-        t.normalize();
+        if (t.length() > MEpsilon<RealType>())
+          t.normalize();
+        // KIRI_LOG_DEBUG("Computejt pre; rv={0},{1}; t={2},{3}", rv.x, rv.y, t.x, t.y);
+        // KIRI_LOG_DEBUG("mContactDir={0},{1}; rv.dot(mContactDir)={2}", mContactDir.x, mContactDir.y, rv.dot(mContactDir));
 
         auto jt = -rv.dot(t);
         jt /= inverse_mass_sum;
         jt /= static_cast<RealType>(mContactNum);
+        // KIRI_LOG_DEBUG("Computejt; jt={0}; inverse_mass_sum={1}", jt, inverse_mass_sum);
 
         if (std::abs(jt) < MEpsilon<RealType>())
           return;
@@ -191,6 +199,8 @@ namespace KIRI2D::PHY::RIGIDBODY
         auto tangent_impulse = t * -j * mMixDynamicFriction;
         if (std::abs(jt) < j * mMixStaticFriction)
           tangent_impulse = t * jt;
+
+        // KIRI_LOG_DEBUG("ComputeImpluse; tangent_impulse={0},{1}, ra={2},{3}, rb={4},{5} ", tangent_impulse.x, tangent_impulse.y, ra.x, ra.y, rb.x, rb.y);
 
         mBodyA->ApplyImpulse(-tangent_impulse, ra);
         mBodyB->ApplyImpulse(tangent_impulse, rb);
@@ -228,6 +238,12 @@ namespace KIRI2D::PHY::RIGIDBODY
       }
     }
 
+    void CheckContactInfo()
+    {
+      CollisionDispatcher<RealType>::GetInstance()->Dispatch(shared_from_this(),
+                                                             mBodyA, mBodyB);
+    }
+
   private:
     int mContactNum = 0;
     RealType mMixRestitution, mMixStaticFriction, mMixDynamicFriction;
@@ -237,12 +253,6 @@ namespace KIRI2D::PHY::RIGIDBODY
     VectorX<2, RealType> mContactPoints[2];
 
     std::shared_ptr<RigidBody<RealType>> mBodyA, mBodyB;
-
-    void CheckContactInfo()
-    {
-      CollisionDispatcher<RealType>::GetInstance()->Dispatch(shared_from_this(),
-                                                             mBodyA, mBodyB);
-    }
 
     void InfiniteMassCorrection()
     {
