@@ -115,9 +115,10 @@ namespace KIRI2D::PHY::RIGIDBODY
         if (body->GetInvMass() == static_cast<RealType>(0.0))
           continue;
         // KIRI_LOG_DEBUG("Advect Isstatic={0}; body->GetVelocity().x, body->GetVelocity().y={1},{2}", body->IsStatic(), body->GetVelocity().x, body->GetVelocity().y);
-        // KIRI_LOG_DEBUG("body vel={0},{1}", body->GetVelocity().x, body->GetVelocity().y);
+        // KIRI_LOG_DEBUG("GetAngularVelocity={0}; Before Update Ori={1}", body->GetAngularVelocity(), body->GetOrientation());
         body->AddPosition(body->GetVelocity() * dt);
         body->AddOrientation(body->GetAngularVelocity() * dt);
+        // KIRI_LOG_DEBUG("After Update Ori={0}",body->GetOrientation());
       }
     }
 

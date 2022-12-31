@@ -52,7 +52,9 @@ namespace KIRI2D::PHY::RIGIDBODY
         void Render(const KiriScene2DPtr &scene, const KiriRenderer2DPtr &renderer)
         {
             auto offset = VectorX<2, RealType>(250.0, 250.0);
+            auto scale = 10;
             std::vector<KiriCircle2> circles;
+            std::vector<KiriLine2> lines;
             for (auto i = 0; i < mObjects.size(); i++)
             {
                 auto shape = mObjects[i]->GetShape();
@@ -60,11 +62,19 @@ namespace KIRI2D::PHY::RIGIDBODY
                 {
                 case CIRCLE:
                     auto shape_circle = std::dynamic_pointer_cast<Circle<RealType>>(shape);
-                    circles.emplace_back(KiriCircle2(mObjects[i]->GetPosition() + offset, Vector3F(0.f, 1.f, 1.f), shape_circle->GetRadius(), false));
+                    auto pos = mObjects[i]->GetPosition().mul(scale) + offset;
+                    circles.emplace_back(KiriCircle2(pos, Vector3F(0.f, 1.f, 1.f), shape_circle->GetRadius() * scale, false));
+                    auto c = std::cos(mObjects[i]->GetOrientation());
+                    auto s = std::sin(mObjects[i]->GetOrientation());
+                    auto rline = VectorX<2, RealType>(-s * shape_circle->GetRadius() * scale, c * shape_circle->GetRadius() * scale);
+                    rline += pos;
+                    lines.emplace_back(KiriLine2(pos, rline));
+
                     break;
                 }
             }
 
+            scene->addLines(lines);
             scene->addCircles(circles);
             renderer->drawCanvas();
         }

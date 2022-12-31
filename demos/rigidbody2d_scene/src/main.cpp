@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
   auto renderer = std::make_shared<KiriRenderer2D>(scene);
   auto system = std::make_shared<RigidBodySystem<float>>();
   system->AddObject(std::make_shared<Circle<float>>(5.f), Vector2F(0.f), true);
-  system->AddObject(std::make_shared<Circle<float>>(1.f), Vector2F(2.f, 10.f), false);
-  system->AddObject(std::make_shared<Circle<float>>(3.f), Vector2F(-2.f, 20.f), false);
-  system->AddObject(std::make_shared<Circle<float>>(2.f), Vector2F(-1.f, 30.f), false);
+  system->AddObject(std::make_shared<Circle<float>>(3.f), Vector2F(-5.f, 20.f), false);
+  // system->AddObject(std::make_shared<Circle<float>>(3.f), Vector2F(-2.f, 20.f), false);
+  // system->AddObject(std::make_shared<Circle<float>>(2.f), Vector2F(-1.f, 30.f), false);
 
   while (1)
   {

@@ -53,13 +53,15 @@ namespace KIRI2D
         Vector2F start;
         Vector2F end;
         Vector3F col = Vector3F(253, 185, 134) / 255.f;
-        float thick = 5.f;
+        float thick;
 
         KiriLine2(
             Vector2F _start,
-            Vector2F _end)
+            Vector2F _end,
+            float _thick = 1.f)
             : start(_start),
-              end(_end) {}
+              end(_end),
+              thick(_thick) {}
     };
 
     struct KiriRect2

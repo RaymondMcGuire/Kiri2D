@@ -50,13 +50,20 @@ namespace KIRI2D::PHY::RIGIDBODY
           mMass ? static_cast<RealType>(1.0) / mMass : static_cast<RealType>(0.0);
     }
 
+    void SetInteria(RealType interia)
+    {
+      mInertia = interia;
+      mInverseInertia =
+          interia ? static_cast<RealType>(1.0) / interia : static_cast<RealType>(0.0);
+    }
+
     void SetPosition(VectorX<2, RealType> pos) { mPosition = pos; }
     void SetVelocity(VectorX<2, RealType> vel) { mVelocity = vel; }
     void SetAngularVelocity(RealType vel) { mAngularVelocity = vel; }
     void SetOrientation(RealType ori)
     {
       mOrientation = ori;
-      mShape->SetOrientation(ori);
+      mShape->SetOrientation(mOrientation);
     }
 
     void AddPosition(VectorX<2, RealType> pos) { mPosition += pos; }
@@ -90,9 +97,9 @@ namespace KIRI2D::PHY::RIGIDBODY
     const RealType GetTorque() const { return mTorque; }
     const RealType GetAngularVelocity() const { return mAngularVelocity; }
 
-    const VectorX<2, RealType> GetPosition() const { return mPosition; }
-    const VectorX<2, RealType> GetVelocity() const { return mVelocity; }
-    const VectorX<2, RealType> GetForce() const { return mForce; }
+    VectorX<2, RealType> GetPosition() const { return mPosition; }
+    VectorX<2, RealType> GetVelocity() const { return mVelocity; }
+    VectorX<2, RealType> GetForce() const { return mForce; }
 
     const bool IsStatic() const { return mIsStatic; }
 
@@ -103,6 +110,7 @@ namespace KIRI2D::PHY::RIGIDBODY
       mInverseMass = static_cast<RealType>(0.0);
       mInertia = static_cast<RealType>(0.0);
       mInverseInertia = static_cast<RealType>(0.0);
+      SetOrientation(static_cast<RealType>(0.0));
     }
 
     void ClearForces()

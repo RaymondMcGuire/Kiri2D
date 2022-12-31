@@ -59,7 +59,9 @@ namespace KIRI2D::PHY::RIGIDBODY
 
     virtual void ComputeMass(RealType density) override
     {
-      mBody.lock()->SetMass(KIRI_PI<RealType>() * mRadius * mRadius * density);
+      auto mass = KIRI_PI<RealType>() * mRadius * mRadius * density;
+      mBody.lock()->SetMass(mass);
+      mBody.lock()->SetInteria(mass * mRadius * mRadius);
     }
 
     virtual void SetOrientation(RealType ori) override
