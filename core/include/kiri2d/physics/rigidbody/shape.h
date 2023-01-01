@@ -76,10 +76,80 @@ namespace KIRI2D::PHY::RIGIDBODY
   };
 
   template <class RealType>
+  class Polygon : public Shape<RealType>
+  {
+  public:
+    explicit Polygon() : mVerticesNum(0) {}
+
+    virtual void ComputeMass(RealType density) override
+    {
+      if (mVerticesNum < 3)
+        return;
+
+      auto area = static_cast<RealType>(0.0);
+      auto centroid = VectorX<2, RealType>(static_cast<RealType>(0.0));
+      auto interia = static_cast<RealType>(0.0);
+      const auto inv3 = static_cast<RealType>(1.0 / 3.0);
+      for (auto i = 0; i < mVerticesNum; i++)
+      {
+        auto p1 = mVertices[i];
+        auto p2 = mVertices[(i + 1) % mVerticesNum];
+        auto d = p1.cross(p2);
+        auto current_area = d * static_cast<RealType>(0.5);
+        area += current_area;
+        centroid += current_area * inv3 * (p1 + p2);
+        interia += (static_cast<RealType>(0.25) * inv3 * d) * (p1.lengthSquared() + p2.lengthSquared() + p1.dot(p2));
+      }
+
+      centroid *= static_cast<RealType>(1.0) / area;
+
+      for (auto i = 0; i < mVerticesNum; i++)
+        mVertices[i] -= centroid;
+
+      mBody.lock()->SetMass(area * density);
+      mBody.lock()->SetInteria(interia * density);
+    }
+
+    void Set(const std::vector<VectorX<2, RealType>> &data)
+    {
+      mVertices = data;
+      mVerticesNum = data.size();
+      mNormals.resize(mVerticesNum);
+
+      for (auto i = 0; i < mVerticesNum; i++)
+      {
+        auto p1 = mVertices[i];
+        auto p2 = mVertices[(i + 1) % mVerticesNum];
+        auto face = p2 - p1;
+        mNormals[i] = VectorX<2, RealType>(face.y, -face.x);
+        if (mNormals[i].length() > MEpsilon<RealType>())
+          mNormals[i].normalize();
+      }
+    }
+
+    virtual void SetOrientation(RealType ori) override
+    {
+      auto c = std::cos(ori);
+      auto s = std::sin(ori);
+      mMat.set(c, -s, s, c);
+    }
+
+    virtual const ShapeType GetType() override { return CIRCLE; }
+
+  private:
+    int mVerticesNum;
+    Matrix2x2<RealType> mMat;
+    std::vector<VectorX<2, RealType>> mVertices, mNormals;
+  };
+
+  template <class RealType>
   using ShapePtr = std::shared_ptr<Shape<RealType>>;
 
   template <class RealType>
   using CirclePtr = std::shared_ptr<Circle<RealType>>;
+
+  template <class RealType>
+  using PolygonPtr = std::shared_ptr<Polygon<RealType>>;
 
 } // namespace PHY::RIGIDBODY
 

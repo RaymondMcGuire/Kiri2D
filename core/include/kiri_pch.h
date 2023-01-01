@@ -175,6 +175,8 @@ using Vector3D = kiri_math_mini::Vector3D;
 using Vector4F = kiri_math_mini::Vector4F;
 using Vector4D = kiri_math_mini::Vector4D;
 
+template <class Type>
+using Matrix2x2 = kiri_math_mini::Matrix2x2<Type>;
 using Matrix2x2F = kiri_math_mini::Matrix2x2F;
 using Matrix3x3F = kiri_math_mini::Matrix3x3F;
 using Matrix4x4F = kiri_math_mini::Matrix4x4F;
