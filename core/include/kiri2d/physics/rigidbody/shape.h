@@ -45,6 +45,11 @@ namespace KIRI2D::PHY::RIGIDBODY
       mBody = body;
     }
 
+    const std::weak_ptr<RigidBody<RealType>> &GetBody()
+    {
+      return mBody;
+    }
+
     static const int SHAPE_NUM = 2;
 
   protected:
@@ -147,6 +152,26 @@ namespace KIRI2D::PHY::RIGIDBODY
       auto c = std::cos(ori);
       auto s = std::sin(ori);
       mMat.set(c, -s, s, c);
+    }
+
+    VectorX<2, RealType> GetExtremePointAlongDir(const VectorX<2, RealType> &dir)
+    {
+      auto max_projection = -Huge<RealType>();
+      VectorX<2, RealType> extreme;
+
+      for (auto i = 0; i < mVerticesNum; ++i)
+      {
+        auto v = mVertices[i];
+        auto projection = v.dot(dir);
+
+        if (projection > max_projection)
+        {
+          extreme = v;
+          max_projection = projection;
+        }
+      }
+
+      return extreme;
     }
 
     virtual const ShapeType GetType() override { return POLYGON; }

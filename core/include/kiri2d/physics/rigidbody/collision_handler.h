@@ -53,7 +53,7 @@ namespace KIRI2D::PHY::RIGIDBODY
     {
       handler->SetPenetration(rad_a);
       handler->SetContactDir(VectorX<2, RealType>(1.0, 0.0));
-      handler->SetContactPoint0(pos_a);
+      handler->SetContactPoint(pos_a, 0);
     }
     else
     {
@@ -61,7 +61,7 @@ namespace KIRI2D::PHY::RIGIDBODY
       handler->SetPenetration(radius - dist);
       auto unit_dir = dir / dist;
       handler->SetContactDir(unit_dir);
-      handler->SetContactPoint0(unit_dir * rad_a + pos_a);
+      handler->SetContactPoint(unit_dir * rad_a + pos_a, 0);
     }
   }
 
@@ -112,7 +112,7 @@ namespace KIRI2D::PHY::RIGIDBODY
       handler->SetContactNum(1);
       auto dir = -(rotate_mat * normals[face_normal]);
       handler->SetContactDir(dir);
-      handler->SetContactPoint0(dir * rad_a + pos_a);
+      handler->SetContactPoint(dir * rad_a + pos_a, 0);
       handler->SetPenetration(rad_a);
       return;
     }
@@ -134,7 +134,7 @@ namespace KIRI2D::PHY::RIGIDBODY
         n.normalize();
       handler->SetContactDir(n);
       v1 = rotate_mat * v1 + pos_b;
-      handler->SetContactPoint0(v1);
+      handler->SetContactPoint(v1, 0);
     }
     else if (dot2 <= static_cast<RealType>(0.0))
     {
@@ -145,7 +145,7 @@ namespace KIRI2D::PHY::RIGIDBODY
       handler->SetContactNum(1);
       auto n = v2 - circle_center;
       v2 = rotate_mat * v2 + pos_b;
-      handler->SetContactPoint0(v2);
+      handler->SetContactPoint(v2, 0);
       n = rotate_mat * n;
       if (n.length() > MEpsilon<RealType>())
         n.normalize();
@@ -159,7 +159,7 @@ namespace KIRI2D::PHY::RIGIDBODY
 
       n = rotate_mat * n;
       handler->SetContactDir(-n);
-      handler->SetContactPoint0(handler->GetContactDir() * rad_a + pos_a);
+      handler->SetContactPoint(handler->GetContactDir() * rad_a + pos_a, 0);
       handler->SetContactNum(1);
     }
   }
@@ -172,6 +172,191 @@ namespace KIRI2D::PHY::RIGIDBODY
   {
     Circle2Polygon<RealType>(handler, bodyB, bodyA);
     handler->SetContactDir(-handler->GetContactDir());
+  }
+
+  template <class RealType>
+  static std::tuple<RealType, int> FindAxisLeastPenetration(
+      const PolygonPtr<RealType> &shapeA,
+      const PolygonPtr<RealType> &shapeB)
+  {
+    auto max_distance = -Huge<RealType>();
+    auto max_index = -1;
+
+    auto a_vertices_num = shapeA->GetVerticesNum();
+    auto a_vertices = shapeA->GetVertices();
+    auto a_normals = shapeA->GetNormals();
+
+    auto a_rotmat = shapeA->GetRotateMatrix();
+    auto b_rotmat = shapeB->GetRotateMatrix();
+
+    auto pos_a = shapeA->GetBody().lock()->GetPosition();
+    auto pos_b = shapeB->GetBody().lock()->GetPosition();
+
+    for (auto i = 0; i < a_vertices_num; ++i)
+    {
+      auto face_a = a_rotmat * a_normals[i];
+      auto face_a2b = b_rotmat.transposed() * face_a;
+
+      auto extreme_along_b = shapeB->GetExtremePointAlongDir(-face_a2b);
+
+      auto vert_a2b = b_rotmat.transposed() * (a_rotmat * a_vertices[i] + pos_a - pos_b);
+      auto penetration = face_a2b.dot(extreme_along_b - vert_a2b);
+
+      if (penetration > max_distance)
+      {
+        max_distance = penetration;
+        max_index = i;
+      }
+    }
+
+    return std::make_pair(max_distance, max_index);
+  }
+
+  template <class RealType>
+  static std::vector<VectorX<2, RealType>> FindIncidentFace(
+      const PolygonPtr<RealType> &referencePoly,
+      const PolygonPtr<RealType> &incidentPoly,
+      int reference_index)
+  {
+    auto incident_rotmat = incidentPoly->GetRotateMatrix();
+    auto incident_vertices = incidentPoly->GetVertices();
+    auto incident_pos = incidentPoly->GetBody().lock()->GetPosition();
+    auto incident_vertnum = incidentPoly->GetVerticesNum();
+
+    auto normal_ref2ind = incident_rotmat.transposed() * referencePoly->GetRotateMatrix() * referencePoly->GetNormals()[reference_index];
+
+    auto incident_face = 0;
+    auto min_dot = Huge<RealType>();
+    for (auto i = 0; i < incident_vertnum; ++i)
+    {
+      auto dot = normal_ref2ind.dot(incidentPoly->GetNormals()[i]);
+      if (dot < min_dot)
+      {
+        min_dot = dot;
+        incident_face = i;
+      }
+    }
+
+    std::vector<VectorX<2, RealType>> incident_faces{
+        incident_rotmat * incident_vertices[incident_face] + incident_pos,
+        incident_rotmat * incident_vertices[(incident_face + 1) % incident_vertnum] + incident_pos};
+    return incident_faces;
+  }
+
+  template <class RealType>
+  static std::tuple<int, std::vector<VectorX<2, RealType>>> Clip(
+      VectorX<2, RealType> n, RealType c, std::vector<VectorX<2, RealType>> faces)
+  {
+    auto sp = 0;
+    auto out = faces;
+
+    auto d1 = n.dot(faces[0]) - c;
+    auto d2 = n.dot(faces[1]) - c;
+
+    if (d1 <= static_cast<RealType>(0.0))
+      out[sp++] = faces[0];
+    if (d2 <= static_cast<RealType>(0.0))
+      out[sp++] = faces[1];
+
+    if (d1 * d2 < static_cast<RealType>(0.0))
+    {
+      auto alpha = d1 / (d1 - d2);
+      out[sp] = faces[0] + alpha * (faces[1] - faces[0]);
+      ++sp;
+    }
+
+    KIRI_ASSERT(sp != 3);
+
+    return std::make_pair(sp, out);
+  }
+
+  template <class RealType>
+  static void
+  Polygon2Polygon(const std::shared_ptr<CollisionHandler<RealType>> &handler,
+                  std::shared_ptr<RigidBody<RealType>> bodyA,
+                  std::shared_ptr<RigidBody<RealType>> bodyB)
+  {
+    KIRI_LOG_DEBUG("Dispatch Polygon2Polygon!!");
+
+    handler->SetContactNum(0);
+
+    auto shape_a = std::dynamic_pointer_cast<Polygon<RealType>>(bodyA->GetShape());
+    auto shape_b = std::dynamic_pointer_cast<Polygon<RealType>>(bodyB->GetShape());
+
+    auto [penetration_a, face_a] = FindAxisLeastPenetration(shape_a, shape_b);
+    if (penetration_a >= static_cast<RealType>(0.0))
+      return;
+
+    auto [penetration_b, face_b] = FindAxisLeastPenetration(shape_a, shape_b);
+    if (penetration_b >= static_cast<RealType>(0.0))
+      return;
+
+    auto reference_index = face_a;
+    auto flip = false;
+
+    auto reference_poly = shape_a;
+    auto incident_poly = shape_b;
+
+    if (penetration_a < (penetration_b * static_cast<RealType>(0.95) + penetration_a * static_cast<RealType>(0.01)))
+    {
+      reference_index = face_b;
+      flip = true;
+      reference_poly = shape_b;
+      incident_poly = shape_a;
+    }
+
+    auto incident_face = FindIncidentFace(reference_poly, incident_poly, reference_index);
+
+    auto reference_vertices = reference_poly->GetVertices();
+    auto reference_vertnum = reference_poly->GetVerticesNum();
+    auto reference_rotmat = reference_poly->GetRotateMatrix();
+    auto reference_pos = reference_poly->GetBody().lock()->GetPosition();
+    auto v1 = reference_rotmat * reference_vertices[reference_index] + reference_pos;
+    auto v2 = reference_rotmat * reference_vertices[(reference_index + 1) % reference_vertnum] + reference_pos;
+
+    auto side_plane_normal = v2 - v1;
+
+    if (side_plane_normal.length() > MEpsilon<RealType>())
+      side_plane_normal.normalize();
+
+    auto reference_face_normal = VectorX<2, RealType>(side_plane_normal.y, -side_plane_normal.x);
+
+    auto refC = reference_face_normal.dot(v1);
+    auto negSide = -side_plane_normal.dot(v1);
+    auto posSide = side_plane_normal.dot(v2);
+
+    auto [sp1, clip_incident_face1] = Clip(-side_plane_normal, negSide, incident_face);
+    if (sp1 < 2)
+      return;
+
+    auto [sp2, clip_incident_face2] = Clip(side_plane_normal, posSide, clip_incident_face1);
+    if (sp2 < 2)
+      return;
+
+    handler->SetContactDir(flip ? -reference_face_normal : reference_face_normal);
+
+    auto cp = 0;
+    auto separation = reference_face_normal.dot(clip_incident_face2[0]) - refC;
+    if (separation <= static_cast<RealType>(0.0))
+    {
+      handler->SetContactPoint(clip_incident_face2[0], cp);
+      handler->SetPenetration(-separation);
+      ++cp;
+    }
+    else
+      handler->SetPenetration(0);
+
+    separation = reference_face_normal.dot(clip_incident_face2[1]) - refC;
+    if (separation <= static_cast<RealType>(0.0))
+    {
+      handler->SetContactPoint(clip_incident_face2[1], cp);
+      handler->SetPenetration(handler->GetPenetration() - separation);
+      ++cp;
+
+      handler->SetPenetration(handler->GetPenetration() / static_cast<RealType>(cp));
+    }
+
+    handler->SetContactNum(cp);
   }
 
   template <class RealType>
@@ -191,6 +376,10 @@ namespace KIRI2D::PHY::RIGIDBODY
       mDispatcher.appendListener(
           std::make_pair(ShapeType::POLYGON, ShapeType::CIRCLE),
           &Polygon2Circle<RealType>);
+
+      // mDispatcher.appendListener(
+      //     std::make_pair(ShapeType::POLYGON, ShapeType::POLYGON),
+      //     &Polygon2Polygon<RealType>);
     }
 
     void Dispatch(const std::shared_ptr<CollisionHandler<RealType>> &handler,
@@ -252,9 +441,9 @@ namespace KIRI2D::PHY::RIGIDBODY
 
     void SetContactDir(VectorX<2, RealType> dir) { mContactDir = dir; }
     void SetPenetration(RealType val) { mPenetration = val; }
-    void SetContactPoint0(VectorX<2, RealType> p) { mContactPoints[0] = p; }
-    void SetContactPoint1(VectorX<2, RealType> p) { mContactPoints[1] = p; }
+    void SetContactPoint(VectorX<2, RealType> p, int idx) { mContactPoints[idx] = p; }
 
+    const RealType GetPenetration() const { return mPenetration; }
     const VectorX<2, RealType> &GetContactDir() const { return mContactDir; }
     const RealType GetMixRestitution() const { return mMixRestitution; }
     const RealType GetMixStaticFriction() const { return mMixStaticFriction; }
