@@ -110,7 +110,7 @@ namespace KIRI2D::PHY::RIGIDBODY
       mBody.lock()->SetInteria(interia * density);
     }
 
-    void Set(const std::vector<VectorX<2, RealType>> &data)
+    void set(const std::vector<VectorX<2, RealType>> &data)
     {
       mVertices = data;
       mVerticesNum = data.size();
@@ -127,6 +127,21 @@ namespace KIRI2D::PHY::RIGIDBODY
       }
     }
 
+    void SetAsBox(RealType width, RealType height)
+    {
+      mVerticesNum = 4;
+      mVertices.resize(mVerticesNum);
+      mNormals.resize(mVerticesNum);
+      mVertices[0].set(-width, -height);
+      mVertices[1].set(width, -height);
+      mVertices[2].set(width, height);
+      mVertices[3].set(-width, height);
+      mNormals[0].set(static_cast<RealType>(0.0), -static_cast<RealType>(1.0));
+      mNormals[1].set(static_cast<RealType>(1.0), static_cast<RealType>(0.0));
+      mNormals[2].set(static_cast<RealType>(0.0), static_cast<RealType>(1.0));
+      mNormals[3].set(-static_cast<RealType>(1.0), static_cast<RealType>(0.0));
+    }
+
     virtual void SetOrientation(RealType ori) override
     {
       auto c = std::cos(ori);
@@ -135,6 +150,10 @@ namespace KIRI2D::PHY::RIGIDBODY
     }
 
     virtual const ShapeType GetType() override { return CIRCLE; }
+    const Matrix2x2<RealType> &GetRotateMatrix() const { return mMat; }
+    const int GetVerticesNum() const { return mVerticesNum; }
+    const std::vector<VectorX<2, RealType>> &GetVertices() const { return mVertices; }
+    const std::vector<VectorX<2, RealType>> &GetNormals() const { return mNormals; }
 
   private:
     int mVerticesNum;

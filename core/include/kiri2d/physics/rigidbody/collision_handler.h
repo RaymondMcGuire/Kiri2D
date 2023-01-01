@@ -66,6 +66,115 @@ namespace KIRI2D::PHY::RIGIDBODY
   }
 
   template <class RealType>
+  static void
+  Circle2Polygon(const std::shared_ptr<CollisionHandler<RealType>> &handler,
+                 std::shared_ptr<RigidBody<RealType>> bodyA,
+                 std::shared_ptr<RigidBody<RealType>> bodyB)
+  {
+
+    // KIRI_LOG_DEBUG("Dispatch Circle2Polygon!!");
+    handler->SetContactNum(0);
+
+    auto shape_a = std::dynamic_pointer_cast<Circle<RealType>>(bodyA->GetShape());
+    auto shape_b = std::dynamic_pointer_cast<Polygon<RealType>>(bodyB->GetShape());
+
+    auto pos_a = bodyA->GetPosition();
+    auto pos_b = bodyB->GetPosition();
+    auto rad_a = shape_a->GetRadius();
+
+    // transform circle to polygon model space
+    auto rotate_mat = shape_b->GetRotateMatrix();
+    auto circle_center = rotate_mat.transposed() * (pos_a - pos_b);
+    auto separation = -Huge<RealType>();
+    auto face_normal = 0;
+    auto vertices = shape_b->GetVertices();
+    auto normals = shape_b->GetNormals();
+    auto vertices_num = shape_b->GetVerticesNum();
+    for (auto i = 0; i < vertices_num; ++i)
+    {
+      auto s = normals[i].dot(circle_center - vertices[i]);
+
+      if (s > rad_a)
+        return;
+
+      if (s > separation)
+      {
+        separation = s;
+        face_normal = i;
+      }
+    }
+
+    auto v1 = vertices[face_normal];
+    auto v2 = vertices[(face_normal + 1) % vertices_num];
+
+    if (separation < MEpsilon<RealType>())
+    {
+      handler->SetContactNum(1);
+      auto dir = -(rotate_mat * normals[face_normal]);
+      handler->SetContactDir(dir);
+      handler->SetContactPoint0(dir * rad_a + pos_a);
+      handler->SetPenetration(rad_a);
+      return;
+    }
+
+    auto dot1 = (circle_center - v1).dot(v2 - v1);
+    auto dot2 = (circle_center - v2).dot(v1 - v2);
+    handler->SetPenetration(rad_a - separation);
+
+    if (dot1 <= static_cast<RealType>(0.0))
+    {
+      auto dir = circle_center - v1;
+      if (dir.dot(dir) > rad_a * rad_a)
+        return;
+
+      handler->SetContactNum(1);
+      auto n = v1 - circle_center;
+      n = rotate_mat * n;
+      if (n.length() > MEpsilon<RealType>())
+        n.normalize();
+      handler->SetContactDir(n);
+      v1 = rotate_mat * v1 + pos_b;
+      handler->SetContactPoint0(v1);
+    }
+    else if (dot2 <= static_cast<RealType>(0.0))
+    {
+      auto dir = circle_center - v2;
+      if (dir.dot(dir) > rad_a * rad_a)
+        return;
+
+      handler->SetContactNum(1);
+      auto n = v2 - circle_center;
+      v2 = rotate_mat * v2 + pos_b;
+      handler->SetContactPoint0(v2);
+      n = rotate_mat * n;
+      if (n.length() > MEpsilon<RealType>())
+        n.normalize();
+      handler->SetContactDir(n);
+    }
+    else
+    {
+      auto n = normals[face_normal];
+      if ((circle_center - v1).dot(n) > rad_a)
+        return;
+
+      n = rotate_mat * n;
+      handler->SetContactDir(-n);
+      handler->SetContactPoint0(handler->GetContactDir() * rad_a + pos_a);
+      handler->SetContactNum(1);
+    }
+  }
+
+  template <class RealType>
+  static void
+  Polygon2Circle(const std::shared_ptr<CollisionHandler<RealType>> &handler,
+                 std::shared_ptr<RigidBody<RealType>> bodyA,
+                 std::shared_ptr<RigidBody<RealType>> bodyB)
+  {
+    Circle2Polygon<RealType>(handler, bodyB, bodyA);
+    handler->SetContactDir(-handler->GetContactDir());
+  }
+
+  template <class RealType>
   class CollisionDispatchInternal
   {
   public:
@@ -74,6 +183,14 @@ namespace KIRI2D::PHY::RIGIDBODY
       mDispatcher.appendListener(
           std::make_pair(ShapeType::CIRCLE, ShapeType::CIRCLE),
           &Circle2Circle<RealType>);
+
+      mDispatcher.appendListener(
+          std::make_pair(ShapeType::CIRCLE, ShapeType::POLYGON),
+          &Circle2Polygon<RealType>);
+
+      mDispatcher.appendListener(
+          std::make_pair(ShapeType::POLYGON, ShapeType::CIRCLE),
+          &Polygon2Circle<RealType>);
     }
 
     void Dispatch(const std::shared_ptr<CollisionHandler<RealType>> &handler,
@@ -138,6 +255,7 @@ namespace KIRI2D::PHY::RIGIDBODY
     void SetContactPoint0(VectorX<2, RealType> p) { mContactPoints[0] = p; }
     void SetContactPoint1(VectorX<2, RealType> p) { mContactPoints[1] = p; }
 
+    const VectorX<2, RealType> &GetContactDir() const { return mContactDir; }
     const RealType GetMixRestitution() const { return mMixRestitution; }
     const RealType GetMixStaticFriction() const { return mMixStaticFriction; }
     const RealType GetMixDynamicFriction() const { return mMixDynamicFriction; }
