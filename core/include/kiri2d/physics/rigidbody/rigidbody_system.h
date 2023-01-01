@@ -58,19 +58,36 @@ namespace KIRI2D::PHY::RIGIDBODY
             for (auto i = 0; i < mObjects.size(); i++)
             {
                 auto shape = mObjects[i]->GetShape();
+                auto obj_pos = mObjects[i]->GetPosition();
                 switch (shape->GetType())
                 {
                 case CIRCLE:
+                {
                     auto shape_circle = std::dynamic_pointer_cast<Circle<RealType>>(shape);
-                    auto pos = mObjects[i]->GetPosition().mul(scale) + offset;
+                    auto pos = obj_pos.mul(scale) + offset;
                     circles.emplace_back(KiriCircle2(pos, Vector3F(0.f, 1.f, 1.f), shape_circle->GetRadius() * scale, false));
                     auto c = std::cos(mObjects[i]->GetOrientation());
                     auto s = std::sin(mObjects[i]->GetOrientation());
                     auto rline = VectorX<2, RealType>(-s * shape_circle->GetRadius() * scale, c * shape_circle->GetRadius() * scale);
                     rline += pos;
                     lines.emplace_back(KiriLine2(pos, rline));
-
                     break;
+                }
+
+                case POLYGON:
+                {
+                    auto shape_polygon = std::dynamic_pointer_cast<Polygon<RealType>>(shape);
+                    auto vertices = shape_polygon->GetVertices();
+                    auto vert_num = shape_polygon->GetVerticesNum();
+                    auto rot_mat = shape_polygon->GetRotateMatrix();
+                    for (auto v = 0; v < vert_num; v++)
+                    {
+                        auto point1 = (obj_pos + rot_mat * vertices[v]).mul(scale) + offset;
+                        auto point2 = (obj_pos + rot_mat * vertices[(v + 1) % vert_num]).mul(scale) + offset;
+                        lines.emplace_back(KiriLine2(point1, point2));
+                    }
+                    break;
+                }
                 }
             }
 

@@ -97,9 +97,9 @@ namespace KIRI2D::PHY::RIGIDBODY
     const RealType GetTorque() const { return mTorque; }
     const RealType GetAngularVelocity() const { return mAngularVelocity; }
 
-    VectorX<2, RealType> GetPosition() const { return mPosition; }
-    VectorX<2, RealType> GetVelocity() const { return mVelocity; }
-    VectorX<2, RealType> GetForce() const { return mForce; }
+    const VectorX<2, RealType> &GetPosition() const { return mPosition; }
+    const VectorX<2, RealType> &GetVelocity() const { return mVelocity; }
+    const VectorX<2, RealType> &GetForce() const { return mForce; }
 
     const bool IsStatic() const { return mIsStatic; }
 

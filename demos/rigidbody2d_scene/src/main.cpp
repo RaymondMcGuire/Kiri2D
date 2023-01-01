@@ -28,12 +28,16 @@ int main(int argc, char *argv[])
   system->AddObject(std::make_shared<RIGIDBODY::Circle<float>>(5.f), Vector2F(0.f), true);
 
   auto box = std::make_shared<RIGIDBODY::Polygon<float>>();
-  box->SetAsBox(30.f, 1.f);
+  box->SetAsBox(20.f, 1.f);
   box->SetOrientation(0.f);
   system->AddObject(box, Vector2F(0.f, -15.f), true);
 
   system->AddObject(std::make_shared<RIGIDBODY::Circle<float>>(3.f), Vector2F(-5.f, 20.f), false);
-  system->AddObject(std::make_shared<RIGIDBODY::Circle<float>>(3.f), Vector2F(2.f, 20.f), false);
+
+  auto box1 = std::make_shared<RIGIDBODY::Polygon<float>>();
+  box1->SetAsBox(2.f, 1.f);
+
+  system->AddObject(box1, Vector2F(2.f, 20.f), false);
   system->AddObject(std::make_shared<RIGIDBODY::Circle<float>>(2.f), Vector2F(1.f, 30.f), false);
 
   while (1)

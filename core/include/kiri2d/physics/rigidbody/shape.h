@@ -149,7 +149,7 @@ namespace KIRI2D::PHY::RIGIDBODY
       mMat.set(c, -s, s, c);
     }
 
-    virtual const ShapeType GetType() override { return CIRCLE; }
+    virtual const ShapeType GetType() override { return POLYGON; }
     const Matrix2x2<RealType> &GetRotateMatrix() const { return mMat; }
     const int GetVerticesNum() const { return mVerticesNum; }
     const std::vector<VectorX<2, RealType>> &GetVertices() const { return mVertices; }
