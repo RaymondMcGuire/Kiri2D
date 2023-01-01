@@ -113,7 +113,6 @@ namespace HDV::Hull
                 }
             }
 
-
             for (auto i = 0; i < pre_simplexs.size(); i++)
             {
                 auto flag = true;
@@ -207,14 +206,14 @@ namespace HDV::Hull
                     auto difference = min - v;
                     if (difference >= PLANE_DISTANCE_TOLERANCE)
                     {
-                        // you found a better solution than before, clear out the list and store new value
+
                         min = v;
                         minIndices.clear();
                         minIndices.emplace_back(j);
                     }
                     else if (difference > 0)
                     {
-                        // you found a solution slightly better than before, clear out those that are no longer on the list and store new value
+
                         min = v;
 
                         //! TODO need confirm
@@ -225,20 +224,20 @@ namespace HDV::Hull
                     }
                     else if (difference > -PLANE_DISTANCE_TOLERANCE)
                     {
-                        // same or almost as good as current limit, so store it
+
                         minIndices.emplace_back(j);
                     }
                     difference = v - max;
                     if (difference >= PLANE_DISTANCE_TOLERANCE)
                     {
-                        // you found a better solution than before, clear out the list and store new value
+
                         max = v;
                         maxIndices.clear();
                         maxIndices.emplace_back(j);
                     }
                     else if (difference > 0)
                     {
-                        // you found a solution slightly better than before, clear out those that are no longer on the list and store new value
+
                         max = v;
 
                         //! TODO need confirm
@@ -249,7 +248,7 @@ namespace HDV::Hull
                     }
                     else if (difference > -PLANE_DISTANCE_TOLERANCE)
                     {
-                        // same or almost as good as current limit, so store it
+
                         maxIndices.emplace_back(j);
                     }
                 }
@@ -284,13 +283,10 @@ namespace HDV::Hull
 
                 auto origNumDim = mDimension - 1;
                 auto parabolaScale = 2 / (absSum(mAxisMinma) + absSum(mAxisMaxma) - std::abs(mAxisMaxma[origNumDim]) - std::abs(mAxisMinma[origNumDim]));
-                // the parabola scale is 1 / average of the sum of the other dimensions.
-                // multiplying this by the parabola will scale it back to be on near similar size to the
-                // other dimensions. Without this, the term is much larger than the others, which causes
-                // problems for roundoff error and finding the normal of faces.
-                mAxisMinma[origNumDim] *= parabolaScale; // change the extreme values as well
+
+                mAxisMinma[origNumDim] *= parabolaScale;
                 mAxisMaxma[origNumDim] *= parabolaScale;
-                // it is done here because
+
                 for (int i = origNumDim; i < mPositions.size(); i += mDimension)
                     mPositions[i] *= parabolaScale;
             }
@@ -323,28 +319,25 @@ namespace HDV::Hull
 
         static void computeLUFactor(std::vector<double> &data, int order, std::vector<int> &ipiv, std::vector<double> &vecLUcolj)
         {
-            // Initialize the pivot matrix to the identity permutation.
+
             for (auto i = 0; i < order; i++)
             {
                 ipiv[i] = i;
             }
 
-            // Outer loop.
             for (auto j = 0; j < order; j++)
             {
                 auto indexj = j * order;
                 auto indexjj = indexj + j;
 
-                // Make a copy of the j-th column to localize references.
                 for (auto i = 0; i < order; i++)
                 {
                     vecLUcolj[i] = data[indexj + i];
                 }
 
-                // Apply previous transformations.
                 for (auto i = 0; i < order; i++)
                 {
-                    // Most of the time is spent in the following dot product.
+
                     auto kmax = std::min(i, j);
                     auto s = 0.0;
                     for (auto k = 0; k < kmax; k++)
@@ -355,7 +348,6 @@ namespace HDV::Hull
                     data[indexj + i] = vecLUcolj[i] -= s;
                 }
 
-                // Find pivot and exchange if necessary.
                 auto p = j;
                 for (auto i = j + 1; i < order; i++)
                 {
@@ -380,7 +372,6 @@ namespace HDV::Hull
                     ipiv[j] = p;
                 }
 
-                // Compute multipliers.
                 if (j < order & data[indexjj] != 0.0)
                 {
                     for (auto i = j + 1; i < order; i++)
@@ -416,9 +407,9 @@ namespace HDV::Hull
                 {
                     det *= A[mDimension * i + i];
                     if (iPiv[i] != i)
-                        det *= -1; // the determinant sign changes on row swap.
+                        det *= -1;
+                    return det;
                 }
-                return det;
             }
             }
         }
@@ -483,7 +474,6 @@ namespace HDV::Hull
             auto y = ntY;
             auto z = ntZ;
 
-            // This was generated using Mathematica
             auto nx = x[3] * (y[2] * z[1] - y[1] * z[2]) + x[2] * (y[1] * z[3] - y[3] * z[1]) + x[1] * (y[3] * z[2] - y[2] * z[3]);
             auto ny = x[3] * (y[0] * z[2] - y[2] * z[0]) + x[2] * (y[3] * z[0] - y[0] * z[3]) + x[0] * (y[2] * z[3] - y[3] * z[2]);
             auto nz = x[3] * (y[1] * z[0] - y[0] * z[1]) + x[1] * (y[0] * z[3] - y[3] * z[0]) + x[0] * (y[3] * z[1] - y[1] * z[3]);
@@ -500,12 +490,6 @@ namespace HDV::Hull
 
         void findNormalVectorND(std::vector<int> Vertices, std::vector<double> &normal)
         {
-            // We need to solve the matrix A n = B where
-            //   - A contains coordinates of Vertices as columns
-            //   - B is vector with all 1's. Really, it should be the distance of
-            //       the plane from the origin, but - since we're not worried about that
-            //       here and we will normalize the normal anyway - all 1's suffices.
-            //
             std::vector<int> iPiv;
             std::vector<double> data;
             std::vector<double> nDNormalHelperVector;
@@ -516,7 +500,6 @@ namespace HDV::Hull
 
             auto norm = 0.0;
 
-            // Solve determinants by replacing x-th column by all 1.
             for (auto x = 0; x < mDimension; x++)
             {
                 for (auto i = 0; i < mDimension; i++)
@@ -524,8 +507,7 @@ namespace HDV::Hull
                     auto offset = Vertices[i] * mDimension;
                     for (auto j = 0; j < mDimension; j++)
                     {
-                        // maybe I got the i/j mixed up here regarding the representation Math.net uses...
-                        // ...but it does not matter since Det(A) = Det(Transpose(A)).
+
                         data[mDimension * i + j] = j == x ? 1.0 : mPositions[offset + j];
                     }
                 }
@@ -534,7 +516,7 @@ namespace HDV::Hull
                 for (auto i = 0; i < mDimension; i++)
                 {
                     if (iPiv[i] != i)
-                        coord *= -data[mDimension * i + i]; // the determinant sign changes on row swap.
+                        coord *= -data[mDimension * i + i];
                     else
                         coord *= data[mDimension * i + i];
                 }
@@ -542,7 +524,6 @@ namespace HDV::Hull
                 norm += coord * coord;
             }
 
-            // Normalize the result
             auto f = 1.0 / std::sqrt(norm);
             for (auto i = 0; i < normal.size(); i++)
                 normal[i] *= f;
@@ -560,13 +541,7 @@ namespace HDV::Hull
                         A[index++] = edgeVectors[i][j];
                     else
                         A[index] = (std::pow(-1, index) * index++) / bigNumber;
-            // this last term is used for all the Vertices in the comparison for the yet determined Vertices
-            // the idea is to come up with sets of numbers that are orthogonal so that an non-zero value will result
-            // and to choose smallish numbers since the choice of vectors will affect what the end volume is.
-            // A better way (todo?) is to solve a smaller matrix. However, cases were found in which the obvious smaller vector
-            // (the upper left) had too many zeros. So, one would need to find the right subset. Indeed choosing a subset
-            // biases the first dimensions of the others. Perhaps a larger volume would be created from a different vertex
-            // if another subset of dimensions were used.
+
             return std::abs(determinant(A));
         }
 
@@ -586,8 +561,8 @@ namespace HDV::Hull
             auto bigNumber = std::accumulate(mAxisMaxma.begin(), mAxisMaxma.end(), decltype(mAxisMaxma)::value_type(0)) * mDimension * mNumberOfVertices;
             // KIRI_LOG_DEBUG("big number ={0}", bigNumber);
 
-            auto vertex1 = mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].front(); // these are min and max Vertices along
-            auto vertex2 = mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].back();  // the dimension that had the fewest points
+            auto vertex1 = mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].front();
+            auto vertex2 = mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].back();
             mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].erase(mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].begin() + 0);
             mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].erase(mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].begin() + mBoundingBoxPoints[mIndexOfDimensionWithLeastExtremes].size() - 1);
 
@@ -611,7 +586,6 @@ namespace HDV::Hull
                           [&](std::vector<int> elem)
                           { extremes.insert(extremes.end(), elem.begin(), elem.end()); });
 
-            // otherwise find the remaining points by maximizing the initial simplex volume
             auto index = 1;
             while (index < mDimension && !extremes.empty())
             {
@@ -626,7 +600,7 @@ namespace HDV::Hull
 
                 for (auto i = 0; i < extremes.size(); i++)
                 {
-                    // count backwards in order to remove potential duplicates
+
                     auto vIndex = extremes[i];
 
                     edgeVectors[index] = vectorBetweenVertices(vIndex, vertex1);
@@ -810,7 +784,6 @@ namespace HDV::Hull
                 faces[i] = newFace;
             }
 
-            // update the adjacency (check all pairs of faces)
             for (auto i = 0; i < mDimension; i++)
             {
                 for (auto j = i + 1; j < mDimension + 1; j++)
@@ -818,21 +791,20 @@ namespace HDV::Hull
             }
 
             auto numFaces = faces.size();
-            // init the vertex beyond buffers.
+
             for (auto i = 0; i < numFaces; i++)
             {
                 findBeyondVertices(faces[i]);
 
                 // KIRI_LOG_DEBUG("faces[i]->verticesBeyond().size()={0}", faces[i]->verticesBeyond().size());
                 if (faces[i]->verticesBeyond().size() == 0)
-                    mBuffer->ConvexSimplexs.emplace_back(faces[i]); // The face is on the hull
+                    mBuffer->ConvexSimplexs.emplace_back(faces[i]);
                 else
                     mBuffer->UnprocessedFaces->add(faces[i]);
 
                 // faces[i]->toString();
             }
 
-            // Set all Vertices to false (unvisited).
             for (auto i = 0; i < initialPoints.size(); i++)
             {
                 mVertexVisited[initialPoints[i]] = false;
@@ -865,18 +837,15 @@ namespace HDV::Hull
 
                 // KIRI_LOG_DEBUG("centroid={0},{1},{2}", mCentroid[0], mCentroid[1], mCentroid[2]);
 
-                // The affected faces get tagged
                 tagAffectedFaces(mBuffer->UnprocessedFaces->First);
 
                 // mBuffer->UnprocessedFaces->First->toString();
 
-                // Create the cone from the currentVertex and the affected faces horizon.
                 if ((mBuffer->SingularVertices.find(mBuffer->CurrentVertex) == mBuffer->SingularVertices.end()) && createCone())
                     commitCone();
                 else
                     handleSingular();
 
-                // Need to reset the tags
                 auto count = mBuffer->AffectedFaceBuffer.size();
 
                 for (auto i = 0; i < count; i++)
@@ -963,9 +932,9 @@ namespace HDV::Hull
             {
                 if (distance > mBuffer->MaxDistance)
                 {
-                    // If it's within the tolerance distance, use the lex. larger point
+
                     if ((distance - mBuffer->MaxDistance) < PLANE_DISTANCE_TOLERANCE)
-                    { // todo: why is this lexCompare necessary. Would seem to favor x over y over z (etc.)?
+                    {
                         if (lexCompare(v, mBuffer->FurthestVertex) > 0)
                         {
                             mBuffer->MaxDistance = distance;
@@ -982,9 +951,6 @@ namespace HDV::Hull
             }
         }
 
-        /**
-         * Update the centroid of the current hull
-         */
         void updateCenter()
         {
             for (auto i = 0; i < mDimension; i++)
@@ -1009,10 +975,6 @@ namespace HDV::Hull
 
 #pragma region Initilization
 
-        /**
-         * Finds the extremes in all dimensions
-         * @return {std::vector<VERTEXPTR>}  : extremes points
-         */
         std::vector<VERTEXPTR> findExtremes()
         {
             std::vector<VERTEXPTR> extremes;
@@ -1131,32 +1093,25 @@ namespace HDV::Hull
             auto rv = r->vertices();
             auto i = 0;
 
-            // reset marks on the 1st face
             for (i = 0; i < lv.size(); i++)
                 mVertexVisited[lv[i]] = false;
 
-            // mark all Vertices on the 2nd face
             for (i = 0; i < rv.size(); i++)
                 mVertexVisited[rv[i]] = true;
 
-            // find the 1st false index
             for (i = 0; i < lv.size(); i++)
                 if (!mVertexVisited[lv[i]])
                     break;
 
-            // no vertex was marked
             if (i == mDimension)
                 return;
 
-            // check if only 1 vertex wasn't marked
             for (auto j = i + 1; j < lv.size(); j++)
                 if (!mVertexVisited[lv[j]])
                     return;
 
-            // if we are here, the two faces share an edge
             l->adjacentFaces()[i] = r;
 
-            // update the adj. face on the other face - find the vertex that remains marked
             for (i = 0; i < lv.size(); i++)
                 mVertexVisited[lv[i]] = false;
             for (i = 0; i < rv.size(); i++)
@@ -1233,7 +1188,6 @@ namespace HDV::Hull
             {
                 auto oldFace = mBuffer->AffectedFaceBuffer[fIndex];
 
-                // Find the faces that need to be updated
                 auto updateCount = 0;
                 for (auto i = 0; i < mDimension; i++)
                 {
@@ -1242,7 +1196,7 @@ namespace HDV::Hull
                     if (af == nullptr)
                         throw std::invalid_argument("(3) Adjacent Face should never be nullptr");
 
-                    if (af->tag() == 0) // Tag == 0 when oldFaces does not contain af
+                    if (af->tag() == 0)
                     {
                         mBuffer->UpdateBuffer[updateCount] = mBuffer->AffectedFaceBuffer[fIndex]->adjacentFaces()[i];
                         mBuffer->UpdateIndices[updateCount] = i;
@@ -1252,10 +1206,8 @@ namespace HDV::Hull
 
                 for (auto i = 0; i < updateCount; i++)
                 {
-                    // auto adjacentFace = mBuffer->UpdateBuffer[i];
 
                     auto oldFaceAdjacentIndex = 0;
-                    // auto adjFaceAdjacency = adjacentFace->AdjacentFaces;
 
                     for (auto j = 0; j < mDimension; j++)
                     {
@@ -1267,7 +1219,6 @@ namespace HDV::Hull
                         }
                     }
 
-                    // Index of the face that corresponds to this adjacent face
                     auto forbidden = mBuffer->UpdateIndices[i];
 
                     auto newFace = mBuffer->ObjManager->simplex();
@@ -1280,7 +1231,6 @@ namespace HDV::Hull
 
                     auto orderedPivotIndex = 0;
 
-                    // correct the ordering
                     if (currentVertexIndex < oldVertexIndex)
                     {
                         orderedPivotIndex = 0;
@@ -1346,21 +1296,15 @@ namespace HDV::Hull
         void commitCone()
         {
 
-            // Fill the adjacency.
             for (auto i = 0; i < mBuffer->ConeFaceBuffer.size(); i++)
             {
-                // auto face = mBuffer->ConeFaceBuffer[i];
 
-                // auto newFace = face->Face;
-                // auto adjacentFace = face->Pivot;
-                // auto oldFace = face->OldFace;
                 auto orderedPivotIndex = mBuffer->ConeFaceBuffer[i]->FaceIndex;
 
                 mBuffer->ConeFaceBuffer[i]->Face->adjacentFaces()[orderedPivotIndex] = mBuffer->ConeFaceBuffer[i]->Pivot;
 
                 mBuffer->ConeFaceBuffer[i]->Pivot->adjacentFaces()[mBuffer->ConeFaceBuffer[i]->PivotIndex] = mBuffer->ConeFaceBuffer[i]->Face;
 
-                //  let there be a connection.
                 for (auto j = 0; j < mDimension; j++)
                 {
                     if (j == orderedPivotIndex)
@@ -1372,7 +1316,6 @@ namespace HDV::Hull
                     connectFace(connector);
                 }
 
-                //   This could slightly help...
                 if (mBuffer->ConeFaceBuffer[i]->Pivot->verticesBeyond().size() < mBuffer->ConeFaceBuffer[i]->OldFace->verticesBeyond().size())
                 {
                     findBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->Pivot->verticesBeyond(), mBuffer->ConeFaceBuffer[i]->OldFace->verticesBeyond());
@@ -1382,7 +1325,6 @@ namespace HDV::Hull
                     findBeyondVertices(mBuffer->ConeFaceBuffer[i]->Face, mBuffer->ConeFaceBuffer[i]->OldFace->verticesBeyond(), mBuffer->ConeFaceBuffer[i]->Pivot->verticesBeyond());
                 }
 
-                // This face will definitely lie on the hull
                 if (mBuffer->ConeFaceBuffer[i]->Face->verticesBeyond().size() == 0)
                 {
                     mBuffer->ConvexSimplexs.emplace_back(mBuffer->ConeFaceBuffer[i]->Face);
@@ -1391,17 +1333,15 @@ namespace HDV::Hull
 
                     mBuffer->ConeFaceBuffer[i]->Face->verticesBeyond() = mBuffer->EmptyBuffer;
                 }
-                else // add the face to the list
+                else
                 {
 
                     mBuffer->UnprocessedFaces->add(mBuffer->ConeFaceBuffer[i]->Face);
                 }
 
-                // recycle the object.
                 mBuffer->ObjManager->depositDeferredSimplex(mBuffer->ConeFaceBuffer[i]);
             }
 
-            // Recycle the affected faces.
             for (auto fIndex = 0; fIndex < mBuffer->AffectedFaceBuffer.size(); fIndex++)
             {
                 mBuffer->UnprocessedFaces->remove(mBuffer->AffectedFaceBuffer[fIndex]);
@@ -1470,7 +1410,6 @@ namespace HDV::Hull
 
             face->setFurthestVertex(mBuffer->FurthestVertex);
 
-            // Pull the old switch a roo
             auto temp = face->verticesBeyond();
             face->verticesBeyond() = beyondVertices;
             if (temp.size() > 0)
@@ -1483,7 +1422,6 @@ namespace HDV::Hull
             rollbackCenter();
             mBuffer->SingularVertices.insert(mBuffer->CurrentVertex);
 
-            // This means that all the affected faces must be on the hull and that all their "Vertices beyond" are singular.
             for (auto fIndex = 0; fIndex < mBuffer->AffectedFaceBuffer.size(); fIndex++)
             {
                 for (auto i = 0; i < mBuffer->AffectedFaceBuffer[fIndex]->verticesBeyond().size(); i++)
