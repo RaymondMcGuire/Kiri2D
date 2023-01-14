@@ -1,13 +1,12 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-12-24 18:26:53
+ * @Date: 2023-01-11 14:46:17
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-12-24 21:13:44
+ * @LastEditTime: 2023-01-14 15:37:08
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\rigidbody.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _RIGIDBODY_H_
 #define _RIGIDBODY_H_
 
@@ -25,7 +24,7 @@ namespace KIRI2D::PHY::RIGIDBODY
         : mPosition(pos), mDensity(1.0), mMass(0.0), mInverseMass(0.0), mTorque(0.0), mAngularVelocity(0.0), mIsStatic(false)
     {
       mVelocity = VectorX<2, RealType>(static_cast<RealType>(0.0));
-      mRestitution = static_cast<RealType>(0.2);
+      mRestitution = static_cast<RealType>(1.0);
       mStaticFriction = static_cast<RealType>(0.5);
       mDynamicFriction = static_cast<RealType>(0.3);
       mOrientation = Random::get<RealType>(-KIRI_PI<RealType>(), KIRI_PI<RealType>());
@@ -65,6 +64,9 @@ namespace KIRI2D::PHY::RIGIDBODY
       mOrientation = ori;
       mShape->SetOrientation(mOrientation);
     }
+    void SetRestitution(const RealType val) { mRestitution = val; }
+    void SetStaticFriction(const RealType val) { mStaticFriction = val; }
+    void SetDynamicFriction(const RealType val) { mDynamicFriction = val; }
 
     void AddPosition(VectorX<2, RealType> pos) { mPosition += pos; }
     void AddVelocity(VectorX<2, RealType> vel) { mVelocity += vel; }

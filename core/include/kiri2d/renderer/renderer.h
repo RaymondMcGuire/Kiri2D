@@ -2,12 +2,11 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-02-23 00:18:39
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-08 23:20:22
+ * @LastEditTime: 2023-01-14 15:02:42
  * @FilePath: \Kiri2D\core\include\kiri2d\renderer\renderer.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
-
 #ifndef _KIRI2D_RENDERER_H_
 #define _KIRI2D_RENDERER_H_
 
@@ -31,17 +30,17 @@ namespace KIRI2D
             KiriScene2DPtr scene)
             : mScene(std::move(scene))
         {
-            mWindowWidth = mScene->windowWidth();
-            mWindowHeight = mScene->windowHeight();
+            mWindowWidth = mScene->GetWindowWidth();
+            mWindowHeight = mScene->GetWindowHeight();
             mCanvas = cv::Mat::zeros(mWindowHeight, mWindowWidth, CV_8UC3);
-            this->clearCanvas();
+            this->ClearCanvas();
         }
 
-        void clearCanvas();
-        void drawCanvas();
-        void saveImages2File();
-        void saveImages2FileWithPrefix(std::string prefix);
-        inline auto canvas() { return mCanvas; }
+        void ClearCanvas();
+        void DrawCanvas();
+        void SaveImages2File();
+        void SaveImages2FileWithPrefix(std::string prefix);
+        inline auto GetCanvas() { return mCanvas; }
 
         ~KiriRenderer2D() {}
 

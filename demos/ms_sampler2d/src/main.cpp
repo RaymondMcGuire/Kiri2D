@@ -220,17 +220,17 @@ int main(int argc, char *argv[])
             circles[i].col = Vector3F(color.r(), color.g(), color.b());
         }
 
-        scene->addLines(lines);
-        scene->addParticles(points);
-        scene->addCircles(circles);
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+        scene->AddCircles(circles);
 
-        renderer->drawCanvas();
+        renderer->DrawCanvas();
 
         if ((idx + 1) % 100 == 0)
-            renderer->saveImages2FileWithPrefix(boundary_filename);
+            renderer->SaveImages2FileWithPrefix(boundary_filename);
 
-        renderer->clearCanvas();
-        scene->clear();
+        renderer->ClearCanvas();
+        scene->Clear();
 
         auto cur_rmsp = ComputeRMSPE(predict_radius, real_radius);
 

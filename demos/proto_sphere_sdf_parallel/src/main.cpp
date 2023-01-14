@@ -112,21 +112,21 @@ int main(int argc, char *argv[])
     for (auto i = 0; i < inserted_sphere.size(); i++)
       circles.emplace_back(inserted_sphere[i]);
 
-    scene->addLines(lines);
-    scene->addParticles(points);
-    scene->addCircles(circles);
+    scene->AddLines(lines);
+    scene->AddParticles(points);
+    scene->AddCircles(circles);
 
-    renderer->drawCanvas();
+    renderer->DrawCanvas();
 
     if (inserted_sphere.size() > 0)
-      renderer->saveImages2File();
+      renderer->SaveImages2File();
 
-    // cv::imshow("KIRI2D", renderer->canvas());
+    // cv::imshow("KIRI2D", renderer->GetCanvas());
     // cv::waitKey(5);
 
     // clean canvas
-    renderer->clearCanvas();
-    scene->clear();
+    renderer->ClearCanvas();
+    scene->Clear();
   }
 
   return 0;

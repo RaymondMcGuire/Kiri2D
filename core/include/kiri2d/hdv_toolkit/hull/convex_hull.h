@@ -412,6 +412,7 @@ namespace HDV::Hull
                 }
             }
             }
+            return 0.0;
         }
 
         void findNormalVector(std::vector<int> Vertices, std::vector<double> &normalData)

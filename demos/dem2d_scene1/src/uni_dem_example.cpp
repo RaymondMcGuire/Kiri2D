@@ -163,16 +163,16 @@ namespace KIRI2D
 
     void UniDEM2DExample::renderScene(std::vector<KiriCircle2> particles)
     {
-        mScene->addCircles(particles);
+        mScene->AddCircles(particles);
         mScene->addRect(mBoundaryRect);
 
-        mRenderer->drawCanvas();
-        mRenderer->saveImages2File();
+        mRenderer->DrawCanvas();
+        mRenderer->SaveImages2File();
 
         cv::imshow("DEM", mRenderer->canvas());
         cv::waitKey(5);
 
-        mRenderer->clearCanvas();
+        mRenderer->ClearCanvas();
         mScene->clear();
     }
 }

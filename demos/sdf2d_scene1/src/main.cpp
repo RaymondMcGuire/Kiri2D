@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
   for (auto i = 0; i < precompute_lines.size(); ++i)
     lines.emplace_back(precompute_lines[i]);
 
-  scene->addLines(lines);
+  scene->AddLines(lines);
 
   std::vector<KiriCircle2> circles;
   auto sdf = std::make_shared<SDF::PolygonSDF2D>(boundary_polygon, 5.0);
@@ -101,13 +101,13 @@ int main(int argc, char *argv[]) {
         KiriCircle2(Vector2F(points[i].x, points[i].y) + offset,
                     Vector3F(0.f, 1.f, 1.f), 1, true));
   }
-  scene->addCircles(circles);
+  scene->AddCircles(circles);
 
-  renderer->drawCanvas();
-  renderer->saveImages2File();
+  renderer->DrawCanvas();
+  renderer->SaveImages2File();
   while (1) {
-    // renderer->saveImages2File();
-    cv::imshow("KIRI2D", renderer->canvas());
+    // renderer->SaveImages2File();
+    cv::imshow("KIRI2D", renderer->GetCanvas());
     cv::waitKey(5);
   }
 

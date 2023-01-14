@@ -114,23 +114,23 @@ int main_treemaplayout()
 
     auto scene = std::make_shared<KiriScene2D>((size_t)width, (size_t)height);
 
-    // scene->addParticles(ppoints);
-    // scene->addObject(boundary);
+    // scene->AddParticles(ppoints);
+    // scene->AddObject(boundary);
 
-    // scene->addLines(edges);
-    // scene->addParticles(points);
+    // scene->AddLines(edges);
+    // scene->AddParticles(points);
 
     // scene->addRects(treemap2d->GetTreemapLayoutRect());
-    scene->addCircles(circles);
+    scene->AddCircles(circles);
 
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     while (1)
     {
-        renderer->drawCanvas();
-        cv::imshow("KIRI2D", renderer->canvas());
+        renderer->DrawCanvas();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->clearCanvas();
+        renderer->ClearCanvas();
     }
 
     return 0;
@@ -207,19 +207,19 @@ int main111()
     Vector2F offsetVec2 = Vector2F(offset, offset);
     auto scene = std::make_shared<KiriScene2D>((size_t)width, (size_t)height);
 
-    scene->addParticles(ppoints);
-    scene->addObject(boundary);
+    scene->AddParticles(ppoints);
+    scene->AddObject(boundary);
 
-    // scene->addLines(edges);
+    // scene->AddLines(edges);
 
     auto renderer = std::make_shared<KiriRenderer2D>(scene);
 
     while (1)
     {
-        renderer->drawCanvas();
-        cv::imshow("KIRI2D", renderer->canvas());
+        renderer->DrawCanvas();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->clearCanvas();
+        renderer->ClearCanvas();
     }
 
     return 0;

@@ -2,10 +2,10 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-03-27 01:28:37
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-10-16 14:02:39
+ * @LastEditTime: 2023-01-14 14:56:04
  * @FilePath: \Kiri2D\core\include\kiri2d\scene.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_SCENE_H_
@@ -46,27 +46,27 @@ namespace KIRI2D
                     window_center));
         }
 
-        void addObject(KiriSDF2D object);
-        void addLine(KiriLine2 line);
-        void addLines(std::vector<KiriLine2> lines);
-        void addParticle(KiriPoint2 particle);
-        void addParticles(std::vector<KiriPoint2> particles);
-        void addRect(KiriRect2 rect);
-        void addRects(std::vector<KiriRect2> rects);
-        void addCircle(KiriCircle2 circle);
-        void addCircles(std::vector<KiriCircle2> circles);
+        void AddObject(KiriSDF2D object);
+        void AddLine(KiriLine2 line);
+        void AddLines(std::vector<KiriLine2> lines);
+        void AddParticle(KiriPoint2 particle);
+        void AddParticles(std::vector<KiriPoint2> particles);
+        void AddRect(KiriRect2 rect);
+        void AddRects(std::vector<KiriRect2> rects);
+        void AddCircle(KiriCircle2 circle);
+        void AddCircles(std::vector<KiriCircle2> circles);
 
-        inline const auto sdfObjects() { return mSDFObjects; }
-        inline const auto points() { return mPoints; }
-        inline const auto lines() { return mLines; }
-        inline const auto rects() { return mRects; }
-        inline const auto circles() { return mCircles; }
+        inline const auto GetSDFObjects() { return mSDFObjects; }
+        inline const auto GetPoints() { return mPoints; }
+        inline const auto GetLines() { return mLines; }
+        inline const auto GetRects() { return mRects; }
+        inline const auto GetCircles() { return mCircles; }
 
-        inline const auto camera() { return mCamera; }
-        inline const auto windowWidth() { return mWindowWidth; }
-        inline const auto windowHeight() { return mWindowHeight; }
+        inline const auto GetCamera() { return mCamera; }
+        inline const auto GetWindowWidth() { return mWindowWidth; }
+        inline const auto GetWindowHeight() { return mWindowHeight; }
 
-        void clear()
+        void Clear()
         {
             mSDFObjects.clear();
             mPoints.clear();

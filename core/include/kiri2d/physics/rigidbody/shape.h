@@ -1,11 +1,11 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-12-23 13:08:40
+ * @Date: 2023-01-11 14:46:17
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-12-23 14:13:00
+ * @LastEditTime: 2023-01-14 15:14:16
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\shape.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _SHAPE_H_
@@ -115,12 +115,15 @@ namespace KIRI2D::PHY::RIGIDBODY
       mBody.lock()->SetInteria(interia * density);
     }
 
-    void set(const std::vector<VectorX<2, RealType>> &data)
+    void Set(const std::vector<VectorX<2, RealType>> &data)
     {
       mVertices = data;
       mVerticesNum = data.size();
-      mNormals.resize(mVerticesNum);
 
+      this->CheckVerticesByConvexHull();
+
+      // compute normals
+      mNormals.resize(mVerticesNum);
       for (auto i = 0; i < mVerticesNum; i++)
       {
         auto p1 = mVertices[i];
@@ -145,6 +148,18 @@ namespace KIRI2D::PHY::RIGIDBODY
       mNormals[1].set(static_cast<RealType>(1.0), static_cast<RealType>(0.0));
       mNormals[2].set(static_cast<RealType>(0.0), static_cast<RealType>(1.0));
       mNormals[3].set(-static_cast<RealType>(1.0), static_cast<RealType>(0.0));
+    }
+
+    void SetAsRandomConvexShape(RealType size)
+    {
+      std::vector<VectorX<2, RealType>> vertices;
+      auto vertices_num = Random::get(MIN_RND_VERTICES_NUM, MAX_RND_VERTICES_NUM);
+      auto vertices_range = Random::get<RealType>(0, 1) * size + static_cast<RealType>(1.0);
+      for (auto i = 0; i < vertices_num; i++)
+        vertices.emplace_back(VectorX<2, RealType>(Random::get<RealType>(-vertices_range, vertices_range), Random::get<RealType>(-vertices_range, vertices_range)));
+
+      this->Set(vertices);
+      this->SetOrientation(Random::get<RealType>(-KIRI_PI<RealType>(), KIRI_PI<RealType>()));
     }
 
     virtual void SetOrientation(RealType ori) override
@@ -184,6 +199,72 @@ namespace KIRI2D::PHY::RIGIDBODY
     int mVerticesNum;
     Matrix2x2<RealType> mMat;
     std::vector<VectorX<2, RealType>> mVertices, mNormals;
+
+    const int MIN_RND_VERTICES_NUM = 3;
+    const int MAX_RND_VERTICES_NUM = 64;
+
+    void CheckVerticesByConvexHull()
+    {
+      auto right_most = 0;
+      auto highest_x = mVertices[0].x;
+      for (auto i = 1; i < mVerticesNum; i++)
+      {
+        auto x = mVertices[i].x;
+        if (x > highest_x)
+        {
+          highest_x = x;
+          right_most = i;
+        }
+        else if (x == highest_x)
+          if (mVertices[i].y < mVertices[right_most].y)
+            right_most = i;
+      }
+
+      std::vector<int> hull;
+      hull.resize(mVerticesNum, 0);
+
+      auto out_count = 0;
+      auto index_hull = right_most;
+      while (out_count < mVerticesNum)
+      {
+        hull[out_count] = index_hull;
+        auto next_hull_index = 0;
+        for (auto i = 1; i < mVerticesNum; i++)
+        {
+          if (next_hull_index == index_hull)
+          {
+            next_hull_index = i;
+            continue;
+          }
+
+          auto e1 = mVertices[next_hull_index] - mVertices[hull[out_count]];
+          auto e2 = mVertices[i] - mVertices[hull[out_count]];
+          auto c = e1.cross(e2);
+          if (c < static_cast<RealType>(0.0))
+            next_hull_index = i;
+
+          if (c == static_cast<RealType>(0.0) && e2.lengthSquared() > e1.lengthSquared())
+            next_hull_index = i;
+        }
+
+        ++out_count;
+        index_hull = next_hull_index;
+
+        if (next_hull_index == right_most)
+        {
+          mVerticesNum = out_count;
+          break;
+        }
+      }
+
+      std::vector<VectorX<2, RealType>> hull_vertices;
+      hull_vertices.resize(mVerticesNum);
+
+      for (auto i = 0; i < mVerticesNum; ++i)
+        hull_vertices[i] = mVertices[hull[i]];
+
+      mVertices = hull_vertices;
+    }
   };
 
   template <class RealType>

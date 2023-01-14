@@ -110,15 +110,15 @@ void QuickHullVoronoi2d()
             lines.emplace_back(precompute_lines[i]);
         }
 
-        scene->addLines(lines);
-        scene->addParticles(points);
+        scene->AddLines(lines);
+        scene->AddParticles(points);
 
-        renderer->drawCanvas();
-        // renderer->saveImages2File();
-        cv::imshow("KIRI2D", renderer->canvas());
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->clearCanvas();
-        scene->clear();
+        renderer->ClearCanvas();
+        scene->Clear();
     }
 }
 
@@ -379,17 +379,17 @@ void MSSampler2D()
             circles[i].col = Vector3F(color.r(), color.g(), color.b());
         }
 
-        scene->addLines(lines);
-        scene->addParticles(points);
-        scene->addCircles(circles);
+        scene->AddLines(lines);
+        scene->AddParticles(points);
+        scene->AddCircles(circles);
 
-        renderer->drawCanvas();
+        renderer->DrawCanvas();
 
         if ((idx + 1) % 100 == 0)
-            renderer->saveImages2FileWithPrefix(boundaryFileName);
+            renderer->SaveImages2FileWithPrefix(boundaryFileName);
 
-        renderer->clearCanvas();
-        scene->clear();
+        renderer->ClearCanvas();
+        scene->Clear();
 
         auto cur_rmsp = ComputeRMSPE(predictRadiusArray, realRadiusArray);
 
@@ -484,14 +484,14 @@ void Sph2dExample()
         }
 
         scene->addRect(boundaryRect);
-        scene->addParticles(points);
+        scene->AddParticles(points);
 
-        renderer->drawCanvas();
-        // renderer->saveImages2File();
-        cv::imshow("KIRI2D::SPH2D", renderer->canvas());
+        renderer->DrawCanvas();
+        // renderer->SaveImages2File();
+        cv::imshow("KIRI2D::SPH2D", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->clearCanvas();
-        scene->clear();
+        renderer->ClearCanvas();
+        scene->Clear();
     }
 }
 
@@ -605,17 +605,17 @@ void BlueNoiseSamplingVisual()
         }
 
         scene->addRect(boundaryRect);
-        scene->addParticles(points);
+        scene->AddParticles(points);
 
-        // scene->addCircles(circles);
-        //  scene->addObject(boundary_vis);
+        // scene->AddCircles(circles);
+        //  scene->AddObject(boundary_vis);
 
-        renderer->drawCanvas();
-        renderer->saveImages2File();
-        cv::imshow("KIRI2D::Blue Noise Sampling", renderer->canvas());
+        renderer->DrawCanvas();
+        renderer->SaveImages2File();
+        cv::imshow("KIRI2D::Blue Noise Sampling", renderer->GetCanvas());
         cv::waitKey(5);
-        renderer->clearCanvas();
-        scene->clear();
+        renderer->ClearCanvas();
+        scene->Clear();
     }
 }
 

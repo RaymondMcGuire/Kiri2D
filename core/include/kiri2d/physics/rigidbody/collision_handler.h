@@ -1,11 +1,11 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-12-24 18:26:53
+ * @Date: 2023-01-11 14:46:17
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-12-24 22:07:18
+ * @LastEditTime: 2023-01-14 11:11:02
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\collision_handler.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #ifndef _COLLISION_HANDLER_H_
 #define _COLLISION_HANDLER_H_
@@ -276,7 +276,7 @@ namespace KIRI2D::PHY::RIGIDBODY
                   std::shared_ptr<RigidBody<RealType>> bodyA,
                   std::shared_ptr<RigidBody<RealType>> bodyB)
   {
-    KIRI_LOG_DEBUG("Dispatch Polygon2Polygon!!");
+    // KIRI_LOG_DEBUG("Dispatch Polygon2Polygon!!");
 
     handler->SetContactNum(0);
 
@@ -287,7 +287,7 @@ namespace KIRI2D::PHY::RIGIDBODY
     if (penetration_a >= static_cast<RealType>(0.0))
       return;
 
-    auto [penetration_b, face_b] = FindAxisLeastPenetration(shape_a, shape_b);
+    auto [penetration_b, face_b] = FindAxisLeastPenetration(shape_b, shape_a);
     if (penetration_b >= static_cast<RealType>(0.0))
       return;
 
@@ -377,9 +377,9 @@ namespace KIRI2D::PHY::RIGIDBODY
           std::make_pair(ShapeType::POLYGON, ShapeType::CIRCLE),
           &Polygon2Circle<RealType>);
 
-      // mDispatcher.appendListener(
-      //     std::make_pair(ShapeType::POLYGON, ShapeType::POLYGON),
-      //     &Polygon2Polygon<RealType>);
+      mDispatcher.appendListener(
+          std::make_pair(ShapeType::POLYGON, ShapeType::POLYGON),
+          &Polygon2Polygon<RealType>);
     }
 
     void Dispatch(const std::shared_ptr<CollisionHandler<RealType>> &handler,

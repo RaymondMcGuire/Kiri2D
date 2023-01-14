@@ -1,11 +1,11 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-12-22 18:59:20
+ * @Date: 2023-01-11 14:46:17
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-12-24 18:44:34
+ * @LastEditTime: 2023-01-14 15:10:06
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\rigidbody_system.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #ifndef _RIGIDBODY_SYSTEM_H_
 #define _RIGIDBODY_SYSTEM_H_
@@ -22,11 +22,15 @@ namespace KIRI2D::PHY::RIGIDBODY
     {
     public:
         explicit RigidBodySystem(
+            VectorX<2, RealType> lowest,
+            VectorX<2, RealType> highest,
+            int maxNum = 100,
             RealType dt = static_cast<RealType>(1.0 / 60.0),
             int iteration = 10,
             RealType gravityScale = static_cast<RealType>(5.0))
-            : mDt(dt), mIteration(iteration), mAccumulator(static_cast<RealType>(0.0)),
-              mGravityScale(gravityScale)
+            : mDt(dt), mIteration(iteration), mStepNum(0), mAccumulator(static_cast<RealType>(0.0)),
+              mGravityScale(gravityScale), mMaxBodyNum(maxNum),
+              mSimWorldLowest(lowest), mSimWorldHighest(highest)
         {
             mGravity = VectorX<2, RealType>(static_cast<RealType>(0.0), static_cast<RealType>(-9.8 * mGravityScale));
             mSolver = std::make_shared<RigidBodySolver<RealType>>();
@@ -38,6 +42,8 @@ namespace KIRI2D::PHY::RIGIDBODY
 
         void UpdateSystem()
         {
+            this->CheckSimWorldBoundary();
+
             mAccumulator += mPerFrameTimer.elapsed();
             mPerFrameTimer.restart();
             mAccumulator = std::clamp(mAccumulator, static_cast<RealType>(0.0), static_cast<RealType>(0.1));
@@ -47,12 +53,13 @@ namespace KIRI2D::PHY::RIGIDBODY
                 mSolver->UpdateSolver(mObjects, mIteration, mDt, mGravity);
                 mAccumulator -= mDt;
             }
+
+            mStepNum++;
         }
 
-        void Render(const KiriScene2DPtr &scene, const KiriRenderer2DPtr &renderer)
+        void Render(const KiriScene2DPtr &scene, const KiriRenderer2DPtr &renderer, const RealType scale)
         {
-            auto offset = VectorX<2, RealType>(250.0, 250.0);
-            auto scale = 10;
+            auto offset = VectorX<2, RealType>(scene->GetWindowWidth(), scene->GetWindowHeight()) / static_cast<RealType>(2.0);
             std::vector<KiriCircle2> circles;
             std::vector<KiriLine2> lines;
             for (auto i = 0; i < mObjects.size(); i++)
@@ -91,9 +98,9 @@ namespace KIRI2D::PHY::RIGIDBODY
                 }
             }
 
-            scene->addLines(lines);
-            scene->addCircles(circles);
-            renderer->drawCanvas();
+            scene->AddLines(lines);
+            scene->AddCircles(circles);
+            renderer->DrawCanvas();
         }
 
         void AddObject(const ShapePtr<RealType> &shape, const VectorX<2, RealType> &pos, const bool staticObj = false)
@@ -105,10 +112,29 @@ namespace KIRI2D::PHY::RIGIDBODY
             mObjects.emplace_back(rigidbody);
         }
 
+        void EmitRndPolygon(const RealType size, const VectorX<2, RealType> &lowest, const VectorX<2, RealType> &highest, const int frequence)
+        {
+            if (mObjects.size() >= mMaxBodyNum || mStepNum % frequence != 0)
+                return;
+
+            auto shape = std::make_shared<RIGIDBODY::Polygon<RealType>>();
+            shape->SetAsRandomConvexShape(size);
+
+            auto rnd_pos = VectorX<2, RealType>(Random::get<RealType>(lowest.x, highest.x), Random::get<RealType>(lowest.y, highest.y));
+            this->AddObject(shape, rnd_pos);
+            auto body = shape->GetBody();
+            body.lock()->SetRestitution(static_cast<RealType>(0.5));
+            body.lock()->SetStaticFriction(static_cast<RealType>(0.2));
+            body.lock()->SetDynamicFriction(static_cast<RealType>(0.1));
+        }
+
     private:
         RealType mDt;
         RealType mAccumulator;
-        int mIteration;
+
+        int mIteration, mStepNum;
+        int mMaxBodyNum;
+        VectorX<2, RealType> mSimWorldLowest, mSimWorldHighest;
 
         RealType mGravityScale;
         VectorX<2, RealType> mGravity;
@@ -116,6 +142,21 @@ namespace KIRI2D::PHY::RIGIDBODY
         KiriTimer mPerFrameTimer;
         std::shared_ptr<RigidBodySolver<RealType>> mSolver;
         std::vector<std::shared_ptr<RigidBody<RealType>>> mObjects;
+
+        void CheckSimWorldBoundary()
+        {
+            mObjects.erase(
+                std::remove_if(
+                    mObjects.begin(), mObjects.end(),
+                    [=](auto &rigidbody)
+                    {
+                        auto pos = rigidbody->GetPosition();
+                        if (pos.x < mSimWorldLowest.x || pos.x > mSimWorldHighest.x || pos.y < mSimWorldLowest.y || pos.y > mSimWorldHighest.y)
+                            return true;
+                        return false;
+                    }),
+                mObjects.end());
+        }
     };
 
 } // namespace PHY::RIGIDBODY
