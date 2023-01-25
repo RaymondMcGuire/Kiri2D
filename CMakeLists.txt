@@ -94,6 +94,7 @@ if(NOT ${ENABLE_CUDA})
 
   add_subdirectory(demos/sdf2d_scene1)
   add_subdirectory(demos/rigidbody2d_scene)
+  add_subdirectory(demos/dynamic_fracture_scene1)
 
   # add_subdirectory(demos/test_bayesian)
   # add_subdirectory(demos/interior_point_method)

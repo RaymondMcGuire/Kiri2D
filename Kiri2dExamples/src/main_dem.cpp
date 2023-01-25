@@ -91,8 +91,8 @@ auto particle_scale = 500.f;
 
 auto offsetvec2 = Vector2F(windowwidth - world_size.x * particle_scale, windowheight - world_size.y * particle_scale) / 2.f;
 
-auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-auto renderer = std::make_shared<KiriRenderer2D>(scene);
+auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
 std::vector<KiriCircle2> boundaries;
 
@@ -497,8 +497,8 @@ void NSDEM_SetupParams()
 
     offsetvec2 = Vector2F(windowwidth - world_size.x, windowheight - world_size.y) / 2.f;
 
-    // scene = std::make_shared<KiriScene2D>((size_t)windowheight, (size_t)windowheight);
-    // renderer = std::make_shared<KiriRenderer2D>(scene);
+    // scene = std::make_shared<KiriScene2D<float>>((size_t)windowheight, (size_t)windowheight);
+    // renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     // dem params
     CUDA_DEM_NS_PARAMS.rest_density = 2000.f;

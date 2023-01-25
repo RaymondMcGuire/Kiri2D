@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2023-01-11 14:46:17
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2023-01-14 15:10:06
+ * @LastEditTime: 2023-01-25 23:26:05
  * @FilePath: \Kiri2D\core\include\kiri2d\physics\rigidbody\rigidbody_system.h
  * @Description:
  * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -57,11 +57,11 @@ namespace KIRI2D::PHY::RIGIDBODY
             mStepNum++;
         }
 
-        void Render(const KiriScene2DPtr &scene, const KiriRenderer2DPtr &renderer, const RealType scale)
+        void Render(const std::shared_ptr<KiriScene2D<RealType>> &scene, const std::shared_ptr<KiriRenderer2D<RealType>> &renderer, const RealType scale)
         {
             auto offset = VectorX<2, RealType>(scene->GetWindowWidth(), scene->GetWindowHeight()) / static_cast<RealType>(2.0);
-            std::vector<KiriCircle2> circles;
-            std::vector<KiriLine2> lines;
+            std::vector<KiriCircle2<RealType>> circles;
+            std::vector<KiriLine2<RealType>> lines;
             for (auto i = 0; i < mObjects.size(); i++)
             {
                 auto shape = mObjects[i]->GetShape();
@@ -72,7 +72,7 @@ namespace KIRI2D::PHY::RIGIDBODY
                 {
                     auto shape_circle = std::dynamic_pointer_cast<Circle<RealType>>(shape);
                     auto pos = obj_pos.mul(scale) + offset;
-                    circles.emplace_back(KiriCircle2(pos, Vector3F(0.f, 1.f, 1.f), shape_circle->GetRadius() * scale, false));
+                    circles.emplace_back(KiriCircle2(pos, VectorX<3, RealType>(0.f, 1.f, 1.f), shape_circle->GetRadius() * scale, false));
                     auto c = std::cos(mObjects[i]->GetOrientation());
                     auto s = std::sin(mObjects[i]->GetOrientation());
                     auto rline = VectorX<2, RealType>(-s * shape_circle->GetRadius() * scale, c * shape_circle->GetRadius() * scale);
@@ -91,6 +91,7 @@ namespace KIRI2D::PHY::RIGIDBODY
                     {
                         auto point1 = (obj_pos + rot_mat * vertices[v]).mul(scale) + offset;
                         auto point2 = (obj_pos + rot_mat * vertices[(v + 1) % vert_num]).mul(scale) + offset;
+
                         lines.emplace_back(KiriLine2(point1, point2));
                     }
                     break;

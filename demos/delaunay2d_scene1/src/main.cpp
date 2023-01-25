@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
     auto window_height = 500.f;
     auto window_width = 500.f;
     auto offset = Vector2F((size_t)window_width, (size_t)window_height) / 2.f;
-    auto scene = std::make_shared<KiriScene2D>((size_t)window_width, (size_t)window_height);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)window_width, (size_t)window_height);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     // delaunay triangulation config
     auto sampler_num = 100;
@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
     delaunay2d->generate(sites);
 
     // visualization
-    std::vector<KiriLine2> lines;
-    std::vector<KiriLine2> precompute_lines;
+    std::vector<KiriLine2<float>> lines;
+    std::vector<KiriLine2<float>> precompute_lines;
 
     // delaunay2d cells
     auto cells = delaunay2d->cells();

@@ -19,8 +19,8 @@ namespace KIRI2D
         mWorldSize = Vector2F(2.f);
         mRenderOffset = Vector2F(WINDOW_WIDTH - mWorldSize.x * PARTICLES_RENDER_SCALE, WINDOW_HEIGHT - mWorldSize.y * PARTICLES_RENDER_SCALE) / 2.f;
 
-        mScene = std::make_shared<KiriScene2D>((auto)WINDOW_WIDTH, (auto)WINDOW_HEIGHT);
-        mRenderer = std::make_shared<KiriRenderer2D>(mScene);
+        mScene = std::make_shared<KiriScene2D<float>>((auto)WINDOW_WIDTH, (auto)WINDOW_HEIGHT);
+        mRenderer = std::make_shared<KiriRenderer2D<float>>(mScene);
     }
 
     void UniDEM2DExample::setupParams()

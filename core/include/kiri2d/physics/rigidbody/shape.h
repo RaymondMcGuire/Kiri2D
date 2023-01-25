@@ -92,7 +92,7 @@ namespace KIRI2D::PHY::RIGIDBODY
         return;
 
       auto area = static_cast<RealType>(0.0);
-      auto centroid = VectorX<2, RealType>(static_cast<RealType>(0.0));
+      mCentroid = VectorX<2, RealType>(static_cast<RealType>(0.0));
       auto interia = static_cast<RealType>(0.0);
       const auto inv3 = static_cast<RealType>(1.0 / 3.0);
       for (auto i = 0; i < mVerticesNum; i++)
@@ -102,14 +102,14 @@ namespace KIRI2D::PHY::RIGIDBODY
         auto d = p1.cross(p2);
         auto current_area = d * static_cast<RealType>(0.5);
         area += current_area;
-        centroid += current_area * inv3 * (p1 + p2);
+        mCentroid += current_area * inv3 * (p1 + p2);
         interia += (static_cast<RealType>(0.25) * inv3 * d) * (p1.lengthSquared() + p2.lengthSquared() + p1.dot(p2));
       }
 
-      centroid *= static_cast<RealType>(1.0) / area;
+      mCentroid *= static_cast<RealType>(1.0) / area;
 
       for (auto i = 0; i < mVerticesNum; i++)
-        mVertices[i] -= centroid;
+        mVertices[i] -= mCentroid;
 
       mBody.lock()->SetMass(area * density);
       mBody.lock()->SetInteria(interia * density);
@@ -194,10 +194,12 @@ namespace KIRI2D::PHY::RIGIDBODY
     const int GetVerticesNum() const { return mVerticesNum; }
     const std::vector<VectorX<2, RealType>> &GetVertices() const { return mVertices; }
     const std::vector<VectorX<2, RealType>> &GetNormals() const { return mNormals; }
+    const VectorX<2, RealType> &GetCentroid() const { return mCentroid; }
 
   private:
     int mVerticesNum;
     Matrix2x2<RealType> mMat;
+    VectorX<2, RealType> mCentroid;
     std::vector<VectorX<2, RealType>> mVertices, mNormals;
 
     const int MIN_RND_VERTICES_NUM = 3;

@@ -1,11 +1,11 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-10-16 15:08:04
+ * @Date: 2023-01-11 14:46:17
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-10-16 15:17:24
+ * @LastEditTime: 2023-01-25 23:08:38
  * @FilePath: \Kiri2D\core\include\kiri2d\data\shape_struct.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_SHAPE_STRUCT_H_
@@ -17,30 +17,32 @@
 
 namespace KIRI2D
 {
+    template <class RealType>
     struct KiriPoint2
     {
-        Vector2F pos;
-        Vector3F col;
-        float radius = 1.f;
+        VectorX<2, RealType> pos;
+        VectorX<3, RealType> col;
+        RealType radius = static_cast<RealType>(1.0);
 
         KiriPoint2(
-            Vector2F _pos,
-            Vector3F _col)
+            VectorX<2, RealType> _pos,
+            VectorX<3, RealType> _col)
             : pos(_pos),
               col(_col) {}
     };
 
+    template <class RealType>
     struct KiriCircle2
     {
-        Vector2F pos;
-        Vector3F col;
-        float radius;
+        VectorX<2, RealType> pos;
+        VectorX<3, RealType> col;
+        RealType radius;
         bool fill;
 
         KiriCircle2(
-            Vector2F _pos,
-            Vector3F _col,
-            float _radius,
+            VectorX<2, RealType> _pos,
+            VectorX<3, RealType> _col,
+            RealType _radius,
             bool _fill = true)
             : pos(_pos),
               col(_col),
@@ -48,33 +50,35 @@ namespace KIRI2D
               fill(_fill) {}
     };
 
+    template <class RealType>
     struct KiriLine2
     {
-        Vector2F start;
-        Vector2F end;
-        Vector3F col = Vector3F(253, 185, 134) / 255.f;
-        float thick;
+        VectorX<2, RealType> start;
+        VectorX<2, RealType> end;
+        VectorX<3, RealType> col = VectorX<3, RealType>(253, 185, 134) / static_cast<RealType>(255.0);
+        RealType thick;
 
         KiriLine2(
-            Vector2F _start,
-            Vector2F _end,
-            float _thick = 1.f)
+            VectorX<2, RealType> _start,
+            VectorX<2, RealType> _end,
+            RealType _thick = 1.f)
             : start(_start),
               end(_end),
               thick(_thick) {}
     };
 
+    template <class RealType>
     struct KiriRect2
     {
-        Vector2F original;
-        Vector2F size;
+        VectorX<2, RealType> original;
+        VectorX<2, RealType> size;
 
         KiriRect2()
-            : original(Vector2F(0.f)), size(Vector2F(0.f)) {}
+            : original(VectorX<2, RealType>(0)), size(VectorX<2, RealType>(0)) {}
 
         KiriRect2(
-            Vector2F _original,
-            Vector2F _size)
+            VectorX<2, RealType> _original,
+            VectorX<2, RealType> _size)
             : original(_original),
               size(_size) {}
     };

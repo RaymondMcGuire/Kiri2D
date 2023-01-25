@@ -19,9 +19,9 @@ int main(int argc, char *argv[]) {
   // scene renderer config
   auto window_height = 500.f;
   auto window_width = 500.f;
-  auto scene = std::make_shared<KiriScene2D>((size_t)window_width,
+  auto scene = std::make_shared<KiriScene2D<float>>((size_t)window_width,
                                              (size_t)window_height);
-  auto renderer = std::make_shared<KiriRenderer2D>(scene);
+  auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
   // config
   auto scale = 450.f;
@@ -60,8 +60,8 @@ int main(int argc, char *argv[]) {
                 2.f;
 
   // visualization
-  std::vector<KiriLine2> lines;
-  std::vector<KiriLine2> precompute_lines;
+  std::vector<KiriLine2<float>> lines;
+  std::vector<KiriLine2<float>> precompute_lines;
 
   for (size_t j = 0; j < boundary_polygon->positions().size(); j++) {
     auto vertices = boundary_polygon->positions()[j];

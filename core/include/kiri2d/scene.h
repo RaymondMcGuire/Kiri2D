@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-03-27 01:28:37
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2023-01-14 14:56:04
+ * @LastEditTime: 2023-01-25 23:12:27
  * @FilePath: \Kiri2D\core\include\kiri2d\scene.h
  * @Description:
  * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -19,7 +19,7 @@
 
 namespace KIRI2D
 {
-
+    template <class RealType>
     class KiriScene2D
     {
     public:
@@ -35,28 +35,75 @@ namespace KIRI2D
               mWindowHeight(windowHeight),
               mViewWidth(windowWidth)
         {
-            float view_height = mWindowHeight * mViewWidth / mWindowWidth;
-            auto look_at = Vector2F(mViewWidth / 2.f, view_height / 2.f);
-            auto window_size = Vector2F(mViewWidth / mWindowWidth, view_height / mWindowHeight);
-            auto window_center = Vector2F(mViewWidth / (2.f * window_size.x), view_height / (2.f * window_size.y));
-            mCamera = std::make_shared<KiriCamera2D>(
-                Camera2DProperty(
+            RealType view_height = mWindowHeight * mViewWidth / mWindowWidth;
+            auto look_at = VectorX<2, RealType>(mViewWidth / 2.f, view_height / 2.f);
+            auto window_size = VectorX<2, RealType>(mViewWidth / mWindowWidth, view_height / mWindowHeight);
+            auto window_center = VectorX<2, RealType>(mViewWidth / (2.f * window_size.x), view_height / (2.f * window_size.y));
+            mCamera = std::make_shared<KiriCamera2D<RealType>>(
+                Camera2DProperty<RealType>(
                     look_at,
                     window_size,
                     window_center));
         }
 
-        void AddObject(KiriSDF2D object);
-        void AddLine(KiriLine2 line);
-        void AddLines(std::vector<KiriLine2> lines);
-        void AddParticle(KiriPoint2 particle);
-        void AddParticles(std::vector<KiriPoint2> particles);
-        void AddRect(KiriRect2 rect);
-        void AddRects(std::vector<KiriRect2> rects);
-        void AddCircle(KiriCircle2 circle);
-        void AddCircles(std::vector<KiriCircle2> circles);
+        void AddObject(KiriSDF2D object)
+        {
+            mSDFObjects.emplace_back(object);
+        }
 
-        inline const auto GetSDFObjects() { return mSDFObjects; }
+        void AddParticle(KiriPoint2<RealType> particle)
+        {
+            mPoints.emplace_back(particle);
+        }
+
+        void AddParticles(std::vector<KiriPoint2<RealType>> particles)
+        {
+            for (size_t i = 0; i < particles.size(); i++)
+            {
+                mPoints.emplace_back(particles[i]);
+            }
+        }
+
+        void AddCircle(KiriCircle2<RealType> circle)
+        {
+            mCircles.emplace_back(circle);
+        }
+
+        void AddCircles(std::vector<KiriCircle2<RealType>> circles)
+        {
+            for (size_t i = 0; i < circles.size(); i++)
+            {
+                mCircles.emplace_back(circles[i]);
+            }
+        }
+
+        void AddLine(KiriLine2<RealType> line)
+        {
+            mLines.emplace_back(line);
+        }
+
+        void AddLines(std::vector<KiriLine2<RealType>> lines)
+        {
+            for (size_t i = 0; i < lines.size(); i++)
+            {
+                mLines.emplace_back(lines[i]);
+            }
+        }
+
+        void AddRect(KiriRect2<RealType> rect)
+        {
+            mRects.emplace_back(rect);
+        }
+
+        void AddRects(std::vector<KiriRect2<RealType>> rects)
+        {
+            for (size_t i = 0; i < rects.size(); i++)
+            {
+                mRects.emplace_back(rects[i]);
+            }
+        }
+
+        // inline const auto GetSDFObjects() { return mSDFObjects; }
         inline const auto GetPoints() { return mPoints; }
         inline const auto GetLines() { return mLines; }
         inline const auto GetRects() { return mRects; }
@@ -68,7 +115,7 @@ namespace KIRI2D
 
         void Clear()
         {
-            mSDFObjects.clear();
+            // mSDFObjects.clear();
             mPoints.clear();
             mLines.clear();
             mRects.clear();
@@ -78,18 +125,19 @@ namespace KIRI2D
         ~KiriScene2D() {}
 
     private:
-        std::vector<KiriSDF2D> mSDFObjects;
-        std::vector<KiriPoint2> mPoints;
-        std::vector<KiriLine2> mLines;
-        std::vector<KiriRect2> mRects;
-        std::vector<KiriCircle2> mCircles;
+        // std::vector<KiriSDF2D> mSDFObjects;
+        std::vector<KiriPoint2<RealType>> mPoints;
+        std::vector<KiriLine2<RealType>> mLines;
+        std::vector<KiriRect2<RealType>> mRects;
+        std::vector<KiriCircle2<RealType>> mCircles;
 
-        KiriCamera2DPtr mCamera;
+        SharedPtr<KiriCamera2D<RealType>> mCamera;
 
         size_t mViewWidth;
         size_t mWindowWidth;
         size_t mWindowHeight;
     };
-    typedef SharedPtr<KiriScene2D> KiriScene2DPtr;
+    typedef SharedPtr<KiriScene2D<float>> KiriScene2DFPtr;
+    typedef SharedPtr<KiriScene2D<double>> KiriScene2DDPtr;
 }
 #endif

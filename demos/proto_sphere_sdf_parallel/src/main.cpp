@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
   // scene renderer config
   auto window_height = 5000.f;
   auto window_width = 5000.f;
-  auto scene = std::make_shared<KiriScene2D>((size_t)window_width, (size_t)window_height);
-  auto renderer = std::make_shared<KiriRenderer2D>(scene);
+  auto scene = std::make_shared<KiriScene2D<float>>((size_t)window_width, (size_t)window_height);
+  auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
   // config
   auto scale = 4500.f;
@@ -58,11 +58,11 @@ int main(int argc, char *argv[])
   auto offset = (Vector2F((size_t)window_width, (size_t)window_height) - Vector2F(boundary_bbox.width(), boundary_bbox.height())) / 2.f;
 
   // visualization
-  std::vector<KiriLine2> lines;
+  std::vector<KiriLine2<float>> lines;
   std::vector<KiriPoint2> points;
   std::vector<KiriCircle2> circles;
   std::vector<KiriCircle2> inserted_sphere;
-  std::vector<KiriLine2> precompute_lines;
+  std::vector<KiriLine2<float>> precompute_lines;
   std::vector<Vector2F> precompute_points;
 
   for (size_t j = 0; j < boundary_polygon->positions().size(); j++)

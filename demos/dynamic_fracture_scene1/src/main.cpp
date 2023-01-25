@@ -1,16 +1,17 @@
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-05-10 17:22:25
+ * @Date: 2023-01-21 12:57:52
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-05-24 09:35:49
- * @FilePath: \Kiri2D\demos\voronoi2d_scene1\src\main.cpp
+ * @LastEditTime: 2023-01-25 22:23:46
+ * @FilePath: \Kiri2D\demos\dynamic_fracture_scene1\src\main.cpp
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #include <kiri2d.h>
 
 using namespace KIRI2D;
 using namespace HDV;
+using namespace PHY;
 
 int main(int argc, char *argv[])
 {
@@ -20,21 +21,21 @@ int main(int argc, char *argv[])
     // scene renderer config
     auto window_height = 500.f;
     auto window_width = 500.f;
-    auto offset = Vector2F((size_t)window_width, (size_t)window_height) / 2.f;
-    auto scene = std::make_shared<KiriScene2D>((size_t)window_width, (size_t)window_height);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto object_scale = 10.f;
+    auto offset = VectorX<2, double>((size_t)window_width, (size_t)window_height) / 2.0;
+    auto scene = std::make_shared<KiriScene2D<double>>((size_t)window_width, (size_t)window_height);
+    auto renderer = std::make_shared<KiriRenderer2D<double>>(scene);
 
     // voronoi diagram config
-    auto sampler_num = 100;
-    auto scale_size = 200.0;
+    auto sampler_num = 10;
     auto voronoi2d = std::make_shared<Voronoi::PowerDiagram2D>();
 
     // clip boundary: square
     auto boundary = std::make_shared<Voronoi::VoronoiPolygon2>();
-    boundary->add(Vector2D(-scale_size, -scale_size));
-    boundary->add(Vector2D(-scale_size, scale_size));
-    boundary->add(Vector2D(scale_size, scale_size));
-    boundary->add(Vector2D(scale_size, -scale_size));
+    boundary->add(VectorX<2, double>(-object_scale, -object_scale));
+    boundary->add(VectorX<2, double>(-object_scale, object_scale));
+    boundary->add(VectorX<2, double>(object_scale, object_scale));
+    boundary->add(VectorX<2, double>(object_scale, -object_scale));
     voronoi2d->setBoundary(boundary);
 
     // generate random sites
@@ -43,11 +44,13 @@ int main(int argc, char *argv[])
     // compute
     voronoi2d->compute();
 
-    // visualization
-    std::vector<KiriLine2> lines;
-    std::vector<KiriPoint2> points;
-    std::vector<KiriLine2> precompute_lines;
-    std::vector<Vector2F> precompute_points;
+    auto system = std::make_shared<RIGIDBODY::RigidBodySystem<double>>(VectorX<2, double>(-25.f), VectorX<2, double>(40.f));
+
+    // set world boundary
+    auto boundary_btm = std::make_shared<RIGIDBODY::Polygon<double>>();
+    boundary_btm->SetAsBox(24.f, 5.f);
+    boundary_btm->SetOrientation(0.f);
+    system->AddObject(boundary_btm, VectorX<2, double>(0.f, -24.f), true);
 
     // voronoi sites
     auto sites = voronoi2d->sites();
@@ -57,35 +60,41 @@ int main(int argc, char *argv[])
         if (site->isBoundaryVertex())
             continue;
 
+        auto shape = std::make_shared<RIGIDBODY::Polygon<double>>();
         auto cell_polygon = site->polygon();
+        std::vector<VectorX<2, double>> verts;
         for (auto j = 0; j < cell_polygon->positions().size(); j++)
         {
-            auto vert = cell_polygon->positions()[j];
-            auto vert1 = cell_polygon->positions()[(j + 1) % (cell_polygon->positions().size())];
-            auto line = KiriLine2(Vector2F(vert.x, vert.y) + offset, Vector2F(vert1.x, vert1.y) + offset);
-            line.thick = 1.f;
-            precompute_lines.emplace_back(line);
+            verts.emplace_back(VectorX<2, double>(cell_polygon->positions()[j].x, cell_polygon->positions()[j].y));
         }
-        precompute_points.emplace_back(Vector2F(site->x(), site->y()));
+
+        shape->Set(verts);
+        system->AddObject(shape, VectorX<2, double>(site->x(), site->y()));
+        auto body = shape->GetBody();
+        body.lock()->SetRestitution(static_cast<double>(0.5));
+        body.lock()->SetStaticFriction(static_cast<double>(0.2));
+        body.lock()->SetDynamicFriction(static_cast<double>(0.1));
+        body.lock()->SetPosition(shape->GetCentroid());
+        body.lock()->SetOrientation(0.0);
     }
 
-    // draw voronoi sites and cells
-    for (auto i = 0; i < precompute_points.size(); i++)
-        points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
-
-    for (auto i = 0; i < precompute_lines.size(); ++i)
-        lines.emplace_back(precompute_lines[i]);
-
-    scene->AddLines(lines);
-    scene->AddParticles(points);
-
-    renderer->DrawCanvas();
-
+    bool enable_sim = false;
     while (1)
     {
-        // renderer->SaveImages2File();
+        if (enable_sim)
+            system->UpdateSystem();
+
+        system->Render(scene, renderer, object_scale);
+
+        renderer->SaveImages2File();
         cv::imshow("KIRI2D", renderer->GetCanvas());
-        cv::waitKey(5);
+        auto key = cv::waitKey(5);
+        if (key == 'q')
+            enable_sim = !enable_sim;
+
+        // clean canvas
+        renderer->ClearCanvas();
+        scene->Clear();
     }
 
     return 0;

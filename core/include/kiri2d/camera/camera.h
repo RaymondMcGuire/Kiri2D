@@ -2,10 +2,10 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2021-02-23 00:18:39
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-10-16 13:58:26
+ * @LastEditTime: 2023-01-25 23:29:16
  * @FilePath: \Kiri2D\core\include\kiri2d\camera\camera.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #ifndef _KIRI2D_CAMERA_H_
@@ -18,18 +18,19 @@
 namespace KIRI2D
 {
 
+    template <class RealType>
     struct Camera2DProperty
     {
-        Vector2F LookAt;
-        Vector2F WindowCellSize;
-        Vector2F WindowCenter;
-        float ViewDistance;
+        VectorX<2, RealType> LookAt;
+        VectorX<2, RealType> WindowCellSize;
+        VectorX<2, RealType> WindowCenter;
+        RealType ViewDistance;
 
         Camera2DProperty(
-            Vector2F lookAt,
-            Vector2F windowCellSize,
-            Vector2F windowCenter,
-            float viewDistance = 1.f)
+            VectorX<2, RealType> lookAt,
+            VectorX<2, RealType> windowCellSize,
+            VectorX<2, RealType> windowCenter,
+            RealType viewDistance = 1.f)
             : LookAt(lookAt),
               WindowCellSize(windowCellSize),
               WindowCenter(windowCenter),
@@ -38,12 +39,13 @@ namespace KIRI2D
         }
     };
 
+    template <class RealType>
     class KiriCamera2D
     {
     public:
-        KiriCamera2D(const Camera2DProperty &cameraProperty)
+        KiriCamera2D(const Camera2DProperty<RealType> &cameraProperty)
         {
-            mRotateMatrix = Matrix2x2F::identity();
+            mRotateMatrix = Matrix2x2<RealType>::identity();
             mCameraData.LookAt = cameraProperty.LookAt;
             mCameraData.WindowCellSize = cameraProperty.WindowCellSize;
             mCameraData.WindowCenter = cameraProperty.WindowCenter;
@@ -51,12 +53,12 @@ namespace KIRI2D
             mCameraData.CameraDistance = 1.f;
         }
 
-        inline const float viewScale()
+        inline const RealType viewScale()
         {
             return mCameraData.CameraDistance / mCameraData.ViewDistance;
         }
 
-        inline const Vector2F project(Vector2F pixel)
+        inline const VectorX<2, RealType> project(VectorX<2, RealType> pixel)
         {
             auto rel_position = mRotateMatrix * (pixel - mCameraData.LookAt) * this->viewScale();
 
@@ -68,17 +70,18 @@ namespace KIRI2D
     private:
         struct Camera2DData
         {
-            Vector2F LookAt;
-            Vector2F WindowCellSize;
-            Vector2F WindowCenter;
+            VectorX<2, RealType> LookAt;
+            VectorX<2, RealType> WindowCellSize;
+            VectorX<2, RealType> WindowCenter;
 
-            float ViewDistance;
-            float CameraDistance;
+            RealType ViewDistance;
+            RealType CameraDistance;
         };
 
         Camera2DData mCameraData;
-        Matrix2x2F mRotateMatrix;
+        Matrix2x2<RealType> mRotateMatrix;
     };
-    typedef SharedPtr<KiriCamera2D> KiriCamera2DPtr;
+    typedef SharedPtr<KiriCamera2D<float>> KiriCamera2DFPtr;
+    typedef SharedPtr<KiriCamera2D<double>> KiriCamera2DDPtr;
 }
 #endif

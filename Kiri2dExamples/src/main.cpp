@@ -59,8 +59,8 @@ void QuickHullVoronoi2d()
 
     Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     pd2->compute();
 
@@ -68,7 +68,7 @@ void QuickHullVoronoi2d()
     {
         // KIRI_LOG_DEBUG("-----------------new----------------------------------");
 
-        std::vector<KiriLine2> precompute_lines;
+        std::vector<KiriLine2<float>> precompute_lines;
         std::vector<Vector2F> precompute_points;
 
         pd2->lloydIteration();
@@ -98,7 +98,7 @@ void QuickHullVoronoi2d()
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
         std::vector<KiriPoint2> points;
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
@@ -173,8 +173,8 @@ void MSSampler2D()
     // Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
     Vector2F offset = Vector2F(500.f);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     auto multiSizeSampler = std::make_shared<Sampler::MultiSizedSampler2D>();
 
@@ -308,7 +308,7 @@ void MSSampler2D()
     {
         auto porosity = multiSizeSampler->compute();
 
-        std::vector<KiriLine2> precompute_lines;
+        std::vector<KiriLine2<float>> precompute_lines;
         std::vector<Vector2F> precompute_points;
 
         auto sites = multiSizeSampler->sites();
@@ -340,7 +340,7 @@ void MSSampler2D()
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
         std::vector<KiriPoint2> points;
         std::vector<KiriCircle2> circles;
         for (auto i = 0; i < precompute_points.size(); i++)
@@ -462,8 +462,8 @@ void Sph2dExample()
 
     sphSolver.initWithBoxVolume(boxVolumeSize, radius);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     // draw boundary
     auto boundaryRect = KiriRect2(offset - Vector2F(radius) * 2.f * particleScale, (worldSize + 4.f * Vector2F(radius)) * particleScale);
@@ -516,8 +516,8 @@ void BlueNoiseSamplingVisual()
     float windowheight = 720.f;
     float windowwidth = 1280.f;
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     using namespace HDV;
     // 2d boundary polygon

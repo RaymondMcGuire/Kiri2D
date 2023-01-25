@@ -374,8 +374,8 @@ void VoronoiExample()
     // pd->SetRelaxIterNumber(100);
     // pd->LloydRelaxation();
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     while (1)
     {
@@ -498,8 +498,8 @@ void VoronoiExample1()
 
     auto del_tri = pd->ComputeDelaunayTriangulation();
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     while (1)
     {
@@ -638,8 +638,8 @@ void VoronoiExample2()
     // auto porosity = pd->ComputeMinPorosity();
     // KIRI_LOG_DEBUG("Minium porosity = {0}", porosity);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     Vector<KiriPoint2> points;
     Vector<KiriLine2> lines;
@@ -806,8 +806,8 @@ void LloydRelaxationExample()
     // pd->SetRelaxIterNumber(100);
     // pd->LloydRelaxation();
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     while (1)
     {
@@ -880,8 +880,8 @@ void NOCAJ12Example()
     nocaj12->SetRootBoundary2(boundary);
     nocaj12->GenExample(width, height);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     while (1)
     {
@@ -1027,8 +1027,8 @@ void NOCAJ12Example1()
     // // for (size_t i = 0; i < site1.size(); i++)
     // //     site1[i]->PrintSite();
 
-    // auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    // auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    // auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    // auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     // while (1)
     // {
@@ -1147,8 +1147,8 @@ void VoroTestExample()
     voroPorOptiCore->SetBoundaryPolygon2(boundaryPoly);
     voroPorOptiCore->init();
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     while (1)
     {
@@ -1229,8 +1229,8 @@ void VoroPorosityOptimizeConvexExample()
     opti->SetRootBoundary2(boundary);
     opti->GenExample(width, height);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     Vector<float> errorArray, porosityArray, radiusErrorArray;
     Vector<Vector4F> lastMaxCircle;
@@ -1428,8 +1428,8 @@ void VoroPorosityTreemapOptiExample()
         voroTreeNodes, boundaryPoly);
     voroPorTreeMap->InitTreeMapNodes();
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     while (1)
     {
@@ -1533,8 +1533,8 @@ void UniParticleSampler()
         }
     }
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     // auto line = KiriLine2(start, end);
     // line.col = Vector3F(0.f, 0.f, 255.f);
@@ -1597,8 +1597,8 @@ void VoroPorosityOptimizeScaleExample()
     opti->GenExample(width, height);
     opti->SetMaxIterationNum(maxIter);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     Vec_Float errorArray, porosityArray, radiusErrorArray;
     Vec_Float RMSEArray, RMSPEArray;
@@ -1726,8 +1726,8 @@ void StraightSkeletonExample1()
 
     float width = 1000.f;
     float height = 1000.f;
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     Vector2F offset = Vector2F(width, height) / 12.f;
 
@@ -1900,8 +1900,8 @@ void LoadVoronoiExample()
     spliter->SetBoundaryPolygon2(boundaryPoly);
     spliter->init();
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     Vector<KiriPoint2> points;
     Vector<KiriLine2> lines;
@@ -2058,8 +2058,8 @@ void UniPoissonDiskSampler()
     sampler->InitUniSampler(radius, Vector2F(bbox.width(), bbox.height()));
     // sampler->InitMultiRadiiSampler(20.f, max_radius, Vector2F(bbox.width(), bbox.height()));
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
     while (1)
     {
         auto uni_points = sampler->UniSampling(radius, Vector2F(bbox.width(), bbox.height()));
@@ -2181,8 +2181,8 @@ void DebugNSParticles()
     auto ns_packs = LoadCSVFile2NSPack1("ns_data.csv");
     emitter->BuildNsDemVolume(data, ns_packs);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
     std::vector<KiriCircle2> circles;
 
     circles.clear();
@@ -2263,12 +2263,12 @@ void VoronoiNSOptimize()
     ns_opti->SetBoundaryPolygon2(boundaryPoly);
     ns_opti->init();
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     std::vector<KiriPoint2> points;
 
-    std::vector<KiriLine2> lines, glines;
+    std::vector<KiriLine2<float>> lines, glines;
     std::vector<KiriCircle2> circles, gcircles;
 
     UInt iter_num = 0;
@@ -2399,8 +2399,8 @@ void TestPolygonUnion()
 
     Vector2F offset(500.f);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     cbop::Polygon subj, clip;
 
@@ -2423,7 +2423,7 @@ void TestPolygonUnion()
     cbop::compute(subj, clip, result, op);
     auto p = result.getContours()[0].getPoints();
 
-    std::vector<KiriLine2> precompute_lines;
+    std::vector<KiriLine2<float>> precompute_lines;
 
     for (size_t j = 0; j < p.size(); j++)
     {
@@ -2432,7 +2432,7 @@ void TestPolygonUnion()
 
     while (1)
     {
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
 
         // for (auto i = 0; i < vertices1.size(); ++i)
         // {
@@ -2616,10 +2616,10 @@ void QuickHullConvexHull2d()
 
     Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
-    std::vector<KiriLine2> precompute_lines;
+    std::vector<KiriLine2<float>> precompute_lines;
     auto simplexs = cv2->computeSortSimplexsList();
     for (size_t i = 0; i < simplexs.size(); i++)
     {
@@ -2634,7 +2634,7 @@ void QuickHullConvexHull2d()
     {
         cv2->Generate(vet2);
 
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
         std::vector<KiriPoint2> points;
 
         for (size_t i = 0; i < vet2.size(); i++)
@@ -2703,10 +2703,10 @@ void QuickHullDelaunayTriangulation2d()
 
     Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
-    std::vector<KiriLine2> precompute_lines;
+    std::vector<KiriLine2<float>> precompute_lines;
 
     for (size_t i = 0; i < res2.size(); i++)
     {
@@ -2725,7 +2725,7 @@ void QuickHullDelaunayTriangulation2d()
 
     while (1)
     {
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
         std::vector<KiriPoint2> points;
 
         for (size_t i = 0; i < vet2.size(); i++)
@@ -2787,8 +2787,8 @@ void QuickHullVoronoi2d()
 
     Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     pd2->Compute();
 
@@ -2796,7 +2796,7 @@ void QuickHullVoronoi2d()
     {
         // KIRI_LOG_DEBUG("-----------------new----------------------------------");
 
-        std::vector<KiriLine2> precompute_lines;
+        std::vector<KiriLine2<float>> precompute_lines;
         std::vector<Vector2F> precompute_points;
 
         pd2->LloydIteration();
@@ -2826,7 +2826,7 @@ void QuickHullVoronoi2d()
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
         std::vector<KiriPoint2> points;
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
@@ -2891,8 +2891,8 @@ void BalzerIEEE2009Example()
 
     Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     sampler->init();
 
@@ -2901,7 +2901,7 @@ void BalzerIEEE2009Example()
     {
         // KIRI_LOG_DEBUG("-----------------new----------------------------------");
 
-        std::vector<KiriLine2> precompute_lines;
+        std::vector<KiriLine2<float>> precompute_lines;
         std::vector<Vector2F> precompute_points;
 
         bool stable = sampler->Compute();
@@ -2934,7 +2934,7 @@ void BalzerIEEE2009Example()
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
         std::vector<KiriPoint2> points;
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
@@ -3068,8 +3068,8 @@ void MSSampler2D()
     // Vector2F offset = Vector2F(windowwidth, windowheight) / 2.f;
     Vector2F offset = Vector2F(500.f);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)windowwidth, (size_t)windowheight);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     multiSizeSampler->init();
 
@@ -3083,7 +3083,7 @@ void MSSampler2D()
         multiSizeSampler->Compute();
         // KIRI_LOG_DEBUG("-----------------new----------------------------------");
 
-        std::vector<KiriLine2> precompute_lines;
+        std::vector<KiriLine2<float>> precompute_lines;
         std::vector<Vector2F> precompute_points;
 
         auto sites = multiSizeSampler->GetSites();
@@ -3115,7 +3115,7 @@ void MSSampler2D()
             // KIRI_LOG_DEBUG("pd2->AddSite(std::make_shared<Voronoi::VoronoiSite2>({0}f, {1}f, {2}));", site->x()(), site->y()(), i);
         }
 
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
         std::vector<KiriPoint2> points;
         std::vector<KiriCircle2> circles;
         for (size_t i = 0; i < precompute_points.size(); i++)

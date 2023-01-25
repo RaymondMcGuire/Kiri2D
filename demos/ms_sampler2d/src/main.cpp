@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
 
     auto offset = Vector2F(500.f);
 
-    auto scene = std::make_shared<KiriScene2D>((size_t)window_width, (size_t)window_height);
-    auto renderer = std::make_shared<KiriRenderer2D>(scene);
+    auto scene = std::make_shared<KiriScene2D<float>>((size_t)window_width, (size_t)window_height);
+    auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
     auto ms_sampler = std::make_shared<Sampler::MultiSizedSampler2D>();
 
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     {
         auto porosity = ms_sampler->compute();
 
-        std::vector<KiriLine2> precompute_lines;
+        std::vector<KiriLine2<float>> precompute_lines;
         std::vector<Vector2F> precompute_points;
 
         auto sites = ms_sampler->sites();
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
             precompute_points.emplace_back(Vector2F(site->x(), site->y()));
         }
 
-        std::vector<KiriLine2> lines;
+        std::vector<KiriLine2<float>> lines;
         std::vector<KiriPoint2> points;
         std::vector<KiriCircle2> circles;
         for (auto i = 0; i < precompute_points.size(); i++)

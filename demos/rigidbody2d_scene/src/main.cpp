@@ -2,7 +2,7 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2023-01-11 14:46:17
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2023-01-14 15:08:33
+ * @LastEditTime: 2023-01-25 22:23:16
  * @FilePath: \Kiri2D\demos\rigidbody2d_scene\src\main.cpp
  * @Description:
  * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
   auto window_width = 500.f;
   auto object_scale = 10.f;
 
-  auto scene = std::make_shared<KiriScene2D>((size_t)window_width,
-                                             (size_t)window_height);
-  auto renderer = std::make_shared<KiriRenderer2D>(scene);
+  auto scene = std::make_shared<KiriScene2D<float>>((size_t)window_width,
+                                                    (size_t)window_height);
+  auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
   auto system = std::make_shared<RIGIDBODY::RigidBodySystem<float>>(Vector2F(-25.f), Vector2F(40.f));
 
   // set world boundary
@@ -32,21 +32,6 @@ int main(int argc, char *argv[])
   boundary_btm->SetAsBox(24.f, 5.f);
   boundary_btm->SetOrientation(0.f);
   system->AddObject(boundary_btm, Vector2F(0.f, -24.f), true);
-
-  auto LoadPolygonFromXYFile = [](std::vector<Vector2F> &points, const char *filePath, const float scale)
-  {
-    size_t num;
-    std::ifstream file(filePath);
-    file >> num;
-    for (int i = 0; i < num; ++i)
-    {
-      Vector2F xy;
-      file >> xy.x >> xy.y;
-      points.emplace_back(xy * scale);
-    }
-
-    file.close();
-  };
 
   while (1)
   {
