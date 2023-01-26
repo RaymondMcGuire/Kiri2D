@@ -291,7 +291,7 @@ void GenRndTreemap()
     std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
     std::vector<TreemapNode> nodes;
-    std::vector<KiriCircle2> circles;
+     std::vector<KiriCircle2<float>> circles;
 
     size_t totalNum = 100;
     float totalValue = 0.f;
@@ -632,7 +632,7 @@ void VoronoiExample2()
     pd->LloydRelaxation();
 
     // auto maxCir = pd->ComputeMaxInscribedCircle();
-    // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxCir.x, maxCir.y), height) + offsetVec2, Vector3F(0.f, 0.f, 1.f), maxCir.z);
+    // auto maxCir2 = KiriCircle2<float>(Transform2Original(Vector2F(maxCir.x, maxCir.y), height) + offsetVec2, Vector3F(0.f, 0.f, 1.f), maxCir.z);
     // KIRI_LOG_DEBUG("MaxInscribedCircle, center=({0},{1}), radius={2}", maxCir.x, maxCir.y, maxCir.z);
 
     // auto porosity = pd->ComputeMinPorosity();
@@ -651,7 +651,7 @@ void VoronoiExample2()
     // auto skeletons = boundaryPoly->GetSkeletons();
     // auto mic = boundaryPoly->ComputeMICByStraightSkeleton();
     // auto micPos = Transform2Original(Vector2F(mic.x, mic.y), height) + offsetVec2;
-    // circles.emplace_back(KiriCircle2(micPos, Vector3F(255.f, 0.f, 255.f), mic.z));
+    // circles.emplace_back(KiriCircle2<float>(micPos, Vector3F(255.f, 0.f, 255.f), mic.z));
 
     // for (size_t i = 0; i < skeletons.size(); i++)
     // {
@@ -677,14 +677,14 @@ void VoronoiExample2()
 
             // auto mic = poly->ComputeMICByStraightSkeleton();
             // auto micPos = Transform2Original(Vector2F(mic.x, mic.y), height) + offsetVec2;
-            // circles.emplace_back(KiriCircle2(micPos, Vector3F(0.f, 0.f, 100.f), mic.z));
+            // circles.emplace_back(KiriCircle2<float>(micPos, Vector3F(0.f, 0.f, 100.f), mic.z));
 
             auto amic = poly->ComputeAllCByStraightSkeleton();
             for (size_t ic = 0; ic < amic.size(); ic++)
             {
                 auto micPos = Transform2Original(Vector2F(amic[ic].x, amic[ic].y), height) + offsetVec2;
 
-                circles.emplace_back(KiriCircle2(micPos, Vector3F(dist(engine), dist(engine), dist(engine)), amic[ic].z, false));
+                circles.emplace_back(KiriCircle2<float>(micPos, Vector3F(dist(engine), dist(engine), dist(engine)), amic[ic].z, false));
             }
 
             auto skeletons = poly->GetSkeletons();
@@ -985,7 +985,7 @@ void NOCAJ12Example1()
     // std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     // std::vector<TreemapNode> nodes;
-    // std::vector<KiriCircle2> circles;
+    //  std::vector<KiriCircle2<float>> circles;
 
     // size_t totalNum = 10;
     // float totalValue = 0.f;
@@ -1288,7 +1288,7 @@ void VoroPorosityOptimizeConvexExample()
             auto radiusError = 0.f;
             for (size_t i = 0; i < maxIC.size(); i++)
             {
-                auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+                auto maxCir2 = KiriCircle2<float>(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y), height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
                 circles.emplace_back(maxCir2);
                 // KIRI_LOG_INFO("Site idx={0}, max radius={1}, target radius={2}", i, maxIC[i].z, maxIC[i].w);
                 radiusError += std::abs(maxIC[i].z - maxIC[i].w);
@@ -1375,7 +1375,7 @@ void VoroPorosityTreemapOptiExample()
     std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
     std::vector<TreemapNode> nodes;
-    std::vector<KiriCircle2> circles;
+     std::vector<KiriCircle2<float>> circles;
 
     size_t totalNum = 200;
     float totalValue = 0.f;
@@ -1529,7 +1529,7 @@ void UniParticleSampler()
             uniPoints.emplace_back(pos);
 
             if (boundary.FindRegion(pos) < 0.f)
-                circles.emplace_back(KiriCircle2(pos, Vector3F(100.f, 85.f, 134.f) / 255.f, radius));
+                circles.emplace_back(KiriCircle2<float>(pos, Vector3F(100.f, 85.f, 134.f) / 255.f, radius));
         }
     }
 
@@ -1662,8 +1662,8 @@ void VoroPorosityOptimizeScaleExample()
             Vec_Float predictRadiusArray, realRadiusArray;
             for (size_t i = 0; i < maxIC.size(); i++)
             {
-                // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
-                auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y), Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+                // auto maxCir2 = KiriCircle2<float>(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
+                auto maxCir2 = KiriCircle2<float>(Vector2F(maxIC[i].x, maxIC[i].y), Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
 
                 predictRadiusArray.emplace_back(maxIC[i].z);
                 realRadiusArray.emplace_back(maxIC[i].w);
@@ -1956,7 +1956,7 @@ void LoadVoronoiExample()
             {
                 if (mic[idx].z == 0.f)
                     continue;
-                // auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
+                // auto maxCir2 = KiriCircle2<float>(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
                 // // maxCir2.fill = false;
                 // maxCir2.col = gcolor;
                 // circles.emplace_back(maxCir2);
@@ -1967,7 +1967,7 @@ void LoadVoronoiExample()
             ns.col = gcolor;
             ns_data.emplace_back(ns);
 
-            // auto maxCir2 = KiriCircle2(Vector2F(mic.x, mic.y), Vector3F(1.f, 0.f, 1.f), mic.z);
+            // auto maxCir2 = KiriCircle2<float>(Vector2F(mic.x, mic.y), Vector3F(1.f, 0.f, 1.f), mic.z);
             // if (site_i->GetIsGroup())
             //     maxCir2.col = site_i->GetGroupColor();
 
@@ -1981,7 +1981,7 @@ void LoadVoronoiExample()
 
         for (size_t j = 0; j < ns.pos.size(); j++)
         {
-            auto maxCir2 = KiriCircle2(ns.pos[j], Vector3F(1.f, 0.f, 1.f), ns.rad[j]);
+            auto maxCir2 = KiriCircle2<float>(ns.pos[j], Vector3F(1.f, 0.f, 1.f), ns.rad[j]);
             // maxCir2.fill = false;
             maxCir2.col = ns.col;
             circles.emplace_back(maxCir2);
@@ -2075,14 +2075,14 @@ void UniPoissonDiskSampler()
             {
                 auto pos = uni_points[i];
                 if (boundary.FindRegion(pos) < 0.f)
-                    circles.emplace_back(KiriCircle2(pos + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, radius / 2.f));
+                    circles.emplace_back(KiriCircle2<float>(pos + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, radius / 2.f));
             }
 
             // for (auto i = 0; i < mr_points.size(); i++)
             // {
             //     auto pos = Vector2F(mr_points[i].x, mr_points[i].y);
             //     if (boundary.FindRegion(pos) < 0.f)
-            //         circles.emplace_back(KiriCircle2(pos + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, mr_points[i].z / 2.f));
+            //         circles.emplace_back(KiriCircle2<float>(pos + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, mr_points[i].z / 2.f));
             // }
 
             scene->AddLines(lines);
@@ -2183,14 +2183,14 @@ void DebugNSParticles()
 
     auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
-    std::vector<KiriCircle2> circles;
+     std::vector<KiriCircle2<float>> circles;
 
     circles.clear();
 
     for (size_t i = 0; i < data.sphere_data.size(); i++)
     {
         auto sp = data.sphere_data[i];
-        circles.emplace_back(KiriCircle2(Vector2F(sp.center.x, sp.center.y), Vector3F(sp.color.x, sp.color.y, sp.color.z), sp.radius));
+        circles.emplace_back(KiriCircle2<float>(Vector2F(sp.center.x, sp.center.y), Vector3F(sp.color.x, sp.color.y, sp.color.z), sp.radius));
     }
 
     scene->AddCircles(circles);
@@ -2266,10 +2266,10 @@ void VoronoiNSOptimize()
     auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
     auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
-    std::vector<KiriPoint2> points;
+    std::vector<KiriPoint2<float>> points;
 
     std::vector<KiriLine2<float>> lines, glines;
-    std::vector<KiriCircle2> circles, gcircles;
+     std::vector<KiriCircle2<float>> circles, gcircles;
 
     UInt iter_num = 0;
     while (1)
@@ -2318,7 +2318,7 @@ void VoronoiNSOptimize()
                 auto mic = poly->ComputeMICByStraightSkeletonTest();
                 for (size_t idx = 0; idx < mic.size(); idx++)
                 {
-                    auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
+                    auto maxCir2 = KiriCircle2<float>(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
                     // maxCir2.fill = false;
                     maxCir2.col = site_i->GetGroupColor();
                     circles.emplace_back(maxCir2);
@@ -2356,7 +2356,7 @@ void VoronoiNSOptimize()
                 auto mic = poly_i->ComputeMICByStraightSkeletonTest();
                 for (size_t idx = 0; idx < mic.size(); idx++)
                 {
-                    auto maxCir2 = KiriCircle2(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
+                    auto maxCir2 = KiriCircle2<float>(Vector2F(mic[idx].x, mic[idx].y), Vector3F(1.f, 0.f, 1.f), mic[idx].z);
                     // maxCir2.fill = false;
                     maxCir2.col = poly_i->GetColor();
                     gcircles.emplace_back(maxCir2);
@@ -2635,7 +2635,7 @@ void QuickHullConvexHull2d()
         cv2->Generate(vet2);
 
         std::vector<KiriLine2<float>> lines;
-        std::vector<KiriPoint2> points;
+        std::vector<KiriPoint2<float>> points;
 
         for (size_t i = 0; i < vet2.size(); i++)
         {
@@ -2726,7 +2726,7 @@ void QuickHullDelaunayTriangulation2d()
     while (1)
     {
         std::vector<KiriLine2<float>> lines;
-        std::vector<KiriPoint2> points;
+        std::vector<KiriPoint2<float>> points;
 
         for (size_t i = 0; i < vet2.size(); i++)
         {
@@ -2827,7 +2827,7 @@ void QuickHullVoronoi2d()
         }
 
         std::vector<KiriLine2<float>> lines;
-        std::vector<KiriPoint2> points;
+        std::vector<KiriPoint2<float>> points;
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
@@ -2935,7 +2935,7 @@ void BalzerIEEE2009Example()
         }
 
         std::vector<KiriLine2<float>> lines;
-        std::vector<KiriPoint2> points;
+        std::vector<KiriPoint2<float>> points;
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
@@ -3116,8 +3116,8 @@ void MSSampler2D()
         }
 
         std::vector<KiriLine2<float>> lines;
-        std::vector<KiriPoint2> points;
-        std::vector<KiriCircle2> circles;
+        std::vector<KiriPoint2<float>> points;
+         std::vector<KiriCircle2<float>> circles;
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
@@ -3133,8 +3133,8 @@ void MSSampler2D()
 
         for (size_t i = 0; i < maxIC.size(); i++)
         {
-            // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
-            auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y) + offset, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+            // auto maxCir2 = KiriCircle2<float>(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
+            auto maxCir2 = KiriCircle2<float>(Vector2F(maxIC[i].x, maxIC[i].y) + offset, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
 
             circles.emplace_back(maxCir2);
 

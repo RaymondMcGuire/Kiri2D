@@ -47,7 +47,7 @@
 
 //     // boundary
 //     KiriSDFPoly2D boundary;
-//     std::vector<KiriPoint2> ppoints;
+//     std::vector<KiriPoint2<float>> ppoints;
 //     std::vector<Vector2F> ptest;
 //     size_t testn;
 //     // load_xy_file(ptest, testn, "D:/project/Kiri/export/xy/test.xy");
@@ -82,7 +82,7 @@
 //     std::piecewise_constant_distribution<float> pcdis{std::begin(radiusRange), std::end(radiusRange), std::begin(radiusRangeProb)};
 
 //     std::vector<TreemapNode> nodes;
-//     std::vector<KiriCircle2> circles;
+//      std::vector<KiriCircle2<float>> circles;
 
 //     size_t totalNum = 10000;
 //     float totalValue = 0.f;
@@ -117,7 +117,7 @@
 //                 p = rect.original + Vector2F(rad, rad + j * minw);
 
 //             if (boundary.FindRegion(p) < 0.f)
-//                 circles.emplace_back(KiriCircle2(p, Vector3F(1.f, 0.f, 0.f), rad));
+//                 circles.emplace_back(KiriCircle2<float>(p, Vector3F(1.f, 0.f, 0.f), rad));
 //         }
 //     }
 
@@ -154,7 +154,7 @@
 
 //     // boundary
 //     KiriSDFPoly2D boundary;
-//     std::vector<KiriPoint2> ppoints;
+//     std::vector<KiriPoint2<float>> ppoints;
 //     std::vector<Vector2F> ptest;
 //     size_t testn;
 

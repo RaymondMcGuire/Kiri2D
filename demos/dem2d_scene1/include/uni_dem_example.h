@@ -50,7 +50,7 @@ namespace KIRI2D
 
         virtual void init();
         virtual void setupParams();
-        virtual void renderScene(std::vector<KiriCircle2> particles);
+        virtual void renderScene( std::vector<KiriCircle2<float>> particles);
     };
 
     typedef SharedPtr<UniDEM2DExample>

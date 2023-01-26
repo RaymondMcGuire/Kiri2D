@@ -10,34 +10,23 @@ set(EXTLIBS_LIB ${CMAKE_SOURCE_DIR}/external/KiriExtlib/lib)
 link_directories(${EXTLIBS_LIB})
 
 # Configuration File
-configure_file(${CMAKE_SOURCE_DIR}/configuration/root_directory.h.in  ${CMAKE_BINARY_DIR}/configuration/root_directory.h)
+configure_file(${CMAKE_SOURCE_DIR}/configuration/root_directory.h.in ${CMAKE_BINARY_DIR}/configuration/root_directory.h)
 set(CONFIGURATION_INCLUDE ${CMAKE_BINARY_DIR}/configuration)
 
 # Kiri2d Core Library
 set(KIRI2D_LIB_INLCUDE ${CMAKE_SOURCE_DIR}/core/include)
-
-# OpenMP
-if(WIN32)
-    find_package(OpenMP REQUIRED)
-    if(OPENMP_FOUND)
-        message(STATUS "OpenMP_C_Found   : ${OpenMP_C_FOUND}")
-        message(STATUS "OpenMP_CXX_Found : ${OpenMP_CXX_FOUND}")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    endif()
-endif()
 
 if(APPLE)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS ON)
     set(OpenCV_DIR "/Users/raymondmg/Project/opencv/build")
-        find_package(OpenCV REQUIRED)
+    find_package(OpenCV REQUIRED)
 endif()
 
 # Project Config
-file(GLOB_RECURSE SOURCES  "src/*.cpp" "src/*.c")
-file(GLOB_RECURSE HEADERS  "include/*.hpp" "include/*.h")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
+file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
 set(PROJECT_FILES ${SOURCES} ${HEADERS})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)
@@ -80,5 +69,5 @@ set_target_properties(
     VS_DEBUGGER_WORKING_DIRECTORY "$<$<CONFIG:debug>:${WD_DEBUG_FILE_PATH}>$<$<CONFIG:release>:${WD_RELEASE_FILE_PATH}>"
 )
 
-#Copy DLLs
+# Copy DLLs
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/external/KiriExtlib/dlls" $<TARGET_FILE_DIR:${PROJECT_NAME}>)

@@ -2,6 +2,15 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2023-01-21 12:57:52
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2023-01-26 18:35:52
+ * @FilePath: \Kiri2D\demos\dynamic_fracture_scene1\src\main.cpp
+ * @Description:
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ */
+/***
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2023-01-21 12:57:52
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
  * @LastEditTime: 2023-01-25 22:23:46
  * @FilePath: \Kiri2D\demos\dynamic_fracture_scene1\src\main.cpp
  * @Description:
@@ -12,6 +21,13 @@
 using namespace KIRI2D;
 using namespace HDV;
 using namespace PHY;
+
+void swap(int *l, int *r)
+{
+    int *tmp = l;
+    *l = *r;
+    *r = *tmp;
+}
 
 int main(int argc, char *argv[])
 {

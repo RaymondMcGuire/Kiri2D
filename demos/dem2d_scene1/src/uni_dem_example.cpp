@@ -146,10 +146,10 @@ namespace KIRI2D
             cudaMemcpy(particle_positions, particles->GetPosPtr(), float2_bytes, cudaMemcpyDeviceToHost);
             cudaMemcpy(particle_radius, particles->GetRadiusPtr(), float_bytes, cudaMemcpyDeviceToHost);
 
-            std::vector<KiriCircle2> render_particles;
+             std::vector<KiriCircle2<float>> render_particles;
             for (auto i = 0; i < particles_num; i++)
             {
-                auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) * PARTICLES_RENDER_SCALE + mRenderOffset, Vector3F(0.88f, 0.79552f, 0.5984f), particle_radius[i] * PARTICLES_RENDER_SCALE);
+                auto p = KiriCircle2<float>(Vector2F(particle_positions[i].x, particle_positions[i].y) * PARTICLES_RENDER_SCALE + mRenderOffset, Vector3F(0.88f, 0.79552f, 0.5984f), particle_radius[i] * PARTICLES_RENDER_SCALE);
                 render_particles.emplace_back(p);
             }
 
@@ -161,7 +161,7 @@ namespace KIRI2D
         }
     }
 
-    void UniDEM2DExample::renderScene(std::vector<KiriCircle2> particles)
+    void UniDEM2DExample::renderScene( std::vector<KiriCircle2<float>> particles)
     {
         mScene->AddCircles(particles);
         mScene->addRect(mBoundaryRect);

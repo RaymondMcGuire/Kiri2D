@@ -2,10 +2,10 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-05-24 10:26:18
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-05-24 10:29:01
+ * @LastEditTime: 2023-01-26 23:34:40
  * @FilePath: \Kiri2D\demos\convexhull2d_scene1\src\main.cpp
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 
 #include <kiri2d.h>
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     // visualization
     std::vector<KiriLine2<float>> lines;
-    std::vector<KiriPoint2> points;
+    std::vector<KiriPoint2<float>> points;
     std::vector<KiriLine2<float>> precompute_lines;
     std::vector<Vector2F> precompute_points;
 

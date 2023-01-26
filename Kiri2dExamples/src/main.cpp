@@ -99,7 +99,7 @@ void QuickHullVoronoi2d()
         }
 
         std::vector<KiriLine2<float>> lines;
-        std::vector<KiriPoint2> points;
+        std::vector<KiriPoint2<float>> points;
         for (size_t i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
@@ -341,8 +341,8 @@ void MSSampler2D()
         }
 
         std::vector<KiriLine2<float>> lines;
-        std::vector<KiriPoint2> points;
-        std::vector<KiriCircle2> circles;
+        std::vector<KiriPoint2<float>> points;
+         std::vector<KiriCircle2<float>> circles;
         for (auto i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
@@ -359,8 +359,8 @@ void MSSampler2D()
         Vec_Double predictRadiusArray, realRadiusArray;
         for (auto i = 0; i < maxIC.size(); i++)
         {
-            // auto maxCir2 = KiriCircle2(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
-            auto maxCir2 = KiriCircle2(Vector2F(maxIC[i].x, maxIC[i].y) + offset, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
+            // auto maxCir2 = KiriCircle2<float>(Transform2Original(Vector2F(maxIC[i].x, maxIC[i].y) * 10.f, height) + offsetVec2, Vector3F(1.f, 0.f, 0.f), maxIC[i].z * 10.f);
+            auto maxCir2 = KiriCircle2<float>(Vector2F(maxIC[i].x, maxIC[i].y) + offset, Vector3F(1.f, 0.f, 0.f), maxIC[i].z);
 
             circles.emplace_back(maxCir2);
 
@@ -472,7 +472,7 @@ void Sph2dExample()
     {
         // KIRI_LOG_DEBUG("-----------------new----------------------------------");
 
-        std::vector<KiriPoint2> points;
+        std::vector<KiriPoint2<float>> points;
         sphSolver.update(timeStep);
         auto particles = sphSolver.GetParticles();
         for (auto i = 0; i < particles.size(); i++)
@@ -483,7 +483,7 @@ void Sph2dExample()
             points.emplace_back(p);
         }
 
-        scene->addRect(boundaryRect);
+        scene->AddRect(boundaryRect);
         scene->AddParticles(points);
 
         renderer->DrawCanvas();
@@ -537,7 +537,7 @@ void BlueNoiseSamplingVisual()
     for (auto i = 0; i < boundary2d_data.size(); i++)
     {
         auto newPos = Vector2F(boundary2d_data[i].x, boundary2d_data[i].y);
-        boundary_sdf.Append(newPos);
+        boundary_sdf.append(newPos);
         boundary_bbox.merge(newPos);
     }
 
@@ -555,7 +555,7 @@ void BlueNoiseSamplingVisual()
         {
             auto pos = lower + Vector2F(density_radius, density_radius) + Vector2F(i, j) * (density_radius * 2.f);
 
-            if (boundary_sdf.FindRegion(pos) <= 0.f)
+            if (boundary_sdf.findRegion(pos) <= 0.f)
                 sdf_points.emplace_back(pos);
         }
     }
@@ -577,13 +577,13 @@ void BlueNoiseSamplingVisual()
     for (auto i = 0; i < boundary2d_data.size(); i++)
     {
         auto newPos = Vector2F(boundary2d_data[i].x, boundary2d_data[i].y) * scaleSize + offset;
-        boundary_vis.Append(newPos);
+        boundary_vis.append(newPos);
         boundary_bbox.merge(newPos);
     }
 
-    std::vector<KiriCircle2> circles;
+     std::vector<KiriCircle2<float>> circles;
     for (auto i = 0; i < sdf_points.size(); i++)
-        circles.emplace_back(KiriCircle2(sdf_points[i] * scaleSize + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, radius * scaleSize));
+        circles.emplace_back(KiriCircle2<float>(sdf_points[i] * scaleSize + offset, Vector3F(100.f, 85.f, 134.f) / 255.f, radius * scaleSize));
 
     // draw boundary
     auto boundaryRect = KiriRect2(offset - Vector2F(radius) * 2.f * scaleSize, (worldSize + 4.f * Vector2F(radius)) * scaleSize);
@@ -591,7 +591,7 @@ void BlueNoiseSamplingVisual()
     while (1)
     {
 
-        std::vector<KiriPoint2> points;
+        std::vector<KiriPoint2<float>> points;
         blueNoiseSolver.update(timeStep);
         std::cout << cnt++ << std::endl;
 
@@ -604,7 +604,7 @@ void BlueNoiseSamplingVisual()
             points.emplace_back(p);
         }
 
-        scene->addRect(boundaryRect);
+        scene->AddRect(boundaryRect);
         scene->AddParticles(points);
 
         // scene->AddCircles(circles);
@@ -669,7 +669,7 @@ void BlueNoiseSampling()
         for (auto i = 0; i < boundary2d_data.size(); i++)
         {
             auto newPos = Vector2F(boundary2d_data[i].x, boundary2d_data[i].y);
-            boundary_sdf.Append(newPos);
+            boundary_sdf.append(newPos);
             boundary_bbox.merge(newPos);
             boundary_polygon->add(Vector2D(newPos.x, newPos.y));
         }
@@ -690,7 +690,7 @@ void BlueNoiseSampling()
             {
                 auto pos = lower + Vector2F(density_radius, density_radius) + Vector2F(i, j) * (density_radius * 2.f);
 
-                if (boundary_sdf.FindRegion(pos) <= 0.f)
+                if (boundary_sdf.findRegion(pos) <= 0.f)
                     position.emplace_back(pos);
             }
         }

@@ -41,9 +41,9 @@ int main(int argc, char *argv[])
 
   // visualization
   std::vector<KiriLine2<float>> lines;
-  std::vector<KiriPoint2> points;
-  std::vector<KiriCircle2> circles;
-  std::vector<KiriCircle2> inserted_sphere;
+  std::vector<KiriPoint2<float>> points;
+   std::vector<KiriCircle2<float>> circles;
+   std::vector<KiriCircle2<float>> inserted_sphere;
   std::vector<KiriLine2<float>> precompute_lines;
   std::vector<Vector2F> precompute_points;
 
@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
     auto inserted_sphere_color_data = proto_sphere_packing->insertedSpheresColor();
 
     for (auto i = 0; i < inserted_sphere_data.size(); i++)
-      inserted_sphere.emplace_back(KiriCircle2(Vector2F(inserted_sphere_data[i].x, inserted_sphere_data[i].y) + offset, inserted_sphere_color_data[i], inserted_sphere_data[i].z, true));
+      inserted_sphere.emplace_back(KiriCircle2<float>(Vector2F(inserted_sphere_data[i].x, inserted_sphere_data[i].y) + offset, inserted_sphere_color_data[i], inserted_sphere_data[i].z, true));
 
-    circles.emplace_back(KiriCircle2(Vector2F(current_sphere.x, current_sphere.y) + offset, Vector3F(0.f, 1.f, 1.f), current_sphere_radius, false));
+    circles.emplace_back(KiriCircle2<float>(Vector2F(current_sphere.x, current_sphere.y) + offset, Vector3F(0.f, 1.f, 1.f), current_sphere_radius, false));
     precompute_points.emplace_back(Vector2F(current_sphere.x, current_sphere.y));
 
     for (auto i = 0; i < precompute_points.size(); i++)

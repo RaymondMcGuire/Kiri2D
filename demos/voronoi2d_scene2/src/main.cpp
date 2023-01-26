@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     // visualization
     std::vector<KiriLine2<float>> lines;
-    std::vector<KiriPoint2> points;
+    std::vector<KiriPoint2<float>> points;
     std::vector<KiriLine2<float>> precompute_lines;
     std::vector<Vector2F> precompute_points;
 

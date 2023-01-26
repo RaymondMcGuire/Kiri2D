@@ -259,7 +259,7 @@ namespace KIRI2D::SPH
                     particles[i].force -= particles[i].mass * (particles[i].pressure / (particles[i].density * particles[i].density) + particles[j].pressure / (particles[j].density * particles[j].density)) * gradKernel(x, kernelRadius);
                 }
 
-                auto dist = boundarySDF.FindRegion(xi);
+                auto dist = boundarySDF.findRegion(xi);
 
                 // remove normal acceleration
                 if (dist >= 0.f)
@@ -343,7 +343,7 @@ namespace KIRI2D::SPH
                 particles[i].velocity += dt * particles[i].force;
                 particles[i].velocity *= 0.9f;
 
-                auto dist = boundarySDF.FindRegion(particles[i].position);
+                auto dist = boundarySDF.findRegion(particles[i].position);
                 if (dist >= 0.f)
                     particles[i].velocity -= particles[i].velocity.dot(particles[i].normal) * particles[i].normal;
                 else

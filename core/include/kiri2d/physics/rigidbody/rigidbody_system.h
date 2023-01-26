@@ -72,7 +72,7 @@ namespace KIRI2D::PHY::RIGIDBODY
                 {
                     auto shape_circle = std::dynamic_pointer_cast<Circle<RealType>>(shape);
                     auto pos = obj_pos.mul(scale) + offset;
-                    circles.emplace_back(KiriCircle2(pos, VectorX<3, RealType>(0.f, 1.f, 1.f), shape_circle->GetRadius() * scale, false));
+                    circles.emplace_back(KiriCircle2<RealType>(pos, VectorX<3, RealType>(0.f, 1.f, 1.f), shape_circle->GetRadius() * scale, false));
                     auto c = std::cos(mObjects[i]->GetOrientation());
                     auto s = std::sin(mObjects[i]->GetOrientation());
                     auto rline = VectorX<2, RealType>(-s * shape_circle->GetRadius() * scale, c * shape_circle->GetRadius() * scale);

@@ -94,7 +94,7 @@ auto offsetvec2 = Vector2F(windowwidth - world_size.x * particle_scale, windowhe
 auto scene = std::make_shared<KiriScene2D<float>>((size_t)windowwidth, (size_t)windowheight);
 auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
-std::vector<KiriCircle2> boundaries;
+ std::vector<KiriCircle2<float>> boundaries;
 
 // global params
 const UInt RunLiquidNumber = 0;
@@ -206,7 +206,7 @@ void DEM_SetupParams()
     boundaryEmitter->BuildWorldBoundary(boundaryData, CUDA_BOUNDARY_PARAMS.lowest_point, CUDA_BOUNDARY_PARAMS.highest_point, CUDA_DEM_PARAMS.particle_radius);
     for (size_t i = 0; i < boundaryData.pos.size(); i++)
     {
-        auto pb = KiriCircle2(Vector2F(boundaryData.pos[i].x, boundaryData.pos[i].y) * particle_scale + offsetvec2, Vector3F(0.f, 0.f, 1.f), radius * particle_scale);
+        auto pb = KiriCircle2<float>(Vector2F(boundaryData.pos[i].x, boundaryData.pos[i].y) * particle_scale + offsetvec2, Vector3F(0.f, 0.f, 1.f), radius * particle_scale);
         boundaries.emplace_back(pb);
     }
 
@@ -339,7 +339,7 @@ void MRDEM_SetupParams()
     boundaryEmitter->BuildWorldBoundary(boundaryData, CUDA_BOUNDARY_PARAMS.lowest_point, CUDA_BOUNDARY_PARAMS.highest_point, volumeData.minRadius);
     for (size_t i = 0; i < boundaryData.pos.size(); i++)
     {
-        auto pb = KiriCircle2(Vector2F(boundaryData.pos[i].x, boundaryData.pos[i].y) * particle_scale + offsetvec2, Vector3F(0.f, 0.f, 1.f), volumeData.minRadius * particle_scale);
+        auto pb = KiriCircle2<float>(Vector2F(boundaryData.pos[i].x, boundaryData.pos[i].y) * particle_scale + offsetvec2, Vector3F(0.f, 0.f, 1.f), volumeData.minRadius * particle_scale);
         boundaries.emplace_back(pb);
     }
 
@@ -380,7 +380,7 @@ void MRDEM_SetupParams()
         boundary_searcher);
 }
 
-void UpdateScene(const std::vector<KiriCircle2> &circles)
+void UpdateScene(const  std::vector<KiriCircle2<float>> &circles)
 {
 
     scene->AddCircles(boundaries);
@@ -429,7 +429,7 @@ void Update()
         else
         {
 
-            std::vector<KiriCircle2> circles;
+             std::vector<KiriCircle2<float>> circles;
             DEMSystem->UpdateSystem(RenderInterval);
             auto particles = std::dynamic_pointer_cast<CudaMRDemParticles>(DEMSystem->GetParticles());
             auto particles_num = particles->Size();
@@ -442,7 +442,7 @@ void Update()
 
             for (size_t i = 0; i < particles_num; i++)
             {
-                auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) * particle_scale + offsetvec2, Vector3F(0.88f, 0.79552f, 0.5984f), particle_radius[i] * particle_scale);
+                auto p = KiriCircle2<float>(Vector2F(particle_positions[i].x, particle_positions[i].y) * particle_scale + offsetvec2, Vector3F(0.88f, 0.79552f, 0.5984f), particle_radius[i] * particle_scale);
                 circles.emplace_back(p);
             }
 
@@ -461,7 +461,7 @@ void UpdateRealTime()
 
     auto particles = DEMSystem->GetParticles();
 
-    std::vector<KiriCircle2> circles;
+     std::vector<KiriCircle2<float>> circles;
 
     auto particles_num = particles->Size();
     size_t f2bytes = particles_num * sizeof(float2);
@@ -470,7 +470,7 @@ void UpdateRealTime()
 
     for (size_t i = 0; i < particles_num; i++)
     {
-        auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) * particle_scale + offsetvec2, Vector3F(1.f, 0.f, 0.f), radius * particle_scale);
+        auto p = KiriCircle2<float>(Vector2F(particle_positions[i].x, particle_positions[i].y) * particle_scale + offsetvec2, Vector3F(1.f, 0.f, 0.f), radius * particle_scale);
         circles.emplace_back(p);
     }
 
@@ -552,7 +552,7 @@ void NSDEM_SetupParams()
     boundaryEmitter->BuildWorldBoundary(boundaryData, CUDA_BOUNDARY_PARAMS.lowest_point, CUDA_BOUNDARY_PARAMS.highest_point, volumeData.min_radius);
     for (size_t i = 0; i < boundaryData.pos.size(); i++)
     {
-        auto pb = KiriCircle2(Vector2F(boundaryData.pos[i].x, boundaryData.pos[i].y) + offsetvec2, Vector3F(0.f, 0.f, 1.f), volumeData.min_radius);
+        auto pb = KiriCircle2<float>(Vector2F(boundaryData.pos[i].x, boundaryData.pos[i].y) + offsetvec2, Vector3F(0.f, 0.f, 1.f), volumeData.min_radius);
         boundaries.emplace_back(pb);
     }
 
@@ -656,7 +656,7 @@ void UpdateNSSystem()
         else
         {
 
-            std::vector<KiriCircle2> circles;
+             std::vector<KiriCircle2<float>> circles;
             auto particles_num = particles->Size();
             size_t fbytes = particles_num * sizeof(float);
             size_t f2bytes = particles_num * sizeof(float2);
@@ -672,7 +672,7 @@ void UpdateNSSystem()
 
             for (size_t i = 0; i < particles_num; i++)
             {
-                auto p = KiriCircle2(Vector2F(particle_positions[i].x, particle_positions[i].y) + offsetvec2, Vector3F(particle_colors[i].x, particle_colors[i].y, particle_colors[i].z), particle_radius[i]);
+                auto p = KiriCircle2<float>(Vector2F(particle_positions[i].x, particle_positions[i].y) + offsetvec2, Vector3F(particle_colors[i].x, particle_colors[i].y, particle_colors[i].z), particle_radius[i]);
                 circles.emplace_back(p);
             }
 
@@ -702,7 +702,7 @@ void UpdateNSSystemRealTime()
     TotalFrameTime += PerFrameTimer.elapsed();
     auto particles = DEMNSSystem->GetParticles();
 
-    std::vector<KiriCircle2> circles;
+     std::vector<KiriCircle2<float>> circles;
     auto particles_num = particles->Size();
     size_t fbytes = particles_num * sizeof(float);
     size_t f2bytes = particles_num * sizeof(float2);
@@ -719,7 +719,7 @@ void UpdateNSSystemRealTime()
     for (size_t i = 0; i < particles_num; i++)
     {
         auto pos = Vector2F(particle_positions[i].x, particle_positions[i].y) + offsetvec2;
-        auto p = KiriCircle2(pos, Vector3F(particle_colors[i].x, particle_colors[i].y, particle_colors[i].z), particle_radius[i]);
+        auto p = KiriCircle2<float>(pos, Vector3F(particle_colors[i].x, particle_colors[i].y, particle_colors[i].z), particle_radius[i]);
         circles.emplace_back(p);
 
         // KIRI_LOG_DEBUG("pos={0},{1}", pos.x, pos.y);

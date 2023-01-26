@@ -1,9 +1,11 @@
 /***
- * @Author: Xu.WANG
- * @Date: 2021-12-08 15:00:22
- * @LastEditTime: 2021-12-08 15:00:56
- * @LastEditors: Xu.WANG
+ * @Author: Xu.WANG raymondmgwx@gmail.com
+ * @Date: 2022-02-19 10:59:26
+ * @LastEditors: Xu.WANG raymondmgwx@gmail.com
+ * @LastEditTime: 2023-01-26 23:36:46
+ * @FilePath: \Kiri2D\core\include\kiri2d\hdv_toolkit\delaunay\delaunay_triangulation2.h
  * @Description:
+ * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
  */
 #ifndef _HDV_DELAUNAY_TRIANGULATION2_H_
 #define _HDV_DELAUNAY_TRIANGULATION2_H_
@@ -38,30 +40,29 @@ namespace HDV::Delaunay
         {
 
             clear();
-            auto dim = mDimension;
-
-            if (input.size() <= dim + 1)
+            int input_num = input.size();
+            if (input_num <= mDimension + 1)
                 return;
 
-            auto count = input.size();
+            auto count = input_num;
 
             for (auto i = 0; i < count; i++)
             {
                 auto v = input[i]->positions();
-                v.resize(dim + 1);
-                v[dim] = input[i]->lengthSquared() - input[i]->weight();
+                v.resize(mDimension + 1);
+                v[mDimension] = input[i]->lengthSquared() - input[i]->weight();
                 // KIRI_LOG_DEBUG("weight={0}", input[i]->weight());
                 input[i]->positions() = v;
             }
 
-            mHull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(dim + 1);
+            mHull = std::make_shared<HDV::Hull::ConvexHull<VERTEXPTR>>(mDimension + 1);
             mHull->enablePowerDiagram(true);
             mHull->generate(input, assignIds, checkInput);
 
             for (auto i = 0; i < count; i++)
             {
                 auto v = input[i]->positions();
-                v.resize(dim);
+                v.resize(mDimension);
                 input[i]->positions() = v;
             }
 
@@ -77,7 +78,7 @@ namespace HDV::Delaunay
 
                 auto simplex = mHull->simplexs()[i];
 
-                if (simplex->normals()[dim] >= 0.0f)
+                if (simplex->normals()[mDimension] >= 0.0f)
                 {
                     for (auto j = 0; j < simplex->adjacents().size(); j++)
                     {
@@ -109,8 +110,6 @@ namespace HDV::Delaunay
 
         /**
          * @reference MathWorld: http://mathworld.wolfram.com/Circumcircle.html
-         * @param  {std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>>} simplex :
-         * @return {std::shared_ptr<DelaunayCell<VERTEXPTR,}                      :
          */
         std::shared_ptr<DelaunayCell<VERTEXPTR, VERTEX>> createCell(const std::shared_ptr<HDV::Primitives::Simplex<VERTEXPTR>> &simplex)
         {

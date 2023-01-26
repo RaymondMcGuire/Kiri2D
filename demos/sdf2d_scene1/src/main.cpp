@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 
   scene->AddLines(lines);
 
-  std::vector<KiriCircle2> circles;
+   std::vector<KiriCircle2<float>> circles;
   auto sdf = std::make_shared<SDF::PolygonSDF2D>(boundary_polygon, 5.0);
   sdf->computeSDF();
 
@@ -91,14 +91,14 @@ int main(int argc, char *argv[]) {
     spheres.emplace_back(Vector3D(p.x, p.y, size));
     sdf->updateSDFWithSpheres(spheres);
 
-    circles.emplace_back(KiriCircle2(Vector2F(p.x, p.y) + offset,
+    circles.emplace_back(KiriCircle2<float>(Vector2F(p.x, p.y) + offset,
                                      Vector3F(1.f, 0.f, 0.f), size, false));
   }
 
   auto points = sdf->placeGridPoints();
   for (int i = 0; i < points.size(); i++) {
     circles.emplace_back(
-        KiriCircle2(Vector2F(points[i].x, points[i].y) + offset,
+        KiriCircle2<float>(Vector2F(points[i].x, points[i].y) + offset,
                     Vector3F(0.f, 1.f, 1.f), 1, true));
   }
   scene->AddCircles(circles);

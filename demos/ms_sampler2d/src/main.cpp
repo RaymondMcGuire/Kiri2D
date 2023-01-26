@@ -184,8 +184,8 @@ int main(int argc, char *argv[])
         }
 
         std::vector<KiriLine2<float>> lines;
-        std::vector<KiriPoint2> points;
-        std::vector<KiriCircle2> circles;
+        std::vector<KiriPoint2<float>> points;
+         std::vector<KiriCircle2<float>> circles;
         for (auto i = 0; i < precompute_points.size(); i++)
         {
             points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
         Vec_Double predict_radius, real_radius;
         for (auto i = 0; i < mic.size(); i++)
         {
-            auto mic_paint = KiriCircle2(Vector2F(mic[i].x, mic[i].y) + offset, Vector3F(1.f, 0.f, 0.f), mic[i].z);
+            auto mic_paint = KiriCircle2<float>(Vector2F(mic[i].x, mic[i].y) + offset, Vector3F(1.f, 0.f, 0.f), mic[i].z);
 
             circles.emplace_back(mic_paint);
 
