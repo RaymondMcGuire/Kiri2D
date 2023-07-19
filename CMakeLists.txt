@@ -87,6 +87,7 @@ if(NOT ${ENABLE_CUDA})
   add_subdirectory(demos/ms_sampler2d)
 
   add_subdirectory(demos/proto_sphere_scene1)
+  add_subdirectory(demos/proto_sphere_scene2)
   add_subdirectory(demos/proto_sphere_sdf_parallel)
   add_subdirectory(demos/proto_sphere_bon2020_scene1)
   add_subdirectory(demos/proto_sphere_test)

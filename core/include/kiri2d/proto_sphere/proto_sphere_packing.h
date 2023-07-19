@@ -1,11 +1,11 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-11-03 16:19:02
+ * @Date: 2022-11-08 11:45:10
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-03 16:19:05
+ * @LastEditTime: 2023-04-13 11:09:16
  * @FilePath: \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_packing.h
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved. 
  */
 
 #ifndef _PROTO_SPHERE_PACK_H_
@@ -49,7 +49,7 @@ namespace PSPACK
                     q_c = Vector2D(point.x, point.y) + point.z * (mCurrentSphere - Vector2D(point.x, point.y)).normalized();
             }
 
-            auto epsilon = this->coolingFunc(mIterNum, 0.08, 0.8);
+            auto epsilon = this->coolingFunc(mIterNum, 0.1, 0.4);
             auto current_move = epsilon * (mCurrentSphere - q_c);
 
             if (current_move.length() <= q_c.distanceTo(mCurrentSphere))

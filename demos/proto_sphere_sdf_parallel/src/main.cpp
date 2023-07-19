@@ -1,13 +1,12 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-11-08 18:11:34
+ * @Date: 2023-01-30 11:49:55
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-09 21:25:14
+ * @LastEditTime: 2023-04-13 11:38:07
  * @FilePath: \Kiri2D\demos\proto_sphere_sdf_parallel\src\main.cpp
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved. 
  */
-
 #include <kiri2d.h>
 
 using namespace KIRI2D;
