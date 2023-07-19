@@ -84,6 +84,7 @@ namespace KIRI2D
                     cv::circle(mCanvas, cv::Point(cx, cy), circles[i].radius, cv::Scalar(col.z, col.y, col.x, -1), 1);
             }
 
+            std::vector<cv::Point> smooth_pts_vec;
             auto lines = mScene->GetLines();
             for (int i = 0; i < lines.size(); i++)
             {
@@ -94,19 +95,27 @@ namespace KIRI2D
                 int ex = end_relate_position[0];
                 int ey = mWindowHeight - end_relate_position[1];
                 auto col = lines[i].col * static_cast<RealType>(255.0);
+                //smooth_pts_vec.emplace_back(cv::Point(sx, sy));
+                //smooth_pts_vec.emplace_back(cv::Point(ex, ey));
                 cv::line(mCanvas, cv::Point(sx, sy), cv::Point(ex, ey), cv::Scalar(col.x, col.y, col.z), lines[i].thick * mScene->GetCamera()->viewScale());
             }
+            //std::vector<cv::Point> smooth_pts_smoothed;
+            //cv::approxPolyDP(smooth_pts_vec, smooth_pts_smoothed, 10, true);
 
-            auto rects = mScene->GetRects();
-            for (int i = 0; i < rects.size(); i++)
-            {
-                VectorX<2, RealType> original = mScene->GetCamera()->project(rects[i].original + VectorX<2, RealType>(0.f, rects[i].size.y));
-                int ox = original[0];
-                int oy = mWindowHeight - original[1];
+            //const cv::Point* pts[] = { &smooth_pts_smoothed[0] };
+            //const int npts[] = { static_cast<int>(smooth_pts_smoothed.size()) };
+            //cv::polylines(mCanvas, pts, npts, 1, true, cv::Scalar(0, 255, 0), 3, cv::LINE_AA);
 
-                cv::Rect rect(ox, oy, rects[i].size.x, rects[i].size.y);
-                cv::rectangle(mCanvas, rect, cv::Scalar(253, 185, 134), 2.f * mScene->GetCamera()->viewScale());
-            }
+            //auto rects = mScene->GetRects();
+            //for (int i = 0; i < rects.size(); i++)
+            //{
+            //    VectorX<2, RealType> original = mScene->GetCamera()->project(rects[i].original + VectorX<2, RealType>(0.f, rects[i].size.y));
+            //    int ox = original[0];
+            //    int oy = mWindowHeight - original[1];
+
+            //    cv::Rect rect(ox, oy, rects[i].size.x, rects[i].size.y);
+            //    cv::rectangle(mCanvas, rect, cv::Scalar(253, 185, 134), 2.f * mScene->GetCamera()->viewScale());
+            //}
 
             // auto GetSDFObjects = mScene->GetSDFObjects();
             // for (size_t i = 0; i < GetSDFObjects.size(); i++)

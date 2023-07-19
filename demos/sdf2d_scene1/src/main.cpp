@@ -1,16 +1,56 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-11-30 15:29:43
+ * @Date: 2022-12-03 01:38:50
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-30 15:44:27
+ * @LastEditTime: 2023-05-03 22:03:22
  * @FilePath: \Kiri2D\demos\sdf2d_scene1\src\main.cpp
- * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved. 
  */
 #include <kiri2d.h>
 
 using namespace KIRI2D;
 using namespace HDV;
+
+
+Vector2D perpendicular(Vector2D v) {
+    return Vector2D( -v.y, v.x );
+}
+
+Vector2D moveInside(Vector2D p, Vector2D n, double distance) {
+    return Vector2D( p.x + n.x * distance, p.y + n.y * distance );
+}
+
+std::vector<Vector2D> shrink(std::vector<Vector2D> shape, double distance) {
+    // 计算形状的边界
+    std::vector<Vector2D> boundary;
+    for (int i = 0; i < shape.size(); i++) {
+        int j = (i + 1) % shape.size();
+        auto a = shape[i];
+        auto b = shape[j];
+        double d = a.distanceTo(b);
+        auto n = perpendicular(Vector2D( b.x - a.x, b.y - a.y )).normalized();
+        auto m = moveInside(a, n, distance);
+        boundary.emplace_back(m);
+    }
+
+    // 构造新形状
+    // std::vector<Vector2D> newShape;
+    // for (int i = 0; i < shape.size(); i++) {
+    //     int j = (i + 1) % shape.size();
+    //       auto a = shape[i];
+    //       auto b = shape[j];
+    //       auto c = shape[j];
+    //       double d = a.distanceTo(b);
+    //       auto n = perpendicular(Vector2D( b.x - a.x, b.y - a.y )).normalized();
+    //       auto m1 = moveInside(a, n, distance);
+    //       auto m2 = moveInside(b, n, distance);
+    //       auto p = Vector2D( (m1.x + m2.x) / 2, (m1.y + m2.y) / 2 );
+    //       newShape.push_back(p);
+    //       newShape.push_back(c);
+    //   }
+    return boundary;
+}
 
 int main(int argc, char *argv[]) {
   // log system
@@ -24,7 +64,7 @@ int main(int argc, char *argv[]) {
   auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
   // config
-  auto scale = 450.f;
+  auto scale = 400.f;
 
   // boundary
   auto boundary_polygon = std::make_shared<Voronoi::VoronoiPolygon2>();
@@ -63,13 +103,24 @@ int main(int argc, char *argv[]) {
   std::vector<KiriLine2<float>> lines;
   std::vector<KiriLine2<float>> precompute_lines;
 
-  for (size_t j = 0; j < boundary_polygon->positions().size(); j++) {
-    auto vertices = boundary_polygon->positions()[j];
+  auto boundary_shapes = boundary_polygon->positions();
+  for (size_t j = 0; j < boundary_shapes.size(); j++) {
+    auto vertices = boundary_shapes[j];
     auto vertices1 =
-        boundary_polygon
-            ->positions()[(j + 1) % (boundary_polygon->positions().size())];
+        boundary_shapes[(j + 1) % (boundary_shapes.size())];
     auto line = KiriLine2(Vector2F(vertices.x, vertices.y) + offset,
                           Vector2F(vertices1.x, vertices1.y) + offset);
+    line.thick = 1.f;
+    precompute_lines.emplace_back(line);
+  }
+
+  auto new_boundary = shrink(boundary_shapes,-20);
+    for (size_t j = 0; j < new_boundary.size(); j++) {
+    auto vertices = new_boundary[j];
+    auto vertices1 =
+        new_boundary[(j + 1) % (new_boundary.size())];
+    auto line = KiriLine2(Vector2F(vertices.x, vertices.y)+ offset,
+                          Vector2F(vertices1.x, vertices1.y)+ offset);
     line.thick = 1.f;
     precompute_lines.emplace_back(line);
   }
@@ -83,25 +134,25 @@ int main(int argc, char *argv[]) {
   auto sdf = std::make_shared<SDF::PolygonSDF2D>(boundary_polygon, 5.0);
   sdf->computeSDF();
 
-  auto size = 10;
-  for (auto i = 0; i < 50; i++) {
-    auto p = boundary_polygon->rndInnerPointWithDistConstrain(size);
+  //auto size = 10;
+  //for (auto i = 0; i < 50; i++) {
+  //  auto p = boundary_polygon->rndInnerPointWithDistConstrain(size);
 
-    std::vector<Vector3D> spheres;
-    spheres.emplace_back(Vector3D(p.x, p.y, size));
-    sdf->updateSDFWithSpheres(spheres);
+  //  std::vector<Vector3D> spheres;
+  //  spheres.emplace_back(Vector3D(p.x, p.y, size));
+  //  sdf->updateSDFWithSpheres(spheres);
 
-    circles.emplace_back(KiriCircle2<float>(Vector2F(p.x, p.y) + offset,
-                                     Vector3F(1.f, 0.f, 0.f), size, false));
-  }
+  //  circles.emplace_back(KiriCircle2<float>(Vector2F(p.x, p.y) + offset,
+  //                                   Vector3F(1.f, 0.f, 0.f), size, false));
+  //}
 
-  auto points = sdf->placeGridPoints();
-  for (int i = 0; i < points.size(); i++) {
-    circles.emplace_back(
-        KiriCircle2<float>(Vector2F(points[i].x, points[i].y) + offset,
-                    Vector3F(0.f, 1.f, 1.f), 1, true));
-  }
-  scene->AddCircles(circles);
+  //auto points = sdf->placeGridPoints();
+  //for (int i = 0; i < points.size(); i++) {
+  //  circles.emplace_back(
+  //      KiriCircle2<float>(Vector2F(points[i].x, points[i].y) + offset,
+  //                  Vector3F(0.f, 1.f, 1.f), 1, true));
+  //}
+  //scene->AddCircles(circles);
 
   renderer->DrawCanvas();
   renderer->SaveImages2File();
