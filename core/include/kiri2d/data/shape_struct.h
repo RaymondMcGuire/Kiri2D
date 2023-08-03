@@ -22,13 +22,15 @@ namespace KIRI2D
     {
         VectorX<2, RealType> pos;
         VectorX<3, RealType> col;
-        RealType radius = static_cast<RealType>(1.0);
+        RealType radius;
 
         KiriPoint2(
             VectorX<2, RealType> _pos,
-            VectorX<3, RealType> _col)
+            VectorX<3, RealType> _col,
+            RealType _radius = static_cast<RealType>(1.0))
             : pos(_pos),
-              col(_col) {}
+              col(_col),
+              radius(_radius) {}
     };
 
     template <class RealType>

@@ -2,11 +2,12 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-16 20:58:33
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-17 13:17:54
+ * @LastEditTime: 2023-08-03 16:21:32
  * @FilePath: \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_packing_sdf_opti.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved.
  */
+
 #ifndef _PROTO_SPHERE_PACK_SDF_OPTI_H_
 #define _PROTO_SPHERE_PACK_SDF_OPTI_H_
 
@@ -27,7 +28,8 @@ namespace PSPACK
           mPreDefinedRadiusRange(radiusRange),
           mCurrentRadiusRangeProb(radiusRangeProb),
           mPreDefinedRadiusRangeProb(radiusRangeProb),
-          mFindMinimumPorosity(findMinimumPorosity)
+          mFindMinimumPorosity(findMinimumPorosity),
+          mStartFindMinimumPorosity(findMinimumPorosity)
     {
       mSDF2D = std::make_shared<HDV::SDF::PolygonSDF2D>(mBoundary, 10.0);
       mSDF2D->computeSDF();
@@ -170,9 +172,7 @@ namespace PSPACK
         mDrawCurrentSpheres = false;
         if (mLastInsertedNum == mInsertedSpheres.size())
         {
-          if (mFindMinimumPorosity)
-            mStartFindMinimumPorosity = true;
-          else
+          if (!mFindMinimumPorosity)
           {
             KIRI_LOG_DEBUG("Generated Finished!");
             mFinished = true;
@@ -212,8 +212,8 @@ namespace PSPACK
         auto pos = Vector2D(sphere.x, sphere.y);
 
         // compute current sphere radius
-        // auto [current_radius, q_c] = mSDF2D->getSDF(pos);
-        auto [current_radius, q_c] = mSDF2D->getSDFWithRndOffset(pos);
+        auto [current_radius, q_c] = mSDF2D->getSDF(pos);
+        // auto [current_radius, q_c] = mSDF2D->getSDFWithRndOffset(pos);
 
         // radius is not correct
         if (current_radius < 0.0)

@@ -2,10 +2,10 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-08 18:11:34
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-09 21:25:14
+ * @LastEditTime: 2023-08-03 15:55:47
  * @FilePath: \Kiri2D\demos\proto_sphere_sdf_parallel\src\main.cpp
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved.
  */
 
 #include <kiri2d.h>
@@ -20,13 +20,13 @@ int main(int argc, char *argv[])
   KiriLog::init();
 
   // scene renderer config
-  auto window_height = 5000.f;
-  auto window_width = 5000.f;
+  auto window_height = 4000.f;
+  auto window_width = 4000.f;
   auto scene = std::make_shared<KiriScene2D<float>>((size_t)window_width, (size_t)window_height);
   auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
   // config
-  auto scale = 4500.f;
+  auto scale = 3500.f;
 
   // boundary
   auto boundary_polygon = std::make_shared<Voronoi::VoronoiPolygon2>();
@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
   // visualization
   std::vector<KiriLine2<float>> lines;
   std::vector<KiriPoint2<float>> points;
-   std::vector<KiriCircle2<float>> circles;
-   std::vector<KiriCircle2<float>> inserted_sphere;
+  std::vector<KiriCircle2<float>> circles;
+  std::vector<KiriCircle2<float>> inserted_sphere;
   std::vector<KiriLine2<float>> precompute_lines;
   std::vector<Vector2F> precompute_points;
 
@@ -70,15 +70,15 @@ int main(int argc, char *argv[])
     auto vertices = boundary_polygon->positions()[j];
     auto vertices1 = boundary_polygon->positions()[(j + 1) % (boundary_polygon->positions().size())];
     auto line = KiriLine2(Vector2F(vertices.x, vertices.y) + offset, Vector2F(vertices1.x, vertices1.y) + offset);
-    line.thick = 1.f;
+    line.thick = 2.f;
     precompute_lines.emplace_back(line);
   }
 
   // proto sphere algo
-  auto proto_sphere_packing = std::make_shared<ProtoSpherePackingSDF2D>(boundary_polygon);
+  auto proto_sphere_packing = std::make_shared<ProtoSpherePackingSDF2D>(boundary_polygon, 20.0);
 
   // while (1)
-  for (auto idx = 0; idx < 300; idx++)
+  for (auto idx = 0; idx < 320; idx++)
   {
     // clear
     lines.clear();
@@ -86,14 +86,16 @@ int main(int argc, char *argv[])
     circles.clear();
     precompute_points.clear();
 
+    auto points_num = scene->GetPoints().size();
+
     if (idx > 1)
       proto_sphere_packing->convergePrototype();
 
-    // auto current_spheres = proto_sphere_packing->currentSpheres();
-    // for (auto i = 0; i < current_spheres.size(); i++)
-    // {
-    //   precompute_points.emplace_back(Vector2F(current_spheres[i].x, current_spheres[i].y));
-    // }
+    auto current_spheres = proto_sphere_packing->currentSpheres();
+    for (auto i = 0; i < current_spheres.size(); i++)
+    {
+      precompute_points.emplace_back(Vector2F(current_spheres[i].x, current_spheres[i].y));
+    }
 
     auto inserted_sphere_data = proto_sphere_packing->insertedSpheres();
     auto inserted_sphere_color_data = proto_sphere_packing->insertedSpheresColor();
@@ -103,8 +105,11 @@ int main(int argc, char *argv[])
 
     // circles.emplace_back(KiriCircle2<float>(Vector2F(current_sphere.x, current_sphere.y) + offset, Vector3F(0.f, 1.f, 1.f), current_sphere_radius, false));
 
+    // draw temp points
     for (auto i = 0; i < precompute_points.size(); i++)
-      points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f)));
+    {
+      points.emplace_back(KiriPoint2(precompute_points[i] + offset, Vector3F(1.f, 0.f, 0.f), 5.f));
+    }
 
     for (auto i = 0; i < precompute_lines.size(); ++i)
       lines.emplace_back(precompute_lines[i]);
@@ -118,8 +123,8 @@ int main(int argc, char *argv[])
 
     renderer->DrawCanvas();
 
-    if (inserted_sphere.size() > 0)
-      renderer->SaveImages2File();
+    // if (inserted_sphere.size() > 0)
+    renderer->SaveImages2File();
 
     // cv::imshow("KIRI2D", renderer->GetCanvas());
     // cv::waitKey(5);

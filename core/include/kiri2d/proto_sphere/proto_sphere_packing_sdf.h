@@ -2,12 +2,11 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-09 15:59:29
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-09 21:10:23
+ * @LastEditTime: 2023-08-03 16:44:13
  * @FilePath: \Kiri2D\core\include\kiri2d\proto_sphere\proto_sphere_packing_sdf.h
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved.
  */
-
 #ifndef _PROTO_SPHERE_PACK_SDF_H_
 #define _PROTO_SPHERE_PACK_SDF_H_
 
@@ -20,10 +19,10 @@ namespace PSPACK
     class ProtoSpherePackingSDF2D
     {
     public:
-        explicit ProtoSpherePackingSDF2D(const HDV::Voronoi::VoronoiPolygon2Ptr &boundary)
+        explicit ProtoSpherePackingSDF2D(const HDV::Voronoi::VoronoiPolygon2Ptr &boundary, double cell_size = 10.0)
             : mBoundary(std::move(boundary))
         {
-            mSDF2D = std::make_shared<HDV::SDF::PolygonSDF2D>(mBoundary, 10.0);
+            mSDF2D = std::make_shared<HDV::SDF::PolygonSDF2D>(mBoundary, cell_size);
             mSDF2D->computeSDF();
             initParticles();
         }
@@ -49,7 +48,7 @@ namespace PSPACK
             mAllConverged = true;
             for (auto i = 0; i < mCurrentSpheres.size(); i++)
             {
-                if (mConverges[i])
+                if (mConverges[i] || mIterNums[i] > 50)
                     continue;
                 else
                     mAllConverged = false;
@@ -68,6 +67,7 @@ namespace PSPACK
 
                 auto radius = min_dist;
                 auto current_move_len = current_move.length();
+                // KIRI_LOG_DEBUG("current_move_len={0}", current_move_len);
                 if (current_move_len < 1e-6)
                     mConverges[i] = true;
 
