@@ -2,10 +2,10 @@
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-16 12:37:22
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2022-11-17 13:21:39
+ * @LastEditTime: 2023-08-03 17:34:26
  * @FilePath: \Kiri2D\demos\proto_sphere_parallel_test\src\main.cpp
  * @Description:
- * @Copyright (c) 2022 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved.
  */
 
 #include <kiri2d.h>
@@ -20,14 +20,14 @@ int main(int argc, char *argv[])
   KiriLog::init();
 
   // scene renderer config
-  auto window_height = 5000.f;
-  auto window_width = 5000.f;
+  auto window_height = 4000.f;
+  auto window_width = 4000.f;
   auto scene = std::make_shared<KiriScene2D<float>>((size_t)window_width,
-                                             (size_t)window_height);
+                                                    (size_t)window_height);
   auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
 
   // config
-  auto scale = 4500.f;
+  auto scale = 3500.f;
 
   // boundary
   auto boundary_polygon = std::make_shared<Voronoi::VoronoiPolygon2>();
@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
   // visualization
   std::vector<KiriLine2<float>> lines;
   std::vector<KiriPoint2<float>> points;
-   std::vector<KiriCircle2<float>> circles;
-   std::vector<KiriCircle2<float>> inserted_sphere;
+  std::vector<KiriCircle2<float>> circles;
+  std::vector<KiriCircle2<float>> inserted_sphere;
   std::vector<KiriLine2<float>> precompute_lines;
   std::vector<Vector2F> precompute_points;
 
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
       boundary_polygon, radius_range, radius_range_prob, true);
 
   // while (1)
-  for (auto idx = 0; idx < 200; idx++)
+  for (auto idx = 0; idx < 120; idx++)
   {
     auto converged = false;
     // clear
