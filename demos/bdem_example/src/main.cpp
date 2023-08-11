@@ -1,11 +1,11 @@
-/***
+/*** 
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2023-07-18 10:51:01
+ * @Date: 2023-08-10 16:22:07
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2023-07-18 16:29:02
+ * @LastEditTime: 2023-08-10 17:29:15
  * @FilePath: \Kiri2D\demos\bdem_example\src\main.cpp
- * @Description:
- * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved.
+ * @Description: 
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved. 
  */
 #include <kiri2d.h>
 
@@ -81,24 +81,27 @@ int main(int argc, char *argv[])
     // log system
     KiriLog::init();
     // scene renderer config
-    float window_height = 1500.f;
-    float window_width = 1500.f;
+    float window_height = 1000.f;
+    float window_width = 1000.f;
 
     auto offset = Vector2F(250.f);
 
     auto scene = std::make_shared<KiriScene2D<float>>((size_t)window_width, (size_t)window_height);
     auto renderer = std::make_shared<KiriRenderer2D<float>>(scene);
-    auto scale_size = 1000.0;
+    auto scale_size = 500.0;
 
     int numOfFrames = 200;
     double fps = 60, r = 0.02, kn = 1e7;
+    auto density = 2500.0;
+    auto mass = KIRI_PI<double>()* r*r*density;
+    auto interia = 0.5 * mass *r *r;
     std::vector<Particle> pts;
 
     for (double x = 0.1; x < 0.9; x += 2 * r)
     {
         for (double y = 0.4; y < 0.45; y += 2 * r)
         {
-            pts.push_back(Particle(1.3e-4 / r / r, 2.6e-4 / r / r / r / r, r, Vec(x, y), 1));
+            pts.push_back(Particle(1.0/mass, 1.0/interia, r, Vec(x, y), 1));
         }
     }
 
@@ -106,7 +109,7 @@ int main(int argc, char *argv[])
     {
         for (double y = 0.1; y < 0.3; y += 2 * r)
         {
-            pts.push_back(Particle(1.3e-4 / r / r, 2.6e-4 / r / r / r / r, r, Vec(x, y), 2));
+            pts.push_back(Particle(1.0/mass, 1.0/interia, r, Vec(x, y), 2));
         }
     }
 
@@ -147,7 +150,8 @@ int main(int argc, char *argv[])
     int s = static_cast<int>(1.0 / fps / std::sqrt(7.5e3 * r * r / kn)) * 10;
     double dt = 1.0 / fps / static_cast<double>(s);
 
-    for (int frameIdx = 0; frameIdx < numOfFrames; frameIdx++)
+    //for (int frameIdx = 0; frameIdx < numOfFrames; frameIdx++)
+    while(1)
     {
 
         for (int iter = 0; iter < s; iter++)
@@ -157,7 +161,11 @@ int main(int argc, char *argv[])
             {
                 pts[i].F = Vec();
                 pts[i].T = 0.0;
+
+                // line 8
                 pts[i].x = pts[i].x + pts[i].vMid * dt;
+
+                // line 9
                 pts[i].q = clampRad(pts[i].q + pts[i].wMid * dt);
             }
 
@@ -250,7 +258,9 @@ int main(int argc, char *argv[])
         scene->AddCircles(circles);
         renderer->DrawCanvas();
 
-        renderer->SaveImages2File();
+        cv::imshow("KIRI2D", renderer->GetCanvas());
+        cv::waitKey(5);
+        //renderer->SaveImages2File();
 
         renderer->ClearCanvas();
         scene->Clear();
