@@ -1,11 +1,11 @@
-/*** 
+/***
  * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2023-08-10 16:22:07
+ * @Date: 2023-08-13 09:52:35
  * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2023-08-10 17:29:15
+ * @LastEditTime: 2023-08-14 11:46:39
  * @FilePath: \Kiri2D\demos\bdem_example\src\main.cpp
- * @Description: 
- * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved. 
+ * @Description:
+ * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved.
  */
 #include <kiri2d.h>
 
@@ -55,8 +55,13 @@ struct Vec
 
 struct Bond
 {
+    // j:connected particle id
     int s, j;
+
+    // initial bond length
     double l;
+
+    // bond initial direction
     Vec d;
     double tn, tt;
 
@@ -72,7 +77,9 @@ struct Particle
     std::vector<Bond> bonds;
 
     Particle(double im, double iI, double r, Vec x, int c)
-        : im(im), iI(iI), r(r), x(x), c(c), wMid(0), w(0), q(0) {}
+        : im(im), iI(iI), r(r), x(x), c(c), wMid(0), w(0), q(0)
+    {
+    }
 };
 
 int main(int argc, char *argv[])
@@ -91,17 +98,25 @@ int main(int argc, char *argv[])
     auto scale_size = 500.0;
 
     int numOfFrames = 200;
-    double fps = 60, r = 0.02, kn = 1e7;
-    auto density = 2500.0;
-    auto mass = KIRI_PI<double>()* r*r*density;
-    auto interia = 0.5 * mass *r *r;
+    double fps = 60, r = 0.02;
+
+    auto S = KIRI_PI<double>() * r * r;
+
+    auto E = 1e7;
+    auto G = 3e6;
+
+    auto kn = 1e7;
+
+    auto density = 2710.0;
+    auto mass = KIRI_PI<double>() * r * r * density;
+    auto interia = 0.5 * mass * r * r;
     std::vector<Particle> pts;
 
     for (double x = 0.1; x < 0.9; x += 2 * r)
     {
         for (double y = 0.4; y < 0.45; y += 2 * r)
         {
-            pts.push_back(Particle(1.0/mass, 1.0/interia, r, Vec(x, y), 1));
+            pts.push_back(Particle(1.0 / mass, 1.0 / interia, r, Vec(x, y), 1));
         }
     }
 
@@ -109,7 +124,7 @@ int main(int argc, char *argv[])
     {
         for (double y = 0.1; y < 0.3; y += 2 * r)
         {
-            pts.push_back(Particle(1.0/mass, 1.0/interia, r, Vec(x, y), 2));
+            pts.push_back(Particle(1.0 / mass, 1.0 / interia, r, Vec(x, y), 2));
         }
     }
 
@@ -149,9 +164,10 @@ int main(int argc, char *argv[])
 
     int s = static_cast<int>(1.0 / fps / std::sqrt(7.5e3 * r * r / kn)) * 10;
     double dt = 1.0 / fps / static_cast<double>(s);
+    auto mu = 0.7;
 
-    //for (int frameIdx = 0; frameIdx < numOfFrames; frameIdx++)
-    while(1)
+    // for (int frameIdx = 0; frameIdx < numOfFrames; frameIdx++)
+    while (1)
     {
 
         for (int iter = 0; iter < s; iter++)
@@ -174,21 +190,40 @@ int main(int argc, char *argv[])
                 // non-boundary particles
                 if (pts[i].im > 1e-6)
                 {
+                    // line 11
                     for (int j = 0; j < pts.size(); j++)
                     {
                         if (i != j)
                         {
                             Vec lij = pts[i].x - pts[j].x;
-                            double o = pts[i].r + pts[j].r - lij.len();
+
+                            // equ 20
+                            double delta_ij = pts[i].r + pts[j].r - lij.len();
 
                             // non-overlap
-                            if (o <= 1e-12)
+                            if (delta_ij <= 1e-12)
                             {
                                 continue;
                             }
                             Vec n = lij / lij.len();
-                            double a = 1.4 * std::sqrt(kn / (pts[i].im + pts[j].im));
-                            pts[i].F = pts[i].F + n * (kn * o + a * (pts[j].v - pts[i].v).dot(n));
+
+                            auto kt = 1.4 * std::sqrt(kn / (pts[i].im + pts[j].im));
+                            // equ 22
+                            auto F_r = n * kn * delta_ij;
+
+                            auto vij = (pts[j].v - pts[i].v);
+                            auto dot_epslion = vij.dot(n);
+                            auto vt = vij - n * dot_epslion;
+
+                            auto F_f = vt * -kt;
+
+                            auto max_fs = F_r.len() * mu;
+                            if (F_f.len() > max_fs)
+                            {
+                                F_f = vt * max_fs;
+                            }
+
+                            pts[i].F = pts[i].F + F_r + F_f;
                         }
                     }
 
@@ -201,22 +236,34 @@ int main(int argc, char *argv[])
                         }
                         Vec l = pts[b.j].x - pts[i].x;
                         Vec n = l / l.len();
+
+                        // tangential unit vector in 2D
                         Vec t(-n.y, n.x);
+
+                        // bond status: pull or push
                         double dl = l.len() - b.l;
+
                         double qb = std::atan2(b.d.y, b.d.x) - std::atan2(n.y, n.x);
+
+                        // equation 5 in 2D
                         double ti = clampRad(qb + pts[i].q);
                         double tj = clampRad(qb + pts[b.j].q);
 
                         // equation 4
-                        Vec Fn = n * kn * dl;
-                        Vec Ft = t * (-kn / 3.0 * r * r / l.len() * (ti + tj));
+                        Vec F_stretch = n * kn * dl;
+
+                        auto ks = kn / 3 * r * r / l.len();
+
+                        // equation 9
+                        Vec F_shear = t * ks * -(ti + tj);
+
                         double T = kn / 6.0 * r * r * (tj - 3.0 * ti);
-                        if ((dl > 0.0 && (Fn.len() / (2.0 * r) + std::abs(kn / 2.0 * (tj - ti))) > b.tn) || (Ft.len() / (2.0 * r) > b.tt))
+                        if ((dl > 0.0 && (F_stretch.len() / (2.0 * r) + std::abs(kn / 2.0 * (tj - ti))) > b.tn) || (F_shear.len() / (2.0 * r) > b.tt))
                         {
                             b.s = 1;
                             continue;
                         }
-                        pts[i].F = pts[i].F + Fn + Ft;
+                        pts[i].F = pts[i].F + F_stretch + F_shear;
                         pts[i].T = pts[i].T + T;
                     }
                 }
@@ -224,10 +271,19 @@ int main(int argc, char *argv[])
 
             for (int i = 0; i < pts.size(); i++)
             {
+                // line 16 F(t + dt)
                 Vec acc = pts[i].F * pts[i].im + (pts[i].im > 1e-6 ? Vec(0, -9.8) : Vec());
+
+                // line 18
                 pts[i].v = pts[i].vMid + acc * 0.5 * dt;
+
+                // line 6
                 pts[i].vMid = pts[i].vMid + acc * dt;
+
+                // line 19
                 pts[i].w = pts[i].wMid + pts[i].T * pts[i].iI * 0.5 * dt;
+
+                // line 7
                 pts[i].wMid = pts[i].wMid + pts[i].T * pts[i].iI * dt;
             }
         }
@@ -260,7 +316,7 @@ int main(int argc, char *argv[])
 
         cv::imshow("KIRI2D", renderer->GetCanvas());
         cv::waitKey(5);
-        //renderer->SaveImages2File();
+        // renderer->SaveImages2File();
 
         renderer->ClearCanvas();
         scene->Clear();
