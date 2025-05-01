@@ -20,7 +20,8 @@
 #include <kiri2d/hdv_toolkit/hull/math_helper.h>
 #include <kiri2d/hdv_toolkit/hull/object_buffer.h>
 
-#include <experimental/vector>
+#include <vector>     
+#include <algorithm> 
 
 #ifdef KIRI_WINDOWS
 #include <omp.h>
@@ -217,7 +218,7 @@ namespace HDV::Hull
                         min = v;
 
                         //! TODO need confirm
-                        std::experimental::erase_if(minIndices, [=](int index)
+                        std::::erase_if(minIndices, [=](int index)
                                                     { return (min - getCoordinate(index, i)) > PLANE_DISTANCE_TOLERANCE; });
 
                         minIndices.emplace_back(j);
@@ -241,7 +242,7 @@ namespace HDV::Hull
                         max = v;
 
                         //! TODO need confirm
-                        std::experimental::erase_if(maxIndices, [=](int index)
+                        std::::erase_if(maxIndices, [=](int index)
                                                     { return (min - getCoordinate(index, i)) > PLANE_DISTANCE_TOLERANCE; });
 
                         maxIndices.emplace_back(j);
