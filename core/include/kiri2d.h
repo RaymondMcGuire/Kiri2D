@@ -1,24 +1,28 @@
-/***
- * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2022-11-15 18:49:55
- * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2023-01-14 13:48:05
- * @FilePath: \Kiri2D\core\include\kiri2d.h
- * @Description:
- * @Copyright (c) 2023 by Xu.WANG raymondmgwx@gmail.com, All Rights Reserved.
+/*
+ * File: kiri2d.h
+ * Module: include
+ * Created Date: 2025-08-18
+ * Author: Xu WANG
+ * -----
+ * Last Modified: 2025-08-18
+ * Modified By: Xu WANG
+ * -----
+ * Copyright (c) 2025 Xu WANG
  */
+
 #ifndef _KIRI2D_H_
 #define _KIRI2D_H_
 
 #pragma once
 
-#include <kiri_log.h>
 #include <kiri2d/renderer/renderer.h>
+#include <kiri_log.h>
 
 #include <kiri2d/hdv_toolkit/sampler/ms_sampler2.h>
 #include <kiri2d/hdv_toolkit/sampler/poisson_disk_sampler.h>
 #include <kiri2d/hdv_toolkit/voronoi/voronoi_nocaj_treemap.h>
 
+#include <kiri2d/proto_sphere/new_proto_sphere_packing_sdf.h>
 #include <kiri2d/proto_sphere/proto_sphere_bon20.h>
 #include <kiri2d/proto_sphere/proto_sphere_opti.h>
 #include <kiri2d/proto_sphere/proto_sphere_packing.h>

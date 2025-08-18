@@ -22,7 +22,7 @@
 namespace PSPACK {
 class ProtoSpherePackingSDF2D {
 public:
-  static constexpr int MAX_ITERATIONS = 50;
+  static constexpr int MAX_ITERATIONS = 10;
   static constexpr double CONVERGENCE_THRESHOLD = 1e-6;
   static constexpr double DEFAULT_COOLING_INIT = 0.08;
   static constexpr double DEFAULT_COOLING_K = 0.8;
@@ -145,8 +145,8 @@ protected:
       if (!checkOverlapping(current)) {
         mInsertedSpheres.push_back(current);
         mInsertedSpheresColor.emplace_back(Vector3F(Random::get(0.0, 1.0),
-                                           Random::get(0.0, 1.0),
-                                           Random::get(0.0, 1.0)));
+                                                    Random::get(0.0, 1.0),
+                                                    Random::get(0.0, 1.0)));
       }
     }
   }
