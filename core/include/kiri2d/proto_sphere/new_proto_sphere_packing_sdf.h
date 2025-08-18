@@ -1,5 +1,5 @@
 /*
- * File: proto_sphere_packing_sdf.h
+ * File: new_proto_sphere_packing_sdf.h
  * Module: proto_sphere
  * Created Date: 2025-08-18
  * Author: Xu WANG
@@ -10,8 +10,8 @@
  * Copyright (c) 2025 Xu WANG
  */
 
-#ifndef _PROTO_SPHERE_PACK_SDF_H_
-#define _PROTO_SPHERE_PACK_SDF_H_
+#ifndef _NEW_PROTO_SPHERE_PACK_SDF_H_
+#define _NEW_PROTO_SPHERE_PACK_SDF_H_
 
 #pragma once
 
@@ -20,7 +20,7 @@
 #include <vector>
 
 namespace PSPACK {
-class ProtoSpherePackingSDF2D {
+class NewProtoSpherePackingSDF2D {
 public:
   static constexpr int MAX_ITERATIONS = 50;
   static constexpr double CONVERGENCE_THRESHOLD = 1e-6;
@@ -28,7 +28,7 @@ public:
   static constexpr double DEFAULT_COOLING_K = 0.8;
   static constexpr double DEFAULT_CELL_SIZE = 10.0;
 
-  explicit ProtoSpherePackingSDF2D(
+  explicit NewProtoSpherePackingSDF2D(
       const HDV::Voronoi::VoronoiPolygon2Ptr &boundary,
       double cell_size = DEFAULT_CELL_SIZE,
       double cooling_init = DEFAULT_COOLING_INIT,
@@ -39,7 +39,7 @@ public:
     initParticles();
   }
 
-  virtual ~ProtoSpherePackingSDF2D() = default;
+  virtual ~NewProtoSpherePackingSDF2D() = default;
 
   const std::vector<Vector3D> &currentSpheres() const {
     return mCurrentSpheres;
@@ -144,9 +144,9 @@ protected:
     for (const auto &current : mCurrentSpheres) {
       if (!checkOverlapping(current)) {
         mInsertedSpheres.push_back(current);
-        mInsertedSpheresColor.emplace_back(Vector3F(Random::get(0.0, 1.0),
+        mInsertedSpheresColor.emplace_back(Random::get(0.0, 1.0),
                                            Random::get(0.0, 1.0),
-                                           Random::get(0.0, 1.0)));
+                                           Random::get(0.0, 1.0));
       }
     }
   }

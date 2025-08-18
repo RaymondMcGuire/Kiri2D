@@ -1,5 +1,5 @@
 # Project Name
-set(PROJECT_NAME ProtoSphereParallelTest)
+set(PROJECT_NAME XProtoSphereParallelCompStrategy)
 
 # Enable CUDA
 set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")

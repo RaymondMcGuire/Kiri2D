@@ -1,3 +1,15 @@
+/*
+ * File: main.cpp
+ * Module: src
+ * Created Date: 2025-08-18
+ * Author: Xu WANG
+ * -----
+ * Last Modified: 2025-08-18
+ * Modified By: Xu WANG
+ * -----
+ * Copyright (c) 2025 Xu WANG
+ */
+
 /***
  * @Author: Xu.WANG raymondmgwx@gmail.com
  * @Date: 2022-11-16 12:37:22
@@ -14,8 +26,7 @@ using namespace KIRI2D;
 using namespace PSPACK;
 using namespace HDV;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // log system
   KiriLog::init();
 
@@ -33,12 +44,10 @@ int main(int argc, char *argv[])
   auto boundary_polygon = std::make_shared<Voronoi::VoronoiPolygon2>();
 
   auto LoadPolygonFromXYFile = [](std::vector<Vector2F> &points, size_t &num,
-                                  const char *filePath)
-  {
+                                  const char *filePath) {
     std::ifstream file(filePath);
     file >> num;
-    for (int i = 0; i < num; ++i)
-    {
+    for (int i = 0; i < num; ++i) {
       Vector2F xy;
       file >> xy.x >> xy.y;
       points.emplace_back(xy);
@@ -72,8 +81,7 @@ int main(int argc, char *argv[])
   std::vector<KiriLine2<float>> precompute_lines;
   std::vector<Vector2F> precompute_points;
 
-  for (size_t j = 0; j < boundary_polygon->positions().size(); j++)
-  {
+  for (size_t j = 0; j < boundary_polygon->positions().size(); j++) {
     auto vertices = boundary_polygon->positions()[j];
     auto vertices1 =
         boundary_polygon
@@ -110,11 +118,10 @@ int main(int argc, char *argv[])
 
   // proto sphere algo
   auto proto_sphere_packing = std::make_shared<ProtoSpherePackingSDFOpti>(
-      boundary_polygon, radius_range, radius_range_prob, true);
+      boundary_polygon, radius_range, radius_range_prob, false, true);
 
   // while (1)
-  for (auto idx = 0; idx < 120; idx++)
-  {
+  for (auto idx = 0; idx < 120; idx++) {
     auto converged = false;
     // clear
     lines.clear();
@@ -122,11 +129,9 @@ int main(int argc, char *argv[])
     circles.clear();
     precompute_points.clear();
 
-    while (!proto_sphere_packing->needDrawSpheres())
-    {
+    while (!proto_sphere_packing->needDrawSpheres()) {
       converged = proto_sphere_packing->convergePrototype();
-      if (converged)
-      {
+      if (converged) {
         KIRI_LOG_DEBUG("Already Converged!");
         break;
       }
