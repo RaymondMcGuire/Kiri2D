@@ -4,21 +4,12 @@
  * Created Date: 2025-08-18
  * Author: Xu WANG
  * -----
- * Last Modified: 2025-08-18
+ * Last Modified: 2025-08-19
  * Modified By: Xu WANG
  * -----
  * Copyright (c) 2025 Xu WANG
  */
 
-/***
- * @Author: Xu.WANG raymondmgwx@gmail.com
- * @Date: 2023-01-30 11:49:55
- * @LastEditors: Xu.WANG raymondmgwx@gmail.com
- * @LastEditTime: 2023-08-10 16:27:44
- * @FilePath: \Kiri2D\demos\proto_sphere_sdf_parallel\src\main.cpp
- * @Description:
- * @Copyright (c) 2023 by Xu.WANG, All Rights Reserved.
- */
 #include <kiri2d.h>
 
 using namespace KIRI2D;
@@ -92,8 +83,11 @@ int main(int argc, char *argv[]) {
   }
 
   // proto sphere algo
+  // auto proto_sphere_packing =
+  //     std::make_shared<SoftProtoSphereStandard2D>(boundary_polygon, 20.0);
+
   auto proto_sphere_packing =
-      std::make_shared<ImprovedProtoSpherePackingSDF2D>(boundary_polygon, 20.0);
+      std::make_shared<SoftProtoSphereTR2D>(boundary_polygon, 20.0);
 
   // while (1)
   for (auto idx = 0; idx < 320; idx++) {

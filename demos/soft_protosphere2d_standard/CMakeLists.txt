@@ -1,5 +1,5 @@
 # Project Name
-set(PROJECT_NAME NewProtoSphereSDFParallel)
+set(PROJECT_NAME SoftProtoSphere2DStandard)
 
 # Enable CUDA
 set(ENABLE_CUDA TRUE CACHE BOOL "enable cuda or not")

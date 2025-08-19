@@ -4,7 +4,7 @@
  * Created Date: 2025-08-18
  * Author: Xu WANG
  * -----
- * Last Modified: 2025-08-18
+ * Last Modified: 2025-08-19
  * Modified By: Xu WANG
  * -----
  * Copyright (c) 2025 Xu WANG
@@ -349,7 +349,8 @@ protected:
     auto data = mSDF2D->placeGridPoints();
 
     for (auto i = 0; i < data.size(); i++) {
-      auto new_sphere = Vector4D(data[i].x, data[i].y, 0.0, pcdis(gen));
+      // auto new_sphere = Vector4D(data[i].x, data[i].y, 0.0, pcdis(gen));
+      auto new_sphere = Vector4D(data[i].x, data[i].y, 0.0, 50.f);
       mCurrentSpheres.emplace_back(new_sphere);
       mLastSpheres.emplace_back(new_sphere);
     }

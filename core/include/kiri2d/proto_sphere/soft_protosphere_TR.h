@@ -4,7 +4,7 @@
  * Created Date: 2025-08-18
  * Author: Xu WANG
  * -----
- * Last Modified: 2025-08-18
+ * Last Modified: 2025-08-19
  * Modified By: Xu WANG
  * -----
  * Copyright (c) 2025 Xu WANG
@@ -13,8 +13,8 @@
  * instead of cooling function for better convergence and parallelizability
  */
 
-#ifndef _IMPROVED_PROTO_SPHERE_PACK_SDF_H_
-#define _IMPROVED_PROTO_SPHERE_PACK_SDF_H_
+#ifndef _SOFT_PROTO_SPHERE_TR_2D_H_
+#define _SOFT_PROTO_SPHERE_TR_2D_H_
 
 #pragma once
 
@@ -24,7 +24,7 @@
 #include <vector>
 
 namespace PSPACK {
-class ImprovedProtoSpherePackingSDF2D {
+class SoftProtoSphereTR2D {
 public:
   static constexpr int MAX_ITERATIONS = 10;
   static constexpr double CONVERGENCE_THRESHOLD = 1e-6;
@@ -38,16 +38,16 @@ public:
   static constexpr double LINE_SEARCH_INITIAL_ALPHA = 1.0; // Initial step size
   static constexpr double MIN_ALPHA = 1e-10;               // Minimum step size
 
-  explicit ImprovedProtoSpherePackingSDF2D(
-      const HDV::Voronoi::VoronoiPolygon2Ptr &boundary,
-      double cell_size = DEFAULT_CELL_SIZE, double tau = DEFAULT_TAU)
+  explicit SoftProtoSphereTR2D(const HDV::Voronoi::VoronoiPolygon2Ptr &boundary,
+                               double cell_size = DEFAULT_CELL_SIZE,
+                               double tau = DEFAULT_TAU)
       : mBoundary(boundary), mTau(tau) {
     mSDF2D = std::make_shared<HDV::SDF::PolygonSDF2D>(mBoundary, cell_size);
     mSDF2D->computeSDF();
     initParticles();
   }
 
-  virtual ~ImprovedProtoSpherePackingSDF2D() = default;
+  virtual ~SoftProtoSphereTR2D() = default;
 
   const std::vector<Vector3D> &currentSpheres() const {
     return mCurrentSpheres;
@@ -233,8 +233,57 @@ protected:
     return pos;
   }
 
+  // L(x) = 0.5 * (s(x) - R)^2
+  double objectiveL(const Vector2D &pos) const {
+    const double s = computeSoftMinRadius(pos);
+    const double diff = s - mTargetRadius;
+    return 0.5 * diff * diff;
+  }
+
+  // ∇L(x) = (s(x) - R) * ∇s(x)
+  Vector2D objectiveGrad(const Vector2D &pos) const {
+    const double s = computeSoftMinRadius(pos);
+    const double diff = s - mTargetRadius;
+    const Vector2D grad_s = computeSoftMinGradient(pos);
+    return diff * grad_s;
+  }
+
+  Vector2D lineSearchMin(const Vector2D &pos, const Vector2D &grad_f) const {
+    double alpha = LINE_SEARCH_INITIAL_ALPHA;
+    const double f0 = objectiveL(pos);
+
+    // 下降方向 p = -grad_f
+    const Vector2D dir = -grad_f;
+    const double grad_dot_dir = grad_f.dot(dir); // = -||grad_f||^2 <= 0
+
+    // 梯度太小时不动
+    if (grad_f.lengthSquared() < 1e-20)
+      return pos;
+
+    while (alpha > MIN_ALPHA) {
+      const Vector2D new_pos = pos + alpha * dir;
+
+      // 保持在多边形内部
+      auto [new_dist, _] = mSDF2D->getSDF(new_pos);
+      if (new_dist <= 0) {
+        alpha *= LINE_SEARCH_BACKTRACK_RHO;
+        continue;
+      }
+
+      const double f_new = objectiveL(new_pos);
+
+      // Armijo 充分下降条件
+      if (f_new <= f0 + LINE_SEARCH_ARMIJO_C1 * alpha * grad_dot_dir) {
+        return new_pos; // 接受
+      }
+
+      alpha *= LINE_SEARCH_BACKTRACK_RHO;
+    }
+    return pos; // 未找到更好步长则不动
+  }
+
   // Update sphere position using gradient ascent with line search
-  void updateSpherePositionWithLineSearch(size_t index) {
+  void updateSpherePositionWithLineSearch_ProtoSphere(size_t index) {
     auto &sphere = mCurrentSpheres[index];
     Vector2D pos(sphere.x, sphere.y);
 
@@ -267,6 +316,50 @@ protected:
 
     // Check if position changed significantly
     if ((new_pos - pos).length() < CONVERGENCE_THRESHOLD) {
+      mConverges[index] = true;
+    }
+  }
+
+  void updateSpherePositionWithLineSearch(size_t index) {
+    auto &sphere = mCurrentSpheres[index];
+    Vector2D pos(sphere.x, sphere.y);
+
+    // 如果在边界外，判定收敛(丢弃)
+    auto [boundary_dist, _] = mSDF2D->getSDF(pos);
+    if (boundary_dist <= 0) {
+      mConverges[index] = true;
+      return;
+    }
+
+    // 目标：最小化 L(x) = 0.5 (s(x)-R)^2
+    Vector2D grad_f = objectiveGrad(pos);
+    const double grad_norm = grad_f.length();
+
+    // 收敛判定 1：梯度很小
+    if (grad_norm < CONVERGENCE_THRESHOLD) {
+      // 收敛判定 2：值接近等值面 s(x)=R
+      const double s = computeSoftMinRadius(pos);
+      if (std::abs(s - mTargetRadius) <= RADIUS_TOL) {
+        mConverges[index] = true;
+        sphere.z = mTargetRadius; // 固定半径
+        return;
+      }
+    }
+
+    // 线搜索（最小化）
+    Vector2D new_pos = lineSearchMin(pos, grad_f);
+    const double move_len = (new_pos - pos).length();
+
+    // 更新并设置半径=R（这里不再写 s(new_pos)）
+    sphere = Vector3D(new_pos.x, new_pos.y, mTargetRadius);
+    mIterNums[index]++;
+
+    // 再次检查等值面逼近程度
+    const double s_new = computeSoftMinRadius(new_pos);
+    const bool near_levelset = std::abs(s_new - mTargetRadius) <= RADIUS_TOL;
+
+    if (move_len < CONVERGENCE_THRESHOLD || near_levelset ||
+        mIterNums[index] > MAX_ITERATIONS) {
       mConverges[index] = true;
     }
   }
@@ -307,7 +400,7 @@ protected:
     }
   }
 
-  bool checkOverlapping(const Vector3D &current) const {
+  bool checkOverlapping_ProtoSphere(const Vector3D &current) const {
     Vector2D cur_pos(current.x, current.y);
     double cur_radius = current.z;
     if (cur_radius < 1e-6) {
@@ -329,6 +422,20 @@ protected:
     return false;
   }
 
+  bool checkOverlapping(const Vector3D &current) const {
+    const Vector2D cur_pos(current.x, current.y);
+    const double R = mTargetRadius;
+
+    for (const auto &other : mInsertedSpheres) {
+      const Vector2D other_pos(other.x, other.y);
+      const double dist_sq = (other_pos - cur_pos).lengthSquared();
+      const double threshold_sq = (2.0 * R) * (2.0 * R);
+      if (dist_sq < threshold_sq)
+        return true;
+    }
+    return false;
+  }
+
 private:
   bool mAllConverged = false;
   bool mDrawCurrentSpheres = false;
@@ -344,6 +451,15 @@ private:
 
   HDV::Voronoi::VoronoiPolygon2Ptr mBoundary;
   HDV::SDF::PolygonSDF2DPtr mSDF2D;
+
+  //
+  static constexpr double DEFAULT_TARGET_RADIUS = 50.0; // 例子，自行设定
+  static constexpr double RADIUS_TOL = 1e-4;            // |s(x)-R|容忍度
+
+  void setTargetRadius(double R) { mTargetRadius = R; }
+  double targetRadius() const { return mTargetRadius; }
+
+  double mTargetRadius = DEFAULT_TARGET_RADIUS;
 };
 
 } // namespace PSPACK
