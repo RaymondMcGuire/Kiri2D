@@ -86,9 +86,8 @@ int main(int argc, char *argv[])
     precompute_lines.emplace_back(line);
   }
 
-  // proto sphere algo
   auto proto_sphere_packing =
-      std::make_shared<SoftProtoSphereStandard2D>(boundary_polygon, 20.0);
+      std::make_shared<SoftProtoSphereTR2D>(boundary_polygon, 20.0);
 
   // while (1)
   for (auto idx = 0; idx < 320; idx++)
