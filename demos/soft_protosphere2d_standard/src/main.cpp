@@ -16,8 +16,7 @@ using namespace KIRI2D;
 using namespace PSPACK;
 using namespace HDV;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // log system
   KiriLog::init();
 
@@ -35,12 +34,10 @@ int main(int argc, char *argv[])
   auto boundary_polygon = std::make_shared<Voronoi::VoronoiPolygon2>();
 
   auto LoadPolygonFromXYFile = [](std::vector<Vector2F> &points, size_t &num,
-                                  const char *filePath)
-  {
+                                  const char *filePath) {
     std::ifstream file(filePath);
     file >> num;
-    for (int i = 0; i < num; ++i)
-    {
+    for (int i = 0; i < num; ++i) {
       Vector2F xy;
       file >> xy.x >> xy.y;
       points.emplace_back(xy);
@@ -74,8 +71,7 @@ int main(int argc, char *argv[])
   std::vector<KiriLine2<float>> precompute_lines;
   std::vector<Vector2F> precompute_points;
 
-  for (size_t j = 0; j < boundary_polygon->positions().size(); j++)
-  {
+  for (size_t j = 0; j < boundary_polygon->positions().size(); j++) {
     auto vertices = boundary_polygon->positions()[j];
     auto vertices1 =
         boundary_polygon
@@ -91,8 +87,7 @@ int main(int argc, char *argv[])
       std::make_shared<SoftProtoSphereStandard2D>(boundary_polygon, 20.0);
 
   // while (1)
-  for (auto idx = 0; idx < 320; idx++)
-  {
+  for (auto idx = 0; idx < 320; idx++) {
     // clear
     lines.clear();
     points.clear();
@@ -105,8 +100,7 @@ int main(int argc, char *argv[])
       proto_sphere_packing->convergePrototype();
 
     auto current_spheres = proto_sphere_packing->currentSpheres();
-    for (auto i = 0; i < current_spheres.size(); i++)
-    {
+    for (auto i = 0; i < current_spheres.size(); i++) {
       precompute_points.emplace_back(
           Vector2F(current_spheres[i].x, current_spheres[i].y));
     }
@@ -126,8 +120,7 @@ int main(int argc, char *argv[])
     // current_sphere_radius, false));
 
     // draw temp points
-    for (auto i = 0; i < precompute_points.size(); i++)
-    {
+    for (auto i = 0; i < precompute_points.size(); i++) {
       points.emplace_back(KiriPoint2(precompute_points[i] + offset,
                                      Vector3F(1.f, 0.f, 0.f), 5.f));
     }
