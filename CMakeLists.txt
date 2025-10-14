@@ -95,6 +95,8 @@ if(NOT ${ENABLE_CUDA})
 
   add_subdirectory(demos/soft_protosphere2d_standard)
   add_subdirectory(demos/soft_protosphere2d_uni_radius)
+  add_subdirectory(demos/soft_protosphere2d_target_dist_radius)
+
 
   add_subdirectory(demos/sdf2d_scene1)
   add_subdirectory(demos/rigidbody2d_scene)

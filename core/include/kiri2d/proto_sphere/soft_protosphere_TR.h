@@ -4,7 +4,7 @@
  * Created Date: 2025-08-18
  * Author: Xu WANG
  * -----
- * Last Modified: 2025-09-15
+ * Last Modified: 2025-10-10
  * Modified By: Xu WANG
  * -----
  * Copyright (c) 2025 Xu WANG
@@ -32,7 +32,7 @@ namespace PSPACK
     static constexpr double CONVERGENCE_THRESHOLD = 1e-6;
     static constexpr double DEFAULT_CELL_SIZE = 10.0;
     static constexpr double DEFAULT_TAU =
-        5.5; // Temperature parameter for soft-min
+        0.0001; // Temperature parameter for soft-min
     static constexpr double LINE_SEARCH_ARMIJO_C1 =
         1e-4; // Armijo condition constant
     static constexpr double LINE_SEARCH_BACKTRACK_RHO =

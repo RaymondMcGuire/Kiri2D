@@ -4,7 +4,7 @@
  * Created Date: 2025-08-18
  * Author: Xu WANG
  * -----
- * Last Modified: 2025-08-19
+ * Last Modified: 2025-10-11
  * Modified By: Xu WANG
  * -----
  * Copyright (c) 2025 Xu WANG
@@ -30,6 +30,7 @@
 
 #include <kiri2d/proto_sphere/soft_protosphere_TR.h>
 #include <kiri2d/proto_sphere/soft_protosphere_standard.h>
+#include <kiri2d/proto_sphere/soft_protosphere_TDR.h>
 
 #include <kiri2d/physics/rigidbody/rigidbody_system.h>
 

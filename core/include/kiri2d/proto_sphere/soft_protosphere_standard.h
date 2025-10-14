@@ -4,7 +4,7 @@
  * Created Date: 2025-08-18
  * Author: Xu WANG
  * -----
- * Last Modified: 2025-09-06
+ * Last Modified: 2025-10-10
  * Modified By: Xu WANG
  * -----
  * Copyright (c) 2025 Xu WANG
@@ -142,6 +142,8 @@ namespace PSPACK
 
       // Use log-sum-exp for numerical stability
       // First find the minimum for shifting
+
+      printf("mTau = %f\n", mTau);
 
       // !Trick
       double shift = -min_dist / mTau;
